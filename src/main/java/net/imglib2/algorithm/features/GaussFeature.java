@@ -13,28 +13,17 @@ import java.util.stream.Collectors;
 /**
  * @author Matthias Arzt
  */
-public class GaussFeature implements Feature {
+public class GaussFeature extends FeatureGroup {
 
-	List<Double> sigmas = Arrays.asList(1.0, 2.0, 4.0, 8.0, 16.0);
+	private static final double[] SIGMAS = new double[]{1.0, 2.0, 4.0, 8.0, 16.0};
 
-	@Override
-	public int count() {
-		return sigmas.size();
+	private static List<Feature> initFeatures() {
+		return Arrays.stream(SIGMAS)
+				.mapToObj(SingleGaussFeature::new)
+				.collect(Collectors.toList());
 	}
 
-	@Override
-	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
-		try {
-			for (int i = 0; i < sigmas.size(); i++)
-				Gauss3.gauss(sigmas.get(i) * 0.4, in, out.get(i));
-		} catch (IncompatibleTypeException e) {
-			throw new RuntimeException(e);
-		}
+	public GaussFeature() {
+		super(initFeatures());
 	}
-
-	@Override
-	public List<String> attributeLabels() {
-		return sigmas.stream().map(sigma -> "Gaussian_blur_" + sigma).collect(Collectors.toList());
-	}
-
 }
