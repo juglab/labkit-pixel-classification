@@ -26,6 +26,8 @@ import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringJoiner;
 
@@ -288,5 +290,85 @@ public class Utils {
 				processor.setf(x, y, ra.get().get());
 			}
 		return processor;
+	}
+
+	static class StopWatch {
+
+		private final long start = System.nanoTime();
+
+		public Time get() {
+			return Time.fromNanoSeconds(System.nanoTime() - start);
+		}
+
+		public String toString() {
+			return get().toString();
+		}
+	}
+
+	static class Time {
+		private final double seconds;
+		private Time(double seconds) {
+			this.seconds = seconds;
+		}
+		static public Time fromNanoSeconds(double ns) {
+			return fromSeconds(ns * 1e-9);
+		}
+
+		private static Time fromSeconds(double seconds) {
+			return new Time(seconds);
+		}
+
+		public Time divide(int divider) {
+			return fromSeconds(seconds / divider);
+		}
+		public Time add(Time time) {
+			return fromSeconds(seconds + time.seconds);
+		}
+		public String toString() {
+			if(seconds >= 1)
+				return seconds + " s";
+			if(seconds >= 1e-3)
+				return seconds * 1e3 + " ms";
+			if(seconds >= 1e-6)
+				return seconds * 1e6 + " µs";
+			return seconds * 1e9 + " ns";
+		}
+		public static Time zero() {
+			return fromSeconds(0);
+		}
+	}
+
+	static class TimeMeasurement {
+
+		static private Map<String, Measurement> map = new HashMap<>();
+
+		static void measure(String id, Runnable run) {
+			StopWatch watch = new StopWatch();
+			run.run();
+			getMeasurement(id).add(watch.get());
+		}
+
+		private static Measurement getMeasurement(String id) {
+			return map.computeIfAbsent(id, key -> new Measurement());
+		}
+
+		static class Measurement {
+			int count = 0;
+			Time time = Time.zero();
+
+			public void add(Time time) {
+				count++;
+				this.time = this.time.add(time);
+			}
+
+			public Time mean() {
+				return time.divide(count);
+			}
+		}
+
+		public static void print() {
+			map.forEach((key, measurement) -> System.out.print(key + ": " + measurement.mean() + "\n"));
+		}
+
 	}
 }
