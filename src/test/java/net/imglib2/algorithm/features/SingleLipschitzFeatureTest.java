@@ -50,14 +50,14 @@ public class SingleLipschitzFeatureTest {
 	private static void distanceTransformOnExample2() {
 		Img<FloatType> img = centeredDotImage(new FloatType(100), new FloatType(0), 2);
 		Utils.TimeMeasurement.measure("forward", () ->
-				new SingleLipschitzFeature(2.0).forward(Views.extendBorder(img), Views.flatIterable(img)));
+				new SingleLipschitzFeature(2.0).forward(Views.extendBorder(img), img));
 		Utils.TimeMeasurement.measure("backward", () ->
 				new SingleLipschitzFeature(2.0).backward(Views.extendBorder(img), img));
 	}
 
 	private static void showResult() {
 		Img<FloatType> img = centeredDotImage(new FloatType(100), new FloatType(0), 3);
-		new SingleLipschitzFeature(2.0).forward(Views.extendBorder(img), Views.flatIterable(img));
+		new SingleLipschitzFeature(2.0).forward(Views.extendBorder(img), img);
 		new SingleLipschitzFeature(2.0).backward(Views.extendBorder(img), img);
 		BdvFunctions.show(img, "lipschitz").setDisplayRange(0, 100);
 	}

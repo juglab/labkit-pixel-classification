@@ -129,4 +129,10 @@ public class RevampUtils {
 				return true;
 		return false;
 	}
+
+	public static long[] nCopies(int count, long value) {
+		long[] result = new long[count];
+		Arrays.fill(result, value);
+		return result;
+	}
 }
