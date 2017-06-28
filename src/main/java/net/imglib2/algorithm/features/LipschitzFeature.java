@@ -9,13 +9,13 @@ import java.util.stream.Collectors;
  */
 public class LipschitzFeature extends FeatureGroup {
 
-	private static List<Feature> initFeatures() {
+	private static List<Feature> initFeatures(long border) {
 		return Arrays.stream(new double[]{5, 10, 15, 20, 25})
-				.mapToObj(slope -> new SingleLipschitz2dFeature(true, true, slope))
+				.mapToObj(slope -> new SingleLipschitzFeature(slope, border))
 				.collect(Collectors.toList());
 	}
 
-	public LipschitzFeature() {
-		super(initFeatures());
+	public LipschitzFeature(long border) {
+		super(initFeatures(border));
 	}
 }

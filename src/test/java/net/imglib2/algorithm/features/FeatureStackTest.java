@@ -41,7 +41,7 @@ public class FeatureStackTest {
 
 	public static void main(String... args) {
 		Img<FloatType> img = ImageJFunctions.convertFloat(squarePictureWithCenteredDot());
-		RandomAccessibleInterval<FloatType> result = Features.applyOnImg(new LipschitzFeature(), img);
+		RandomAccessibleInterval<FloatType> result = Features.applyOnImg(new LipschitzFeature(0), img);
 		ImageJFunctions.show(result);
 	}
 
@@ -68,6 +68,7 @@ public class FeatureStackTest {
 	private void testFeature(float expectedPsnr, int oldFeatureId, Feature newFeature) {
 		RandomAccessibleInterval<FloatType> expected = generateSingleFeature(bridgeImage, oldFeatureId);
 		RandomAccessibleInterval<FloatType> result = createStack(bridgeImg, newFeature);
+		ImageJFunctions.show(result);
 		Utils.assertImagesEqual(expectedPsnr, expected, result);
 		List<String> expectedLabels = oldAttributes(oldFeatureId);
 		List<String> actualLabels = getAttributeLabels(newFeature);
@@ -101,7 +102,7 @@ public class FeatureStackTest {
 
 	@Test
 	public void testLipschitz() {
-		testFeature(40, FeatureStack.LIPSCHITZ, new LipschitzFeature());
+		testFeature(40, FeatureStack.LIPSCHITZ, new LipschitzFeature(0));
 	}
 
 	/** Show that there is a difference between HyperSphereShape and shape used by FilterRank. */

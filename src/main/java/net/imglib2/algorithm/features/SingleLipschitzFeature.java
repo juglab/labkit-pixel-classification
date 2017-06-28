@@ -1,9 +1,9 @@
 package net.imglib2.algorithm.features;
 
 import net.imglib2.*;
-import net.imglib2.algorithm.neighborhood.RectangleShape;
-import net.imglib2.algorithm.neighborhood.Shape;
+import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
+import net.imglib2.type.Type;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -21,10 +21,11 @@ public class SingleLipschitzFeature implements Feature {
 
 	private final double slope;
 
-	private final Shape shape = new RectangleShape(1, true);
+	private final long border;
 
-	public SingleLipschitzFeature(double slope) {
+	public SingleLipschitzFeature(double slope, long border) {
 		this.slope = slope;
+		this.border = border;
 	}
 
 	@Override
@@ -38,15 +39,43 @@ public class SingleLipschitzFeature implements Feature {
 	}
 
 	private void apply(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {
-		Interval expandedInterval = Intervals.expand(out, RevampUtils.nCopies(out.numDimensions(), (long) (255 / slope)));
+		Interval expandedInterval = Intervals.expand(out, RevampUtils.nCopies(out.numDimensions(), border));
 		Img<FloatType> tmp = RevampUtils.ops().create().img(expandedInterval, new FloatType());
+		copy(tmp, in);
 		lipschitz(tmp);
-		Views.interval(Views.pair(tmp, out), out).forEach(p -> p.getB().set(p.getA()));
+		outEquals255PlusAMinusB(Views.iterable(out), in, tmp); // out = 255 + in - tmp
+	}
+
+	private <T extends Type<T>> void copy(IterableInterval<T> out, RandomAccessible<T> in) {
+		Cursor<T> o = out.cursor();
+		RandomAccess<T> a = in.randomAccess();
+		while(o.hasNext()) {
+			o.fwd();
+			a.setPosition(o);
+			o.get().set(a.get());
+		}
+	}
+
+	private <T extends RealType<T>> void outEquals255PlusAMinusB(IterableInterval<T> out, RandomAccessible<T> A, RandomAccessible<T> B) {
+		Cursor<T> o = out.cursor();
+		RandomAccess<T> a = A.randomAccess();
+		RandomAccess<T> b = B.randomAccess();
+		T offset = a.get().createVariable();
+		offset.setReal(255);
+		while(o.hasNext()) {
+			o.fwd();
+			a.setPosition(o);
+			b.setPosition(o);
+			T ov = o.get();
+			ov.set(offset);
+			ov.sub(b.get());
+			ov.add(a.get());
+		}
 	}
 
 	@Override
 	public List<String> attributeLabels() {
-		return Collections.singletonList("Lipschitz_" + slope);
+		return Collections.singletonList("Lipschitz_true_true_" + slope);
 	}
 
 	<T extends RealType<T>> void lipschitz(RandomAccessibleInterval<T> inOut) {

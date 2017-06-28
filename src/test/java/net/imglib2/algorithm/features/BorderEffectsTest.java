@@ -48,10 +48,9 @@ public class BorderEffectsTest {
 	@Test
 	public void testGradient() { testFeature(new GradientFeature()); }
 
-	@Ignore("current implementation of lipschitz feature has border effects")
 	@Test
 	public void testLipschitz() {
-		testFeature(new LipschitzFeature());
+		testFeature(new LipschitzFeature(255));
 	}
 
 	@Test
@@ -94,9 +93,10 @@ public class BorderEffectsTest {
 		return Views.interval(Features.applyOnImg(feature, image), featureInterval);
 	}
 
+	@Test
 	public void showPsnrs() {
 		Feature feature = new FeatureGroup(new GaussFeature(), new HessianFeature(), GaborFeature.group(),
-				new DifferenceOfGaussiansFeature(), new GradientFeature(), new LipschitzFeature(),
+				new DifferenceOfGaussiansFeature(), new GradientFeature(), new LipschitzFeature(255),
 				ShapedFeatures.min(), ShapedFeatures.max(), ShapedFeatures.mean(), ShapedFeatures.median(),
 				ShapedFeatures.variance());
 		RandomAccessibleInterval<FloatType> allResults = calculateResult(feature);
