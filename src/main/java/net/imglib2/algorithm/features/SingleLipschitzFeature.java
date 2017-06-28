@@ -1,17 +1,18 @@
 package net.imglib2.algorithm.features;
 
 import net.imglib2.*;
-import net.imglib2.RandomAccess;
-import net.imglib2.algorithm.neighborhood.Neighborhood;
 import net.imglib2.algorithm.neighborhood.RectangleShape;
 import net.imglib2.algorithm.neighborhood.Shape;
-import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.Img;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Intervals;
+import net.imglib2.util.Pair;
 import net.imglib2.view.Views;
 
 import java.util.*;
-import java.util.Iterator;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 /**
  * @author Matthias Arzt
@@ -20,7 +21,7 @@ public class SingleLipschitzFeature implements Feature {
 
 	private final double slope;
 
-	private final Shape shape = new RectangleShape(1, false);
+	private final Shape shape = new RectangleShape(1, true);
 
 	public SingleLipschitzFeature(double slope) {
 		this.slope = slope;
@@ -33,9 +34,14 @@ public class SingleLipschitzFeature implements Feature {
 
 	@Override
 	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
-		RandomAccessibleInterval<FloatType> out0 = out.get(0);
-		forward(in, out0);
-		backward(Views.extendBorder(out0), (Interval) out0);
+		apply(in, out.get(0));
+	}
+
+	private void apply(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {
+		Interval expandedInterval = Intervals.expand(out, RevampUtils.nCopies(out.numDimensions(), (long) (255 / slope)));
+		Img<FloatType> tmp = RevampUtils.ops().create().img(expandedInterval, new FloatType());
+		lipschitz(tmp);
+		Views.interval(Views.pair(tmp, out), out).forEach(p -> p.getB().set(p.getA()));
 	}
 
 	@Override
@@ -43,64 +49,40 @@ public class SingleLipschitzFeature implements Feature {
 		return Collections.singletonList("Lipschitz_" + slope);
 	}
 
-	<T extends RealType<T>> void forward(RandomAccessible<T> in, RandomAccessibleInterval<T> out) {
-		RandomAccess<T> outCursor = out.randomAccess();
-		RandomAccess<Neighborhood<T>> inRa = shape.neighborhoodsRandomAccessible(in).randomAccess();
-		NeighborhoodOperation no = new NeighborhoodOperation(slope, out.numDimensions(), shape);
-		for (Localizable location : BackwardIterate.iterable(out)) {
-			outCursor.setPosition(location);
-			inRa.setPosition(outCursor);
-			outCursor.get().setReal(no.inspect(inRa.get(), outCursor));
+	<T extends RealType<T>> void lipschitz(RandomAccessibleInterval<T> inOut) {
+		int n = inOut.numDimensions();
+		Interval interval = new FinalInterval(RevampUtils.nCopies(n, -1), RevampUtils.nCopies(n, 1));
+		for(Localizable location : BackwardIterate.iterable(interval)) {
+			if(!isZero(location))
+				forward(Views.extendBorder(inOut), inOut, locationToArray(location));
 		}
 	}
 
-	<T extends RealType<T>> void backward(RandomAccessible<T> inOut, Interval interval) {
-		RandomAccess<T> out = inOut.randomAccess();
-		RandomAccess<Neighborhood<T>> in = shape.neighborhoodsRandomAccessible(inOut).randomAccess();
-		NeighborhoodOperation no = new NeighborhoodOperation(slope, out.numDimensions(), shape);
-		for (Localizable location : BackwardIterate.iterable(interval)) {
-			in.setPosition(location);
-			out.setPosition(location);
-			out.get().setReal(no.inspect(in.get(), out));
-		}
+	<T extends RealType<T>> void forward(final RandomAccessible<T> in, final RandomAccessibleInterval<T> out, final long[] translation) {
+		final double slope = distance(new Point(out.numDimensions()), Point.wrap(translation)) * this.slope;
+		final RandomAccessibleInterval<Pair<T, T>> pair = invert(Views.interval(Views.pair(Views.translate(in, translation), out), out), translation);
+		Views.flatIterable(pair).forEach(p -> p.getB().setReal(
+				Math.max(p.getB().getRealDouble(), p.getA().getRealDouble() - slope)
+		));
 	}
 
-	private static class NeighborhoodOperation {
+	private boolean isZero(Localizable location) {
+		return locationToStream(location).allMatch(x -> x == 0);
+	}
 
-		private final double slope;
+	private long[] locationToArray(Localizable cursor) {
+		return locationToStream(cursor).toArray();
+	}
 
-		private final List<Double> offsets;
+	private LongStream locationToStream(Localizable cursor) {
+		return IntStream.range(0, cursor.numDimensions()).mapToLong(cursor::getLongPosition);
+	}
 
-		private NeighborhoodOperation(double slope, int numDimensions, Shape shape) {
-			this.slope = slope;
-			offsets = calculateOffsets(shape, numDimensions);
-		}
-
-		private List<Double> calculateOffsets(Shape shape, int numDimensions) {
-			RandomAccess<Neighborhood<FloatType>> randomAccess = shape.neighborhoodsRandomAccessible(
-					ArrayImgs.floats(RevampUtils.nCopies(numDimensions, 1))).randomAccess();
-			Neighborhood<?> neighborhood = randomAccess.get();
-			Cursor<?> cursor = neighborhood.cursor();
-			List<Double> result = new ArrayList<>();
-			while (cursor.hasNext()) {
-				cursor.fwd();
-				result.add(- slope * distance(randomAccess, cursor));
-			}
-			return result;
-		}
-
-		private <T extends RealType<T>> double inspect(Neighborhood<T> neighborhood, Localizable center) {
-			Cursor<T> neighbor = neighborhood.localizingCursor();
-			Iterator<Double> offset = offsets.iterator();
-			double max = Double.NEGATIVE_INFINITY;
-			while (neighbor.hasNext()) {
-				neighbor.fwd();
-				double v1 = neighbor.get().getRealDouble() + offset.next();
-				if (v1 > max)
-					max = v1;
-			}
-			return max;
-		}
+	private <T> RandomAccessibleInterval<T> invert(RandomAccessibleInterval<T> pair, long[] translation) {
+		for(int i = pair.numDimensions() - 1; i >= 0; i--)
+			if(translation[i] < 0)
+				return Views.invertAxis(pair, i);
+		return pair;
 	}
 
 	private static double distance(Localizable a, Localizable b) {
