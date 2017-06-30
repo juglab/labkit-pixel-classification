@@ -66,7 +66,6 @@ public class FeatureStackTest {
 	private void testFeature(float expectedPsnr, int oldFeatureId, Feature newFeature) {
 		RandomAccessibleInterval<FloatType> expected = generateSingleFeature(bridgeImage, oldFeatureId);
 		RandomAccessibleInterval<FloatType> result = createStack(bridgeImg, newFeature);
-		ImageJFunctions.show(result);
 		Utils.assertImagesEqual(expectedPsnr, expected, result);
 		List<String> expectedLabels = oldAttributes(oldFeatureId);
 		List<String> actualLabels = getAttributeLabels(newFeature);
