@@ -1,24 +1,22 @@
 package net.imglib2.algorithm.features;
 
 import net.imagej.ops.OpService;
-import net.imglib2.FinalInterval;
-import net.imglib2.Interval;
-import net.imglib2.IterableInterval;
-import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.*;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
 import net.imglib2.type.numeric.ComplexType;
+import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
+import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import org.scijava.Context;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -134,5 +132,34 @@ public class RevampUtils {
 		long[] result = new long[count];
 		Arrays.fill(result, value);
 		return result;
+	}
+
+	static Iterable<Localizable> neigborsLocations(int n) {
+		Img<ByteType> img = ArrayImgs.bytes(nCopies(n, 3));
+		IntervalView<ByteType> translate = Views.translate(img, nCopies(n, -1));
+		Cursor<ByteType> cursor = translate.localizingCursor();
+
+		return () -> new java.util.Iterator<Localizable>() {
+			@Override
+			public boolean hasNext() {
+				return cursor.hasNext();
+			}
+
+			@Override
+			public Localizable next() {
+				cursor.fwd();
+				return cursor;
+			}
+		};
+	}
+
+	static double distance(Localizable a, Localizable b) {
+		int n = a.numDimensions();
+		long sum = 0;
+		for (int i = 0; i < n; i++) {
+			long difference = a.getLongPosition(i) - b.getLongPosition(i);
+			sum += difference * difference;
+		}
+		return Math.sqrt(sum);
 	}
 }

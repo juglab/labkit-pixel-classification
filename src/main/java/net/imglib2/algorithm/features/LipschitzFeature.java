@@ -1,6 +1,7 @@
 package net.imglib2.algorithm.features;
 
 import net.imglib2.*;
+import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.RealType;
@@ -9,12 +10,12 @@ import net.imglib2.util.Intervals;
 import net.imglib2.util.Pair;
 import net.imglib2.view.Views;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+
+import static net.imglib2.algorithm.features.RevampUtils.nCopies;
 
 /**
  * @author Matthias Arzt
@@ -64,7 +65,7 @@ public class LipschitzFeature {
 		}
 
 		private void apply(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {
-			Interval expandedInterval = Intervals.expand(out, RevampUtils.nCopies(out.numDimensions(), border));
+			Interval expandedInterval = Intervals.expand(out, nCopies(out.numDimensions(), border));
 			Img<FloatType> tmp = RevampUtils.ops().create().img(expandedInterval, new FloatType());
 			copy(tmp, in);
 			lipschitz(tmp);
@@ -105,15 +106,15 @@ public class LipschitzFeature {
 
 		<T extends RealType<T>> void lipschitz(RandomAccessibleInterval<T> inOut) {
 			int n = inOut.numDimensions();
-			Interval interval = new FinalInterval(RevampUtils.nCopies(n, -1), RevampUtils.nCopies(n, 1));
-			for(Localizable location : BackwardIterate.iterable(interval)) {
+			Interval interval = new FinalInterval(nCopies(n, -1), nCopies(n, 1));
+			for(Localizable location : RevampUtils.neigborsLocations(n)) {
 				if(!isZero(location))
 					forward(Views.extendBorder(inOut), inOut, locationToArray(location));
 			}
 		}
 
 		<T extends RealType<T>> void forward(final RandomAccessible<T> in, final RandomAccessibleInterval<T> out, final long[] translation) {
-			final double slope = distance(new Point(out.numDimensions()), Point.wrap(translation)) * this.slope;
+			final double slope = RevampUtils.distance(new Point(out.numDimensions()), Point.wrap(translation)) * this.slope;
 			final RandomAccessibleInterval<Pair<T, T>> pair = invert(Views.interval(Views.pair(Views.translate(in, translation), out), out), translation);
 			Views.flatIterable(pair).forEach(p -> p.getB().setReal(
 					Math.max(p.getB().getRealDouble(), p.getA().getRealDouble() - slope)
@@ -139,14 +140,5 @@ public class LipschitzFeature {
 			return pair;
 		}
 
-		private static double distance(Localizable a, Localizable b) {
-			int n = a.numDimensions();
-			long sum = 0;
-			for (int i = 0; i < n; i++) {
-				long difference = a.getLongPosition(i) - b.getLongPosition(i);
-				sum += difference * difference;
-			}
-			return Math.sqrt(sum);
-		}
 	}
 }
