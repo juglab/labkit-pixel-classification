@@ -7,7 +7,6 @@ import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -27,12 +26,12 @@ public class BorderEffectsTest {
 
 	@Test
 	public void testGauss() {
-		testFeature(new GaussFeature());
+		testFeature(GaussFeature.group());
 	}
 
 	@Test
 	public void testHessian() {
-		testFeature(new HessianFeature());
+		testFeature(HessianFeature.group());
 	}
 
 	@Test
@@ -42,31 +41,31 @@ public class BorderEffectsTest {
 
 	@Test
 	public void testDifferenceOfGaussians() {
-		testFeature(new DifferenceOfGaussiansFeature());
+		testFeature(DifferenceOfGaussiansFeature.group());
 	}
 
 	@Test
-	public void testGradient() { testFeature(new GradientFeature()); }
+	public void testGradient() { testFeature(GradientFeature.group()); }
 
 	@Test
 	public void testLipschitz() {
-		testFeature(new LipschitzFeature(255));
+		testFeature(LipschitzFeature.group(50));
 	}
 
 	@Test
-	public void testMin() { testFeature(ShapedFeatures.min()); }
+	public void testMin() { testFeature(ShapedFeature.min()); }
 
 	@Test
-	public void testMax() { testFeature(ShapedFeatures.max()); }
+	public void testMax() { testFeature(ShapedFeature.max()); }
 
 	@Test
-	public void testMean() { testFeature(ShapedFeatures.mean()); }
+	public void testMean() { testFeature(ShapedFeature.mean()); }
 
 	@Test
-	public void testMedian() { testFeature(ShapedFeatures.median()); }
+	public void testMedian() { testFeature(ShapedFeature.median()); }
 
 	@Test
-	public void testVariance() { testFeature(ShapedFeatures.variance()); }
+	public void testVariance() { testFeature(ShapedFeature.variance()); }
 
 	public void testFeature(Feature feature) {
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(feature);
@@ -93,12 +92,11 @@ public class BorderEffectsTest {
 		return Views.interval(Features.applyOnImg(feature, image), featureInterval);
 	}
 
-	@Test
 	public void showPsnrs() {
-		Feature feature = new FeatureGroup(new GaussFeature(), new HessianFeature(), GaborFeature.group(),
-				new DifferenceOfGaussiansFeature(), new GradientFeature(), new LipschitzFeature(255),
-				ShapedFeatures.min(), ShapedFeatures.max(), ShapedFeatures.mean(), ShapedFeatures.median(),
-				ShapedFeatures.variance());
+		Feature feature = new FeatureGroup(GaussFeature.group(), HessianFeature.group(), GaussFeature.group(),
+				DifferenceOfGaussiansFeature.group(), GradientFeature.group(), LipschitzFeature.group(50),
+				ShapedFeature.min(), ShapedFeature.max(), ShapedFeature.mean(), ShapedFeature.median(),
+				ShapedFeature.variance());
 		RandomAccessibleInterval<FloatType> allResults = calculateResult(feature);
 		RandomAccessibleInterval<FloatType> allExpected = calculateExpected(feature);
 		int axis = image.numDimensions();

@@ -13,7 +13,7 @@ import net.imglib2.type.numeric.real.FloatType;
 import trainableSegmentation.filters.Lipschitz_;
 
 /**
- * Tests {@link SingleLipschitzFeature}
+ * Tests {@link LipschitzFeature.SingleLipschitzFeature}
  *
  * @author Matthias Arzt
  */
@@ -34,7 +34,7 @@ public class SingleLipschitzFeatureTest {
 
 	private static void singleForwardTest() {
 		Img<FloatType> img = centeredDotImage(100, 0, 2);
-		new SingleLipschitzFeature(2.0, 0).lipschitz(img);
+		new LipschitzFeature.SingleLipschitzFeature(2.0, 0).lipschitz(img);
 		ImageJFunctions.show(img);
 	}
 
@@ -66,7 +66,7 @@ public class SingleLipschitzFeatureTest {
 
 	private static void distanceTransformOnExample2() {
 		Img<FloatType> img = centeredDotImage(100, 0, 2);
-		Utils.TimeMeasurement.measure("new", () -> new SingleLipschitzFeature(1.0, 0).lipschitz(img));
+		Utils.TimeMeasurement.measure("new", () -> new LipschitzFeature.SingleLipschitzFeature(1.0, 0).lipschitz(img));
 	}
 
 	private static Img<FloatType> centeredDotImage(float foreground, float background, int dimension) {

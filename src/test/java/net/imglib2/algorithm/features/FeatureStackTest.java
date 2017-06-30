@@ -17,12 +17,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.scijava.Context;
 import trainableSegmentation.FeatureStack;
-import weka.core.Instance;
 import weka.core.Instances;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -41,7 +39,7 @@ public class FeatureStackTest {
 
 	public static void main(String... args) {
 		Img<FloatType> img = ImageJFunctions.convertFloat(squarePictureWithCenteredDot());
-		RandomAccessibleInterval<FloatType> result = Features.applyOnImg(new LipschitzFeature(0), img);
+		RandomAccessibleInterval<FloatType> result = Features.applyOnImg(LipschitzFeature.group(0), img);
 		ImageJFunctions.show(result);
 	}
 
@@ -62,7 +60,7 @@ public class FeatureStackTest {
 
 	@Test
 	public void testGaussStack() {
-		testFeature(40, FeatureStack.GAUSSIAN, new GaussFeature());
+		testFeature(40, FeatureStack.GAUSSIAN, GaussFeature.group());
 	}
 
 	private void testFeature(float expectedPsnr, int oldFeatureId, Feature newFeature) {
@@ -87,22 +85,22 @@ public class FeatureStackTest {
 
 	@Test
 	public void testHessianStack() {
-		testFeature(40, FeatureStack.HESSIAN, new HessianFeature());
+		testFeature(40, FeatureStack.HESSIAN, HessianFeature.group());
 	}
 
 	@Test
 	public void testDifferenceOfGaussian() {
-		testFeature(40, FeatureStack.DOG, new DifferenceOfGaussiansFeature());
+		testFeature(40, FeatureStack.DOG, DifferenceOfGaussiansFeature.group());
 	}
 
 	@Test
 	public void testSobel() {
-		testFeature(40, FeatureStack.SOBEL, new GradientFeature());
+		testFeature(40, FeatureStack.SOBEL, GradientFeature.group());
 	}
 
 	@Test
 	public void testLipschitz() {
-		testFeature(40, FeatureStack.LIPSCHITZ, new LipschitzFeature(0));
+		testFeature(40, FeatureStack.LIPSCHITZ, LipschitzFeature.group(0));
 	}
 
 	/** Show that there is a difference between HyperSphereShape and shape used by FilterRank. */
@@ -129,27 +127,27 @@ public class FeatureStackTest {
 
 	@Test
 	public void testMaximum() {
-		testFeature(27, FeatureStack.MAXIMUM, ShapedFeatures.max());
+		testFeature(27, FeatureStack.MAXIMUM, ShapedFeature.max());
 	}
 
 	@Test
 	public void testMinimum() {
-		testFeature(30, FeatureStack.MINIMUM, ShapedFeatures.min());
+		testFeature(30, FeatureStack.MINIMUM, ShapedFeature.min());
 	}
 
 	@Test
 	public void testMean() {
-		testFeature(40, FeatureStack.MEAN, ShapedFeatures.mean());
+		testFeature(40, FeatureStack.MEAN, ShapedFeature.mean());
 	}
 
 	@Test
 	public void testVariance() {
-		testFeature(30, FeatureStack.VARIANCE, ShapedFeatures.variance());
+		testFeature(30, FeatureStack.VARIANCE, ShapedFeature.variance());
 	}
 
 	@Test
 	public void testMedian() {
-		testFeature(30, FeatureStack.MEDIAN, ShapedFeatures.median());
+		testFeature(30, FeatureStack.MEDIAN, ShapedFeature.median());
 	}
 
 	@Test
