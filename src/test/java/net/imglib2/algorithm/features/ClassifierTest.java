@@ -1,10 +1,10 @@
 package net.imglib2.algorithm.features;
 
-import net.imagej.Dataset;
-import net.imagej.DatasetService;
+import com.google.gson.Gson;
+import hr.irb.fastRandomForest.FastRandomForest;
+import net.imagej.ops.OpInfo;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.type.numeric.IntegerType;
@@ -14,10 +14,11 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import org.junit.Test;
-import org.scijava.Context;
+import org.scijava.module.ModuleInfo;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -54,5 +55,22 @@ public class ClassifierTest {
 			if(e == 1) assertEquals(0, r);
 			if(e == 2) assertEquals(1, r);
 		});
+	}
+
+	@Test
+	public void testStoreLoad() throws IOException {
+		Img<FloatType> img = ImageJFunctions.convertFloat(Utils.loadImage("nuclei.tif"));
+		ImgLabeling<String, IntType> labeling = loadLabeling("nucleiLabeling.tif");
+		assertTrue(Intervals.equals(img, labeling));
+
+		Feature feature = new FeatureGroup(new IdendityFeature(), GaussFeature.group());
+		Classifier classifier = Classifier.train(img, labeling, feature);
+		RandomAccessibleInterval<IntType> result = classifier.apply(img);
+		classifier.store("filename");
+
+		Classifier classifier2 = Classifier.load("filename");
+		RandomAccessibleInterval<IntType> result2 = classifier2.apply(img);
+
+		Utils.assertImagesEqual(result, result2);
 	}
 }

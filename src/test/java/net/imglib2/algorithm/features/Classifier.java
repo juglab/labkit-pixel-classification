@@ -21,9 +21,8 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.io.*;
+import java.util.*;
 
 import static net.imglib2.algorithm.features.Features.applyOnImg;
 
@@ -118,6 +117,27 @@ public class Classifier {
 	public static Attribute[] attributesAsArray(Feature feature, List<String> classes) {
 		List<Attribute> attributes = Features.attributes(feature, classes);
 		return attributes.toArray(new Attribute[attributes.size()]);
+	}
+
+	private static Map<String, Feature> map = new HashMap();
+
+	public void store(String filename) throws IOException {
+		try( ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename)) ) {
+			oos.writeObject(classifier);
+			oos.writeObject(classNames);
+		}
+		map.put(filename, feature); // FIXME
+	}
+
+	public static Classifier load(String filename) throws IOException {
+		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
+			Feature feature = map.get(filename); // FIXME
+			weka.classifiers.Classifier classifier = (weka.classifiers.Classifier) ois.readObject();
+			List<String> classNames = (List<String>) ois.readObject();
+			return new Classifier(classNames, feature, classifier);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }
