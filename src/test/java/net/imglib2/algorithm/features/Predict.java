@@ -31,14 +31,14 @@ public class Predict
 	public static < T extends RealType< T >> void classify(final RandomAccessible<Instance> instances, final Classifier classifier, final RandomAccessibleInterval<IntType> output ) throws Exception
 	{
 		for ( final Pair<Instance, IntType> p : Views.interval( Views.pair( instances, output ), output ) )
-			p.getB().set((int) (classifier.classifyInstance(p.getA()) * 255));
+			p.getB().set((int) (classifier.classifyInstance(p.getA())));
 	}
 
 	public static < T extends RealType< T >> RandomAccessibleInterval<IntType> classify(RandomAccessibleInterval< Instance > instances, final Classifier classifier )
 	{
 		return Converters.convert(instances, (instance, b) -> {;
 			try {
-				b.set((int) (classifier.classifyInstance(instance) * 255));
+				b.set((int) (classifier.classifyInstance(instance)));
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}

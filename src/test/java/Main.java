@@ -1,3 +1,4 @@
+import net.imglib2.algorithm.features.ClassifierTest;
 import net.imglib2.algorithm.features.FeatureStackTest;
 
 /**
@@ -5,6 +6,6 @@ import net.imglib2.algorithm.features.FeatureStackTest;
  */
 public class Main {
 	public static void main(String... args) {
-		new FeatureStackTest().testLipschitz();
+		new ClassifierTest().testClassification();
 	}
 }

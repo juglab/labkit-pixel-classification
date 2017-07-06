@@ -20,17 +20,6 @@ public class Features {
 		return result;
 	}
 
-	//public static RandomAccessibleInterval<Instance> instances(Feature feature, RandomAccessibleInterval<FloatType> image, List<String> classes) {
-	//	RandomAccessibleInterval<RealComposite<FloatType>> collapsed = Views.collapseReal(applyOnImg(feature, image));
-	//	RandomAccessible<Instance> instanceView = new InstanceView<>(collapsed, attributesAsArray(feature, classes));
-	//	return Views.interval(instanceView, image);
-	//}
-
-	public static Attribute[] attributesAsArray(Feature feature, List<String> classes) {
-		List<Attribute> attributes = attributes(feature, classes);
-		return attributes.toArray(new Attribute[attributes.size()]);
-	}
-
 	public static List<Attribute> attributes(Feature feature, List<String> classes) {
 		List<String> labels = feature.attributeLabels();
 		List<Attribute> attributes = new ArrayList<>();
