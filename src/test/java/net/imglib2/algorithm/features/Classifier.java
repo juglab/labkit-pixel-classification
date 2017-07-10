@@ -1,5 +1,6 @@
 package net.imglib2.algorithm.features;
 
+import com.google.gson.*;
 import hr.irb.fastRandomForest.FastRandomForest;
 import ij.Prefs;
 import net.imglib2.Cursor;
@@ -22,6 +23,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.util.*;
 
 import static net.imglib2.algorithm.features.Features.applyOnImg;
@@ -31,7 +33,7 @@ import static net.imglib2.algorithm.features.Features.applyOnImg;
  */
 public class Classifier {
 
-	private final Feature feature;
+	private final FeatureGroup feature;
 
 	private List<String> classNames;
 
@@ -39,7 +41,7 @@ public class Classifier {
 
 	public Classifier(List<String> classNames, Feature feature, weka.classifiers.Classifier classifier) {
 		this.classNames = classNames;
-		this.feature = feature;
+		this.feature = new FeatureGroup( feature );
 		this.classifier = classifier;
 	}
 
@@ -122,20 +124,58 @@ public class Classifier {
 	private static Map<String, Feature> map = new HashMap();
 
 	public void store(String filename) throws IOException {
-		try( ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename)) ) {
-			oos.writeObject(classifier);
-			oos.writeObject(classNames);
+		try( FileWriter fw = new FileWriter(filename) ) {
+			Gson gson = initGson();
+			gson.toJson(this, Classifier.class, fw);
+			fw.append("\n");
 		}
-		map.put(filename, feature); // FIXME
 	}
 
 	public static Classifier load(String filename) throws IOException {
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
-			Feature feature = map.get(filename); // FIXME
-			weka.classifiers.Classifier classifier = (weka.classifiers.Classifier) ois.readObject();
-			List<String> classNames = (List<String>) ois.readObject();
-			return new Classifier(classNames, feature, classifier);
-		} catch (ClassNotFoundException e) {
+		try( FileReader fr = new FileReader(filename) ) {
+			return initGson().fromJson(fr, Classifier.class);
+		}
+	}
+
+	private static Gson initGson() {
+		return Features.gsonModifiers(new GsonBuilder())
+				.registerTypeAdapter(weka.classifiers.Classifier.class, new ClassifierSerializer())
+				.registerTypeAdapter(weka.classifiers.Classifier.class, new ClassifierDeserializer())
+				.create();
+	}
+
+	static class ClassifierSerializer implements JsonSerializer<weka.classifiers.Classifier> {
+
+		@Override
+		public JsonElement serialize(weka.classifiers.Classifier classifier, Type type, JsonSerializationContext json) {
+			return new JsonPrimitive(Base64.getEncoder().encodeToString(objectToBytes(classifier)));
+		}
+	}
+
+	static class ClassifierDeserializer implements JsonDeserializer<weka.classifiers.Classifier> {
+
+		@Override
+		public weka.classifiers.Classifier deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext json) throws JsonParseException {
+			return (weka.classifiers.Classifier) bytesToObject(Base64.getDecoder().decode(jsonElement.getAsString()));
+		}
+	}
+
+	private static byte[] objectToBytes(Object object) {
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+			ObjectOutputStream oos = new ObjectOutputStream(baos);
+			oos.writeObject(object);
+			oos.flush();
+			return baos.toByteArray();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static Object bytesToObject(byte[] bytes) {
+		InputStream stream = new ByteArrayInputStream(bytes);
+		try {
+			return new ObjectInputStream(stream).readObject();
+		} catch (IOException | ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
 	}
