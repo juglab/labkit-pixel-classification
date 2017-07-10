@@ -1,8 +1,5 @@
 package net.imglib2.algorithm.features;
 
-import com.google.gson.Gson;
-import hr.irb.fastRandomForest.FastRandomForest;
-import net.imagej.ops.OpInfo;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
@@ -14,7 +11,6 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import org.junit.Test;
-import org.scijava.module.ModuleInfo;
 
 import java.io.IOException;
 
@@ -72,5 +68,14 @@ public class ClassifierTest {
 		RandomAccessibleInterval<IntType> result2 = classifier2.apply(img);
 
 		Utils.assertImagesEqual(result, result2);
+	}
+
+	@Test
+	public void testGson() {
+		Feature feature = new FeatureGroup(GaussFeature.single(1.0), GaussFeature.single(1.0));
+		String serialized = Features.toJson(feature);
+		System.out.println(serialized);
+		FeatureGroup fg = Features.fromJson(serialized);
+		System.out.println(fg);
 	}
 }
