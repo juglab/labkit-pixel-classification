@@ -51,7 +51,10 @@ public class Classifier {
 	}
 
 	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, Feature feature) {
-		weka.classifiers.Classifier classifier = initRandomForest();
+		return train(image, labeling, feature, initRandomForest());
+	}
+
+	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, Feature feature, weka.classifiers.Classifier classifier) {
 		try {
 			classifier.buildClassifier(trainingInstances(image, labeling, feature));
 		} catch (Exception e) {
