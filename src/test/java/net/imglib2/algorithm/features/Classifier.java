@@ -40,7 +40,7 @@ public class Classifier {
 	private weka.classifiers.Classifier classifier;
 
 	public Classifier(List<String> classNames, Feature feature, weka.classifiers.Classifier classifier) {
-		this.classNames = classNames;
+		this.classNames = Collections.unmodifiableList(classNames);
 		this.feature = new FeatureGroup( feature );
 		this.classifier = classifier;
 	}
@@ -145,6 +145,10 @@ public class Classifier {
 				.registerTypeAdapter(weka.classifiers.Classifier.class, new ClassifierSerializer())
 				.registerTypeAdapter(weka.classifiers.Classifier.class, new ClassifierDeserializer())
 				.create();
+	}
+
+	public List<String> classNames() {
+		return classNames;
 	}
 
 	static class ClassifierSerializer implements JsonSerializer<weka.classifiers.Classifier> {

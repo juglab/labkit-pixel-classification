@@ -13,6 +13,7 @@ import org.junit.Test;
 import weka.classifiers.meta.RandomCommittee;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -41,16 +42,15 @@ public class ClassifierTest {
 	public void testClassification() {
 		Classifier classifier = trainClassifier();
 		RandomAccessibleInterval<IntType> result = classifier.apply(img);
-		checkExpected(result);
+		checkExpected(result, classifier.classNames());
 	}
 
-	private void checkExpected(RandomAccessibleInterval<IntType> result) {
+	private void checkExpected(RandomAccessibleInterval<IntType> result, List<String> classNames) {
 		Img<UnsignedByteType> expected = ImageJFunctions.wrapByte(Utils.loadImage("nucleiExpected.tif"));
 		Views.interval(Views.pair(result, expected), expected).forEach(p -> {
-			int r = p.getA().get();
+			String r = classNames.get(p.getA().get());
 			int e = p.getB().get();
-			if(e == 1) assertEquals(0, r);
-			if(e == 2) assertEquals(1, r);
+			if(e != 0) assertEquals(Integer.toString(e), r);
 		});
 	}
 
@@ -85,6 +85,6 @@ public class ClassifierTest {
 		Feature feature = new FeatureGroup(new IdendityFeature(), GaussFeature.group());
 		Classifier classifier = Classifier.train(img, labeling, feature, new RandomCommittee());
 		RandomAccessibleInterval<IntType> result = classifier.apply(img);
-		checkExpected(result);
+		checkExpected(result, classifier.classNames());
 	}
 }
