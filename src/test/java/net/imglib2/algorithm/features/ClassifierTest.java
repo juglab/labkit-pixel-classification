@@ -8,7 +8,6 @@ import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import org.junit.Test;
 import weka.classifiers.meta.RandomCommittee;
@@ -16,7 +15,6 @@ import weka.classifiers.meta.RandomCommittee;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests {@link Classifier}
@@ -24,6 +22,10 @@ import static org.junit.Assert.assertTrue;
  * @author Matthias Arzt
  */
 public class ClassifierTest {
+
+	private Img<FloatType> img = ImageJFunctions.convertFloat(Utils.loadImage("nuclei.tif"));
+
+	private ImgLabeling<String, IntType> labeling = loadLabeling("nucleiLabeling.tif");
 
 	static public ImgLabeling<String, IntType> loadLabeling(String file) {
 		Img<? extends IntegerType<?>> img = ImageJFunctions.wrapByte(Utils.loadImage(file));
@@ -37,14 +39,12 @@ public class ClassifierTest {
 
 	@Test
 	public void testClassification() {
-		Img<FloatType> img = ImageJFunctions.convertFloat(Utils.loadImage("nuclei.tif"));
-		ImgLabeling<String, IntType> labeling = loadLabeling("nucleiLabeling.tif");
-		assertTrue(Intervals.equals(img, labeling));
-
-		Feature feature = new FeatureGroup(new IdendityFeature(), GaussFeature.group());
-		Classifier classifier = Classifier.train(img, labeling, feature);
+		Classifier classifier = trainClassifier();
 		RandomAccessibleInterval<IntType> result = classifier.apply(img);
+		checkExpected(result);
+	}
 
+	private void checkExpected(RandomAccessibleInterval<IntType> result) {
 		Img<UnsignedByteType> expected = ImageJFunctions.wrapByte(Utils.loadImage("nucleiExpected.tif"));
 		Views.interval(Views.pair(result, expected), expected).forEach(p -> {
 			int r = p.getA().get();
@@ -54,14 +54,14 @@ public class ClassifierTest {
 		});
 	}
 
+	private Classifier trainClassifier() {
+		Feature feature = new FeatureGroup(new IdendityFeature(), GaussFeature.group());
+		return Classifier.train(img, labeling, feature);
+	}
+
 	@Test
 	public void testStoreLoad() throws IOException {
-		Img<FloatType> img = ImageJFunctions.convertFloat(Utils.loadImage("nuclei.tif"));
-		ImgLabeling<String, IntType> labeling = loadLabeling("nucleiLabeling.tif");
-		assertTrue(Intervals.equals(img, labeling));
-
-		Feature feature = new FeatureGroup(new IdendityFeature(), GaussFeature.group());
-		Classifier classifier = Classifier.train(img, labeling, feature);
+		Classifier classifier = trainClassifier();
 		RandomAccessibleInterval<IntType> result = classifier.apply(img);
 		classifier.store("filename");
 
@@ -82,23 +82,9 @@ public class ClassifierTest {
 
 	@Test
 	public void testDifferentWekaClassifiers() {
-		// use other weka classifier algorithms to classify an image
-		Img<FloatType> img = ImageJFunctions.convertFloat(Utils.loadImage("nuclei.tif"));
-		ImgLabeling<String, IntType> labeling = loadLabeling("nucleiLabeling.tif");
-		assertTrue(Intervals.equals(img, labeling));
-
 		Feature feature = new FeatureGroup(new IdendityFeature(), GaussFeature.group());
-		weka.classifiers.Classifier wekaClassifier = new RandomCommittee();
-		Classifier classifier = Classifier.train(img, labeling, feature, wekaClassifier);
+		Classifier classifier = Classifier.train(img, labeling, feature, new RandomCommittee());
 		RandomAccessibleInterval<IntType> result = classifier.apply(img);
-		ImageJFunctions.show(result);
-
-		Img<UnsignedByteType> expected = ImageJFunctions.wrapByte(Utils.loadImage("nucleiExpected.tif"));
-		Views.interval(Views.pair(result, expected), expected).forEach(p -> {
-			int r = p.getA().get();
-			int e = p.getB().get();
-			if(e == 1) assertEquals(0, r);
-			if(e == 2) assertEquals(1, r);
-		});
+		checkExpected(result);
 	}
 }
