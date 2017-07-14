@@ -36,7 +36,7 @@ public class Predict
 
 	public static < T extends RealType< T >> RandomAccessibleInterval<IntType> classify(RandomAccessibleInterval< Instance > instances, final Classifier classifier )
 	{
-		return Converters.convert(instances, (instance, b) -> {;
+		return Converters.convert(instances, (instance, b) -> {
 			try {
 				b.set((int) (classifier.classifyInstance(instance)));
 			} catch (Exception e) {
