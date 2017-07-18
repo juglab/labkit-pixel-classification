@@ -15,6 +15,7 @@ import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import org.scijava.Context;
+import org.scijava.script.ScriptService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ import java.util.stream.LongStream;
  */
 public class RevampUtils {
 
-	private static final OpService ops = new Context(OpService.class).service(OpService.class);
+	private static final OpService ops = new Context(OpService.class, ScriptService.class).service(OpService.class);
 	private static final float[] SOBEL_FILTER_X_VALUES = {1f,2f,1f,0f,0f,0f,-1f,-2f,-1f};
 	private static final RandomAccessibleInterval<FloatType> SOBEL_FILTER_X = ArrayImgs.floats(SOBEL_FILTER_X_VALUES, 3, 3);
 	private static final float[] SOBEL_FILTER_Y_VALUES = {1f,0f,-1f,2f,0f,-2f,1f,0f,-1f};
@@ -130,6 +131,12 @@ public class RevampUtils {
 
 	public static long[] nCopies(int count, long value) {
 		long[] result = new long[count];
+		Arrays.fill(result, value);
+		return result;
+	}
+
+	public static double[] nCopies(int count, double value) {
+		double[] result = new double[count];
 		Arrays.fill(result, value);
 		return result;
 	}
