@@ -25,13 +25,17 @@ public class GradientFeature {
 		// prevent from being instantiated
 	}
 
+	public static Feature single(double sigma) {
+		return new SingleGradientFeature(sigma);
+	}
+
 	public static Feature group() {
 		return new FeatureGroup(initFeatures());
 	}
 
 	private static List<Feature> initFeatures() {
 		return Arrays.stream(SIGMAS)
-				.mapToObj(SingleGradientFeature::new)
+				.mapToObj(GradientFeature::single)
 				.collect(Collectors.toList());
 	}
 
