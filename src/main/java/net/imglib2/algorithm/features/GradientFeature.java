@@ -25,17 +25,17 @@ public class GradientFeature {
 		// prevent from being instantiated
 	}
 
-	public static Feature single(double sigma) {
-		return new SingleGradientFeature(sigma);
+	public static Feature sobelSignle(double sigma) {
+		return new SobelGradientFeature(sigma);
 	}
 
-	public static Feature group() {
+	public static Feature sobelGroup() {
 		return new FeatureGroup(initFeatures());
 	}
 
 	private static List<Feature> initFeatures() {
 		return Arrays.stream(SIGMAS)
-				.mapToObj(GradientFeature::single)
+				.mapToObj(GradientFeature::sobelSignle)
 				.collect(Collectors.toList());
 	}
 
@@ -43,11 +43,11 @@ public class GradientFeature {
 	 * ImgLib2 version of trainable segmentation's Sobel feature.
 	 * @author Matthias Arzt
 	 */
-	private static class SingleGradientFeature implements Feature {
+	private static class SobelGradientFeature implements Feature {
 
 		private final double sigma;
 
-		public SingleGradientFeature(double sigma) {
+		public SobelGradientFeature(double sigma) {
 			this.sigma = sigma;
 		}
 

@@ -94,7 +94,7 @@ public class FeatureStackTest {
 
 	@Test
 	public void testSobel() {
-		testFeature(40, FeatureStack.SOBEL, GradientFeature.group());
+		testFeature(40, FeatureStack.SOBEL, GradientFeature.sobelGroup());
 	}
 
 	@Test

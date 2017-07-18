@@ -45,7 +45,7 @@ public class BorderEffectsTest {
 	}
 
 	@Test
-	public void testGradient() { testFeature(GradientFeature.group()); }
+	public void testGradient() { testFeature(GradientFeature.sobelGroup()); }
 
 	@Test
 	public void testLipschitz() {
@@ -94,7 +94,7 @@ public class BorderEffectsTest {
 
 	public void showPsnrs() {
 		Feature feature = new FeatureGroup(GaussFeature.group(), HessianFeature.group(), GaussFeature.group(),
-				DifferenceOfGaussiansFeature.group(), GradientFeature.group(), LipschitzFeature.group(50),
+				DifferenceOfGaussiansFeature.group(), GradientFeature.sobelGroup(), LipschitzFeature.group(50),
 				ShapedFeature.min(), ShapedFeature.max(), ShapedFeature.mean(), ShapedFeature.median(),
 				ShapedFeature.variance());
 		RandomAccessibleInterval<FloatType> allResults = calculateResult(feature);
