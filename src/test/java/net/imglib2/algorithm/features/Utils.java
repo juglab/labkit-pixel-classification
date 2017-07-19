@@ -338,11 +338,11 @@ public class Utils {
 		}
 	}
 
-	static class TimeMeasurement {
+	public static class TimeMeasurement {
 
 		static private Map<String, Measurement> map = new HashMap<>();
 
-		static void measure(String id, Runnable run) {
+		public static void measure(String id, Runnable run) {
 			StopWatch watch = new StopWatch();
 			run.run();
 			getMeasurement(id).add(watch.get());

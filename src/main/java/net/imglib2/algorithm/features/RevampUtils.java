@@ -141,7 +141,7 @@ public class RevampUtils {
 		return result;
 	}
 
-	static Iterable<Localizable> neigborsLocations(int n) {
+	public static Iterable<Localizable> neigborsLocations(int n) {
 		Img<ByteType> img = ArrayImgs.bytes(nCopies(n, 3));
 		IntervalView<ByteType> translate = Views.translate(img, nCopies(n, -1));
 		Cursor<ByteType> cursor = translate.localizingCursor();
@@ -160,7 +160,7 @@ public class RevampUtils {
 		};
 	}
 
-	static double distance(Localizable a, Localizable b) {
+	public static double distance(Localizable a, Localizable b) {
 		int n = a.numDimensions();
 		long sum = 0;
 		for (int i = 0; i < n; i++) {

@@ -1,8 +1,11 @@
-package net.imglib2.algorithm.features;
+package net.imglib2.algorithm.features.ops;
 
 import ij.ImagePlus;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.algorithm.features.RevampUtils;
+import net.imglib2.algorithm.features.Utils;
+import net.imglib2.algorithm.features.ops.SingleLipschitzFeature;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.img.Img;
@@ -13,7 +16,7 @@ import net.imglib2.type.numeric.real.FloatType;
 import trainableSegmentation.filters.Lipschitz_;
 
 /**
- * Tests {@link LipschitzFeature.SingleLipschitzFeature}
+ * Tests {@link SingleLipschitzFeature}
  *
  * @author Matthias Arzt
  */
@@ -34,7 +37,7 @@ public class SingleLipschitzFeatureTest {
 
 	private static void singleForwardTest() {
 		Img<FloatType> img = centeredDotImage(100, 0, 2);
-		new LipschitzFeature.SingleLipschitzFeature(2.0, 0).lipschitz(img);
+		new SingleLipschitzFeature(2.0, 0).lipschitz(img);
 		ImageJFunctions.show(img);
 	}
 
@@ -66,7 +69,7 @@ public class SingleLipschitzFeatureTest {
 
 	private static void distanceTransformOnExample2() {
 		Img<FloatType> img = centeredDotImage(100, 0, 2);
-		Utils.TimeMeasurement.measure("new", () -> new LipschitzFeature.SingleLipschitzFeature(1.0, 0).lipschitz(img));
+		Utils.TimeMeasurement.measure("new", () -> new SingleLipschitzFeature(1.0, 0).lipschitz(img));
 	}
 
 	private static Img<FloatType> centeredDotImage(float foreground, float background, int dimension) {
