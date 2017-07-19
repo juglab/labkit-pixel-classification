@@ -7,6 +7,7 @@ import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.algorithm.features.ops.IdendityFeature;
 import net.imglib2.algorithm.morphology.Dilation;
 import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.img.ImagePlusAdapter;

@@ -1,6 +1,7 @@
 package net.imglib2.algorithm.features;
 
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.algorithm.features.ops.IdendityFeature;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
