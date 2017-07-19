@@ -169,4 +169,8 @@ public class RevampUtils {
 		}
 		return Math.sqrt(sum);
 	}
+
+	public static <T> List<T> filterForClass(Class<T> tClass, List<?> in) {
+		return in.stream().filter(tClass::isInstance).map(tClass::cast).collect(Collectors.toList());
+	}
 }
