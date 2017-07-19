@@ -2,16 +2,24 @@ package net.imglib2.algorithm.features;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import net.imagej.ops.Op;
+import net.imagej.ops.OpInfo;
+import net.imagej.ops.OpService;
 import net.imagej.ops.special.function.Functions;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
+import org.scijava.command.CommandInfo;
+import org.scijava.module.Module;
+import org.scijava.module.ModuleItem;
+import org.scijava.service.SciJavaService;
 import weka.core.Attribute;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -50,7 +58,7 @@ public class Features {
 	public static GsonBuilder gsonModifiers(GsonBuilder builder) {
 		return builder
 				.registerTypeAdapter(Feature.class, new OpSerializer())
-				.registerTypeAdapter(Feature.class, new OpDeserializer())
+				.registerTypeAdapter(Feature.class, new OpDeserializer(RevampUtils.ops()))
 				.registerTypeAdapter(FeatureGroup.class, new FeatureGroupSerializer())
 				.registerTypeAdapter(FeatureGroup.class, new FeatureGroupDeserializer());
 	}
@@ -77,25 +85,44 @@ public class Features {
 		}
 	}
 
-	static class OpSerializer implements JsonSerializer<Feature> {
+	static class OpSerializer implements JsonSerializer<Op> {
 
 		@Override
-		public JsonElement serialize(Feature f, Type type, JsonSerializationContext jsonSerializationContext) {
-			JsonObject jsonObject = (JsonObject) jsonSerializationContext.serialize(f, f.getClass());
-			jsonObject.add("class", new JsonPrimitive(f.getClass().getName()));
+		public JsonElement serialize(Op op, Type type, JsonSerializationContext jsonSerializationContext) {
+			CommandInfo commandInfo = new OpInfo(op.getClass()).cInfo();
+			Module module = commandInfo.createModule(op);
+			JsonObject jsonObject = new JsonObject();
+			jsonObject.add("class", new JsonPrimitive(op.getClass().getName()));
+			for(ModuleItem<?> input : commandInfo.inputs()) {
+				if(! SciJavaService.class.isAssignableFrom(input.getType()) &&
+						! Arrays.asList("in", "out", "ops").contains(input.getName()) )
+					jsonObject.add(input.getName(), jsonSerializationContext.serialize(input.getValue(module)));
+			}
 			return jsonObject;
 		}
 	}
 
-	static class OpDeserializer implements JsonDeserializer<Feature> {
+	static class OpDeserializer implements JsonDeserializer<Op> {
+
+		private final OpService opService;
+
+		OpDeserializer(OpService opService) {
+			this.opService = opService;
+		}
 
 		@Override
-		public Feature deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+		public Op deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			JsonObject o = jsonElement.getAsJsonObject();
 			String className = o.get("class").getAsString();
 			o.remove("class");
 			try {
-				return jsonDeserializationContext.deserialize(o, Class.forName(className));
+				@SuppressWarnings("unchecked")
+				Class<? extends Op> type1 = (Class<? extends Op>) Class.forName(className);
+				OpInfo opInfo = new OpInfo(type1);
+				Op op = jsonDeserializationContext.deserialize(o, type1);
+				op.setEnvironment(opService);
+				opService.getContext().inject(op);
+				return op;
 			} catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);
 			}
