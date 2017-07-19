@@ -16,7 +16,7 @@ import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
 import net.imglib2.algorithm.features.RevampUtils;
-import net.imglib2.type.numeric.integer.IntType;
+import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.miginfocom.swing.MigLayout;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
@@ -209,23 +209,6 @@ public class FeatureSettingsGui {
 			} catch (ModuleException e) {
 				throw new RuntimeException(e);
 			}
-		}
-	}
-
-	interface FeatureOp extends SciJavaPlugin, Op, UnaryComputerOp<IntType, IntType> {
-
-	}
-
-	@Plugin(type = FeatureOp.class)
-	public static class Test extends AbstractUnaryComputerOp<IntType, IntType> implements FeatureOp {
-
-		static String NAME = "TestOp";
-
-		@Parameter
-		private String input = "Hello World!";
-
-		@Override
-		public void compute(IntType input, IntType output) {
 		}
 	}
 }
