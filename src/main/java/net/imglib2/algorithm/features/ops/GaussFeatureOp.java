@@ -23,6 +23,12 @@ public class GaussFeatureOp extends AbstractFeatureOp {
 	@Parameter
 	private double sigma = 1.0;
 
+	public GaussFeatureOp() {}
+
+	public GaussFeatureOp(double sigma) {
+		this.sigma = sigma;
+	}
+
 	@Override
 	public int count() {
 			return 1;
