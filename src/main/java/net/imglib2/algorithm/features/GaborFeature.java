@@ -1,7 +1,6 @@
 package net.imglib2.algorithm.features;
 
 
-import net.imagej.ops.special.function.Functions;
 import net.imglib2.*;
 import net.imglib2.algorithm.features.ops.SingleGaborFeature;
 import net.imglib2.type.numeric.real.DoubleType;
@@ -38,10 +37,7 @@ public class GaborFeature {
 	}
 
 	private static Feature createGaborFeature(double sigma, double gamma, double psi, double frequency, int nAngles, Consumer<RandomAccessibleInterval<FloatType>> postProcessSlice) {
-		Object op = Functions.unary(RevampUtils.ops(), SingleGaborFeature.class,
-				RandomAccessibleInterval.class, RandomAccessibleInterval.class,
-				new Object[]{sigma, gamma, psi, frequency, nAngles});
-		SingleGaborFeature gaborFeature = (SingleGaborFeature) op;
+		SingleGaborFeature gaborFeature = Features.create(SingleGaborFeature.class, sigma, gamma, psi, frequency, nAngles);
 		gaborFeature.setPostProcessSlice(postProcessSlice);
 		return gaborFeature;
 	}

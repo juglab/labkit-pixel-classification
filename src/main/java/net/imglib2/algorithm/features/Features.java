@@ -2,7 +2,9 @@ package net.imglib2.algorithm.features;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import net.imagej.ops.special.function.Functions;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
@@ -51,6 +53,10 @@ public class Features {
 				.registerTypeAdapter(Feature.class, new OpDeserializer())
 				.registerTypeAdapter(FeatureGroup.class, new FeatureGroupSerializer())
 				.registerTypeAdapter(FeatureGroup.class, new FeatureGroupDeserializer());
+	}
+
+	static <T extends FeatureOp> T create(Class<T> aClass, Object... args) {
+		return (T) (Object) Functions.unary(RevampUtils.ops(), aClass, RandomAccessibleInterval.class, RandomAccessibleInterval.class, args);
 	}
 
 	static class FeatureGroupSerializer implements JsonSerializer<FeatureGroup> {
