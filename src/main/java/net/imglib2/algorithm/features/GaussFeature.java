@@ -29,11 +29,11 @@ public class GaussFeature extends FeatureGroup {
 
 	private static List<Feature> initFeatures() {
 		return Arrays.stream(SIGMAS)
-				.mapToObj(GaussFeatureOp::new)
+				.mapToObj(GaussFeature::single)
 				.collect(Collectors.toList());
 	}
 
 	public static Feature single(double sigma) {
-		return new GaussFeatureOp(sigma);
+		return Features.create(GaussFeatureOp.class, sigma);
 	}
 }

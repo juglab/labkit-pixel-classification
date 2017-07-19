@@ -17,13 +17,17 @@ public class HessianFeature {
 		// prevent from being instantiated
 	}
 
+	public static Feature single(double sigma) {
+		return Features.create(SingleHessianFeature.class, sigma);
+	}
+
 	public static Feature group() {
 		return new FeatureGroup(initFeatures());
 	}
 
 	private static List<Feature> initFeatures() {
 		return Arrays.stream(SIGMAS)
-				.mapToObj(SingleHessianFeature::new)
+				.mapToObj(HessianFeature::single)
 				.collect(Collectors.toList());
 	}
 

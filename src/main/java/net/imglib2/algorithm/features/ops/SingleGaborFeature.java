@@ -42,18 +42,6 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 
 	private Consumer<RandomAccessibleInterval<FloatType>> postProcessSlice = x -> {};
 
-	public SingleGaborFeature(double sigma, double gamma, double psi, double frequency, int nAngles, Consumer<RandomAccessibleInterval<FloatType>> postProcessSlice) {
-		this.sigma = sigma;
-		this.gamma = gamma;
-		this.psi = psi;
-		this.frequency = frequency;
-		this.nAngles = nAngles;
-		this.postProcessSlice = postProcessSlice;
-		initialize();
-	}
-
-	public SingleGaborFeature() {}
-
 	public void setPostProcessSlice(Consumer<RandomAccessibleInterval<FloatType>> postProcessSlice) {
 		this.postProcessSlice = postProcessSlice;
 	}

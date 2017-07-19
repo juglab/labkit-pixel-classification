@@ -24,7 +24,11 @@ public class DifferenceOfGaussiansFeature {
 		final double maximumSigma = 16;
 		for (double sigma1 = minimumSigma; sigma1 <= maximumSigma; sigma1 *= 2)
 			for (double sigma2 = minimumSigma; sigma2 < sigma1; sigma2 *= 2)
-				features.add(new SingleDifferenceOfGaussiansFeature(sigma1, sigma2));
+				features.add(single(sigma1, sigma2));
 		return features;
+	}
+
+	public static SingleDifferenceOfGaussiansFeature single(double sigma1, double sigma2) {
+		return Features.create(SingleDifferenceOfGaussiansFeature.class, sigma1, sigma2);
 	}
 }

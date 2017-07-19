@@ -23,12 +23,6 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 	@Parameter
 	private double sigma = 1.0;
 
-	public SingleHessianFeature() {}
-
-	public SingleHessianFeature(double sigma) {
-		this.sigma = sigma;
-	}
-
 	@Override
 	public int count() {
 		return 8;

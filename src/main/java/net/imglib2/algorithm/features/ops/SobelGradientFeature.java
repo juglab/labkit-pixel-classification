@@ -10,6 +10,7 @@ import net.imglib2.util.Intervals;
 import net.imglib2.util.Pair;
 import net.imglib2.view.Views;
 import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,16 +20,11 @@ import java.util.function.ToDoubleFunction;
  * ImgLib2 version of trainable segmentation's Sobel feature.
  * @author Matthias Arzt
  */
+@Plugin(type = FeatureOp.class)
 public class SobelGradientFeature extends AbstractFeatureOp {
 
 	@Parameter
 	private double sigma;
-
-	public SobelGradientFeature() {}
-
-	public SobelGradientFeature(double sigma) {
-		this.sigma = sigma;
-	}
 
 	@Override
 	public int count() {

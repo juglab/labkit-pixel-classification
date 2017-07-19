@@ -27,12 +27,6 @@ public class SignleGradientFeature extends AbstractFeatureOp {
 	@Parameter
 	private double sigma;
 
-	public SignleGradientFeature() {}
-
-	public SignleGradientFeature(double sigma) {
-		this.sigma = sigma;
-	}
-
 	@Override
 	public int count() {
 		return 1;

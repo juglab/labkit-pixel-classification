@@ -24,7 +24,7 @@ import static net.imglib2.algorithm.features.RevampUtils.nCopies;
  * @author Matthias Arzt
  */
 @Plugin(type = FeatureOp.class)
-public class SingleLipschitzFeature implements Feature {
+public class SingleLipschitzFeature extends AbstractFeatureOp {
 
 	@Parameter
 	private double slope;

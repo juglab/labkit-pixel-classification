@@ -27,13 +27,6 @@ public class SingleDifferenceOfGaussiansFeature extends AbstractFeatureOp {
 	@Parameter
 	private double sigma2 = 4.0;
 
-	public SingleDifferenceOfGaussiansFeature() {}
-
-	public SingleDifferenceOfGaussiansFeature(double sigma1, double sigma2) {
-		this.sigma1 = sigma1;
-		this.sigma2 = sigma2;
-	}
-
 	@Override
 	public int count() {
 		return 1;

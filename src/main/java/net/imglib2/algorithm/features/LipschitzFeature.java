@@ -22,12 +22,12 @@ public class LipschitzFeature {
 
 	private static List<Feature> initFeatures(long border) {
 		return Arrays.stream(new double[]{5, 10, 15, 20, 25})
-				.mapToObj(slope -> new SingleLipschitzFeature(slope, border))
+				.mapToObj(slope -> single(slope, border))
 				.collect(Collectors.toList());
 	}
 
 	public static Feature single(double slope, long border) {
-		return new SingleLipschitzFeature(slope, border);
+		return Features.create(SingleLipschitzFeature.class, slope, border);
 	}
 
 }

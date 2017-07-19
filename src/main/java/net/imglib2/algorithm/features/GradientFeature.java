@@ -18,7 +18,7 @@ public class GradientFeature {
 	}
 
 	public static Feature sobelSignle(double sigma) {
-		return new SobelGradientFeature(sigma);
+		return Features.create(SobelGradientFeature.class, sigma);
 	}
 
 	public static Feature sobelGroup() {
@@ -28,7 +28,7 @@ public class GradientFeature {
 	}
 
 	public static Feature single(double sigma) {
-		return new SignleGradientFeature(sigma);
+		return Features.create(SignleGradientFeature.class, sigma);
 	}
 
 	public static Feature group() {
