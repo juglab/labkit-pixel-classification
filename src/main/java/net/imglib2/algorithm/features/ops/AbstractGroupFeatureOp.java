@@ -2,7 +2,6 @@ package net.imglib2.algorithm.features.ops;
 
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.features.Feature;
 import net.imglib2.algorithm.features.FeatureGroup;
 import net.imglib2.type.numeric.real.FloatType;
 
@@ -20,7 +19,7 @@ public abstract class AbstractGroupFeatureOp extends AbstractFeatureOp {
 		featureGroup = new FeatureGroup(initFeatures());
 	}
 
-	protected abstract List<Feature> initFeatures();
+	protected abstract List<FeatureOp> initFeatures();
 
 	@Override
 	public int count() {

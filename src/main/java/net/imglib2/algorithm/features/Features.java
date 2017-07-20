@@ -2,7 +2,6 @@ package net.imglib2.algorithm.features;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import net.imagej.ops.Op;
 import net.imagej.ops.OpInfo;
 import net.imagej.ops.OpService;
 import net.imagej.ops.special.function.Functions;
@@ -46,9 +45,9 @@ public class Features {
 		return gson.fromJson(serialized, FeatureGroup.class);
 	}
 
-	public static String toJson(Feature feature) {
+	public static String toJson(FeatureGroup featureGroup) {
 		Gson gson = initGson();
-		return gson.toJson(new FeatureGroup(feature), FeatureGroup.class);
+		return gson.toJson(featureGroup, FeatureGroup.class);
 	}
 
 	private static Gson initGson() {
@@ -71,7 +70,6 @@ public class Features {
 
 		@Override
 		public JsonElement serialize(FeatureGroup f, Type type, JsonSerializationContext json) {
-			// FIXME make FeatureGroup only contain FeatureOp
 			Type collectionType = new TypeToken<List<FeatureOp>>(){}.getType();
 			return json.serialize(f.features(), collectionType);
 		}
@@ -82,7 +80,7 @@ public class Features {
 		@Override
 		public FeatureGroup deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext json) throws JsonParseException {
 			Type collectionType = new TypeToken<List<FeatureOp>>(){}.getType();
-			return new FeatureGroup(json.<List<Feature>>deserialize(jsonElement, collectionType));
+			return new FeatureGroup(json.<List<FeatureOp>>deserialize(jsonElement, collectionType));
 		}
 	}
 

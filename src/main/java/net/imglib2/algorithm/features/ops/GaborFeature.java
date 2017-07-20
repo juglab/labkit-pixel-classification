@@ -1,15 +1,12 @@
 package net.imglib2.algorithm.features.ops;
 
-import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.Feature;
 import net.imglib2.algorithm.features.Features;
-import net.imglib2.type.numeric.real.FloatType;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * @author Matthias Arzt
@@ -21,9 +18,9 @@ public class GaborFeature extends AbstractGroupFeatureOp {
 	private boolean legacyNormalize = false;
 
 	@Override
-	protected List<Feature> initFeatures() {
+	protected List<FeatureOp> initFeatures() {
 		int nAngles = 10;
-		List<Feature> features = new ArrayList<>();
+		List<FeatureOp> features = new ArrayList<>();
 		for(int i=0; i < 2; i++)
 			for(double gamma = 1; gamma >= 0.25; gamma /= 2)
 				for(int frequency = 2; frequency<3; frequency ++)
@@ -43,7 +40,7 @@ public class GaborFeature extends AbstractGroupFeatureOp {
 		return features;
 	}
 
-	private Feature createGaborFeature(double v, double gamma, double psi, int frequency, int nAngles) {
+	private FeatureOp createGaborFeature(double v, double gamma, double psi, int frequency, int nAngles) {
 		return Features.create(SingleGaborFeature.class, v, gamma, psi, frequency, nAngles, legacyNormalize);
 	}
 }

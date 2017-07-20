@@ -7,6 +7,7 @@ import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.algorithm.features.ops.IdendityFeature;
 import net.imglib2.algorithm.morphology.Dilation;
 import net.imglib2.algorithm.neighborhood.HyperSphereShape;
@@ -44,8 +45,8 @@ public class FeatureStackTest {
 		ImageJFunctions.show(result);
 	}
 
-	public static RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, Feature feature) {
-		return Features.applyOnImg(new FeatureGroup(new IdendityFeature(), feature), image);
+	public static RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureOp feature) {
+		return Features.applyOnImg(new FeatureGroup(Features.create(IdendityFeature.class), feature), image);
 	}
 
 	@Test
@@ -64,7 +65,7 @@ public class FeatureStackTest {
 		testFeature(40, FeatureStack.GAUSSIAN, GaussFeature.group());
 	}
 
-	private void testFeature(float expectedPsnr, int oldFeatureId, Feature newFeature) {
+	private void testFeature(float expectedPsnr, int oldFeatureId, FeatureOp newFeature) {
 		RandomAccessibleInterval<FloatType> expected = generateSingleFeature(bridgeImage, oldFeatureId);
 		RandomAccessibleInterval<FloatType> result = createStack(bridgeImg, newFeature);
 		Utils.assertImagesEqual(expectedPsnr, expected, result);
@@ -79,7 +80,7 @@ public class FeatureStackTest {
 		return IntStream.range(0, instances.classIndex()).mapToObj(i -> instances.attribute(i).name()).collect(Collectors.toList());
 	}
 
-	private List<String> getAttributeLabels(Feature feature) {
+	private List<String> getAttributeLabels(FeatureOp feature) {
 		return new FeatureGroup(new IdendityFeature(), feature).attributeLabels();
 	}
 

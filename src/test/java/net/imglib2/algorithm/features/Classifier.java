@@ -33,34 +33,34 @@ import static net.imglib2.algorithm.features.Features.applyOnImg;
  */
 public class Classifier {
 
-	private final FeatureGroup feature;
+	private final FeatureGroup features;
 
 	private List<String> classNames;
 
 	private weka.classifiers.Classifier classifier;
 
-	public Classifier(List<String> classNames, Feature feature, weka.classifiers.Classifier classifier) {
+	public Classifier(List<String> classNames, FeatureGroup features, weka.classifiers.Classifier classifier) {
 		this.classNames = Collections.unmodifiableList(classNames);
-		this.feature = new FeatureGroup( feature );
+		this.features = features;
 		this.classifier = classifier;
 	}
 
 	public RandomAccessibleInterval<IntType> apply(RandomAccessibleInterval<FloatType> image) {
-		RandomAccessibleInterval<Instance> instances = instances(feature, image, classNames);
+		RandomAccessibleInterval<Instance> instances = instances(features, image, classNames);
 		return Predict.classify(instances, classifier);
 	}
 
-	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, Feature feature) {
-		return train(image, labeling, feature, initRandomForest());
+	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, FeatureGroup features) {
+		return train(image, labeling, features, initRandomForest());
 	}
 
-	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, Feature feature, weka.classifiers.Classifier classifier) {
+	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, FeatureGroup features, weka.classifiers.Classifier classifier) {
 		try {
-			classifier.buildClassifier(trainingInstances(image, labeling, feature));
+			classifier.buildClassifier(trainingInstances(image, labeling, features));
 		} catch (Exception e) {
 			new RuntimeException(e);
 		}
-		return new Classifier(getClassNames(labeling), feature, classifier);
+		return new Classifier(getClassNames(labeling), features, classifier);
 	}
 
 	private static AbstractClassifier initRandomForest() {

@@ -13,8 +13,8 @@ import java.util.List;
 @Plugin(type = FeatureOp.class)
 public class DifferenceOfGaussiansFeature extends AbstractGroupFeatureOp {
 
-	protected List<Feature> initFeatures() {
-		List<Feature> features = new ArrayList<>();
+	protected List<FeatureOp> initFeatures() {
+		List<FeatureOp> features = new ArrayList<>();
 		final double minimumSigma = 1;
 		final double maximumSigma = 16;
 		for (double sigma1 = minimumSigma; sigma1 <= maximumSigma; sigma1 *= 2)

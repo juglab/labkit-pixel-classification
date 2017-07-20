@@ -56,8 +56,8 @@ public class ClassifierTest {
 	}
 
 	private Classifier trainClassifier() {
-		Feature feature = new FeatureGroup(new IdendityFeature(), GaussFeature.group());
-		return Classifier.train(img, labeling, feature);
+		FeatureGroup features = new FeatureGroup(new IdendityFeature(), GaussFeature.group());
+		return Classifier.train(img, labeling, features);
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class ClassifierTest {
 
 	@Test
 	public void testGson() {
-		Feature feature = new FeatureGroup(GaussFeature.single(1.0), GaussFeature.single(1.0));
+		FeatureGroup feature = new FeatureGroup(GaussFeature.single(1.0), GaussFeature.single(1.0));
 		String serialized = Features.toJson(feature);
 		System.out.println(serialized);
 		FeatureGroup fg = Features.fromJson(serialized);
@@ -83,8 +83,8 @@ public class ClassifierTest {
 
 	@Test
 	public void testDifferentWekaClassifiers() {
-		Feature feature = new FeatureGroup(new IdendityFeature(), GaussFeature.group());
-		Classifier classifier = Classifier.train(img, labeling, feature, new RandomCommittee());
+		FeatureGroup features = new FeatureGroup(new IdendityFeature(), GaussFeature.group());
+		Classifier classifier = Classifier.train(img, labeling, features, new RandomCommittee());
 		RandomAccessibleInterval<IntType> result = classifier.apply(img);
 		checkExpected(result, classifier.classNames());
 	}

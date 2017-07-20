@@ -1,6 +1,5 @@
 package net.imglib2.algorithm.features.ops;
 
-import net.imglib2.algorithm.features.Feature;
 import net.imglib2.algorithm.features.Features;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -26,7 +25,7 @@ public class SphereShapedFeature extends AbstractGroupFeatureOp {
 
 	private static final List<Double> RADIUS = Arrays.asList(1.0, 2.0, 4.0, 8.0, 16.0);
 
-	protected List<Feature> initFeatures() {
+	protected List<FeatureOp> initFeatures() {
 		return RADIUS.stream()
 				.map(r -> Features.create(SingleSphereShapedFeature.class, r, operation))
 				.collect(Collectors.toList());

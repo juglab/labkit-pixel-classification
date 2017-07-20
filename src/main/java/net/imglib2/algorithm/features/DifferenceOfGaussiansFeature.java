@@ -1,5 +1,6 @@
 package net.imglib2.algorithm.features;
 
+import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.algorithm.features.ops.SingleDifferenceOfGaussiansFeature;
 
 /**
@@ -11,11 +12,11 @@ public class DifferenceOfGaussiansFeature {
 		// prevent from being instantiated
 	}
 
-	public static Feature group() {
+	public static FeatureOp group() {
 		return Features.create(net.imglib2.algorithm.features.ops.DifferenceOfGaussiansFeature.class);
 	}
 
-	public static SingleDifferenceOfGaussiansFeature single(double sigma1, double sigma2) {
+	public static FeatureOp single(double sigma1, double sigma2) {
 		return Features.create(SingleDifferenceOfGaussiansFeature.class, sigma1, sigma2);
 	}
 }
