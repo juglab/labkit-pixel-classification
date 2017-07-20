@@ -21,11 +21,7 @@ public class FeatureGroup implements Feature {
 
 	private final int count;
 
-	public FeatureGroup(FeatureOp... features) {
-		this(Arrays.asList(features));
-	}
-
-	public FeatureGroup(List<FeatureOp> features) {
+	FeatureGroup(List<FeatureOp> features) {
 		this.features = features.stream().flatMap(this::toStream).collect(Collectors.toList());
 		this.count = this.features.stream().mapToInt(Feature::count).sum();
 	}

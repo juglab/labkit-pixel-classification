@@ -93,7 +93,7 @@ public class BorderEffectsTest {
 	}
 
 	public void showPsnrs() {
-		Feature feature = new FeatureGroup(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(),
+		Feature feature = Features.group(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(),
 				GroupedFeatures.differenceOfGaussians(), GroupedFeatures.sobelGradient(), GroupedFeatures.lipschitz(50),
 				GroupedFeatures.min(), GroupedFeatures.max(), GroupedFeatures.mean(), GroupedFeatures.median(),
 				GroupedFeatures.variance());

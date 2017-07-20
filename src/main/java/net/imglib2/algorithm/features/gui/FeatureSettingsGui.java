@@ -1,8 +1,6 @@
 package net.imglib2.algorithm.features.gui;
 
 import net.imagej.ops.*;
-import net.imagej.ops.special.computer.AbstractUnaryComputerOp;
-import net.imagej.ops.special.computer.UnaryComputerOp;
 import net.imglib2.algorithm.features.FeatureGroup;
 
 import javax.swing.*;
@@ -15,6 +13,7 @@ import java.util.StringJoiner;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
+import net.imglib2.algorithm.features.Features;
 import net.imglib2.algorithm.features.RevampUtils;
 import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.miginfocom.swing.MigLayout;
@@ -187,7 +186,7 @@ public class FeatureSettingsGui {
 		}
 
 		public FeatureGroup features() {
-			return new FeatureGroup( items.stream().map(Holder::get).collect(Collectors.toList()) );
+			return Features.group( items.stream().map(Holder::get).collect(Collectors.toList()) );
 		}
 	}
 

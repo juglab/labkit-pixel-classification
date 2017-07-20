@@ -66,6 +66,14 @@ public class Features {
 		return (T) (Object) Functions.unary(RevampUtils.ops(), aClass, RandomAccessibleInterval.class, RandomAccessibleInterval.class, args);
 	}
 
+	public static FeatureGroup group(FeatureOp... features) {
+		return new FeatureGroup(Arrays.asList(features));
+	}
+
+	public static FeatureGroup group(List<FeatureOp> features) {
+		return new FeatureGroup(features);
+	}
+
 	static class FeatureGroupSerializer implements JsonSerializer<FeatureGroup> {
 
 		@Override
@@ -80,7 +88,7 @@ public class Features {
 		@Override
 		public FeatureGroup deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext json) throws JsonParseException {
 			Type collectionType = new TypeToken<List<FeatureOp>>(){}.getType();
-			return new FeatureGroup(json.<List<FeatureOp>>deserialize(jsonElement, collectionType));
+			return group(json.<List<FeatureOp>>deserialize(jsonElement, collectionType));
 		}
 	}
 

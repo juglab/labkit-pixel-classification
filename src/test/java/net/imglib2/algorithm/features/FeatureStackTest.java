@@ -8,7 +8,6 @@ import ij.process.ImageProcessor;
 import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.ops.FeatureOp;
-import net.imglib2.algorithm.features.ops.IdendityFeature;
 import net.imglib2.algorithm.morphology.Dilation;
 import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.img.ImagePlusAdapter;
@@ -46,7 +45,7 @@ public class FeatureStackTest {
 	}
 
 	public static RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureOp feature) {
-		return Features.applyOnImg(new FeatureGroup(SingleFeatures.identity(), feature), image);
+		return Features.applyOnImg(Features.group(SingleFeatures.identity(), feature), image);
 	}
 
 	@Test
@@ -81,7 +80,7 @@ public class FeatureStackTest {
 	}
 
 	private List<String> getAttributeLabels(FeatureOp feature) {
-		return new FeatureGroup(SingleFeatures.identity(), feature).attributeLabels();
+		return Features.group(SingleFeatures.identity(), feature).attributeLabels();
 	}
 
 	@Test
