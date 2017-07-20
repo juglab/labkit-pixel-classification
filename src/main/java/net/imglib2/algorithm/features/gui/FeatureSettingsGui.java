@@ -87,18 +87,20 @@ public class FeatureSettingsGui {
 
 	private void addPressed() {
 		List<PluginInfo<FeatureOp>> pi = context.service(PluginService.class).getPluginsOfType(FeatureOp.class);
-		List<Class<? extends FeatureOp>> choices = pi.stream().map(x -> x.getPluginClass()).collect(Collectors.toList());
+		List<Class<? extends FeatureOp>> choices = pi.stream().map(PluginInfo::getPluginClass).collect(Collectors.toList());
 
-		Class<? extends Op> choosen = (Class<? extends Op>) JOptionPane.showInputDialog(
+		Class<? extends FeatureOp> choosen = (Class<? extends FeatureOp>) JOptionPane.showInputDialog(
 				frame, "Select new feature", "Add Feature",
 				JOptionPane.PLAIN_MESSAGE, null, choices.toArray(), choices.get(0)
 		);
 		model.add(new Holder(newInstance(choosen)));
 	}
 
-	private <T> T newInstance(Class<T> tClass) {
+	private <T extends FeatureOp> T newInstance(Class<T> tClass) {
 		try {
-			return tClass.newInstance();
+			T t = tClass.newInstance();
+			t.initialize();
+			return t;
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -117,7 +119,7 @@ public class FeatureSettingsGui {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return model.features();
 	}
 
 	public static void main(String... args) {
@@ -150,6 +152,10 @@ public class FeatureSettingsGui {
 				joiner.add(input.getName() + " = " + input.getValue(module));
 			return value.getClass().getSimpleName() + " " + joiner;
 		}
+
+		public FeatureOp get() {
+			return (FeatureOp) value;
+		}
 	}
 
 	static class ListModel extends AbstractListModel<Holder> {
@@ -178,6 +184,10 @@ public class FeatureSettingsGui {
 
 		public void update() {
 			fireContentsChanged(items, 0, items.size());
+		}
+
+		public FeatureGroup features() {
+			return new FeatureGroup( items.stream().map(Holder::get).collect(Collectors.toList()) );
 		}
 	}
 
