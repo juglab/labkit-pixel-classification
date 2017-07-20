@@ -46,7 +46,7 @@ public class FeatureStackTest {
 	}
 
 	public static RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureOp feature) {
-		return Features.applyOnImg(new FeatureGroup(Features.create(IdendityFeature.class), feature), image);
+		return Features.applyOnImg(new FeatureGroup(SingleFeatures.identity(), feature), image);
 	}
 
 	@Test
@@ -81,7 +81,7 @@ public class FeatureStackTest {
 	}
 
 	private List<String> getAttributeLabels(FeatureOp feature) {
-		return new FeatureGroup(new IdendityFeature(), feature).attributeLabels();
+		return new FeatureGroup(SingleFeatures.identity(), feature).attributeLabels();
 	}
 
 	@Test

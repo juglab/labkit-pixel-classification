@@ -11,6 +11,10 @@ public class SingleFeatures {
 		// prevent from being instantiated
 	}
 
+	public static FeatureOp identity() {
+		return Features.create(IdendityFeature.class);
+	}
+
 	public static FeatureOp gabor(double sigma, double gamma, double psi, double frequency, int nAngles) {
 		boolean legacyNormalize = false;
 		return Features.create(SingleGaborFeature.class, sigma, gamma, psi, frequency, nAngles, legacyNormalize);
@@ -44,5 +48,4 @@ public class SingleFeatures {
 	public static FeatureOp differenceOfGaussians(double sigma1, double sigma2) {
 		return Features.create(SingleDifferenceOfGaussiansFeature.class, sigma1, sigma2);
 	}
-
 }
