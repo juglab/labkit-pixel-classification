@@ -155,14 +155,6 @@ public class FeatureStackTest {
 		testFeature(30, FeatureStack.GABOR, GaborFeature.legacy());
 	}
 
-	@Test
-	public void testNormalize() {
-		Img<FloatType> expected = ImageJFunctions.wrapFloat(new ImagePlus("", trainableSegmentation.utils.Utils.normalize(bridgeImage.getStack())));
-		Img<FloatType> result = Utils.copy(bridgeImg);
-		GaborFeature.normalize(result);
-		Utils.assertImagesEqual(expected, result);
-	}
-
 	private static RandomAccessibleInterval<FloatType> generateSingleFeature(ImagePlus image, int feature) {
 		return generateFeatures(image, getEnabledFeatures(feature));
 	}

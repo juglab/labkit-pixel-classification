@@ -25,23 +25,13 @@ public class GaborFeature {
 	}
 
 	public static Feature legacy() {
-		net.imglib2.algorithm.features.ops.GaborFeature feature = Features.create(net.imglib2.algorithm.features.ops.GaborFeature.class);
-		feature.setPostProcessSlice(GaborFeature::normalize);
-		return feature;
+		boolean legazyNormalize = true;
+		return Features.create(net.imglib2.algorithm.features.ops.GaborFeature.class, legazyNormalize);
 	}
 
 	public static Feature singleLegacy(double sigma, double gamma, double psi, double frequency, int nAngles) {
-		SingleGaborFeature gaborFeature = Features.create(SingleGaborFeature.class, sigma, gamma, psi, frequency, nAngles);
-		gaborFeature.setPostProcessSlice(GaborFeature::normalize);
-		return gaborFeature;
-	}
-
-	public static void normalize(RandomAccessibleInterval<FloatType> image2) {
-		DoubleType mean = RevampUtils.ops().stats().mean(Views.iterable(image2));
-		DoubleType stdDev = RevampUtils.ops().stats().stdDev(Views.iterable(image2));
-		float mean2 = (float) mean.get();
-		float invStdDev = (stdDev.get() == 0) ? 1 : (float) (1 / stdDev.get());
-		Views.iterable(image2).forEach(value -> value.set((value.get() - mean2) * invStdDev));
+		boolean legazyNormalize = true;
+		return Features.create(SingleGaborFeature.class, sigma, gamma, psi, frequency, nAngles, legazyNormalize);
 	}
 
 }

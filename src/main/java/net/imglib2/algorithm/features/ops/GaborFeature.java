@@ -4,6 +4,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.Feature;
 import net.imglib2.algorithm.features.Features;
 import net.imglib2.type.numeric.real.FloatType;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import java.util.ArrayList;
@@ -15,6 +16,9 @@ import java.util.function.Consumer;
  */
 @Plugin(type = FeatureOp.class)
 public class GaborFeature extends AbstractGroupFeatureOp {
+
+	@Parameter
+	private boolean legacyNormalize = false;
 
 	@Override
 	protected List<Feature> initFeatures() {
@@ -40,12 +44,6 @@ public class GaborFeature extends AbstractGroupFeatureOp {
 	}
 
 	private Feature createGaborFeature(double v, double gamma, double psi, int frequency, int nAngles) {
-		return Features.create(SingleGaborFeature.class, v, gamma, psi, frequency, nAngles);
-	}
-
-	// FIXME add a parameter legacy to control this behavoir
-	public void setPostProcessSlice(Consumer<RandomAccessibleInterval<FloatType>> normalize) {
-		for(Feature feature : featureGroup.features())
-			((SingleGaborFeature) feature).setPostProcessSlice(normalize);
+		return Features.create(SingleGaborFeature.class, v, gamma, psi, frequency, nAngles, legacyNormalize);
 	}
 }

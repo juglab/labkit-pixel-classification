@@ -5,6 +5,7 @@ import net.imglib2.algorithm.features.RevampUtils;
 import net.imglib2.algorithm.fft2.FFTConvolution;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.GenericComposite;
@@ -38,13 +39,10 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 	@Parameter
 	private int nAngles;
 
+	@Parameter
+	private boolean legacyNormalize = false;
+
 	private List<Img<FloatType>> kernels;
-
-	private Consumer<RandomAccessibleInterval<FloatType>> postProcessSlice = x -> {};
-
-	public void setPostProcessSlice(Consumer<RandomAccessibleInterval<FloatType>> postProcessSlice) {
-		this.postProcessSlice = postProcessSlice;
-	}
 
 	@Override
 	public void initialize() {
@@ -143,7 +141,8 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 			fftConvolution.setKernel(kernel);
 			fftConvolution.setOutput(slice);
 			fftConvolution.convolve();
-			postProcessSlice.accept(slice);
+			if(legacyNormalize)
+				normalize(slice);
 		}
 
 		maxAndMinProjection(stack, max, min);
@@ -174,4 +173,11 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 		return min;
 	}
 
+	public static void normalize(RandomAccessibleInterval<FloatType> image2) {
+		DoubleType mean = RevampUtils.ops().stats().mean(Views.iterable(image2));
+		DoubleType stdDev = RevampUtils.ops().stats().stdDev(Views.iterable(image2));
+		float mean2 = (float) mean.get();
+		float invStdDev = (stdDev.get() == 0) ? 1 : (float) (1 / stdDev.get());
+		Views.iterable(image2).forEach(value -> value.set((value.get() - mean2) * invStdDev));
+	}
 }
