@@ -28,7 +28,7 @@ public class GradientFeatureTest {
 
 		// process
 		Img<FloatType> result = ops.create().img(interval, new FloatType());
-		GradientFeature.single(0.0).apply(in, Collections.singletonList(result));
+		SingleFeatures.gradient(0.0).apply(in, Collections.singletonList(result));
 
 		// test
 		Img<FloatType> expected = ops.create().img(interval, new FloatType());

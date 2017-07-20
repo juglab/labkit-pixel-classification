@@ -41,7 +41,7 @@ public class FeatureStackTest {
 
 	public static void main(String... args) {
 		Img<FloatType> img = ImageJFunctions.convertFloat(squarePictureWithCenteredDot());
-		RandomAccessibleInterval<FloatType> result = Features.applyOnImg(LipschitzFeature.group(0), img);
+		RandomAccessibleInterval<FloatType> result = Features.applyOnImg(GroupedFeatures.lipschitz(0), img);
 		ImageJFunctions.show(result);
 	}
 
@@ -62,7 +62,7 @@ public class FeatureStackTest {
 
 	@Test
 	public void testGaussStack() {
-		testFeature(40, FeatureStack.GAUSSIAN, GaussFeature.group());
+		testFeature(40, FeatureStack.GAUSSIAN, GroupedFeatures.gauss());
 	}
 
 	private void testFeature(float expectedPsnr, int oldFeatureId, FeatureOp newFeature) {
@@ -86,22 +86,22 @@ public class FeatureStackTest {
 
 	@Test
 	public void testHessianStack() {
-		testFeature(40, FeatureStack.HESSIAN, HessianFeature.group());
+		testFeature(40, FeatureStack.HESSIAN, GroupedFeatures.hessian());
 	}
 
 	@Test
 	public void testDifferenceOfGaussian() {
-		testFeature(40, FeatureStack.DOG, DifferenceOfGaussiansFeature.group());
+		testFeature(40, FeatureStack.DOG, GroupedFeatures.differenceOfGaussians());
 	}
 
 	@Test
 	public void testSobel() {
-		testFeature(40, FeatureStack.SOBEL, GradientFeature.sobelGroup());
+		testFeature(40, FeatureStack.SOBEL, GroupedFeatures.sobelGradient());
 	}
 
 	@Test
 	public void testLipschitz() {
-		testFeature(40, FeatureStack.LIPSCHITZ, LipschitzFeature.group(0));
+		testFeature(40, FeatureStack.LIPSCHITZ, GroupedFeatures.lipschitz(0));
 	}
 
 	/** Show that there is a difference between HyperSphereShape and shape used by FilterRank. */
@@ -128,32 +128,32 @@ public class FeatureStackTest {
 
 	@Test
 	public void testMaximum() {
-		testFeature(27, FeatureStack.MAXIMUM, ShapedFeature.max());
+		testFeature(27, FeatureStack.MAXIMUM, GroupedFeatures.max());
 	}
 
 	@Test
 	public void testMinimum() {
-		testFeature(30, FeatureStack.MINIMUM, ShapedFeature.min());
+		testFeature(30, FeatureStack.MINIMUM, GroupedFeatures.min());
 	}
 
 	@Test
 	public void testMean() {
-		testFeature(40, FeatureStack.MEAN, ShapedFeature.mean());
+		testFeature(40, FeatureStack.MEAN, GroupedFeatures.mean());
 	}
 
 	@Test
 	public void testVariance() {
-		testFeature(30, FeatureStack.VARIANCE, ShapedFeature.variance());
+		testFeature(30, FeatureStack.VARIANCE, GroupedFeatures.variance());
 	}
 
 	@Test
 	public void testMedian() {
-		testFeature(30, FeatureStack.MEDIAN, ShapedFeature.median());
+		testFeature(30, FeatureStack.MEDIAN, GroupedFeatures.median());
 	}
 
 	@Test
 	public void testGabor() {
-		testFeature(30, FeatureStack.GABOR, GaborFeature.legacy());
+		testFeature(30, FeatureStack.GABOR, GroupedFeatures.legacyGabor());
 	}
 
 	private static RandomAccessibleInterval<FloatType> generateSingleFeature(ImagePlus image, int feature) {

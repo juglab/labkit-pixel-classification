@@ -26,46 +26,46 @@ public class BorderEffectsTest {
 
 	@Test
 	public void testGauss() {
-		testFeature(GaussFeature.group());
+		testFeature(GroupedFeatures.gauss());
 	}
 
 	@Test
 	public void testHessian() {
-		testFeature(HessianFeature.group());
+		testFeature(GroupedFeatures.hessian());
 	}
 
 	@Test
 	public void testGabor() {
-		testFeature(GaborFeature.group());
+		testFeature(GroupedFeatures.gabor());
 	}
 
 	@Test
 	public void testDifferenceOfGaussians() {
-		testFeature(DifferenceOfGaussiansFeature.group());
+		testFeature(GroupedFeatures.differenceOfGaussians());
 	}
 
 	@Test
-	public void testGradient() { testFeature(GradientFeature.sobelGroup()); }
+	public void testGradient() { testFeature(GroupedFeatures.sobelGradient()); }
 
 	@Test
 	public void testLipschitz() {
-		testFeature(LipschitzFeature.group(50));
+		testFeature(GroupedFeatures.lipschitz(50));
 	}
 
 	@Test
-	public void testMin() { testFeature(ShapedFeature.min()); }
+	public void testMin() { testFeature(GroupedFeatures.min()); }
 
 	@Test
-	public void testMax() { testFeature(ShapedFeature.max()); }
+	public void testMax() { testFeature(GroupedFeatures.max()); }
 
 	@Test
-	public void testMean() { testFeature(ShapedFeature.mean()); }
+	public void testMean() { testFeature(GroupedFeatures.mean()); }
 
 	@Test
-	public void testMedian() { testFeature(ShapedFeature.median()); }
+	public void testMedian() { testFeature(GroupedFeatures.median()); }
 
 	@Test
-	public void testVariance() { testFeature(ShapedFeature.variance()); }
+	public void testVariance() { testFeature(GroupedFeatures.variance()); }
 
 	public void testFeature(Feature feature) {
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(feature);
@@ -93,10 +93,10 @@ public class BorderEffectsTest {
 	}
 
 	public void showPsnrs() {
-		Feature feature = new FeatureGroup(GaussFeature.group(), HessianFeature.group(), GaussFeature.group(),
-				DifferenceOfGaussiansFeature.group(), GradientFeature.sobelGroup(), LipschitzFeature.group(50),
-				ShapedFeature.min(), ShapedFeature.max(), ShapedFeature.mean(), ShapedFeature.median(),
-				ShapedFeature.variance());
+		Feature feature = new FeatureGroup(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(),
+				GroupedFeatures.differenceOfGaussians(), GroupedFeatures.sobelGradient(), GroupedFeatures.lipschitz(50),
+				GroupedFeatures.min(), GroupedFeatures.max(), GroupedFeatures.mean(), GroupedFeatures.median(),
+				GroupedFeatures.variance());
 		RandomAccessibleInterval<FloatType> allResults = calculateResult(feature);
 		RandomAccessibleInterval<FloatType> allExpected = calculateExpected(feature);
 		int axis = image.numDimensions();
@@ -110,6 +110,6 @@ public class BorderEffectsTest {
 	}
 
 	public static void mainDisabled(String... args) {
-		new BorderEffectsTest().showDifference(GaborFeature.group());
+		new BorderEffectsTest().showDifference(GroupedFeatures.gabor());
 	}
 }
