@@ -22,7 +22,7 @@ public class SingleFeatures {
 	}
 
 	public static FeatureOp gauss(double sigma) {
-		return Features.create(GaussFeatureOp.class, sigma);
+		return Features.create(SingleGaussFeature.class, sigma);
 	}
 
 	public static FeatureOp sobelGradient(double sigma) {

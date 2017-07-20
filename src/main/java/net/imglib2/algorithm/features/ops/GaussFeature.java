@@ -10,6 +10,6 @@ public class GaussFeature extends AbstractSigmaGroupFeatureOp {
 
 	@Override
 	protected Class<? extends FeatureOp> getSingleFeatureClass() {
-		return GaussFeatureOp.class;
+		return SingleGaussFeature.class;
 	}
 }
