@@ -57,8 +57,8 @@ public class Features {
 
 	public static GsonBuilder gsonModifiers(GsonBuilder builder) {
 		return builder
-				.registerTypeAdapter(Feature.class, new OpSerializer())
-				.registerTypeAdapter(Feature.class, new OpDeserializer(RevampUtils.ops()))
+				.registerTypeAdapter(FeatureOp.class, new OpSerializer())
+				.registerTypeAdapter(FeatureOp.class, new OpDeserializer(RevampUtils.ops()))
 				.registerTypeAdapter(FeatureGroup.class, new FeatureGroupSerializer())
 				.registerTypeAdapter(FeatureGroup.class, new FeatureGroupDeserializer());
 	}
@@ -71,7 +71,8 @@ public class Features {
 
 		@Override
 		public JsonElement serialize(FeatureGroup f, Type type, JsonSerializationContext json) {
-			Type collectionType = new TypeToken<List<Feature>>(){}.getType();
+			// FIXME make FeatureGroup only contain FeatureOp
+			Type collectionType = new TypeToken<List<FeatureOp>>(){}.getType();
 			return json.serialize(f.features(), collectionType);
 		}
 	}
@@ -80,15 +81,15 @@ public class Features {
 
 		@Override
 		public FeatureGroup deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext json) throws JsonParseException {
-			Type collectionType = new TypeToken<List<Feature>>(){}.getType();
+			Type collectionType = new TypeToken<List<FeatureOp>>(){}.getType();
 			return new FeatureGroup(json.<List<Feature>>deserialize(jsonElement, collectionType));
 		}
 	}
 
-	static class OpSerializer implements JsonSerializer<Op> {
+	static class OpSerializer implements JsonSerializer<FeatureOp> {
 
 		@Override
-		public JsonElement serialize(Op op, Type type, JsonSerializationContext jsonSerializationContext) {
+		public JsonElement serialize(FeatureOp op, Type type, JsonSerializationContext jsonSerializationContext) {
 			CommandInfo commandInfo = new OpInfo(op.getClass()).cInfo();
 			Module module = commandInfo.createModule(op);
 			JsonObject jsonObject = new JsonObject();
@@ -102,7 +103,7 @@ public class Features {
 		}
 	}
 
-	static class OpDeserializer implements JsonDeserializer<Op> {
+	static class OpDeserializer implements JsonDeserializer<FeatureOp> {
 
 		private final OpService opService;
 
@@ -111,17 +112,18 @@ public class Features {
 		}
 
 		@Override
-		public Op deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+		public FeatureOp deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			JsonObject o = jsonElement.getAsJsonObject();
 			String className = o.get("class").getAsString();
 			o.remove("class");
 			try {
 				@SuppressWarnings("unchecked")
-				Class<? extends Op> type1 = (Class<? extends Op>) Class.forName(className);
+				Class<? extends FeatureOp> type1 = (Class<? extends FeatureOp>) Class.forName(className);
 				OpInfo opInfo = new OpInfo(type1);
-				Op op = jsonDeserializationContext.deserialize(o, type1);
+				FeatureOp op = jsonDeserializationContext.deserialize(o, type1);
 				op.setEnvironment(opService);
 				opService.getContext().inject(op);
+				op.initialize();
 				return op;
 			} catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);

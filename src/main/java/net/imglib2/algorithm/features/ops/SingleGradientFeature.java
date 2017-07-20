@@ -22,7 +22,7 @@ import java.util.List;
  * Created by arzt on 19.07.17.
  */
 @Plugin(type = FeatureOp.class)
-public class SignleGradientFeature extends AbstractFeatureOp {
+public class SingleGradientFeature extends AbstractFeatureOp {
 
 	@Parameter
 	private double sigma;

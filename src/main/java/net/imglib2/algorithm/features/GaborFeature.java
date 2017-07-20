@@ -7,10 +7,6 @@ import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
 /**
  * @author Matthias Arzt
  */
@@ -21,47 +17,23 @@ public class GaborFeature {
 	}
 
 	public static Feature group() {
-		return new FeatureGroup(initFeatures(x -> {}));
+		return Features.create(net.imglib2.algorithm.features.ops.GaborFeature.class);
 	}
 
 	public static Feature single(double sigma, double gamma, double psi, double frequency, int nAngles) {
-		return createGaborFeature(sigma, gamma, psi, frequency, nAngles, x -> {});
+		return Features.create(SingleGaborFeature.class, sigma, gamma, psi, frequency, nAngles);
 	}
 
 	public static Feature legacy() {
-		return new FeatureGroup(initFeatures(GaborFeature::normalize));
+		net.imglib2.algorithm.features.ops.GaborFeature feature = Features.create(net.imglib2.algorithm.features.ops.GaborFeature.class);
+		feature.setPostProcessSlice(GaborFeature::normalize);
+		return feature;
 	}
 
 	public static Feature singleLegacy(double sigma, double gamma, double psi, double frequency, int nAngles) {
-		return createGaborFeature(sigma, gamma, psi, frequency, nAngles, GaborFeature::normalize);
-	}
-
-	private static Feature createGaborFeature(double sigma, double gamma, double psi, double frequency, int nAngles, Consumer<RandomAccessibleInterval<FloatType>> postProcessSlice) {
 		SingleGaborFeature gaborFeature = Features.create(SingleGaborFeature.class, sigma, gamma, psi, frequency, nAngles);
-		gaborFeature.setPostProcessSlice(postProcessSlice);
+		gaborFeature.setPostProcessSlice(GaborFeature::normalize);
 		return gaborFeature;
-	}
-
-	private static List<Feature> initFeatures(Consumer<RandomAccessibleInterval<FloatType>> postProcessSlice) {
-		int nAngles = 10;
-		List<Feature> features = new ArrayList<>();
-		for(int i=0; i < 2; i++)
-			for(double gamma = 1; gamma >= 0.25; gamma /= 2)
-				for(int frequency = 2; frequency<3; frequency ++)
-				{
-					final double psi = Math.PI / 2 * i;
-					features.add(createGaborFeature(1.0, gamma, psi, frequency, nAngles, postProcessSlice ));
-				}
-		// elongated filters in x- axis (sigma = [2.0 - 4.0], gamma = [1.0 - 2.0])
-		for(int i=0; i < 2; i++)
-			for(double sigma = 2.0; sigma <= 4.0; sigma *= 2)
-				for(double gamma = 1.0; gamma <= 2.0; gamma *= 2)
-					for(int frequency = 2; frequency<=3; frequency ++)
-					{
-						final double psi = Math.PI / 2 * i;
-						features.add(createGaborFeature(sigma, gamma, psi, frequency, nAngles, postProcessSlice ));
-					}
-		return features;
 	}
 
 	public static void normalize(RandomAccessibleInterval<FloatType> image2) {

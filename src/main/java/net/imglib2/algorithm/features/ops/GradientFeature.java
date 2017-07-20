@@ -6,7 +6,7 @@ import org.scijava.plugin.Plugin;
  * @author Matthias Arzt
  */
 @Plugin(type = FeatureOp.class)
-public class SobelGradientFeature extends AbstractSigmaGroupFeatureOp {
+public class GradientFeature extends AbstractSigmaGroupFeatureOp {
 
 	@Override
 	protected double[] initSigmas() {
@@ -15,6 +15,6 @@ public class SobelGradientFeature extends AbstractSigmaGroupFeatureOp {
 
 	@Override
 	protected Class<? extends FeatureOp> getSingleFeatureClass() {
-		return SingleSobelGradientFeature.class;
+		return SingleGradientFeature.class;
 	}
 }
