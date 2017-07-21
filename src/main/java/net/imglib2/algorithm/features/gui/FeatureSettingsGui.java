@@ -1,6 +1,7 @@
 package net.imglib2.algorithm.features.gui;
 
 import net.imagej.ops.*;
+import net.imglib2.algorithm.features.Feature;
 import net.imglib2.algorithm.features.FeatureGroup;
 
 import javax.swing.*;
@@ -49,12 +50,28 @@ public class FeatureSettingsGui {
 		list.setModel(model);
 		content.setLayout(new MigLayout("insets 0", "[grow]","[grow][]"));
 		content.add(new JScrollPane(list), "split 2, grow");
+		JPopupMenu menu = initMenu();
+		JButton addButton = new JButton("add");
+		addButton.addActionListener(a ->
+			menu.show(addButton, 0, addButton.getHeight()));
 		JPanel sidePanel = new JPanel();
 		sidePanel.setLayout(new MigLayout("insets 0", "[]","[][][][grow]"));
-		sidePanel.add(addButton("add", this::addPressed), "grow, wrap");
+		sidePanel.add(addButton, "grow, wrap");
 		sidePanel.add(addButton("remove", this::removePressed), "grow, wrap");
 		sidePanel.add(addButton("edit", this::editPressed), "grow, wrap");
 		content.add(sidePanel, "top, wrap");
+	}
+
+	private JPopupMenu initMenu() {
+		JPopupMenu menu = new JPopupMenu();
+		List<PluginInfo<FeatureOp>> pi = context.service(PluginService.class).getPluginsOfType(FeatureOp.class);
+		List<Class<? extends FeatureOp>> choices = pi.stream().map(PluginInfo::getPluginClass).collect(Collectors.toList());
+		for(Class<? extends FeatureOp> choice : choices) {
+			JMenuItem item = new JMenuItem(choice.getSimpleName());
+			item.addActionListener(l -> addPressed(choice));
+			menu.add(item);
+		}
+		return menu;
 	}
 
 	private void removePressed() {
@@ -73,17 +90,8 @@ public class FeatureSettingsGui {
 		model.update();
 	}
 
-	private void addPressed() {
-		List<PluginInfo<FeatureOp>> pi = context.service(PluginService.class).getPluginsOfType(FeatureOp.class);
-		List<Class<? extends FeatureOp>> choices = pi.stream().map(PluginInfo::getPluginClass).collect(Collectors.toList());
-
-		Class<? extends FeatureOp> choosen = (Class<? extends FeatureOp>) JOptionPane.showInputDialog(
-				content, "Select new feature", "Add Feature",
-				JOptionPane.PLAIN_MESSAGE, null, choices.toArray(), choices.get(0)
-		);
-		if(choosen == null) return;
-
-		model.add(new Holder(newInstance(choosen)));
+	private void addPressed(Class<? extends FeatureOp> featureClass) {
+		model.add(new Holder(newInstance(featureClass)));
 	}
 
 	private <T extends FeatureOp> T newInstance(Class<T> tClass) {
