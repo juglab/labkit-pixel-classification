@@ -4,13 +4,9 @@ import net.imagej.ops.*;
 import net.imglib2.algorithm.features.FeatureGroup;
 
 import javax.swing.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.StringJoiner;
-import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
 import net.imglib2.algorithm.features.Features;
@@ -35,9 +31,7 @@ import org.scijava.widget.AbstractInputHarvester;
  */
 public class FeatureSettingsGui {
 
-	private final JFrame frame = new JFrame();
-
-	private final Semaphore lock = new Semaphore(0);
+	private final JPanel content = new JPanel();
 
 	private final ListModel model = new ListModel();
 
@@ -53,19 +47,14 @@ public class FeatureSettingsGui {
 
 	private void initGui() {
 		list.setModel(model);
-		frame.setLayout(new MigLayout("", "[grow]","[grow][]"));
-		frame.add(new JScrollPane(list), "grow, wrap");
-		frame.add(addButton("add", this::addPressed), "split 3");
-		frame.add(addButton("remove", this::removePressed));
-		frame.add(addButton("edit", this::editPressed));
-		frame.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				lock.release();
-			}
-		});
-		frame.setSize(100,100);
-		frame.setVisible(true);
+		content.setLayout(new MigLayout("insets 0", "[grow]","[grow][]"));
+		content.add(new JScrollPane(list), "split 2, grow");
+		JPanel sidePanel = new JPanel();
+		sidePanel.setLayout(new MigLayout("insets 0", "[]","[][][][grow]"));
+		sidePanel.add(addButton("add", this::addPressed), "grow, wrap");
+		sidePanel.add(addButton("remove", this::removePressed), "grow, wrap");
+		sidePanel.add(addButton("edit", this::editPressed), "grow, wrap");
+		content.add(sidePanel, "top, wrap");
 	}
 
 	private void removePressed() {
@@ -89,9 +78,11 @@ public class FeatureSettingsGui {
 		List<Class<? extends FeatureOp>> choices = pi.stream().map(PluginInfo::getPluginClass).collect(Collectors.toList());
 
 		Class<? extends FeatureOp> choosen = (Class<? extends FeatureOp>) JOptionPane.showInputDialog(
-				frame, "Select new feature", "Add Feature",
+				content, "Select new feature", "Add Feature",
 				JOptionPane.PLAIN_MESSAGE, null, choices.toArray(), choices.get(0)
 		);
+		if(choosen == null) return;
+
 		model.add(new Holder(newInstance(choosen)));
 	}
 
@@ -111,19 +102,38 @@ public class FeatureSettingsGui {
 		return button;
 	}
 
-	public FeatureGroup show() {
-		frame.setVisible(true);
-		try {
-			lock.acquire();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		return model.features();
+	public static Optional<FeatureGroup> show() {
+		FeatureSettingsGui featureSettingsGui = new FeatureSettingsGui();
+		return featureSettingsGui.showInternal();
+	}
+
+	private Optional<FeatureGroup> showInternal() {
+		boolean ok = showResizeableOkCancelDialog("Select Pixel Features", content);
+		if(ok)
+			return Optional.of(model.features());
+		else
+			return Optional.empty();
+	}
+
+	public static boolean showResizeableOkCancelDialog(String title, JPanel content) {
+		JDialog dialog = new JDialog((Frame) null, title, true);
+		JOptionPane optionPane = new JOptionPane(content, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+		dialog.setContentPane(optionPane);
+		dialog.setResizable(true);
+		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		optionPane.addPropertyChangeListener( e -> {
+				String prop = e.getPropertyName();
+				if (dialog.isVisible() && (e.getSource() == optionPane) && (JOptionPane.VALUE_PROPERTY.equals(prop)))
+					dialog.dispose();
+		});
+		dialog.pack();
+		dialog.setVisible(true);
+		return optionPane.getValue().equals(JOptionPane.OK_OPTION);
 	}
 
 	public static void main(String... args) {
-		new FeatureSettingsGui().show();
-		System.out.print("finished");
+		System.out.println(FeatureSettingsGui.show());
+		System.out.println("finished");
 	}
 
 	private static final List<String> exclude = Arrays.asList("out", "in");
