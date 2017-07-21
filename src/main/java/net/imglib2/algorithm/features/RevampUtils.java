@@ -2,8 +2,10 @@ package net.imglib2.algorithm.features;
 
 import net.imagej.ops.OpService;
 import net.imglib2.*;
+import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
+import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
@@ -18,7 +20,9 @@ import org.scijava.Context;
 import org.scijava.script.ScriptService;
 
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 /**
@@ -86,12 +90,49 @@ public class RevampUtils {
 		return blurred;
 	}
 
-	public static RandomAccessibleInterval<FloatType> deriveX(RandomAccessibleInterval<FloatType> in) {
-		return convolve(in, SOBEL_FILTER_X);
+	public static RandomAccessibleInterval<FloatType> gauss(RandomAccessible<FloatType> input, Interval outputInterval, double[] sigmas) {
+		RandomAccessibleInterval<FloatType> blurred = RevampUtils.ops().create().img(outputInterval, new FloatType());
+		try {
+			Gauss3.gauss(sigmas, input, blurred, Executors.newSingleThreadExecutor());
+		} catch (IncompatibleTypeException e) {
+			throw new RuntimeException(e);
+		}
+		return blurred;
 	}
 
-	public static RandomAccessibleInterval<FloatType> deriveY(RandomAccessibleInterval<FloatType> in) {
-		return convolve(in, SOBEL_FILTER_Y);
+	public static Interval gaussRequiredInput(Interval outputInterval, double[] sigmas) {
+		long[] border = IntStream.of(Gauss3.halfkernelsizes(sigmas))
+				.mapToLong(x -> x - 1)
+				.toArray();
+		return Intervals.expand(outputInterval, border);
+	}
+
+	public static RandomAccessibleInterval<FloatType> deriveX(RandomAccessible<FloatType> input, Interval outputInterval) {
+		if(outputInterval.numDimensions() != 2)
+			throw new IllegalArgumentException("Only two dimensional images supported.");
+		RandomAccessibleInterval<FloatType> output = RevampUtils.ops().create().img(outputInterval, new FloatType());
+		ops().filter().convolve(output, input, SOBEL_FILTER_X);
+		return output;
+	}
+
+	public static Interval deriveXRequiredInput(Interval output) {
+		if(output.numDimensions() != 2)
+			throw new IllegalArgumentException("Only two dimensional images supported.");
+		return Intervals.expand(output, new long[]{1,1});
+	}
+
+	public static RandomAccessibleInterval<FloatType> deriveY(RandomAccessible<FloatType> input, Interval outputInterval) {
+		if(outputInterval.numDimensions() != 2)
+			throw new IllegalArgumentException("Only two dimensional images supported.");
+		RandomAccessibleInterval<FloatType> output = RevampUtils.ops().create().img(outputInterval, new FloatType());
+		ops().filter().convolve(output, input, SOBEL_FILTER_Y);
+		return output;
+	}
+
+	public static Interval deriveYRequiredInput(Interval output) {
+		if(output.numDimensions() != 2)
+			throw new IllegalArgumentException("Only two dimensional images supported.");
+		return Intervals.expand(output, new long[]{1,1});
 	}
 
 	public static RandomAccessibleInterval<FloatType> convolve(RandomAccessibleInterval<FloatType> blurred, RandomAccessibleInterval<FloatType> kernel) {
@@ -173,4 +214,5 @@ public class RevampUtils {
 	public static <T> List<T> filterForClass(Class<T> tClass, List<?> in) {
 		return in.stream().filter(tClass::isInstance).map(tClass::cast).collect(Collectors.toList());
 	}
+
 }

@@ -43,11 +43,13 @@ public class SingleSobelGradientFeature extends AbstractFeatureOp {
 	private void calculate(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {
 		double[] sigmas = {0.4 * sigma, 0.4 * sigma};
 
-		Interval expandedInterval = Intervals.expand(out, new long[]{40, 40}); // FIXME how much do we need to extend?
+		Interval dxInputInterval = RevampUtils.deriveXRequiredInput(out);
+		Interval dyInputInterval = RevampUtils.deriveYRequiredInput(out);
+		Interval blurredInterval = Intervals.union(dxInputInterval, dyInputInterval);
 
-		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(Views.interval(in, expandedInterval), sigmas);
-		RandomAccessible<FloatType> dx = RevampUtils.deriveX(blurred);
-		RandomAccessible<FloatType> dy = RevampUtils.deriveY(blurred);
+		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(in, blurredInterval, sigmas);
+		RandomAccessibleInterval<FloatType> dx = RevampUtils.deriveX(blurred, out);
+		RandomAccessibleInterval<FloatType> dy = RevampUtils.deriveY(blurred, out);
 		RandomAccessible<Pair<FloatType, FloatType>> derivatives = Views.pair(dx, dy);
 		mapToFloat(derivatives, out, input -> norm2(input.getA().get(), input.getB().get()));
 	}

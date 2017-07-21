@@ -60,15 +60,18 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 	private static void calculateHessianOnChannel(RandomAccessible<FloatType> image, RandomAccessibleInterval<FloatType> out, double sigma) {
 		double[] sigmas = {0.4 * sigma, 0.4 * sigma};
 
-		Interval interval = RevampUtils.removeLastDimension(out);
-		Interval expandedInterval = Intervals.expand(interval, new long[]{40, 40}); // FIXME how much do we need to extend?
+		Interval secondDerivativeInterval = RevampUtils.removeLastDimension(out);
+		Interval firstDerivativeInterval = Intervals.union(
+				RevampUtils.deriveXRequiredInput(secondDerivativeInterval), RevampUtils.deriveYRequiredInput(secondDerivativeInterval));
+		Interval blurredInterval = Intervals.union(
+				RevampUtils.deriveXRequiredInput(firstDerivativeInterval), RevampUtils.deriveYRequiredInput(firstDerivativeInterval));
 
-		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(Views.interval(image, expandedInterval), sigmas);
-		RandomAccessibleInterval<FloatType> dx = RevampUtils.deriveX(blurred);
-		RandomAccessibleInterval<FloatType> dy = RevampUtils.deriveY(blurred);
-		RandomAccess<FloatType> dxx = RevampUtils.deriveX(dx).randomAccess();
-		RandomAccess<FloatType> dxy = RevampUtils.deriveY(dx).randomAccess();
-		RandomAccess<FloatType> dyy = RevampUtils.deriveY(dy).randomAccess();
+		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(image, blurredInterval, sigmas);
+		RandomAccessibleInterval<FloatType> dx = RevampUtils.deriveX(blurred, firstDerivativeInterval);
+		RandomAccessibleInterval<FloatType> dy = RevampUtils.deriveY(blurred, firstDerivativeInterval);
+		RandomAccess<FloatType> dxx = RevampUtils.deriveX(dx, secondDerivativeInterval).randomAccess();
+		RandomAccess<FloatType> dxy = RevampUtils.deriveY(dx, secondDerivativeInterval).randomAccess();
+		RandomAccess<FloatType> dyy = RevampUtils.deriveY(dy, secondDerivativeInterval).randomAccess();
 
 		Cursor<RealComposite<FloatType>> cursor = Views.iterable(Views.collapseReal(out)).cursor();
 		while (cursor.hasNext()) {
