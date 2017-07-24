@@ -13,6 +13,7 @@ import net.imglib2.view.Views;
 import org.junit.Test;
 import weka.classifiers.meta.RandomCommittee;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -62,13 +63,17 @@ public class ClassifierTest {
 
 	@Test
 	public void testStoreLoad() throws IOException {
+		// setup
 		Classifier classifier = trainClassifier();
+		// store
+		File temporaryFile = File.createTempFile("classifier", ".tmp");
+		classifier.store(temporaryFile.getPath());
+		// load
+		Classifier classifier2 = Classifier.load(temporaryFile.getPath());
+		temporaryFile.delete();
+		// test
 		RandomAccessibleInterval<IntType> result = classifier.apply(img);
-		classifier.store("filename");
-
-		Classifier classifier2 = Classifier.load("filename");
 		RandomAccessibleInterval<IntType> result2 = classifier2.apply(img);
-
 		Utils.assertImagesEqual(result, result2);
 	}
 
