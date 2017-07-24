@@ -2,7 +2,6 @@ package net.imglib2.algorithm.features;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import net.imagej.ops.OpInfo;
 import net.imagej.ops.OpService;
 import net.imagej.ops.special.function.Functions;
 import net.imglib2.RandomAccessibleInterval;
@@ -10,10 +9,6 @@ import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
-import org.scijava.command.CommandInfo;
-import org.scijava.module.Module;
-import org.scijava.module.ModuleItem;
-import org.scijava.service.SciJavaService;
 import weka.core.Attribute;
 
 import java.lang.reflect.Type;
@@ -96,15 +91,11 @@ public class Features {
 
 		@Override
 		public JsonElement serialize(FeatureOp op, Type type, JsonSerializationContext jsonSerializationContext) {
-			CommandInfo commandInfo = new OpInfo(op.getClass()).cInfo();
-			Module module = commandInfo.createModule(op);
+			FeatureSetting fs = FeatureSetting.fromOp(op);
 			JsonObject jsonObject = new JsonObject();
 			jsonObject.add("class", new JsonPrimitive(op.getClass().getName()));
-			for(ModuleItem<?> input : commandInfo.inputs()) {
-				if(! SciJavaService.class.isAssignableFrom(input.getType()) &&
-						! Arrays.asList("in", "out", "ops").contains(input.getName()) )
-					jsonObject.add(input.getName(), jsonSerializationContext.serialize(input.getValue(module)));
-			}
+			for(String parameter : fs.parameters())
+				jsonObject.add(parameter, jsonSerializationContext.serialize(fs.getParameter(parameter)));
 			return jsonObject;
 		}
 	}
@@ -125,12 +116,10 @@ public class Features {
 			try {
 				@SuppressWarnings("unchecked")
 				Class<? extends FeatureOp> type1 = (Class<? extends FeatureOp>) Class.forName(className);
-				OpInfo opInfo = new OpInfo(type1);
-				FeatureOp op = jsonDeserializationContext.deserialize(o, type1);
-				op.setEnvironment(opService);
-				opService.getContext().inject(op);
-				op.initialize();
-				return op;
+				FeatureSetting fs = FeatureSetting.fromClass(type1);
+				for(String p : fs.parameters())
+					fs.setParameter(p, jsonDeserializationContext.deserialize(o.get(p), fs.getParameterType(p)));
+				return fs.newInstance(opService);
 			} catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);
 			}

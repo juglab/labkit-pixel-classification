@@ -1,8 +1,6 @@
 package net.imglib2.algorithm.features.gui;
 
-import net.imagej.ops.*;
-import net.imglib2.algorithm.features.Feature;
-import net.imglib2.algorithm.features.FeatureGroup;
+import net.imglib2.algorithm.features.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,16 +8,12 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import net.imglib2.algorithm.features.Features;
-import net.imglib2.algorithm.features.RevampUtils;
 import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.miginfocom.swing.MigLayout;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
-import org.scijava.command.CommandInfo;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleException;
-import org.scijava.module.ModuleItem;
 import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.*;
 import org.scijava.ui.swing.widget.SwingInputHarvester;
@@ -91,17 +85,7 @@ public class FeatureSettingsGui {
 	}
 
 	private void addPressed(Class<? extends FeatureOp> featureClass) {
-		model.add(new Holder(newInstance(featureClass)));
-	}
-
-	private <T extends FeatureOp> T newInstance(Class<T> tClass) {
-		try {
-			T t = tClass.newInstance();
-			t.initialize();
-			return t;
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
+		model.add(new Holder(FeatureSetting.fromClass(featureClass)));
 	}
 
 	private JButton addButton(String add, Runnable runnable) {
@@ -144,34 +128,28 @@ public class FeatureSettingsGui {
 		System.out.println("finished");
 	}
 
-	private static final List<String> exclude = Arrays.asList("out", "in");
-
 	class Holder {
 
-		private Op value;
+		private FeatureSetting value;
 
-		Holder(Op value) {
+		Holder(FeatureSetting value) {
 			this.value = value;
 		}
 
 		void edit() {
-			featureSettingsDialog.show(value);
+			value = featureSettingsDialog.show(value);
 		}
 
 		@Override
 		public String toString() {
 			StringJoiner joiner = new StringJoiner(", ");
-			OpInfo opInfo = new OpInfo(value.getClass());
-			CommandInfo cInfo = opInfo.cInfo();
-			Module module = cInfo.createModule(value);
-			for(ModuleItem<?> input : cInfo.inputs())
-				if(!exclude.contains(input.getName()))
-				joiner.add(input.getName() + " = " + input.getValue(module));
-			return value.getClass().getSimpleName() + " " + joiner;
+			for(String parameter : value.parameters())
+				joiner.add(parameter + " = " + value.getParameter(parameter));
+			return value.getName() + " " + joiner;
 		}
 
 		public FeatureOp get() {
-			return (FeatureOp) value;
+			return value.newInstance(RevampUtils.ops());
 		}
 	}
 
@@ -227,12 +205,11 @@ public class FeatureSettingsGui {
 			return swing.isEmpty() ? harvester.get(0) : swing.get(0);
 		}
 
-		void show(Op op) {
+		FeatureSetting show(FeatureSetting op) {
 			try {
-				Module module = new OpInfo(op.getClass()).cInfo().createModule(op);
-				module.resolveInput("in");
-				module.resolveInput("out");
+				Module module = op.asModule();
 				harvester.harvest(module);
+				return FeatureSetting.fromModule(module);
 			} catch (ModuleException e) {
 				throw new RuntimeException(e);
 			}
