@@ -129,7 +129,6 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>Trainable_Segmentation</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.imglib2</groupId>
