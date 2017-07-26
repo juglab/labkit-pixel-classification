@@ -17,7 +17,7 @@ import org.scijava.module.ModuleException;
 import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.*;
 import org.scijava.ui.swing.widget.SwingInputHarvester;
-import org.scijava.widget.AbstractInputHarvester;
+import org.scijava.widget.InputHarvester;
 
 /**
  * GUI to select a list of features and their settings.
@@ -186,23 +186,12 @@ public class FeatureSettingsGui {
 		}
 	}
 
-
 	static class FeatureSettingsDialog extends AbstractContextual {
 
-		private final PluginService pluginService;
-
-		private final AbstractInputHarvester harvester;
+		private final InputHarvester harvester;
 
 		FeatureSettingsDialog(Context context) {
-			pluginService = context.service(PluginService.class);
-			harvester = getHarvester();
-		}
-
-		private AbstractInputHarvester getHarvester() {
-			List<AbstractInputHarvester> harvester = RevampUtils.filterForClass(AbstractInputHarvester.class,
-					pluginService.createInstancesOfType(PreprocessorPlugin.class));
-			List<SwingInputHarvester> swing = RevampUtils.filterForClass(SwingInputHarvester.class, harvester);
-			return swing.isEmpty() ? harvester.get(0) : swing.get(0);
+			harvester = getHarvester(context);
 		}
 
 		FeatureSetting show(FeatureSetting op) {
@@ -214,5 +203,12 @@ public class FeatureSettingsGui {
 				throw new RuntimeException(e);
 			}
 		}
+	}
+
+	private static InputHarvester getHarvester(Context context) {
+		List<InputHarvester> harvester1 = RevampUtils.filterForClass(InputHarvester.class,
+				context.service(PluginService.class).createInstancesOfType(PreprocessorPlugin.class));
+		List<SwingInputHarvester> swing = RevampUtils.filterForClass(SwingInputHarvester.class, harvester1);
+		return swing.isEmpty() ? harvester1.get(0) : swing.get(0);
 	}
 }
