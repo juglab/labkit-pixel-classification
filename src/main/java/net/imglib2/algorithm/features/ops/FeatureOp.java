@@ -23,6 +23,4 @@ public interface FeatureOp extends SciJavaPlugin, Op, UnaryFunctionOp<RandomAcce
 	void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output);
 
 	GlobalSettings globalSettings();
-
-	void setGlobalSettings(GlobalSettings globalSetting);
 }

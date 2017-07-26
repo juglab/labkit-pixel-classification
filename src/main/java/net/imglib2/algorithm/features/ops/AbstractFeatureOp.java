@@ -15,6 +15,7 @@ public abstract class AbstractFeatureOp
 		extends AbstractUnaryFunctionOp<RandomAccessibleInterval<FloatType>, RandomAccessibleInterval<FloatType>>
 		implements FeatureOp
 {
+	@Parameter
 	private GlobalSettings globalSettings;
 
 	@Override
@@ -22,11 +23,6 @@ public abstract class AbstractFeatureOp
 		Img<FloatType> output = ops().create().img(RevampUtils.extend(input, 0, count() - 1), new FloatType());
 		apply(input, RevampUtils.slices(output));
 		return output;
-	}
-
-	@Override
-	public void setGlobalSettings(GlobalSettings globalSetting) {
-		this.globalSettings = globalSetting;
 	}
 
 	@Override

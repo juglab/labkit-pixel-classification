@@ -63,7 +63,6 @@ public class FeatureSetting {
 		FeatureOp delegateObject = (FeatureOp) asModule().getDelegateObject();
 		ops.context().inject(delegateObject);
 		delegateObject.setEnvironment(ops);
-		delegateObject.setGlobalSettings(globalSetting);
 		delegateObject.initialize();
 		return delegateObject;
 	}
@@ -96,6 +95,8 @@ public class FeatureSetting {
 				if(value != null)
 					module.setInput(parameter, value);
 			}
+			module.setInput("globalSettings", globalSetting);
+			module.resolveInput("globalSettings");
 			module.resolveInput("in");
 			module.resolveInput("out");
 			return module;
@@ -110,7 +111,7 @@ public class FeatureSetting {
 
 	// -- Helper methods --
 
-	private static final List<String> EXCLUDE = Arrays.asList("in", "out");
+	private static final List<String> EXCLUDE = Arrays.asList("in", "out", "globalSettings");
 
 	private boolean isParameterValid(ModuleItem<?> mi) {
 		return !(EXCLUDE.contains(mi.getName())) &&
