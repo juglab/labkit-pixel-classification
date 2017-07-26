@@ -41,6 +41,6 @@ public class GaborFeature extends AbstractGroupFeatureOp {
 	}
 
 	private FeatureOp createGaborFeature(double v, double gamma, double psi, int frequency, int nAngles) {
-		return Features.create(SingleGaborFeature.class, v, gamma, psi, frequency, nAngles, legacyNormalize);
+		return Features.create(SingleGaborFeature.class, globalSettings(), v, gamma, psi, frequency, nAngles, legacyNormalize);
 	}
 }

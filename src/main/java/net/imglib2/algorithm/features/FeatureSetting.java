@@ -25,6 +25,8 @@ public class FeatureSetting {
 
 	private final Map<String, Object> parameterValues = new HashMap<>();
 
+	private final GlobalSettings globalSetting = GlobalSettings.defaultSettings();
+
 	private FeatureSetting(CommandInfo commandInfo, Function<String, ?> parameterSupplier) {
 		this.commandInfo = commandInfo;
 		for(String parameter : parameters())
@@ -61,6 +63,7 @@ public class FeatureSetting {
 		FeatureOp delegateObject = (FeatureOp) asModule().getDelegateObject();
 		ops.context().inject(delegateObject);
 		delegateObject.setEnvironment(ops);
+		delegateObject.setGlobalSettings(globalSetting);
 		delegateObject.initialize();
 		return delegateObject;
 	}
@@ -107,7 +110,7 @@ public class FeatureSetting {
 
 	// -- Helper methods --
 
-	private static final List<String> EXCLUDE = Arrays.asList("in", "out", "ops");
+	private static final List<String> EXCLUDE = Arrays.asList("in", "out");
 
 	private boolean isParameterValid(ModuleItem<?> mi) {
 		return !(EXCLUDE.contains(mi.getName())) &&

@@ -5,6 +5,7 @@ import net.imagej.ops.special.function.UnaryFunctionOp;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.Feature;
+import net.imglib2.algorithm.features.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import org.scijava.plugin.SciJavaPlugin;
 
@@ -20,4 +21,8 @@ public interface FeatureOp extends SciJavaPlugin, Op, UnaryFunctionOp<RandomAcce
 	List<String> attributeLabels();
 
 	void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output);
+
+	GlobalSettings globalSettings();
+
+	void setGlobalSettings(GlobalSettings globalSetting);
 }

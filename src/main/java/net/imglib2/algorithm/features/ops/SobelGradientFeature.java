@@ -2,15 +2,16 @@ package net.imglib2.algorithm.features.ops;
 
 import org.scijava.plugin.Plugin;
 
+import java.util.List;
+
 /**
  * @author Matthias Arzt
  */
 @Plugin(type = FeatureOp.class)
 public class SobelGradientFeature extends AbstractSigmaGroupFeatureOp {
 
-	@Override
-	protected double[] initSigmas() {
-		return new double[]{0.0, 1.0, 2.0, 4.0, 8.0, 16.0};
+	public SobelGradientFeature() {
+		super(true);
 	}
 
 	@Override

@@ -12,40 +12,44 @@ public class SingleFeatures {
 	}
 
 	public static FeatureOp identity() {
-		return Features.create(IdendityFeature.class);
+		return createFeature(IdendityFeature.class);
 	}
 
 	public static FeatureOp gabor(double sigma, double gamma, double psi, double frequency, int nAngles) {
 		boolean legacyNormalize = false;
-		return Features.create(SingleGaborFeature.class, sigma, gamma, psi, frequency, nAngles, legacyNormalize);
+		return createFeature(SingleGaborFeature.class, sigma, gamma, psi, frequency, nAngles, legacyNormalize);
 	}
 
 	public static FeatureOp legacyGabor(double sigma, double gamma, double psi, double frequency, int nAngles) {
 		boolean legacyNormalize = true;
-		return Features.create(SingleGaborFeature.class, sigma, gamma, psi, frequency, nAngles, legacyNormalize);
+		return createFeature(SingleGaborFeature.class, sigma, gamma, psi, frequency, nAngles, legacyNormalize);
 	}
 
 	public static FeatureOp gauss(double sigma) {
-		return Features.create(SingleGaussFeature.class, sigma);
+		return createFeature(SingleGaussFeature.class, sigma);
 	}
 
 	public static FeatureOp sobelGradient(double sigma) {
-		return Features.create(SingleSobelGradientFeature.class, sigma);
+		return createFeature(SingleSobelGradientFeature.class, sigma);
 	}
 
 	public static FeatureOp gradient(double sigma) {
-		return Features.create(SingleGradientFeature.class, sigma);
+		return createFeature(SingleGradientFeature.class, sigma);
 	}
 
 	public static FeatureOp lipschitz(double slope, long border) {
-		return Features.create(SingleLipschitzFeature.class, slope, border);
+		return createFeature(SingleLipschitzFeature.class, slope, border);
 	}
 
 	public static FeatureOp hessian(double sigma) {
-		return Features.create(SingleHessianFeature.class, sigma);
+		return createFeature(SingleHessianFeature.class, sigma);
 	}
 
 	public static FeatureOp differenceOfGaussians(double sigma1, double sigma2) {
-		return Features.create(SingleDifferenceOfGaussiansFeature.class, sigma1, sigma2);
+		return createFeature(SingleDifferenceOfGaussiansFeature.class, sigma1, sigma2);
+	}
+
+	private static FeatureOp createFeature(Class<? extends FeatureOp> aClass, Object... args) {
+		return Features.create(aClass, GlobalSettings.defaultSettings(), args);
 	}
 }

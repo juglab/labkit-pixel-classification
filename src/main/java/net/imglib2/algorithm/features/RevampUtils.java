@@ -24,6 +24,7 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 /**
  * @author Matthias Arzt
@@ -215,4 +216,7 @@ public class RevampUtils {
 		return in.stream().filter(tClass::isInstance).map(tClass::cast).collect(Collectors.toList());
 	}
 
+	public static Object[] prepend(Object x, Object[] xs) {
+		return Stream.concat(Stream.of(x), Stream.of(xs)).toArray();
+	}
 }

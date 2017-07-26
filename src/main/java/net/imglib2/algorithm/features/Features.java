@@ -57,8 +57,9 @@ public class Features {
 				.registerTypeAdapter(FeatureGroup.class, new FeatureGroupDeserializer());
 	}
 
-	public static <T extends FeatureOp> T create(Class<T> aClass, Object... args) {
-		return (T) (Object) Functions.unary(RevampUtils.ops(), aClass, RandomAccessibleInterval.class, RandomAccessibleInterval.class, args);
+	public static <T extends FeatureOp> T create(Class<T> aClass, GlobalSettings globalSettings, Object... args) {
+		Object[] allArgs = RevampUtils.prepend(globalSettings, args);
+		return (T) (Object) Functions.unary(RevampUtils.ops(), aClass, RandomAccessibleInterval.class, RandomAccessibleInterval.class, allArgs);
 	}
 
 	public static FeatureGroup group(FeatureOp... features) {

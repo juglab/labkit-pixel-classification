@@ -16,24 +16,24 @@ public class GroupedFeatures {
 
 	public static FeatureOp gabor() {
 		boolean legacyNormalize = false;
-		return Features.create(net.imglib2.algorithm.features.ops.GaborFeature.class, legacyNormalize);
+		return createFeature(net.imglib2.algorithm.features.ops.GaborFeature.class, legacyNormalize);
 	}
 
 	public static FeatureOp legacyGabor() {
 		boolean legacyNormalize = true;
-		return Features.create(net.imglib2.algorithm.features.ops.GaborFeature.class, legacyNormalize);
+		return createFeature(net.imglib2.algorithm.features.ops.GaborFeature.class, legacyNormalize);
 	}
 
 	public static FeatureOp gauss() {
-		return Features.create(net.imglib2.algorithm.features.ops.GaussFeature.class);
+		return createFeature(net.imglib2.algorithm.features.ops.GaussFeature.class);
 	}
 
 	public static FeatureOp sobelGradient() {
-		return Features.create(SobelGradientFeature.class);
+		return createFeature(SobelGradientFeature.class);
 	}
 
 	public static FeatureOp gradient() {
-		return Features.create(net.imglib2.algorithm.features.ops.GradientFeature.class);
+		return createFeature(net.imglib2.algorithm.features.ops.GradientFeature.class);
 	}
 
 	public static FeatureOp min() {
@@ -57,18 +57,22 @@ public class GroupedFeatures {
 	}
 
 	private static FeatureOp createSphereShapeFeature(String operation) {
-		return Features.create(SphereShapedFeature.class, operation);
+		return createFeature(SphereShapedFeature.class, operation);
 	}
 
 	public static FeatureOp lipschitz(long border) {
-		return Features.create(net.imglib2.algorithm.features.ops.LipschitzFeature.class, border);
+		return createFeature(net.imglib2.algorithm.features.ops.LipschitzFeature.class, border);
 	}
 
 	public static FeatureOp hessian() {
-		return Features.create(net.imglib2.algorithm.features.ops.HessianFeature.class);
+		return createFeature(net.imglib2.algorithm.features.ops.HessianFeature.class);
 	}
 
 	public static FeatureOp differenceOfGaussians() {
-		return Features.create(net.imglib2.algorithm.features.ops.DifferenceOfGaussiansFeature.class);
+		return createFeature(net.imglib2.algorithm.features.ops.DifferenceOfGaussiansFeature.class);
+	}
+
+	private static FeatureOp createFeature(Class<? extends FeatureOp> aClass, Object... args) {
+		return Features.create(aClass, GlobalSettings.defaultSettings(), args);
 	}
 }

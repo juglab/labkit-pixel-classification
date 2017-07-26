@@ -11,7 +11,7 @@ import static org.junit.Assert.assertNotNull;
 public class FeaturesTest {
 	@Test
 	public void testCreate() {
-		SingleGaussFeature op = Features.create(SingleGaussFeature.class, 1.3);
+		SingleGaussFeature op = Features.create(SingleGaussFeature.class, GlobalSettings.defaultSettings(), 1.3);
 		assertNotNull(op);
 	}
 }

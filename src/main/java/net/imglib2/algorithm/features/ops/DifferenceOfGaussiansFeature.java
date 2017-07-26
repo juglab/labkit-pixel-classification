@@ -19,7 +19,7 @@ public class DifferenceOfGaussiansFeature extends AbstractGroupFeatureOp {
 		final double maximumSigma = 16;
 		for (double sigma1 = minimumSigma; sigma1 <= maximumSigma; sigma1 *= 2)
 			for (double sigma2 = minimumSigma; sigma2 < sigma1; sigma2 *= 2)
-				features.add(Features.create(SingleDifferenceOfGaussiansFeature.class, sigma1, sigma2));
+				features.add(Features.create(SingleDifferenceOfGaussiansFeature.class, globalSettings(), sigma1, sigma2));
 		return features;
 	}
 }
