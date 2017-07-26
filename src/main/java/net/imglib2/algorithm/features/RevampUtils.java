@@ -219,4 +219,18 @@ public class RevampUtils {
 	public static Object[] prepend(Object x, Object[] xs) {
 		return Stream.concat(Stream.of(x), Stream.of(xs)).toArray();
 	}
+
+	public static void wrapException(RunnableWithException r) {
+		try {
+			r.run();
+		} catch(Exception e) {
+			if(e instanceof RuntimeException)
+				throw (RuntimeException) e;
+			throw new RuntimeException(e);
+		}
+	}
+
+	public interface RunnableWithException {
+		void run() throws Exception;
+	}
 }

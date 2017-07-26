@@ -18,6 +18,7 @@ import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.*;
 import org.scijava.ui.swing.widget.SwingInputHarvester;
 import org.scijava.widget.InputHarvester;
+import org.scijava.widget.InputPanel;
 
 /**
  * GUI to select a list of features and their settings.
@@ -42,7 +43,14 @@ public class FeatureSettingsGui {
 
 	private void initGui() {
 		list.setModel(model);
-		content.setLayout(new MigLayout("insets 0", "[grow]","[grow][]"));
+		content.setLayout(new MigLayout("insets 0", "[grow]","[][grow][]"));
+		InputHarvester<JPanel, JPanel> harvester = getHarvester(context);
+		Map<String, Object> map = new TreeMap<>();
+		map.put("minSigma", 1.0);
+		map.put("minSigma", 16.0);
+		InputPanel<JPanel, JPanel> inputPanel = harvester.createInputPanel();
+		RevampUtils.wrapException(() -> harvester.buildPanel(inputPanel, new TrivialModule(map)));
+		content.add(inputPanel.getComponent(), "wrap");
 		content.add(new JScrollPane(list), "split 2, grow");
 		JPopupMenu menu = initMenu();
 		JButton addButton = new JButton("add");
@@ -205,7 +213,7 @@ public class FeatureSettingsGui {
 		}
 	}
 
-	private static InputHarvester getHarvester(Context context) {
+	private static InputHarvester<JPanel, JPanel> getHarvester(Context context) {
 		List<InputHarvester> harvester1 = RevampUtils.filterForClass(InputHarvester.class,
 				context.service(PluginService.class).createInstancesOfType(PreprocessorPlugin.class));
 		List<SwingInputHarvester> swing = RevampUtils.filterForClass(SwingInputHarvester.class, harvester1);
