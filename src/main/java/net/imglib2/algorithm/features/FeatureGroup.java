@@ -6,7 +6,6 @@ import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,8 +21,19 @@ public class FeatureGroup implements Feature {
 	private final int count;
 
 	FeatureGroup(List<FeatureOp> features) {
+		checkGlobalSettings(features);
 		this.features = features.stream().flatMap(this::toStream).collect(Collectors.toList());
 		this.count = this.features.stream().mapToInt(Feature::count).sum();
+	}
+
+	private void checkGlobalSettings(List<FeatureOp> features) {
+		if(features.isEmpty())
+			return;
+		GlobalSettings settings = features.get(0).globalSettings();
+		boolean allEqual =
+				features.stream().allMatch(f -> settings.equals(f.globalSettings()));
+		if(!allEqual)
+			throw new IllegalArgumentException("All features in a feature group must use the same global settings");
 	}
 
 	private Stream<? extends FeatureOp> toStream(FeatureOp f) {

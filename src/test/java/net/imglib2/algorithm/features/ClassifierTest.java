@@ -57,7 +57,7 @@ public class ClassifierTest {
 	}
 
 	private Classifier trainClassifier() {
-		FeatureGroup features = Features.group(new IdendityFeature(), GroupedFeatures.gauss());
+		FeatureGroup features = Features.group(SingleFeatures.identity(), GroupedFeatures.gauss());
 		return Classifier.train(img, labeling, features);
 	}
 
@@ -88,7 +88,7 @@ public class ClassifierTest {
 
 	@Test
 	public void testDifferentWekaClassifiers() {
-		FeatureGroup features = Features.group(new IdendityFeature(), GroupedFeatures.gauss());
+		FeatureGroup features = Features.group(SingleFeatures.identity(), GroupedFeatures.gauss());
 		Classifier classifier = Classifier.train(img, labeling, features, new RandomCommittee());
 		RandomAccessibleInterval<IntType> result = classifier.apply(img);
 		checkExpected(result, classifier.classNames());

@@ -52,7 +52,7 @@ public class Features {
 	public static GsonBuilder gsonModifiers(GsonBuilder builder) {
 		return builder
 				.registerTypeAdapter(FeatureOp.class, new OpSerializer())
-				.registerTypeAdapter(FeatureOp.class, new OpDeserializer(RevampUtils.ops()))
+				.registerTypeAdapter(FeatureOp.class, new OpDeserializer(RevampUtils.ops(), GlobalSettings.defaultSettings()))
 				.registerTypeAdapter(FeatureGroup.class, new FeatureGroupSerializer())
 				.registerTypeAdapter(FeatureGroup.class, new FeatureGroupDeserializer());
 	}
@@ -105,8 +105,11 @@ public class Features {
 
 		private final OpService opService;
 
-		OpDeserializer(OpService opService) {
+		private GlobalSettings globalSettings;
+
+		OpDeserializer(OpService opService, GlobalSettings globalSettings) {
 			this.opService = opService;
+			this.globalSettings = globalSettings;
 		}
 
 		@Override
@@ -120,7 +123,7 @@ public class Features {
 				FeatureSetting fs = FeatureSetting.fromClass(type1);
 				for(String p : fs.parameters())
 					fs.setParameter(p, jsonDeserializationContext.deserialize(o.get(p), fs.getParameterType(p)));
-				return fs.newInstance(opService);
+				return fs.newInstance(opService, globalSettings);
 			} catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);
 			}

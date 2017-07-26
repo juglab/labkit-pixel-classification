@@ -3,7 +3,9 @@ package net.imglib2.algorithm.features.gui;
 import net.imglib2.algorithm.features.*;
 
 import javax.swing.*;
+import javax.swing.text.NumberFormatter;
 import java.awt.*;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +20,6 @@ import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.*;
 import org.scijava.ui.swing.widget.SwingInputHarvester;
 import org.scijava.widget.InputHarvester;
-import org.scijava.widget.InputPanel;
 
 /**
  * GUI to select a list of features and their settings.
@@ -37,6 +38,8 @@ public class FeatureSettingsGui {
 
 	private final FeatureSettingsDialog featureSettingsDialog = new FeatureSettingsDialog(context);
 
+	private GlobalsPanel globalsPanel;
+
 	public FeatureSettingsGui() {
 		initGui();
 	}
@@ -44,13 +47,8 @@ public class FeatureSettingsGui {
 	private void initGui() {
 		list.setModel(model);
 		content.setLayout(new MigLayout("insets 0", "[grow]","[][grow][]"));
-		InputHarvester<JPanel, JPanel> harvester = getHarvester(context);
-		Map<String, Object> map = new TreeMap<>();
-		map.put("minSigma", 1.0);
-		map.put("minSigma", 16.0);
-		InputPanel<JPanel, JPanel> inputPanel = harvester.createInputPanel();
-		RevampUtils.wrapException(() -> harvester.buildPanel(inputPanel, new TrivialModule(map)));
-		content.add(inputPanel.getComponent(), "wrap");
+		globalsPanel = new GlobalsPanel(GlobalSettings.defaultSettings());
+		content.add(globalsPanel, "wrap");
 		content.add(new JScrollPane(list), "split 2, grow");
 		JPopupMenu menu = initMenu();
 		JButton addButton = new JButton("add");
@@ -62,6 +60,41 @@ public class FeatureSettingsGui {
 		sidePanel.add(addButton("remove", this::removePressed), "grow, wrap");
 		sidePanel.add(addButton("edit", this::editPressed), "grow, wrap");
 		content.add(sidePanel, "top, wrap");
+	}
+
+	private static class GlobalsPanel extends JPanel {
+
+		private final JFormattedTextField minSigmaField;
+		private final JFormattedTextField maxSigmaField;
+		private final JFormattedTextField thicknessField;
+
+		public GlobalsPanel(GlobalSettings globalSettings) {
+			setLayout(new MigLayout("insets 0", "[]20pt[50pt]", "[][]"));
+			add(new JLabel("min sigma"));
+			minSigmaField = initFormattedTextField();
+			minSigmaField.setValue(globalSettings.minSigma());
+			add(minSigmaField, "grow, wrap");
+			add(new JLabel("min sigma"));
+			maxSigmaField = initFormattedTextField();
+			maxSigmaField.setValue(globalSettings.maxSigma());
+			add(maxSigmaField, "grow, wrap");
+			add(new JLabel("membrane thickness"));
+			thicknessField = initFormattedTextField();
+			thicknessField.setValue(globalSettings.membraneThickness());
+			add(thicknessField, "grow, wrap");
+		}
+
+		private JFormattedTextField initFormattedTextField() {
+			return new JFormattedTextField(new NumberFormatter(NumberFormat.getInstance()));
+		}
+
+		GlobalSettings get() {
+			return new GlobalSettings(
+					(Double) minSigmaField.getValue(),
+					(Double) maxSigmaField.getValue(),
+					(Double) thicknessField.getValue()
+			);
+		}
 	}
 
 	private JPopupMenu initMenu() {
@@ -93,7 +126,7 @@ public class FeatureSettingsGui {
 	}
 
 	private void addPressed(Class<? extends FeatureOp> featureClass) {
-		model.add(new Holder(FeatureSetting.fromClass(featureClass)));
+		model.add(new Holder(featureClass));
 	}
 
 	private JButton addButton(String add, Runnable runnable) {
@@ -109,9 +142,10 @@ public class FeatureSettingsGui {
 
 	private Optional<FeatureGroup> showInternal() {
 		boolean ok = showResizeableOkCancelDialog("Select Pixel Features", content);
-		if(ok)
-			return Optional.of(model.features());
-		else
+		if(ok) {
+			GlobalSettings globalSettings = globalsPanel.get();
+			return Optional.of(model.features(globalSettings));
+		} else
 			return Optional.empty();
 	}
 
@@ -136,12 +170,12 @@ public class FeatureSettingsGui {
 		System.out.println("finished");
 	}
 
-	class Holder {
+	private class Holder {
 
 		private FeatureSetting value;
 
-		Holder(FeatureSetting value) {
-			this.value = value;
+		public Holder(Class<? extends FeatureOp> featureClass) {
+			this.value = FeatureSetting.fromClass(featureClass);
 		}
 
 		void edit() {
@@ -156,8 +190,8 @@ public class FeatureSettingsGui {
 			return value.getName() + " " + joiner;
 		}
 
-		public FeatureOp get() {
-			return value.newInstance(RevampUtils.ops());
+		public FeatureOp get(GlobalSettings globalSettings) {
+			return value.newInstance(RevampUtils.ops(), globalSettings);
 		}
 	}
 
@@ -189,8 +223,8 @@ public class FeatureSettingsGui {
 			fireContentsChanged(items, 0, items.size());
 		}
 
-		public FeatureGroup features() {
-			return Features.group( items.stream().map(Holder::get).collect(Collectors.toList()) );
+		public FeatureGroup features(GlobalSettings globalSettings) {
+			return Features.group( items.stream().map(h -> h.get(globalSettings)).collect(Collectors.toList()) );
 		}
 	}
 
@@ -204,7 +238,7 @@ public class FeatureSettingsGui {
 
 		FeatureSetting show(FeatureSetting op) {
 			try {
-				Module module = op.asModule();
+				Module module = op.asModule(GlobalSettings.defaultSettings());
 				harvester.harvest(module);
 				return FeatureSetting.fromModule(module);
 			} catch (ModuleException e) {

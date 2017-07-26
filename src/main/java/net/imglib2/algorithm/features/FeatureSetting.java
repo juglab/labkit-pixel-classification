@@ -25,8 +25,6 @@ public class FeatureSetting {
 
 	private final Map<String, Object> parameterValues = new HashMap<>();
 
-	private final GlobalSettings globalSetting = GlobalSettings.defaultSettings();
-
 	private FeatureSetting(CommandInfo commandInfo, Function<String, ?> parameterSupplier) {
 		this.commandInfo = commandInfo;
 		for(String parameter : parameters())
@@ -58,9 +56,9 @@ public class FeatureSetting {
 		return new FeatureSetting(fs.commandInfo, fs.parameterValues::get);
 	}
 
-	public FeatureOp newInstance(OpEnvironment ops) {
+	public FeatureOp newInstance(OpEnvironment ops, GlobalSettings globalSettings) {
 		@SuppressWarnings("unchecked")
-		FeatureOp delegateObject = (FeatureOp) asModule().getDelegateObject();
+		FeatureOp delegateObject = (FeatureOp) asModule(globalSettings).getDelegateObject();
 		ops.context().inject(delegateObject);
 		delegateObject.setEnvironment(ops);
 		delegateObject.initialize();
@@ -87,7 +85,7 @@ public class FeatureSetting {
 		return commandInfo.getInput(name).getGenericType();
 	}
 
-	public Module asModule() {
+	public Module asModule(GlobalSettings globalSettings) {
 		try {
 			Module module = commandInfo.createModule();
 			for(String parameter : parameters()) {
@@ -95,7 +93,7 @@ public class FeatureSetting {
 				if(value != null)
 					module.setInput(parameter, value);
 			}
-			module.setInput("globalSettings", globalSetting);
+			module.setInput("globalSettings", globalSettings);
 			module.resolveInput("globalSettings");
 			module.resolveInput("in");
 			module.resolveInput("out");
