@@ -68,7 +68,6 @@ public class ClassifierTest {
 		return Classifier.train(img, labeling, features);
 	}
 
-	@Ignore("Failing because global settings need to be stored.")
 	@Test
 	public void testStoreLoad() throws IOException {
 		// setup

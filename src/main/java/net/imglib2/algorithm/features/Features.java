@@ -52,7 +52,7 @@ public class Features {
 	public static GsonBuilder gsonModifiers(GsonBuilder builder) {
 		return builder
 				.registerTypeAdapter(FeatureOp.class, new OpSerializer())
-				.registerTypeAdapter(FeatureOp.class, new OpDeserializer(RevampUtils.ops(), GlobalSettings.defaultSettings()))
+				.registerTypeAdapter(FeatureOp.class, new OpDeserializer(RevampUtils.ops()))
 				.registerTypeAdapter(FeatureGroup.class, new FeatureGroupSerializer())
 				.registerTypeAdapter(FeatureGroup.class, new FeatureGroupDeserializer());
 	}
@@ -95,8 +95,9 @@ public class Features {
 			FeatureSetting fs = FeatureSetting.fromOp(op);
 			JsonObject jsonObject = new JsonObject();
 			jsonObject.add("class", new JsonPrimitive(op.getClass().getName()));
+			jsonObject.add("globalSettings", jsonSerializationContext.serialize(op.globalSettings()));
 			for(String parameter : fs.parameters())
-				jsonObject.add(parameter, jsonSerializationContext.serialize(fs.getParameter(parameter)));
+				jsonObject.add(parameter, jsonSerializationContext.serialize(fs.getParameter(parameter), fs.getParameterType(parameter)));
 			return jsonObject;
 		}
 	}
@@ -105,25 +106,26 @@ public class Features {
 
 		private final OpService opService;
 
-		private GlobalSettings globalSettings;
-
-		OpDeserializer(OpService opService, GlobalSettings globalSettings) {
+		OpDeserializer(OpService opService) {
 			this.opService = opService;
-			this.globalSettings = globalSettings;
 		}
 
 		@Override
 		public FeatureOp deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			JsonObject o = jsonElement.getAsJsonObject();
 			String className = o.get("class").getAsString();
-			o.remove("class");
+			GlobalSettings globalSettings = jsonDeserializationContext.deserialize(o.get("globalSettings"), GlobalSettings.class);
+			FeatureSetting fs = FeatureSetting.fromClass(classForName(className));
+			for(String p : fs.parameters())
+				fs.setParameter(p, jsonDeserializationContext.deserialize(o.get(p), fs.getParameterType(p)));
+			return fs.newInstance(opService, globalSettings);
+		}
+
+		private Class<? extends FeatureOp> classForName(String className) {
 			try {
 				@SuppressWarnings("unchecked")
-				Class<? extends FeatureOp> type1 = (Class<? extends FeatureOp>) Class.forName(className);
-				FeatureSetting fs = FeatureSetting.fromClass(type1);
-				for(String p : fs.parameters())
-					fs.setParameter(p, jsonDeserializationContext.deserialize(o.get(p), fs.getParameterType(p)));
-				return fs.newInstance(opService, globalSettings);
+				Class<? extends FeatureOp> tClass = (Class<? extends FeatureOp>) Class.forName(className);
+				return tClass;
 			} catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);
 			}
