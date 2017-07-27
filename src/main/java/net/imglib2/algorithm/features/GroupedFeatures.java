@@ -10,69 +10,73 @@ import net.imglib2.algorithm.features.ops.SphereShapedFeature;
  */
 public class GroupedFeatures {
 
-	private GroupedFeatures() {
-		// prevent from being instantiated
+	public static final GroupedFeatures GroupedFeatures = new GroupedFeatures(GlobalSettings.defaultSettings());
+
+	private final GlobalSettings globalSettings;
+
+	GroupedFeatures(GlobalSettings settings) {
+		this.globalSettings = settings;
 	}
 
-	public static FeatureOp gabor() {
+	public FeatureOp gabor() {
 		boolean legacyNormalize = false;
 		return createFeature(net.imglib2.algorithm.features.ops.GaborFeature.class, legacyNormalize);
 	}
 
-	public static FeatureOp legacyGabor() {
+	public FeatureOp legacyGabor() {
 		boolean legacyNormalize = true;
 		return createFeature(net.imglib2.algorithm.features.ops.GaborFeature.class, legacyNormalize);
 	}
 
-	public static FeatureOp gauss() {
+	public FeatureOp gauss() {
 		return createFeature(net.imglib2.algorithm.features.ops.GaussFeature.class);
 	}
 
-	public static FeatureOp sobelGradient() {
+	public FeatureOp sobelGradient() {
 		return createFeature(SobelGradientFeature.class);
 	}
 
-	public static FeatureOp gradient() {
+	public FeatureOp gradient() {
 		return createFeature(net.imglib2.algorithm.features.ops.GradientFeature.class);
 	}
 
-	public static FeatureOp min() {
+	public FeatureOp min() {
 		return createSphereShapeFeature(SingleSphereShapedFeature.MIN);
 	}
 
-	public static FeatureOp max() {
+	public FeatureOp max() {
 		return createSphereShapeFeature(SingleSphereShapedFeature.MAX);
 	}
 
-	public static FeatureOp mean() {
+	public FeatureOp mean() {
 		return createSphereShapeFeature(SingleSphereShapedFeature.MEAN);
 	}
 
-	public static FeatureOp median() {
+	public FeatureOp median() {
 		return createSphereShapeFeature(SingleSphereShapedFeature.MEDIAN);
 	}
 
-	public static FeatureOp variance() {
+	public FeatureOp variance() {
 		return createSphereShapeFeature(SingleSphereShapedFeature.VARIANCE);
 	}
 
-	private static FeatureOp createSphereShapeFeature(String operation) {
+	private FeatureOp createSphereShapeFeature(String operation) {
 		return createFeature(SphereShapedFeature.class, operation);
 	}
 
-	public static FeatureOp lipschitz(long border) {
+	public FeatureOp lipschitz(long border) {
 		return createFeature(net.imglib2.algorithm.features.ops.LipschitzFeature.class, border);
 	}
 
-	public static FeatureOp hessian() {
+	public FeatureOp hessian() {
 		return createFeature(net.imglib2.algorithm.features.ops.HessianFeature.class);
 	}
 
-	public static FeatureOp differenceOfGaussians() {
+	public FeatureOp differenceOfGaussians() {
 		return createFeature(net.imglib2.algorithm.features.ops.DifferenceOfGaussiansFeature.class);
 	}
 
-	private static FeatureOp createFeature(Class<? extends FeatureOp> aClass, Object... args) {
-		return Features.create(aClass, GlobalSettings.defaultSettings(), args);
+	private FeatureOp createFeature(Class<? extends FeatureOp> aClass, Object... args) {
+		return Features.create(aClass, globalSettings, args);
 	}
 }

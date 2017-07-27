@@ -10,6 +10,8 @@ import org.junit.Test;
 
 import java.util.Collections;
 
+import static net.imglib2.algorithm.features.SingleFeatures.*;
+
 /**
  * Created by arzt on 18.07.17.
  */
