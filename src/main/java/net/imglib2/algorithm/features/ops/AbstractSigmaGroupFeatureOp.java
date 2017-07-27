@@ -19,12 +19,10 @@ public abstract class AbstractSigmaGroupFeatureOp extends AbstractGroupFeatureOp
 	}
 
 	private List<Double> initSigmas() {
-		GlobalSettings settings = globalSettings();
 		List<Double> sigmas = new ArrayList<>();
 		if(includeZero)
 			sigmas.add(0.0);
-		for(double sigma = settings.minSigma(), maxSigma = settings.maxSigma(); sigma <= maxSigma; sigma *= 2.0)
-			sigmas.add(sigma);
+		sigmas.addAll(globalSettings().sigmas());
 		return sigmas;
 	}
 

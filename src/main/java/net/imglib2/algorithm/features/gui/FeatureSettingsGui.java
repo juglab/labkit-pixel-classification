@@ -6,9 +6,11 @@ import javax.swing.*;
 import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.miginfocom.swing.MigLayout;
@@ -64,34 +66,25 @@ public class FeatureSettingsGui {
 
 	private static class GlobalsPanel extends JPanel {
 
-		private final JFormattedTextField minSigmaField;
-		private final JFormattedTextField maxSigmaField;
+		private final JFormattedTextField sigmasField;
+
 		private final JFormattedTextField thicknessField;
 
 		public GlobalsPanel(GlobalSettings globalSettings) {
-			setLayout(new MigLayout("insets 0", "[]20pt[50pt]", "[][]"));
+			setLayout(new MigLayout("insets 0", "[]20pt[100pt]", "[][]"));
 			add(new JLabel("min sigma"));
-			minSigmaField = initFormattedTextField();
-			minSigmaField.setValue(globalSettings.minSigma());
-			add(minSigmaField, "grow, wrap");
-			add(new JLabel("min sigma"));
-			maxSigmaField = initFormattedTextField();
-			maxSigmaField.setValue(globalSettings.maxSigma());
-			add(maxSigmaField, "grow, wrap");
+			sigmasField = new JFormattedTextField(new ListOfDoubleFormatter());
+			sigmasField.setValue(globalSettings.sigmas());
+			add(sigmasField, "grow, wrap");
 			add(new JLabel("membrane thickness"));
-			thicknessField = initFormattedTextField();
+			thicknessField = new JFormattedTextField(new NumberFormatter(NumberFormat.getInstance()));
 			thicknessField.setValue(globalSettings.membraneThickness());
 			add(thicknessField, "grow, wrap");
 		}
 
-		private JFormattedTextField initFormattedTextField() {
-			return new JFormattedTextField(new NumberFormatter(NumberFormat.getInstance()));
-		}
-
 		GlobalSettings get() {
 			return new GlobalSettings(
-					(Double) minSigmaField.getValue(),
-					(Double) maxSigmaField.getValue(),
+					(List<Double>) sigmasField.getValue(),
 					(Double) thicknessField.getValue()
 			);
 		}
@@ -253,4 +246,23 @@ public class FeatureSettingsGui {
 		List<SwingInputHarvester> swing = RevampUtils.filterForClass(SwingInputHarvester.class, harvester1);
 		return swing.isEmpty() ? harvester1.get(0) : swing.get(0);
 	}
+
+	private static class ListOfDoubleFormatter extends JFormattedTextField.AbstractFormatter {
+
+		@Override
+		public Object stringToValue(String text) throws ParseException {
+			return Stream.of(text.split(";")).map(Double::new).collect(Collectors.toList());
+		}
+
+		@Override
+		public String valueToString(Object value) throws ParseException {
+			if(value == null)
+				return "";
+			@SuppressWarnings("unchecked")
+			List<Double> list = (List<Double>) value;
+			StringJoiner joiner = new StringJoiner("; ");
+			list.stream().map(Object::toString).forEach(joiner::add);
+			return joiner.toString();
+		}
+	};
 }
