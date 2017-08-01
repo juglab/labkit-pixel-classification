@@ -116,13 +116,13 @@ public class Utils {
 	}
 
 	public static <A extends Type<A>>
-	void assertImagesEqual(final RandomAccessibleInterval<A> a, final RandomAccessibleInterval<A> b) {
+	void assertImagesEqual(final RandomAccessibleInterval<? extends A> a, final RandomAccessibleInterval<? extends A> b) {
 		assertTrue(Intervals.equals(a, b));
 		System.out.println("check picture content.");
-		IntervalView<Pair<A, A>> pairs = Views.interval(Views.pair(a, b), b);
-		Cursor<Pair<A, A>> cursor = pairs.cursor();
+		IntervalView<? extends Pair<? extends A, ? extends A>> pairs = Views.interval(Views.pair(a, b), b);
+		Cursor<? extends Pair<? extends A, ? extends A>> cursor = pairs.cursor();
 		while(cursor.hasNext()) {
-			Pair<A,A> p = cursor.next();
+			Pair<? extends A,? extends A> p = cursor.next();
 			boolean equal = p.getA().valueEquals(p.getB());
 			if(!equal)
 				fail("Pixel values not equal on coordinate " +
@@ -139,7 +139,7 @@ public class Utils {
 		assertImagesEqual(new ImagePlus("expected", expected), actual);
 	}
 
-	private static <A extends Type<A>> String positionString(Cursor<Pair<A, A>> cursor) {
+	private static <A extends Type<A>> String positionString(Localizable cursor) {
 		StringJoiner joiner = new StringJoiner(", ");
 		for (int i = 0, n = cursor.numDimensions(); i < n; i++)
 			joiner.add(String.valueOf(cursor.getIntPosition(i)));

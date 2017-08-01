@@ -41,7 +41,7 @@ public class InstanceView<C extends Composite<? extends RealType<?>>> extends Ab
 		return Views.interval(new InstanceView<>(collapsed, attributesAsArray(feature, classes)), collapsed);
 	}
 
-	private static Attribute[] attributesAsArray(Feature feature, List<String> classes) {
+	static Attribute[] attributesAsArray(Feature feature, List<String> classes) {
 		List<Attribute> attributes = Features.attributes(feature, classes);
 		return attributes.toArray(new Attribute[attributes.size()]);
 	}

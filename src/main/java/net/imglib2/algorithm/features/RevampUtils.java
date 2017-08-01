@@ -230,6 +230,16 @@ public class RevampUtils {
 		}
 	}
 
+	public static <R> R wrapException(SupplierWithException<R> r) {
+		try {
+			return r.get();
+		} catch(Exception e) {
+			if(e instanceof RuntimeException)
+				throw (RuntimeException) e;
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static DenseInstance getInstance(int featureCount, int classIndex, Composite<? extends RealType<?>> featureValues) {
 		double[] values = new double[featureCount + 1];
 		for (int i = 0; i < featureCount; i++)
@@ -244,5 +254,9 @@ public class RevampUtils {
 
 	public interface RunnableWithException {
 		void run() throws Exception;
+	}
+
+	public interface SupplierWithException<R> {
+		R get() throws Exception;
 	}
 }

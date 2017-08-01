@@ -46,14 +46,14 @@ public class ClassifierTest {
 	@Test
 	public void testClassification() {
 		Classifier classifier = trainClassifier();
-		RandomAccessibleInterval<IntType> result = classifier.segment(img);
+		RandomAccessibleInterval<? extends IntegerType> result = classifier.segment(img);
 		checkExpected(result, classifier.classNames());
 	}
 
-	private void checkExpected(RandomAccessibleInterval<IntType> result, List<String> classNames) {
+	private void checkExpected(RandomAccessibleInterval<? extends IntegerType> result, List<String> classNames) {
 		Img<UnsignedByteType> expected = ImageJFunctions.wrapByte(Utils.loadImage("nucleiExpected.tif"));
 		Views.interval(Views.pair(result, expected), expected).forEach(p -> {
-			String r = classNames.get(p.getA().get());
+			String r = classNames.get(p.getA().getInteger());
 			int e = p.getB().get();
 			if(e != 0) assertEquals(Integer.toString(e), r);
 		});
@@ -78,9 +78,9 @@ public class ClassifierTest {
 		Classifier classifier2 = Classifier.load(temporaryFile.getPath());
 		temporaryFile.delete();
 		// test
-		RandomAccessibleInterval<IntType> result = classifier.segment(img);
-		RandomAccessibleInterval<IntType> result2 = classifier2.segment(img);
-		Utils.assertImagesEqual(result, result2);
+		RandomAccessibleInterval<? extends IntegerType<?>> result = classifier.segment(img);
+		RandomAccessibleInterval<? extends IntegerType<?>> result2 = classifier2.segment(img);
+		Utils.<IntegerType>assertImagesEqual(result, result2);
 	}
 
 	@Test
@@ -96,7 +96,7 @@ public class ClassifierTest {
 	public void testDifferentWekaClassifiers() {
 		FeatureGroup features = Features.group(SingleFeatures.identity(), GroupedFeatures.gauss());
 		Classifier classifier = Trainer.train(img, labeling, features, new RandomCommittee());
-		RandomAccessibleInterval<IntType> result = classifier.segment(img);
+		RandomAccessibleInterval<? extends IntegerType> result = classifier.segment(img);
 		checkExpected(result, classifier.classNames());
 	}
 }
