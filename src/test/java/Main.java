@@ -1,5 +1,4 @@
-import net.imglib2.algorithm.features.ClassifierTest;
-import net.imglib2.algorithm.features.FeatureStackTest;
+import net.imglib2.algorithm.features.classification.ClassifierTest;
 
 /**
  * Created by arzt on 28.06.17.

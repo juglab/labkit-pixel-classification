@@ -1,9 +1,13 @@
-package net.imglib2.algorithm.features;
+package net.imglib2.algorithm.features.classification;
 
 import hr.irb.fastRandomForest.FastRandomForest;
 import ij.Prefs;
 import net.imglib2.*;
 import net.imglib2.RandomAccess;
+import net.imglib2.algorithm.features.Feature;
+import net.imglib2.algorithm.features.FeatureGroup;
+import net.imglib2.algorithm.features.Features;
+import net.imglib2.algorithm.features.RevampUtils;
 import net.imglib2.img.Img;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;

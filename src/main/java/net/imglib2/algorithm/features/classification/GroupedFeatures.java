@@ -1,5 +1,7 @@
-package net.imglib2.algorithm.features;
+package net.imglib2.algorithm.features.classification;
 
+import net.imglib2.algorithm.features.Features;
+import net.imglib2.algorithm.features.GlobalSettings;
 import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.algorithm.features.ops.SingleSphereShapedFeature;
 import net.imglib2.algorithm.features.ops.SobelGradientFeature;

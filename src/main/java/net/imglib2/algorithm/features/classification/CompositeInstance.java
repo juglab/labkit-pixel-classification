@@ -1,4 +1,4 @@
-package net.imglib2.algorithm.features;
+package net.imglib2.algorithm.features.classification;
 
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.composite.Composite;

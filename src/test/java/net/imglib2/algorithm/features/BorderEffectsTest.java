@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static net.imglib2.algorithm.features.GroupedFeatures.*;
+import static net.imglib2.algorithm.features.classification.GroupedFeatures.*;
 
 /**
  * @author Matthias Arzt

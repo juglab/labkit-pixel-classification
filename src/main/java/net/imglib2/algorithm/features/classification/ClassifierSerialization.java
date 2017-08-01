@@ -1,6 +1,7 @@
-package net.imglib2.algorithm.features;
+package net.imglib2.algorithm.features.classification;
 
 import com.google.gson.*;
+import net.imglib2.algorithm.features.Features;
 
 import java.io.*;
 import java.lang.reflect.Type;

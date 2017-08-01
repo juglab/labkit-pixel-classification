@@ -1,9 +1,8 @@
-package net.imglib2.algorithm.features;
+package net.imglib2.algorithm.features.classification;
 
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
-import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.AbstractConvertedRandomAccess;
 import net.imglib2.converter.AbstractConvertedRandomAccessible;
 import net.imglib2.type.numeric.RealType;
