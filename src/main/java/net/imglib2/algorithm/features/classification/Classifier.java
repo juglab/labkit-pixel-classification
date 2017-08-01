@@ -59,8 +59,6 @@ public class Classifier {
 		return classNames;
 	}
 
-	private static Map<String, Feature> map = new HashMap();
-
 	public void store(String filename) throws IOException {
 		ClassifierSerialization.store(this, filename);
 	}
