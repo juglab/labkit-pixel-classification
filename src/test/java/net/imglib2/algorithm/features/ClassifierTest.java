@@ -1,7 +1,6 @@
 package net.imglib2.algorithm.features;
 
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.features.ops.IdendityFeature;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
@@ -10,7 +9,6 @@ import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
-import org.junit.Ignore;
 import org.junit.Test;
 import weka.classifiers.meta.RandomCommittee;
 
