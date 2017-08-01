@@ -46,7 +46,7 @@ public class ClassifierTest {
 	@Test
 	public void testClassification() {
 		Classifier classifier = trainClassifier();
-		RandomAccessibleInterval<IntType> result = classifier.apply(img);
+		RandomAccessibleInterval<IntType> result = classifier.segment(img);
 		checkExpected(result, classifier.classNames());
 	}
 
@@ -78,8 +78,8 @@ public class ClassifierTest {
 		Classifier classifier2 = Classifier.load(temporaryFile.getPath());
 		temporaryFile.delete();
 		// test
-		RandomAccessibleInterval<IntType> result = classifier.apply(img);
-		RandomAccessibleInterval<IntType> result2 = classifier2.apply(img);
+		RandomAccessibleInterval<IntType> result = classifier.segment(img);
+		RandomAccessibleInterval<IntType> result2 = classifier2.segment(img);
 		Utils.assertImagesEqual(result, result2);
 	}
 
@@ -96,7 +96,7 @@ public class ClassifierTest {
 	public void testDifferentWekaClassifiers() {
 		FeatureGroup features = Features.group(SingleFeatures.identity(), GroupedFeatures.gauss());
 		Classifier classifier = Trainer.train(img, labeling, features, new RandomCommittee());
-		RandomAccessibleInterval<IntType> result = classifier.apply(img);
+		RandomAccessibleInterval<IntType> result = classifier.segment(img);
 		checkExpected(result, classifier.classNames());
 	}
 }

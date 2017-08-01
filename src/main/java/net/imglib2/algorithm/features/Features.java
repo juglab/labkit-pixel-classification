@@ -4,6 +4,8 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import net.imagej.ops.OpService;
 import net.imagej.ops.special.function.Functions;
+import net.imglib2.Interval;
+import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.img.Img;
@@ -22,8 +24,12 @@ import java.util.List;
 public class Features {
 
 	public static RandomAccessibleInterval<FloatType> applyOnImg(Feature feature, RandomAccessibleInterval<FloatType> image) {
-		Img<FloatType> result = RevampUtils.ops().create().img(RevampUtils.extend(image, 0, feature.count() - 1), new FloatType());
-		feature.apply(Views.extendBorder(image), RevampUtils.slices(result));
+		return applyOnImg(feature, Views.extendBorder(image), image);
+	}
+
+	public static RandomAccessibleInterval<FloatType> applyOnImg(Feature feature, RandomAccessible<FloatType> extendedImage, Interval interval) {
+		Img<FloatType> result = RevampUtils.ops().create().img(RevampUtils.extend(interval, 0, feature.count() - 1), new FloatType());
+		feature.apply(extendedImage, RevampUtils.slices(result));
 		return result;
 	}
 

@@ -10,6 +10,7 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
 import net.imglib2.type.numeric.ComplexType;
+import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.IntType;
@@ -18,7 +19,6 @@ import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
-import net.imglib2.view.composite.GenericComposite;
 import org.scijava.Context;
 import org.scijava.script.ScriptService;
 import weka.core.DenseInstance;
@@ -164,10 +164,6 @@ public class RevampUtils {
 		return copy(Views.iterable(input));
 	}
 
-	public static void copy(RandomAccessibleInterval<FloatType> in, RandomAccessibleInterval<FloatType> out) {
-		ops().copy().iterableInterval(Views.iterable(out), Views.iterable(in));
-	}
-
 	public static <T extends ComplexType<T>> boolean containsNaN(RandomAccessibleInterval<T> result) {
 		for(T value : Views.iterable(result))
 			if(Double.isNaN(value.getRealDouble()))
@@ -240,6 +236,10 @@ public class RevampUtils {
 			values[i] = featureValues.get(i).getRealDouble();
 		values[featureCount] = classIndex;
 		return new DenseInstance(1.0, values);
+	}
+
+	public static void copyInteger(RandomAccessibleInterval<? extends IntegerType<?>> in, RandomAccessibleInterval<? extends IntegerType<?>> result) {
+		Views.interval(Views.pair(in, result), in).forEach(p -> p.getB().setInteger(p.getA().getInteger()));
 	}
 
 	public interface RunnableWithException {

@@ -4,7 +4,10 @@ import net.imglib2.*;
 import net.imglib2.algorithm.features.FeatureGroup;
 import net.imglib2.algorithm.features.Features;
 import net.imglib2.algorithm.features.RevampUtils;
+import net.imglib2.img.Img;
+import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
@@ -38,12 +41,18 @@ public class Classifier {
 		return features;
 	}
 
-	public RandomAccessibleInterval<IntType> apply(RandomAccessibleInterval<FloatType> image) {
-		RandomAccessibleInterval<FloatType> featureValues = Features.applyOnImg(features, image);
-		return applyOnComposite(Views.collapseReal(featureValues));
+	public RandomAccessibleInterval<? extends IntegerType<?>> segment(RandomAccessibleInterval<FloatType> image) {
+		Img<ByteType> result = RevampUtils.ops().create().img(image, new ByteType());
+		segment(result, Views.extendBorder(image));
+		return result;
 	}
 
-	public RandomAccessibleInterval<IntType> applyOnComposite(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> featureValues) {
+	void segment(RandomAccessibleInterval<? extends IntegerType<?>> out, RandomAccessible<FloatType> image) {
+		RandomAccessibleInterval<FloatType> featureValues = Features.applyOnImg(features, image, out);
+		RevampUtils.copyInteger(segmentLazyOnComposite(Views.collapseReal(featureValues)), out);
+	}
+
+	public RandomAccessibleInterval<IntType> segmentLazyOnComposite(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> featureValues) {
 		RandomAccessibleInterval<Instance> instances = InstanceView.wrapComposite(features, classNames, featureValues);
 		return Predict.classify(instances, classifier);
 	}
