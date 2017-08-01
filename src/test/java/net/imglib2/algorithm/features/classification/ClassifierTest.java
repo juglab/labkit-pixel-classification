@@ -2,8 +2,6 @@ package net.imglib2.algorithm.features.classification;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.*;
-import net.imglib2.algorithm.features.classification.Classifier;
-import net.imglib2.algorithm.features.classification.GroupedFeatures;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
@@ -66,7 +64,7 @@ public class ClassifierTest {
 		net.imglib2.algorithm.features.SingleFeatures sf = new SingleFeatures(settings);
 		net.imglib2.algorithm.features.classification.GroupedFeatures gf = new GroupedFeatures(settings);
 		FeatureGroup features = Features.group(sf.identity(), gf.gauss());
-		return Classifier.train(img, labeling, features);
+		return Trainer.train(img, labeling, features);
 	}
 
 	@Test
@@ -97,7 +95,7 @@ public class ClassifierTest {
 	@Test
 	public void testDifferentWekaClassifiers() {
 		FeatureGroup features = Features.group(SingleFeatures.identity(), GroupedFeatures.gauss());
-		Classifier classifier = Classifier.train(img, labeling, features, new RandomCommittee());
+		Classifier classifier = Trainer.train(img, labeling, features, new RandomCommittee());
 		RandomAccessibleInterval<IntType> result = classifier.apply(img);
 		checkExpected(result, classifier.classNames());
 	}

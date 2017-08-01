@@ -64,51 +64,8 @@ public class Classifier {
 		return Predict.classify(instances, classifier);
 	}
 
-	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, FeatureGroup features) {
-		return train(image, labeling, features, initRandomForest());
-	}
-
-	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, FeatureGroup features, weka.classifiers.Classifier classifier) {
-		List<String> classNames = getClassNames(labeling);
-		Training<Classifier> training = training(classNames, features, classifier);
-
-		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(applyOnImg(features, image));
-		RandomAccess<? extends GenericComposite<FloatType>> ra = featureStack.randomAccess();
-		for(int classIndex = 0; classIndex < classNames.size(); classIndex++) {
-			final LabelRegions<String> regions = new LabelRegions<>(labeling);
-			LabelRegion<String> region = regions.getLabelRegion(classNames.get(classIndex));
-			Cursor<Void> cursor = region.cursor();
-			while(cursor.hasNext()) {
-				cursor.next();
-				ra.setPosition(cursor);
-				training.add(ra.get(), classIndex);
-			}
-		}
-		return training.train();
-	}
-
 	public List<String> classNames() {
 		return classNames;
-	}
-
-	private static AbstractClassifier initRandomForest() {
-		FastRandomForest rf = new FastRandomForest();
-		int numOfTrees = 200;
-		rf.setNumTrees(numOfTrees);
-		//this is the default that Breiman suggests
-		//rf.setNumFeatures((int) Math.round(Math.sqrt(featureStack.getSize())));
-		//but this seems to work better
-		int randomFeatures = 2;
-		rf.setNumFeatures(randomFeatures);
-		// Random seed
-		rf.setSeed( (new Random()).nextInt() );
-		// Set number of threads
-		rf.setNumThreads( Prefs.getThreads() );
-		return rf;
-	}
-
-	private static List<String> getClassNames(ImgLabeling<String, IntType> labeling) {
-		return new ArrayList<>(labeling.getMapping().getLabels());
 	}
 
 	private static RandomAccessibleInterval<Instance> instances(Feature feature, List<String> classes, RandomAccessibleInterval<FloatType> featureValues) {
