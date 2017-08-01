@@ -10,14 +10,18 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
 import net.imglib2.type.numeric.ComplexType;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
+import net.imglib2.view.composite.Composite;
+import net.imglib2.view.composite.GenericComposite;
 import org.scijava.Context;
 import org.scijava.script.ScriptService;
+import weka.core.DenseInstance;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -228,6 +232,14 @@ public class RevampUtils {
 				throw (RuntimeException) e;
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static DenseInstance getInstance(int featureCount, int classIndex, Composite<? extends RealType<?>> featureValues) {
+		double[] values = new double[featureCount + 1];
+		for (int i = 0; i < featureCount; i++)
+			values[i] = featureValues.get(i).getRealDouble();
+		values[featureCount] = classIndex;
+		return new DenseInstance(1.0, values);
 	}
 
 	public interface RunnableWithException {

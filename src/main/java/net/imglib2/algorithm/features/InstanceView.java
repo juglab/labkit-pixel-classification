@@ -2,25 +2,26 @@ package net.imglib2.algorithm.features;
 
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
+import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.AbstractConvertedRandomAccess;
 import net.imglib2.converter.AbstractConvertedRandomAccessible;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.view.composite.RealComposite;
+import net.imglib2.view.composite.Composite;
 import weka.core.Attribute;
 import weka.core.Instance;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class InstanceView< R extends RealType< R >> extends AbstractConvertedRandomAccessible< RealComposite< R >, Instance >
+public class InstanceView<C extends Composite<? extends RealType<?>>> extends AbstractConvertedRandomAccessible< C, Instance >
 {
 
-	final RandomAccessibleInterval< RealComposite< R > > source;
+	final RandomAccessible<C> source;
 
 	private final Attribute[] attributes;
 
-	public InstanceView(final RandomAccessibleInterval< RealComposite< R > > source, final Attribute[] attributes )
+	public InstanceView(final RandomAccessible<C> source, final Attribute[] attributes )
 	{
 		super( source );
 		this.source = source;
@@ -28,29 +29,28 @@ public class InstanceView< R extends RealType< R >> extends AbstractConvertedRan
 	}
 
 	@Override
-	public InstanceAccess< R > randomAccess()
-	{
+	public InstanceAccess<C> randomAccess() {
 		return new InstanceAccess<>( source.randomAccess(), attributes );
 	}
 
 	@Override
-	public InstanceAccess< R > randomAccess( final Interval interval )
+	public InstanceAccess<C> randomAccess(final Interval interval )
 	{
 		return randomAccess();
 	}
 
-	public static class InstanceAccess< R extends RealType< R >> extends AbstractConvertedRandomAccess< RealComposite< R >, Instance >
+	public static class InstanceAccess<C extends Composite<? extends RealType<?>>> extends AbstractConvertedRandomAccess< C, Instance >
 	{
 
-		private final CompositeInstance< R > instance;
+		private final CompositeInstance instance;
 
 		private final Attribute[] attributes;
 
 
-		public InstanceAccess(final RandomAccess< RealComposite< R > > source, final Attribute[] attributes )
+		public InstanceAccess(final RandomAccess< C > source, final Attribute[] attributes )
 		{
 			super( source );
-			instance = new CompositeInstance< >( source.get(), attributes );
+			instance = new CompositeInstance( source.get(), attributes );
 			this.attributes = attributes;
 		}
 
@@ -62,7 +62,7 @@ public class InstanceView< R extends RealType< R >> extends AbstractConvertedRan
 		}
 
 		@Override
-		public InstanceAccess< R > copy()
+		public InstanceAccess< C > copy()
 		{
 			return new InstanceAccess<>( source.copyRandomAccess(), attributes );
 		}

@@ -3,22 +3,20 @@ package net.imglib2.algorithm.features;
 import com.google.gson.*;
 import hr.irb.fastRandomForest.FastRandomForest;
 import ij.Prefs;
-import net.imglib2.Cursor;
+import net.imglib2.*;
 import net.imglib2.RandomAccess;
-import net.imglib2.RandomAccessible;
-import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
+import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.GenericComposite;
-import net.imglib2.view.composite.RealComposite;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
-import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -45,8 +43,22 @@ public class Classifier {
 		this.classifier = classifier;
 	}
 
+	public FeatureGroup features() {
+		return features;
+	}
+
 	public RandomAccessibleInterval<IntType> apply(RandomAccessibleInterval<FloatType> image) {
-		RandomAccessibleInterval<Instance> instances = instances(features, image, classNames);
+		RandomAccessibleInterval<FloatType> featureValues = applyOnImg(features, image);
+		return applyOnFeatures(featureValues);
+	}
+
+	public RandomAccessibleInterval<IntType> applyOnFeatures(RandomAccessibleInterval<FloatType> featureValues) {
+		RandomAccessibleInterval<Instance> instances = instances(features, classNames, featureValues);
+		return Predict.classify(instances, classifier);
+	}
+
+	public RandomAccessibleInterval<IntType> applyOnComposite(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> featureValues) {
+		RandomAccessibleInterval<Instance> instances = instancesForComposite(features, classNames, featureValues);
 		return Predict.classify(instances, classifier);
 	}
 
@@ -55,12 +67,26 @@ public class Classifier {
 	}
 
 	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, FeatureGroup features, weka.classifiers.Classifier classifier) {
-		try {
-			classifier.buildClassifier(trainingInstances(image, labeling, features));
-		} catch (Exception e) {
-			new RuntimeException(e);
+		List<String> classNames = getClassNames(labeling);
+		Training<Classifier> training = training(classNames, features, classifier);
+
+		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(applyOnImg(features, image));
+		RandomAccess<? extends GenericComposite<FloatType>> ra = featureStack.randomAccess();
+		for(int classIndex = 0; classIndex < classNames.size(); classIndex++) {
+			final LabelRegions<String> regions = new LabelRegions<>(labeling);
+			LabelRegion<String> region = regions.getLabelRegion(classNames.get(classIndex));
+			Cursor<Void> cursor = region.cursor();
+			while(cursor.hasNext()) {
+				cursor.next();
+				ra.setPosition(cursor);
+				training.add(ra.get(), classIndex);
+			}
 		}
-		return new Classifier(getClassNames(labeling), features, classifier);
+		return training.train();
+	}
+
+	public List<String> classNames() {
+		return classNames;
 	}
 
 	private static AbstractClassifier initRandomForest() {
@@ -79,47 +105,19 @@ public class Classifier {
 		return rf;
 	}
 
-	private static Instances trainingInstances(Img<FloatType> image, ImgLabeling<String, IntType> labeling, Feature feature) {
-		List<String> classNames = getClassNames(labeling);
-		final List<Attribute> attributes = Features.attributes(feature, classNames);
-		final Instances instances = new Instances("segment", new ArrayList<>(attributes), 1);
-		int featureCount = feature.count();
-		instances.setClassIndex(featureCount);
-
-		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(applyOnImg(feature, image));
-		RandomAccess<? extends GenericComposite<FloatType>> ra = featureStack.randomAccess();
-		for(int classIndex = 0; classIndex < classNames.size(); classIndex++) {
-			final LabelRegions<String> regions = new LabelRegions<>(labeling);
-			LabelRegion<String> region = regions.getLabelRegion(classNames.get(classIndex));
-			Cursor<Void> cursor = region.cursor();
-			while(cursor.hasNext()) {
-				cursor.next();
-				ra.setPosition(cursor);
-				instances.add(getInstance(featureCount, classIndex, ra.get()));
-			}
-		}
-		return instances;
-	}
-
 	private static List<String> getClassNames(ImgLabeling<String, IntType> labeling) {
 		return new ArrayList<>(labeling.getMapping().getLabels());
 	}
 
-	private static DenseInstance getInstance(int featureCount, int classIndex, GenericComposite<FloatType> featureValues) {
-		double[] values = new double[featureCount + 1];
-		for (int i = 0; i < featureCount; i++)
-			values[i] = featureValues.get(i).get();
-		values[featureCount] = classIndex;
-		return new DenseInstance(1.0, values);
+	private static RandomAccessibleInterval<Instance> instances(Feature feature, List<String> classes, RandomAccessibleInterval<FloatType> featureValues) {
+		return instancesForComposite(feature, classes, Views.collapseReal(featureValues));
 	}
 
-	public static RandomAccessibleInterval<Instance> instances(Feature feature, RandomAccessibleInterval<FloatType> image, List<String> classes) {
-		RandomAccessibleInterval<RealComposite<FloatType>> collapsed = Views.collapseReal(applyOnImg(feature, image));
-		RandomAccessible<Instance> instanceView = new InstanceView<>(collapsed, attributesAsArray(feature, classes));
-		return Views.interval(instanceView, image);
+	private static <C extends Composite<? extends RealType<?>>> RandomAccessibleInterval<Instance> instancesForComposite(Feature feature, List<String> classes, RandomAccessibleInterval<C> collapsed) {
+		return Views.interval(new InstanceView<>(collapsed, attributesAsArray(feature, classes)), collapsed);
 	}
 
-	public static Attribute[] attributesAsArray(Feature feature, List<String> classes) {
+	private static Attribute[] attributesAsArray(Feature feature, List<String> classes) {
 		List<Attribute> attributes = Features.attributes(feature, classes);
 		return attributes.toArray(new Attribute[attributes.size()]);
 	}
@@ -145,10 +143,6 @@ public class Classifier {
 				.registerTypeAdapter(weka.classifiers.Classifier.class, new ClassifierSerializer())
 				.registerTypeAdapter(weka.classifiers.Classifier.class, new ClassifierDeserializer())
 				.create();
-	}
-
-	public List<String> classNames() {
-		return classNames;
 	}
 
 	static class ClassifierSerializer implements JsonSerializer<weka.classifiers.Classifier> {
@@ -187,4 +181,42 @@ public class Classifier {
 		}
 	}
 
+	public static Training<Classifier> training(List<String> classNames, FeatureGroup features, weka.classifiers.Classifier classifier) {
+		return new MyTrainingData(classNames, features, classifier);
+	}
+
+	private static class MyTrainingData implements Training<Classifier> {
+
+		final Instances instances;
+
+		final int featureCount;
+
+		final private List<String> classNames;
+
+		final private FeatureGroup features;
+
+		final private weka.classifiers.Classifier classifier;
+
+		MyTrainingData(List<String> classNames, FeatureGroup features, weka.classifiers.Classifier classifier) {
+			this.classNames = classNames;
+			this.features = features;
+			this.classifier = classifier;
+			this.instances = new Instances("segment", new ArrayList<>(Features.attributes(features, classNames)), 1);
+			this.featureCount = features.count();
+			instances.setClassIndex(featureCount);
+		}
+
+		@Override
+		public void add(Composite<? extends RealType<?>> featureVector, int classIndex) {
+			instances.add(RevampUtils.getInstance(featureCount, classIndex, featureVector));
+		}
+
+		@Override
+		public Classifier train() {
+			RevampUtils.wrapException( () ->
+ 				classifier.buildClassifier(instances)
+			);
+			return new Classifier(classNames, features, classifier);
+		}
+	}
 }

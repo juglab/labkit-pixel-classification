@@ -1,27 +1,27 @@
 package net.imglib2.algorithm.features;
 
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.view.composite.RealComposite;
+import net.imglib2.view.composite.Composite;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 
 import java.util.Enumeration;
 
-public class CompositeInstance< R extends RealType< R >> implements Instance
+public class CompositeInstance implements Instance
 {
 
 	// Store RealComposite< R > instead of Sampler< RealComposite< R > >
 	// This requires a setSource method but for getting attributes is only
 	// RealComposite.get instead of Sampler.get.get
-	private RealComposite< R > source;
+	private Composite<? extends RealType<?>> source;
 
 	private final Attribute[] attributes;
 
 	private final int classIndex;
 
 
-	public CompositeInstance(final RealComposite< R > source, final Attribute[] attributes )
+	public CompositeInstance(final Composite<? extends RealType<?>> source, final Attribute[] attributes )
 	{
 		super();
 		this.source = source;
@@ -29,15 +29,15 @@ public class CompositeInstance< R extends RealType< R >> implements Instance
 		this.classIndex = attributes.length - 1;
 	}
 
-	public void setSource( final RealComposite< R > source )
+	public void setSource( final Composite<? extends RealType<?>> source )
 	{
 		this.source = source;
 	}
 
 	@Override
-	public CompositeInstance< R > copy()
+	public CompositeInstance copy()
 	{
-		return new CompositeInstance<>( source.copy(), attributes );
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
