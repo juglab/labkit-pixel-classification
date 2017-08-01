@@ -1,14 +1,15 @@
 package net.imglib2.algorithm.features.classification;
 
 import net.imglib2.*;
-import net.imglib2.algorithm.features.Feature;
 import net.imglib2.algorithm.features.FeatureGroup;
 import net.imglib2.algorithm.features.Features;
 import net.imglib2.algorithm.features.RevampUtils;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
+import net.imglib2.view.composite.RealComposite;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -46,8 +47,8 @@ public class Classifier {
 	}
 
 	public RandomAccessibleInterval<IntType> applyOnFeatures(RandomAccessibleInterval<FloatType> featureValues) {
-		RandomAccessibleInterval<Instance> instances = InstanceView.wrap(features, classNames, featureValues);
-		return Predict.classify(instances, classifier);
+		RandomAccessibleInterval<RealComposite<FloatType>> collapsed = Views.collapseReal(featureValues);
+		return applyOnComposite(collapsed);
 	}
 
 	public RandomAccessibleInterval<IntType> applyOnComposite(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> featureValues) {
