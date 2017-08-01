@@ -1,8 +1,6 @@
 package net.imglib2.algorithm.features.classification;
 
 import net.imagej.ops.Ops;
-import net.imagej.ops.special.computer.AbstractUnaryComputerOp;
-import net.imagej.ops.special.computer.UnaryComputerOp;
 import net.imagej.ops.special.hybrid.AbstractUnaryHybridCF;
 import net.imagej.ops.special.hybrid.UnaryHybridCF;
 import net.imglib2.*;
@@ -10,14 +8,15 @@ import net.imglib2.algorithm.features.FeatureGroup;
 import net.imglib2.algorithm.features.Features;
 import net.imglib2.algorithm.features.RevampUtils;
 import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ByteType;
-import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
-import weka.core.Instance;
+import net.imglib2.view.composite.GenericComposite;
+import weka.core.Attribute;
 import weka.core.Instances;
 
 import java.io.*;
@@ -57,9 +56,8 @@ public class Classifier {
 		RevampUtils.copyInteger(segmentLazyOnComposite(Views.collapseReal(featureValues)), out);
 	}
 
-	public RandomAccessibleInterval<IntType> segmentLazyOnComposite(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> featureValues) {
-		RandomAccessibleInterval<Instance> instances = InstanceView.wrapComposite(features, classNames, featureValues);
-		return Predict.classify(instances, classifier);
+	public RandomAccessibleInterval<? extends IntegerType<?>> segmentLazyOnComposite(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> featureValues) {
+		return Views.interval(new MappingView<>(featureValues, pixelClassificationOp()), featureValues);
 	}
 
 	public RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> predict(RandomAccessibleInterval<FloatType> image) {
@@ -74,11 +72,15 @@ public class Classifier {
 		RevampUtils.ops().run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelPredictionOp());
 	}
 
-	public UnaryComputerOp<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>> pixelPredictionOp() {
+	public RandomAccessibleInterval<Composite<? extends RealType<?>>> predictLazyOnComposite(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> featureValues) {
+		return Views.interval(new MappingView<>(featureValues, pixelPredictionOp()), featureValues);
+	}
+
+	public UnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>> pixelPredictionOp() {
 		return new PixelPredictionOp();
 	}
 
-	public UnaryHybridCF<? extends Composite<? extends RealType<?>>, IntegerType<?>> pixelClassificationOp() {
+	public UnaryHybridCF<Composite<? extends RealType<?>>, IntegerType<?>> pixelClassificationOp() {
 		return new PixelClassifierOp();
 	}
 
@@ -128,11 +130,18 @@ public class Classifier {
 		}
 	}
 
+	// -- Helper methods --
+
+	Attribute[] attributesAsArray() {
+		List<Attribute> attributes = Features.attributes(features, classNames);
+		return attributes.toArray(new Attribute[attributes.size()]);
+	}
+
 	// -- Helper classes --
 
 	private class PixelClassifierOp extends AbstractUnaryHybridCF<Composite<? extends RealType<?>>, IntegerType<?>> {
 
-		CompositeInstance compositeInstance = new CompositeInstance(null, InstanceView.attributesAsArray(features, classNames));
+		CompositeInstance compositeInstance = new CompositeInstance(null, attributesAsArray());
 
 		@Override
 		public UnaryHybridCF<Composite<? extends RealType<?>>, IntegerType<?>> getIndependentInstance() {
@@ -152,12 +161,12 @@ public class Classifier {
 
 	}
 
-	private class PixelPredictionOp extends AbstractUnaryComputerOp<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>> {
+	private class PixelPredictionOp extends AbstractUnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>> {
 
-		CompositeInstance compositeInstance = new CompositeInstance(null, InstanceView.attributesAsArray(features, classNames));
+		CompositeInstance compositeInstance = new CompositeInstance(null, attributesAsArray());
 
 		@Override
-		public UnaryComputerOp<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>> getIndependentInstance() {
+		public UnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>> getIndependentInstance() {
 			return new PixelPredictionOp();
 		}
 
@@ -169,5 +178,9 @@ public class Classifier {
 				output.get(i).setReal(result[i]);
 		}
 
+		@Override
+		public Composite<? extends RealType<?>> createOutput(Composite<? extends RealType<?>> input) {
+			return new GenericComposite<>(ArrayImgs.doubles(compositeInstance.numClasses()).randomAccess());
+		}
 	}
 }
