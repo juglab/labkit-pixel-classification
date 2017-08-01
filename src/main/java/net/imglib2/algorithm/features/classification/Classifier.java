@@ -1,24 +1,15 @@
 package net.imglib2.algorithm.features.classification;
 
-import hr.irb.fastRandomForest.FastRandomForest;
-import ij.Prefs;
 import net.imglib2.*;
-import net.imglib2.RandomAccess;
 import net.imglib2.algorithm.features.Feature;
 import net.imglib2.algorithm.features.FeatureGroup;
 import net.imglib2.algorithm.features.Features;
 import net.imglib2.algorithm.features.RevampUtils;
-import net.imglib2.img.Img;
-import net.imglib2.roi.labeling.ImgLabeling;
-import net.imglib2.roi.labeling.LabelRegion;
-import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
-import net.imglib2.view.composite.GenericComposite;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -35,9 +26,11 @@ public class Classifier {
 
 	private final FeatureGroup features;
 
-	private List<String> classNames;
+	private final List<String> classNames;
 
 	private weka.classifiers.Classifier classifier;
+
+	private boolean isTrained = false;
 
 	public Classifier(List<String> classNames, FeatureGroup features, weka.classifiers.Classifier classifier) {
 		this.classNames = Collections.unmodifiableList(classNames);
@@ -91,26 +84,21 @@ public class Classifier {
 		return ClassifierSerialization.load(filename);
 	}
 
-	public static Training<Classifier> training(List<String> classNames, FeatureGroup features, weka.classifiers.Classifier classifier) {
-		return new MyTrainingData(classNames, features, classifier);
+	public Training training() {
+		return new MyTrainingData();
 	}
 
-	private static class MyTrainingData implements Training<Classifier> {
+	public boolean isTrained() {
+		return isTrained;
+	}
+
+	private class MyTrainingData implements Training {
 
 		final Instances instances;
 
 		final int featureCount;
 
-		final private List<String> classNames;
-
-		final private FeatureGroup features;
-
-		final private weka.classifiers.Classifier classifier;
-
-		MyTrainingData(List<String> classNames, FeatureGroup features, weka.classifiers.Classifier classifier) {
-			this.classNames = classNames;
-			this.features = features;
-			this.classifier = classifier;
+		MyTrainingData() {
 			this.instances = new Instances("segment", new ArrayList<>(Features.attributes(features, classNames)), 1);
 			this.featureCount = features.count();
 			instances.setClassIndex(featureCount);
@@ -122,11 +110,11 @@ public class Classifier {
 		}
 
 		@Override
-		public Classifier train() {
+		public void train() {
 			RevampUtils.wrapException( () ->
  				classifier.buildClassifier(instances)
 			);
-			return new Classifier(classNames, features, classifier);
+
 		}
 	}
 }

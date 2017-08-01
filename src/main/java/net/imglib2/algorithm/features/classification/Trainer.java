@@ -29,13 +29,23 @@ import static net.imglib2.algorithm.features.Features.applyOnImg;
  */
 public class Trainer {
 
-	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, FeatureGroup features) {
-		return train(image, labeling, features, initRandomForest());
+	private final FeatureGroup features;
+
+	private final List<String> classNames;
+
+	private final Training training;
+
+	private Trainer(Classifier classifier) {
+		features = classifier.features();
+		training = classifier.training();
+		classNames = classifier.classNames();
 	}
 
-	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, FeatureGroup features, weka.classifiers.Classifier classifier) {
-		List<String> classNames = getClassNames(labeling);
-		Training<Classifier> training = Classifier.training(classNames, features, classifier);
+	public static Trainer of(Classifier classifier) {
+		return new Trainer(classifier);
+	}
+
+	public void trainLabeledImage(Img<FloatType> image, ImgLabeling<String, IntType> labeling) {
 		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(applyOnImg(features, image));
 		RandomAccess<? extends GenericComposite<FloatType>> ra = featureStack.randomAccess();
 		for(int classIndex = 0; classIndex < classNames.size(); classIndex++) {
@@ -48,7 +58,18 @@ public class Trainer {
 				training.add(ra.get(), classIndex);
 			}
 		}
-		return training.train();
+		training.train();
+	}
+
+	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, FeatureGroup features) {
+		return train(image, labeling, features, initRandomForest());
+	}
+
+	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, FeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
+		List<String> classNames = getClassNames(labeling);
+		Classifier classifier = new Classifier(classNames, features, initialWekaClassifier); Training training = classifier.training();
+		Trainer.of(classifier).trainLabeledImage(image, labeling);
+		return classifier;
 	}
 
 	public static AbstractClassifier initRandomForest() {
@@ -67,7 +88,7 @@ public class Trainer {
 		return rf;
 	}
 
-	// private Helper methods
+	// -- Helper methods --
 
 	private static List<String> getClassNames(ImgLabeling<String, IntType> labeling) {
 		return new ArrayList<>(labeling.getMapping().getLabels());
