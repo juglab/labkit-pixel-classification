@@ -9,14 +9,11 @@ import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
-import net.imglib2.view.composite.RealComposite;
 import weka.core.Instance;
 import weka.core.Instances;
 
 import java.io.*;
 import java.util.*;
-
-import static net.imglib2.algorithm.features.Features.applyOnImg;
 
 /**
  * @author Matthias Arzt
@@ -42,13 +39,8 @@ public class Classifier {
 	}
 
 	public RandomAccessibleInterval<IntType> apply(RandomAccessibleInterval<FloatType> image) {
-		RandomAccessibleInterval<FloatType> featureValues = applyOnImg(features, image);
-		return applyOnFeatures(featureValues);
-	}
-
-	public RandomAccessibleInterval<IntType> applyOnFeatures(RandomAccessibleInterval<FloatType> featureValues) {
-		RandomAccessibleInterval<RealComposite<FloatType>> collapsed = Views.collapseReal(featureValues);
-		return applyOnComposite(collapsed);
+		RandomAccessibleInterval<FloatType> featureValues = Features.applyOnImg(features, image);
+		return applyOnComposite(Views.collapseReal(featureValues));
 	}
 
 	public RandomAccessibleInterval<IntType> applyOnComposite(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> featureValues) {
