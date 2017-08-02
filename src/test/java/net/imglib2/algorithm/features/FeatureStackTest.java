@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static net.imglib2.algorithm.features.classification.GroupedFeatures.*;
+import static net.imglib2.algorithm.features.GroupedFeatures.*;
 import static net.imglib2.algorithm.features.SingleFeatures.*;
 import static org.junit.Assert.assertEquals;
 

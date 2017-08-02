@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import static net.imglib2.algorithm.features.classification.GroupedFeatures.*;
+import static net.imglib2.algorithm.features.GroupedFeatures.*;
 import static net.imglib2.algorithm.features.SingleFeatures.*;
 import static org.junit.Assert.assertEquals;
 
@@ -62,7 +62,7 @@ public class ClassifierTest {
 	private Classifier trainClassifier() {
 		GlobalSettings settings = new GlobalSettings(Arrays.asList(1.0, 8.0, 16.0), 3.0);
 		net.imglib2.algorithm.features.SingleFeatures sf = new SingleFeatures(settings);
-		net.imglib2.algorithm.features.classification.GroupedFeatures gf = new GroupedFeatures(settings);
+		net.imglib2.algorithm.features.GroupedFeatures gf = new GroupedFeatures(settings);
 		FeatureGroup features = Features.group(sf.identity(), gf.gauss());
 		return Trainer.train(img, labeling, features);
 	}

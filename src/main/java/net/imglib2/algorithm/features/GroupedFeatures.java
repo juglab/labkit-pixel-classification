@@ -1,7 +1,5 @@
-package net.imglib2.algorithm.features.classification;
+package net.imglib2.algorithm.features;
 
-import net.imglib2.algorithm.features.Features;
-import net.imglib2.algorithm.features.GlobalSettings;
 import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.algorithm.features.ops.SingleSphereShapedFeature;
 import net.imglib2.algorithm.features.ops.SobelGradientFeature;
@@ -16,7 +14,7 @@ public class GroupedFeatures {
 
 	private final GlobalSettings globalSettings;
 
-	GroupedFeatures(GlobalSettings settings) {
+	public GroupedFeatures(GlobalSettings settings) {
 		this.globalSettings = settings;
 	}
 
