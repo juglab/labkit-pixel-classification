@@ -45,7 +45,7 @@ public class RevampUtils {
 		return ops;
 	}
 
-	public static List<RandomAccessibleInterval<FloatType>> slices(RandomAccessibleInterval<FloatType> output) {
+	public static <T> List<RandomAccessibleInterval<T>> slices(RandomAccessibleInterval<T> output) {
 		int axis = output.numDimensions() - 1;
 		return LongStream.range(output.min(axis), output.max(axis) + 1)
 				.mapToObj(pos -> Views.hyperSlice(output, axis, pos))
