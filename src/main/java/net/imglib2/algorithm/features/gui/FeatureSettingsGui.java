@@ -32,7 +32,7 @@ public class FeatureSettingsGui {
 
 	private final JPanel content = new JPanel();
 
-	private final ListModel model = new ListModel();
+	private final ListModel model;
 
 	private final JList<Holder> list = new JList<>();
 
@@ -42,14 +42,16 @@ public class FeatureSettingsGui {
 
 	private GlobalsPanel globalsPanel;
 
-	public FeatureSettingsGui() {
-		initGui();
+	public FeatureSettingsGui(FeatureGroup fg) {
+		List<Holder> init = fg.features().stream().map(f -> new Holder(f)).collect(Collectors.toList());
+		model = new ListModel(init);
+		initGui(GlobalSettings.defaultSettings());
 	}
 
-	private void initGui() {
+	private void initGui(GlobalSettings globals) {
 		list.setModel(model);
 		content.setLayout(new MigLayout("insets 0", "[grow]","[][grow][]"));
-		globalsPanel = new GlobalsPanel(GlobalSettings.defaultSettings());
+		globalsPanel = new GlobalsPanel(globals);
 		content.add(globalsPanel, "wrap");
 		content.add(new JScrollPane(list), "split 2, grow");
 		JPopupMenu menu = initMenu();
@@ -128,8 +130,8 @@ public class FeatureSettingsGui {
 		return button;
 	}
 
-	public static Optional<FeatureGroup> show() {
-		FeatureSettingsGui featureSettingsGui = new FeatureSettingsGui();
+	public static Optional<FeatureGroup> show(FeatureGroup fg) {
+		FeatureSettingsGui featureSettingsGui = new FeatureSettingsGui(fg);
 		return featureSettingsGui.showInternal();
 	}
 
@@ -159,7 +161,7 @@ public class FeatureSettingsGui {
 	}
 
 	public static void main(String... args) {
-		System.out.println(FeatureSettingsGui.show());
+		System.out.println(FeatureSettingsGui.show(Features.group()));
 		System.out.println("finished");
 	}
 
@@ -169,6 +171,10 @@ public class FeatureSettingsGui {
 
 		public Holder(Class<? extends FeatureOp> featureClass) {
 			this.value = FeatureSetting.fromClass(featureClass);
+		}
+
+		public Holder(Feature f) {
+			this.value = FeatureSetting.fromOp((FeatureOp) f);
 		}
 
 		void edit() {
@@ -190,7 +196,11 @@ public class FeatureSettingsGui {
 
 	static class ListModel extends AbstractListModel<Holder> {
 
-		List<Holder> items = new ArrayList();
+		private final List<Holder> items;
+
+		public ListModel(List<Holder> items) {
+			this.items = new ArrayList(items);
+		}
 
 		@Override
 		public int getSize() {
