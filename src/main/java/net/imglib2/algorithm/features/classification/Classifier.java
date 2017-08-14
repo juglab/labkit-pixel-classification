@@ -16,6 +16,7 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.GenericComposite;
+import net.imglib2.view.composite.RealComposite;
 import weka.core.Attribute;
 import weka.core.Instances;
 
@@ -53,7 +54,7 @@ public class Classifier {
 
 	public void segment(RandomAccessibleInterval<? extends IntegerType<?>> out, RandomAccessible<FloatType> image) {
 		RandomAccessibleInterval<FloatType> featureValues = Features.applyOnImg(features, image, out);
-		RevampUtils.copyInteger(segmentLazyOnComposite(Views.collapseReal(featureValues)), out);
+		RevampUtils.ops().run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelClassificationOp());
 	}
 
 	public RandomAccessibleInterval<? extends IntegerType<?>> segmentLazyOnComposite(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> featureValues) {
