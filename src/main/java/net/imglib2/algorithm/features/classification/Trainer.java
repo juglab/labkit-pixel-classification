@@ -5,14 +5,18 @@ import ij.Prefs;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.FeatureGroup;
 import net.imglib2.img.Img;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.type.numeric.IntegerType;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
+import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.GenericComposite;
 import weka.classifiers.AbstractClassifier;
 
@@ -45,9 +49,13 @@ public class Trainer {
 		return new Trainer(classifier);
 	}
 
-	public void trainLabeledImage(Img<FloatType> image, ImgLabeling<String, IntType> labeling) {
+	public void trainLabeledImage(Img<FloatType> image, ImgLabeling<String, ?> labeling) {
 		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(applyOnImg(features, image));
-		RandomAccess<? extends GenericComposite<FloatType>> ra = featureStack.randomAccess();
+		trainLabeledFeatures(featureStack, labeling);
+	}
+
+	public void trainLabeledFeatures(RandomAccessible<? extends Composite<? extends RealType<?>>> features, ImgLabeling<String, ?> labeling) {
+		RandomAccess<? extends Composite<? extends RealType<?>>> ra = features.randomAccess();
 		for(int classIndex = 0; classIndex < classNames.size(); classIndex++) {
 			final LabelRegions<String> regions = new LabelRegions<>(labeling);
 			LabelRegion<String> region = regions.getLabelRegion(classNames.get(classIndex));
