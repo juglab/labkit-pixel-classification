@@ -1,7 +1,6 @@
 package net.imglib2.algorithm.features.ops;
 
 import net.imglib2.*;
-import net.imglib2.algorithm.features.Feature;
 import net.imglib2.algorithm.features.RevampUtils;
 import net.imglib2.img.Img;
 import net.imglib2.type.Type;

@@ -173,8 +173,8 @@ public class FeatureSettingsGui {
 			this.value = FeatureSetting.fromClass(featureClass);
 		}
 
-		public Holder(Feature f) {
-			this.value = FeatureSetting.fromOp((FeatureOp) f);
+		public Holder(FeatureOp f) {
+			this.value = FeatureSetting.fromOp(f);
 		}
 
 		void edit() {

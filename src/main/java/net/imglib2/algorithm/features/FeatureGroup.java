@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 /**
  * @author Matthias Arzt
  */
-public class FeatureGroup implements Feature {
+public class FeatureGroup {
 
 	private final List<FeatureOp> features;
 
@@ -23,7 +23,7 @@ public class FeatureGroup implements Feature {
 	FeatureGroup(List<FeatureOp> features) {
 		checkGlobalSettings(features);
 		this.features = features.stream().flatMap(this::toStream).collect(Collectors.toList());
-		this.count = this.features.stream().mapToInt(Feature::count).sum();
+		this.count = this.features.stream().mapToInt(FeatureOp::count).sum();
 	}
 
 	private void checkGlobalSettings(List<FeatureOp> features) {
@@ -40,31 +40,28 @@ public class FeatureGroup implements Feature {
 		return (f instanceof FeatureGroup) ? ((FeatureGroup) f).features.stream() : Stream.of(f);
 	}
 
-	@Override
 	public int count() {
 		return count;
 	}
 
-	@Override
 	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
 		if(out.size() != count)
 			throw new IllegalArgumentException();
 		int startIndex = 0;
-		for(Feature feature : features) {
+		for(FeatureOp feature : features) {
 			int count = feature.count();
 			feature.apply(in, out.subList(startIndex, startIndex + count));
 			startIndex += count;
 		}
 	}
 
-	@Override
 	public List<String> attributeLabels() {
 		List<String> labels = new ArrayList<>();
-		features.stream().map(Feature::attributeLabels).forEach(labels::addAll);
+		features.stream().map(FeatureOp::attributeLabels).forEach(labels::addAll);
 		return labels;
 	}
 
-	public List<Feature> features() {
+	public List<FeatureOp> features() {
 		return Collections.unmodifiableList(features);
 	}
 }

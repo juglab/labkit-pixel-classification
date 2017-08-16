@@ -1,6 +1,5 @@
 package net.imglib2.algorithm.features.ops;
 
-import net.imglib2.algorithm.features.Feature;
 import net.imglib2.algorithm.features.Features;
 import org.scijava.plugin.Plugin;
 

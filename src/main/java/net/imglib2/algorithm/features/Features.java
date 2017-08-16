@@ -23,17 +23,17 @@ import java.util.List;
  */
 public class Features {
 
-	public static RandomAccessibleInterval<FloatType> applyOnImg(Feature feature, RandomAccessibleInterval<FloatType> image) {
+	public static RandomAccessibleInterval<FloatType> applyOnImg(FeatureGroup feature, RandomAccessibleInterval<FloatType> image) {
 		return applyOnImg(feature, Views.extendBorder(image), image);
 	}
 
-	public static RandomAccessibleInterval<FloatType> applyOnImg(Feature feature, RandomAccessible<FloatType> extendedImage, Interval interval) {
+	public static RandomAccessibleInterval<FloatType> applyOnImg(FeatureGroup feature, RandomAccessible<FloatType> extendedImage, Interval interval) {
 		Img<FloatType> result = RevampUtils.ops().create().img(RevampUtils.extend(interval, 0, feature.count() - 1), new FloatType());
 		feature.apply(extendedImage, RevampUtils.slices(result));
 		return result;
 	}
 
-	public static List<Attribute> attributes(Feature feature, List<String> classes) {
+	public static List<Attribute> attributes(FeatureGroup feature, List<String> classes) {
 		List<String> labels = feature.attributeLabels();
 		List<Attribute> attributes = new ArrayList<>();
 		labels.forEach(label -> attributes.add(new Attribute(label)));

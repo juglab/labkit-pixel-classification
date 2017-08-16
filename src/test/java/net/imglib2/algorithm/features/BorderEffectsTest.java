@@ -3,6 +3,7 @@ package net.imglib2.algorithm.features;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.real.FloatType;
@@ -69,33 +70,35 @@ public class BorderEffectsTest {
 	@Test
 	public void testVariance() { testFeature(GroupedFeatures.variance()); }
 
-	public void testFeature(Feature feature) {
-		RandomAccessibleInterval<FloatType> expected = calculateExpected(feature);
-		RandomAccessibleInterval<FloatType> result = calculateResult(feature);
+	public void testFeature(FeatureOp feature) {
+		FeatureGroup group = Features.group(feature);
+		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
+		RandomAccessibleInterval<FloatType> result = calculateResult(group);
 		Utils.assertImagesEqual(50.0, result, expected);
 	}
 
-	public void showDifference(Feature feature) {
-		RandomAccessibleInterval<FloatType> expected = calculateExpected(feature);
-		RandomAccessibleInterval<FloatType> result = calculateResult(feature);
+	public void showDifference(FeatureOp feature) {
+		FeatureGroup group = Features.group(feature);
+		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
+		RandomAccessibleInterval<FloatType> result = calculateResult(group);
 		Utils.showPsnr(expected, result);
 		Utils.show(Utils.subtract(expected, result), expected, result);
 	}
 
-	public RandomAccessibleInterval<FloatType> calculateResult(Feature feature) {
+	public RandomAccessibleInterval<FloatType> calculateResult(FeatureGroup feature) {
 		Interval featureInterval = RevampUtils.extend(interval, 0, feature.count() - 1);
 		RandomAccessibleInterval<FloatType> result = RevampUtils.ops().create().img(featureInterval, new FloatType());
 		feature.apply(image, RevampUtils.slices(result));
 		return result;
 	}
 
-	public RandomAccessibleInterval<FloatType> calculateExpected(Feature feature) {
+	public RandomAccessibleInterval<FloatType> calculateExpected(FeatureGroup feature) {
 		Interval featureInterval = RevampUtils.extend(interval, 0, feature.count() - 1);
 		return Views.interval(Features.applyOnImg(feature, image), featureInterval);
 	}
 
 	public void showPsnrs() {
-		Feature feature = Features.group(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(),
+		FeatureGroup feature = Features.group(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(),
 				GroupedFeatures.differenceOfGaussians(), GroupedFeatures.sobelGradient(), GroupedFeatures.lipschitz(50),
 				GroupedFeatures.min(), GroupedFeatures.max(), GroupedFeatures.mean(), GroupedFeatures.median(),
 				GroupedFeatures.variance());
