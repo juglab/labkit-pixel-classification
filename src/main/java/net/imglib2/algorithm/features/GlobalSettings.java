@@ -11,20 +11,23 @@ import java.util.Objects;
 public final class GlobalSettings {
 
 	public static GlobalSettings defaultSettings() {
-		return new GlobalSettings(1.0, 16.0, 1.0);
+		return new GlobalSettings(ImageType.GRAY_SCALE, 1.0, 16.0, 1.0);
 	}
+
+	private final ImageType imageType;
 
 	private final List<Double> sigmas;
 
 	private final double membraneThickness;
 
-	public GlobalSettings(List<Double> sigmas, double membraneThickness) {
+	public GlobalSettings(ImageType imageType, List<Double> sigmas, double membraneThickness) {
+		this.imageType = imageType;
 		this.sigmas = Collections.unmodifiableList(new ArrayList<>(sigmas));
 		this.membraneThickness = membraneThickness;
 	}
 
-	public GlobalSettings(double minSigma, double maxSigma, double membraneThickness) {
-		this(initSigmas(minSigma, maxSigma), membraneThickness);
+	public GlobalSettings(ImageType imageType, double minSigma, double maxSigma, double membraneThickness) {
+		this(imageType, initSigmas(minSigma, maxSigma), membraneThickness);
 	}
 
 	private static List<Double> initSigmas(double minSigma, double maxSigma) {
@@ -35,7 +38,7 @@ public final class GlobalSettings {
 	}
 
 	public GlobalSettings(GlobalSettings globalSettings) {
-		this(globalSettings.sigmas(), globalSettings.membraneThickness());
+		this(globalSettings.imageType(), globalSettings.sigmas(), globalSettings.membraneThickness());
 	}
 
 	public List<Double> sigmas() {
@@ -56,8 +59,16 @@ public final class GlobalSettings {
 		if(!(obj instanceof GlobalSettings))
 			return false;
 		GlobalSettings settings = (GlobalSettings) obj;
-		return sigmas.equals(settings.sigmas) &&
-				membraneThickness() == settings.membraneThickness();
+		return imageType.equals(settings.imageType) &&
+				sigmas.equals(settings.sigmas) &&
+				membraneThickness == settings.membraneThickness;
 	}
 
+	public ImageType imageType() {
+		return imageType;
+	}
+
+	public enum ImageType {
+		COLOR, GRAY_SCALE;
+	}
 }

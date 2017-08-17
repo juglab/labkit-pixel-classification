@@ -60,7 +60,7 @@ public class ClassifierTest {
 	}
 
 	private Classifier trainClassifier() {
-		GlobalSettings settings = new GlobalSettings(Arrays.asList(1.0, 8.0, 16.0), 3.0);
+		GlobalSettings settings = new GlobalSettings(GlobalSettings.ImageType.GRAY_SCALE, Arrays.asList(1.0, 8.0, 16.0), 3.0);
 		net.imglib2.algorithm.features.SingleFeatures sf = new SingleFeatures(settings);
 		net.imglib2.algorithm.features.GroupedFeatures gf = new GroupedFeatures(settings);
 		FeatureGroup features = Features.group(sf.identity(), gf.gauss());
