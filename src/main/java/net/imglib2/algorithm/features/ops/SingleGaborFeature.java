@@ -59,10 +59,6 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 	@Override
 	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
 		gaborProcessChannel(kernels, in, out.get(0), out.get(1));
-		if(RevampUtils.containsNaN(out.get(0)))
-			assert false;
-		if(RevampUtils.containsNaN(out.get(1)))
-			assert false;
 	}
 
 	@Override
