@@ -3,9 +3,11 @@ package net.imglib2.algorithm.features.ops;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.FeatureGroup;
+import net.imglib2.algorithm.features.FeatureJoiner;
 import net.imglib2.algorithm.features.Features;
 import net.imglib2.type.numeric.real.FloatType;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -13,11 +15,11 @@ import java.util.List;
  */
 public abstract class AbstractGroupFeatureOp extends AbstractFeatureOp {
 
-	protected FeatureGroup featureGroup = Features.group();
+	protected FeatureJoiner featureGroup = new FeatureJoiner(Collections.emptyList());
 
 	@Override
 	public void initialize() {
-		featureGroup = Features.group(initFeatures());
+		featureGroup = new FeatureJoiner(initFeatures());
 	}
 
 	protected abstract List<FeatureOp> initFeatures();
