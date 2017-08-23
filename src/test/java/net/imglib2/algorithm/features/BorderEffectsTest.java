@@ -71,34 +71,34 @@ public class BorderEffectsTest {
 	public void testVariance() { testFeature(GroupedFeatures.variance()); }
 
 	public void testFeature(FeatureOp feature) {
-		FeatureGroup group = Features.group(feature);
+		GrayFeatureGroup group = Features.group(feature);
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
 		RandomAccessibleInterval<FloatType> result = calculateResult(group);
 		Utils.assertImagesEqual(50.0, result, expected);
 	}
 
 	public void showDifference(FeatureOp feature) {
-		FeatureGroup group = Features.group(feature);
+		GrayFeatureGroup group = Features.group(feature);
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
 		RandomAccessibleInterval<FloatType> result = calculateResult(group);
 		Utils.showPsnr(expected, result);
 		Utils.show(Utils.subtract(expected, result), expected, result);
 	}
 
-	public RandomAccessibleInterval<FloatType> calculateResult(FeatureGroup feature) {
+	public RandomAccessibleInterval<FloatType> calculateResult(GrayFeatureGroup feature) {
 		Interval featureInterval = RevampUtils.extend(interval, 0, feature.count() - 1);
 		RandomAccessibleInterval<FloatType> result = RevampUtils.ops().create().img(featureInterval, new FloatType());
 		feature.apply(image, RevampUtils.slices(result));
 		return result;
 	}
 
-	public RandomAccessibleInterval<FloatType> calculateExpected(FeatureGroup feature) {
+	public RandomAccessibleInterval<FloatType> calculateExpected(GrayFeatureGroup feature) {
 		Interval featureInterval = RevampUtils.extend(interval, 0, feature.count() - 1);
 		return Views.interval(Features.applyOnImg(feature, image), featureInterval);
 	}
 
 	public void showPsnrs() {
-		FeatureGroup feature = Features.group(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(),
+		GrayFeatureGroup feature = Features.group(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(),
 				GroupedFeatures.differenceOfGaussians(), GroupedFeatures.sobelGradient(), GroupedFeatures.lipschitz(50),
 				GroupedFeatures.min(), GroupedFeatures.max(), GroupedFeatures.mean(), GroupedFeatures.median(),
 				GroupedFeatures.variance());

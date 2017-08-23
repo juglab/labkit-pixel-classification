@@ -2,9 +2,7 @@ package net.imglib2.algorithm.features.ops;
 
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.features.FeatureGroup;
 import net.imglib2.algorithm.features.FeatureJoiner;
-import net.imglib2.algorithm.features.Features;
 import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.Collections;

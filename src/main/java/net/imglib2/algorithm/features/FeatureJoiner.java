@@ -16,28 +16,35 @@ import java.util.stream.Stream;
  */
 public class FeatureJoiner {
 
+	private final GlobalSettings settings;
+
 	private final List<FeatureOp> features;
 
 	private final int count;
 
 	public FeatureJoiner(List<FeatureOp> features) {
-		checkGlobalSettings(features);
+		this.settings = checkGlobalSettings(features);
 		this.features = features.stream().flatMap(this::toStream).collect(Collectors.toList());
 		this.count = this.features.stream().mapToInt(FeatureOp::count).sum();
 	}
 
-	private void checkGlobalSettings(List<FeatureOp> features) {
+	private GlobalSettings checkGlobalSettings(List<FeatureOp> features) {
 		if(features.isEmpty())
-			return;
+			return GlobalSettings.defaultSettings();
 		GlobalSettings settings = features.get(0).globalSettings();
 		boolean allEqual =
 				features.stream().allMatch(f -> settings.equals(f.globalSettings()));
 		if(!allEqual)
 			throw new IllegalArgumentException("All features in a feature group must use the same global settings");
+		return settings;
+	}
+
+	public GlobalSettings globalSettings() {
+		return settings;
 	}
 
 	private Stream<? extends FeatureOp> toStream(FeatureOp f) {
-		return (f instanceof FeatureGroup) ? ((FeatureJoiner) f).features.stream() : Stream.of(f);
+		return (f instanceof GrayFeatureGroup) ? ((FeatureJoiner) f).features.stream() : Stream.of(f);
 	}
 
 	public int count() {

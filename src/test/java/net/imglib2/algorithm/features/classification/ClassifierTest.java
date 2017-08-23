@@ -63,7 +63,7 @@ public class ClassifierTest {
 		GlobalSettings settings = new GlobalSettings(GlobalSettings.ImageType.GRAY_SCALE, Arrays.asList(1.0, 8.0, 16.0), 3.0);
 		net.imglib2.algorithm.features.SingleFeatures sf = new SingleFeatures(settings);
 		net.imglib2.algorithm.features.GroupedFeatures gf = new GroupedFeatures(settings);
-		FeatureGroup features = Features.group(sf.identity(), gf.gauss());
+		GrayFeatureGroup features = Features.group(sf.identity(), gf.gauss());
 		return Trainer.train(img, labeling, features);
 	}
 
@@ -85,16 +85,16 @@ public class ClassifierTest {
 
 	@Test
 	public void testGson() {
-		FeatureGroup feature = Features.group(SingleFeatures.gauss(1.0), SingleFeatures.gauss(1.0));
+		GrayFeatureGroup feature = Features.group(SingleFeatures.gauss(1.0), SingleFeatures.gauss(1.0));
 		String serialized = Features.toJson(feature);
 		System.out.println(serialized);
-		FeatureGroup fg = Features.fromJson(serialized);
+		GrayFeatureGroup fg = Features.fromJson(serialized);
 		System.out.println(fg);
 	}
 
 	@Test
 	public void testDifferentWekaClassifiers() {
-		FeatureGroup features = Features.group(SingleFeatures.identity(), GroupedFeatures.gauss());
+		GrayFeatureGroup features = Features.group(SingleFeatures.identity(), GroupedFeatures.gauss());
 		Classifier classifier = Trainer.train(img, labeling, features, new RandomCommittee());
 		RandomAccessibleInterval<? extends IntegerType> result = classifier.segment(img);
 		checkExpected(result, classifier.classNames());

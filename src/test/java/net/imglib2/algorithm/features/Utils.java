@@ -102,7 +102,7 @@ public class Utils {
 	}
 
 	public static <A extends IntegerType<A>, B extends IntegerType<B>>
-		void assertImagesEqual(final IterableInterval<A> a, final RandomAccessibleInterval<B> b) {
+	void assertImagesEqual(final IterableInterval<A> a, final RandomAccessibleInterval<B> b) {
 		assertTrue(Intervals.equals(a, b));
 		System.out.println("check picture content.");
 		Cursor< A > aCursor = a.localizingCursor();

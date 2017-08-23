@@ -9,6 +9,7 @@ import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
@@ -252,11 +253,31 @@ public class RevampUtils {
 		Views.interval(Views.pair(in, result), in).forEach(p -> p.getB().setInteger(p.getA().getInteger()));
 	}
 
+	public static List<RandomAccessible<FloatType>> splitChannels(RandomAccessible<ARGBType> image) {
+		return convertersStream().map(x -> Converters.convert(image, x, new FloatType())).collect(Collectors.toList());
+	}
+
+	public static List<RandomAccessibleInterval<FloatType>> splitChannels(RandomAccessibleInterval<ARGBType> image) {
+		return convertersStream().map(x -> Converters.convert(image, x, new FloatType())).collect(Collectors.toList());
+	}
+
+	private static Stream<Converter<ARGBType, FloatType>> convertersStream() {
+		return Stream.<IntToIntFunction>of(ARGBType::red, ARGBType::green, ARGBType::blue) .map(RevampUtils::converter);
+	}
+
+	private static Converter<ARGBType, FloatType> converter(IntToIntFunction f) {
+		return (in, out) -> out.set(((float) f.apply(in.get())) / 255.f);
+	}
+
 	public interface RunnableWithException {
 		void run() throws Exception;
 	}
 
 	public interface SupplierWithException<R> {
 		R get() throws Exception;
+	}
+
+	private interface IntToIntFunction {
+		int apply(int value);
 	}
 }

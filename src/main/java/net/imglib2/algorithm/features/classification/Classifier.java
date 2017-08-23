@@ -4,7 +4,7 @@ import net.imagej.ops.Ops;
 import net.imagej.ops.special.hybrid.AbstractUnaryHybridCF;
 import net.imagej.ops.special.hybrid.UnaryHybridCF;
 import net.imglib2.*;
-import net.imglib2.algorithm.features.FeatureGroup;
+import net.imglib2.algorithm.features.GrayFeatureGroup;
 import net.imglib2.algorithm.features.Features;
 import net.imglib2.algorithm.features.RevampUtils;
 import net.imglib2.img.Img;
@@ -16,7 +16,6 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.GenericComposite;
-import net.imglib2.view.composite.RealComposite;
 import weka.core.Attribute;
 import weka.core.Instances;
 
@@ -28,7 +27,7 @@ import java.util.*;
  */
 public class Classifier {
 
-	private final FeatureGroup features;
+	private final GrayFeatureGroup features;
 
 	private final List<String> classNames;
 
@@ -36,13 +35,13 @@ public class Classifier {
 
 	private boolean isTrained = false;
 
-	public Classifier(List<String> classNames, FeatureGroup features, weka.classifiers.Classifier classifier) {
+	public Classifier(List<String> classNames, GrayFeatureGroup features, weka.classifiers.Classifier classifier) {
 		this.classNames = Collections.unmodifiableList(classNames);
 		this.features = features;
 		this.classifier = classifier;
 	}
 
-	public FeatureGroup features() {
+	public GrayFeatureGroup features() {
 		return features;
 	}
 

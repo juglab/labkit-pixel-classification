@@ -17,23 +17,24 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Matthias Arzt
  */
 public class Features {
 
-	public static RandomAccessibleInterval<FloatType> applyOnImg(FeatureGroup feature, RandomAccessibleInterval<FloatType> image) {
+	public static <T> RandomAccessibleInterval<FloatType> applyOnImg(FeatureGroup<T> feature, RandomAccessibleInterval<T> image) {
 		return applyOnImg(feature, Views.extendBorder(image), image);
 	}
 
-	public static RandomAccessibleInterval<FloatType> applyOnImg(FeatureGroup feature, RandomAccessible<FloatType> extendedImage, Interval interval) {
+	public static <T> RandomAccessibleInterval<FloatType> applyOnImg(FeatureGroup<T> feature, RandomAccessible<T> extendedImage, Interval interval) {
 		Img<FloatType> result = RevampUtils.ops().create().img(RevampUtils.extend(interval, 0, feature.count() - 1), new FloatType());
 		feature.apply(extendedImage, RevampUtils.slices(result));
 		return result;
 	}
 
-	public static List<Attribute> attributes(FeatureGroup feature, List<String> classes) {
+	public static List<Attribute> attributes(GrayFeatureGroup feature, List<String> classes) {
 		List<String> labels = feature.attributeLabels();
 		List<Attribute> attributes = new ArrayList<>();
 		labels.forEach(label -> attributes.add(new Attribute(label)));
@@ -41,14 +42,14 @@ public class Features {
 		return attributes;
 	}
 
-	public static FeatureGroup fromJson(String serialized) {
+	public static GrayFeatureGroup fromJson(String serialized) {
 		Gson gson = initGson();
-		return gson.fromJson(serialized, FeatureGroup.class);
+		return gson.fromJson(serialized, GrayFeatureGroup.class);
 	}
 
-	public static String toJson(FeatureGroup featureGroup) {
+	public static String toJson(GrayFeatureGroup featureGroup) {
 		Gson gson = initGson();
-		return gson.toJson(featureGroup, FeatureGroup.class);
+		return gson.toJson(featureGroup, GrayFeatureGroup.class);
 	}
 
 	private static Gson initGson() {
@@ -59,8 +60,8 @@ public class Features {
 		return builder
 				.registerTypeAdapter(FeatureOp.class, new OpSerializer())
 				.registerTypeAdapter(FeatureOp.class, new OpDeserializer(RevampUtils.ops()))
-				.registerTypeAdapter(FeatureGroup.class, new FeatureGroupSerializer())
-				.registerTypeAdapter(FeatureGroup.class, new FeatureGroupDeserializer());
+				.registerTypeAdapter(GrayFeatureGroup.class, new FeatureGroupSerializer())
+				.registerTypeAdapter(GrayFeatureGroup.class, new FeatureGroupDeserializer());
 	}
 
 	public static <T extends FeatureOp> T create(Class<T> aClass, GlobalSettings globalSettings, Object... args) {
@@ -68,27 +69,31 @@ public class Features {
 		return (T) (Object) Functions.unary(RevampUtils.ops(), aClass, RandomAccessibleInterval.class, RandomAccessibleInterval.class, allArgs);
 	}
 
-	public static FeatureGroup group(FeatureOp... features) {
-		return new FeatureGroup(Arrays.asList(features));
+	public static GrayFeatureGroup group(FeatureOp... features) {
+		return new GrayFeatureGroup(Arrays.asList(features));
 	}
 
-	public static FeatureGroup group(List<FeatureOp> features) {
-		return new FeatureGroup(features);
+	public static GrayFeatureGroup group(List<FeatureOp> features) {
+		return new GrayFeatureGroup(features);
 	}
 
-	static class FeatureGroupSerializer implements JsonSerializer<FeatureGroup> {
+	static List<RandomAccessible<FloatType>> extendBorder(List<RandomAccessibleInterval<FloatType>> in) {
+		return in.stream().map(Views::extendBorder).collect(Collectors.toList());
+	}
+
+	static class FeatureGroupSerializer implements JsonSerializer<GrayFeatureGroup> {
 
 		@Override
-		public JsonElement serialize(FeatureGroup f, Type type, JsonSerializationContext json) {
+		public JsonElement serialize(GrayFeatureGroup f, Type type, JsonSerializationContext json) {
 			Type collectionType = new TypeToken<List<FeatureOp>>(){}.getType();
 			return json.serialize(f.features(), collectionType);
 		}
 	}
 
-	static class FeatureGroupDeserializer implements JsonDeserializer<FeatureGroup> {
+	static class FeatureGroupDeserializer implements JsonDeserializer<GrayFeatureGroup> {
 
 		@Override
-		public FeatureGroup deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext json) throws JsonParseException {
+		public GrayFeatureGroup deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext json) throws JsonParseException {
 			Type collectionType = new TypeToken<List<FeatureOp>>(){}.getType();
 			return group(json.<List<FeatureOp>>deserialize(jsonElement, collectionType));
 		}
@@ -137,4 +142,5 @@ public class Features {
 			}
 		}
 	}
+
 }

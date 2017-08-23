@@ -1,9 +1,8 @@
 package net.imglib2.algorithm.features;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author Matthias Arzt
@@ -69,6 +68,23 @@ public final class GlobalSettings {
 	}
 
 	public enum ImageType {
-		COLOR, GRAY_SCALE;
+		COLOR("red", "green", "blue"), GRAY_SCALE("");
+
+		private int channelCount;
+
+		private List<String> channelNames;
+
+		ImageType(String... names) {
+			channelCount = names.length;
+			channelNames = Arrays.asList(names);
+		}
+
+		public int channelCount() {
+			return channelCount;
+		}
+
+		public List<String> channelNames() {
+			return channelNames;
+		}
 	}
 }

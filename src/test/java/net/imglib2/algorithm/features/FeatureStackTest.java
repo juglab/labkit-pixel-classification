@@ -42,7 +42,7 @@ public class FeatureStackTest {
 
 	public static void main(String... args) {
 		Img<FloatType> img = ImageJFunctions.convertFloat(squarePictureWithCenteredDot());
-		FeatureGroup group = Features.group(GroupedFeatures.lipschitz(0));
+		FeatureGroup<FloatType> group = Features.group(GroupedFeatures.lipschitz(0));
 		RandomAccessibleInterval<FloatType> result = Features.applyOnImg(group, img);
 		ImageJFunctions.show(result);
 	}
