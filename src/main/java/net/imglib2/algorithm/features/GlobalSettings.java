@@ -1,8 +1,10 @@
 package net.imglib2.algorithm.features;
 
-import java.awt.*;
+import net.imglib2.algorithm.features.ops.FeatureOp;
+
 import java.util.*;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author Matthias Arzt
@@ -68,13 +70,17 @@ public final class GlobalSettings {
 	}
 
 	public enum ImageType {
-		COLOR("red", "green", "blue"), GRAY_SCALE("");
+		COLOR(ColorFeatureGroup::new, "red", "green", "blue"),
+		GRAY_SCALE(GrayFeatureGroup::new, "");
 
-		private int channelCount;
+		private final Function<List<FeatureOp>, FeatureGroup> groupFactory;
 
-		private List<String> channelNames;
+		private final int channelCount;
 
-		ImageType(String... names) {
+		private final List<String> channelNames;
+
+		ImageType(Function<List<FeatureOp>, FeatureGroup> groupFactory, String... names) {
+			this.groupFactory = groupFactory;
 			channelCount = names.length;
 			channelNames = Arrays.asList(names);
 		}
@@ -85,6 +91,10 @@ public final class GlobalSettings {
 
 		public List<String> channelNames() {
 			return channelNames;
+		}
+
+		public Function<List<FeatureOp>, FeatureGroup> groupFactory() {
+			return groupFactory;
 		}
 	}
 }

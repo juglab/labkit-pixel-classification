@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 /**
  * @author Matthias Arzt
  */
-public class ColorFeatureGroup implements FeatureGroup<ARGBType> {
+public class ColorFeatureGroup implements FeatureGroup {
 
 	private final FeatureJoiner joiner;
 
@@ -33,13 +33,18 @@ public class ColorFeatureGroup implements FeatureGroup<ARGBType> {
 	}
 
 	@Override
+	public Class<?> getType() {
+		return ARGBType.class;
+	}
+
+	@Override
 	public int count() {
 		return joiner.count() * channelCount();
 	}
 
 	@Override
-	public void apply(RandomAccessible<ARGBType> input, List<RandomAccessibleInterval<FloatType>> output) {
-		List<RandomAccessible<FloatType>> inputs = RevampUtils.splitChannels(input);
+	public void apply(RandomAccessible<?> input, List<RandomAccessibleInterval<FloatType>> output) {
+		List<RandomAccessible<FloatType>> inputs = RevampUtils.splitChannels(RevampUtils.castRandomAccessible(input, ARGBType.class));
 		List<List<RandomAccessibleInterval<FloatType>>> outputs = split(output, channelCount());
 		for (int i = 0; i < channelCount(); i++)
 			joiner.apply(inputs.get(i), outputs.get(i));

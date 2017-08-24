@@ -269,6 +269,17 @@ public class RevampUtils {
 		return (in, out) -> out.set(((float) f.apply(in.get())) / 255.f);
 	}
 
+	public static <T> T uncheckedCast(Object input) {
+		@SuppressWarnings("unchecked") T result = (T) input;
+		return result;
+	}
+
+	static <T> RandomAccessible<T> castRandomAccessible(RandomAccessible<?> input, Class<T> tClass) {
+		if(tClass.isInstance(input.randomAccess().get()))
+			return uncheckedCast(input);
+		throw new IllegalArgumentException("RandomAccessible input must be of type " + tClass.getName());
+	}
+
 	public interface RunnableWithException {
 		void run() throws Exception;
 	}

@@ -8,14 +8,21 @@ import net.imglib2.type.numeric.real.FloatType;
 import java.util.List;
 
 /**
- * Created by arzt on 23.08.17.
+ * @author Matthias Arzt
  */
-public interface FeatureGroup<T> {
+public interface FeatureGroup {
+
 	int count();
 
-	void apply(RandomAccessible<T> in, List<RandomAccessibleInterval<FloatType>> out);
+	void apply(RandomAccessible<?> in, List<RandomAccessibleInterval<FloatType>> out);
 
 	List<String> attributeLabels();
 
 	List<FeatureOp> features();
+
+	Class<?> getType();
+
+	default boolean matches(RandomAccessible<?> in) {
+		return getType().isInstance(in.randomAccess().get());
+	}
 }

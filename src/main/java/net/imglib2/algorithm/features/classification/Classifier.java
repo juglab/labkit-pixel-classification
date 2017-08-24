@@ -4,7 +4,7 @@ import net.imagej.ops.Ops;
 import net.imagej.ops.special.hybrid.AbstractUnaryHybridCF;
 import net.imagej.ops.special.hybrid.UnaryHybridCF;
 import net.imglib2.*;
-import net.imglib2.algorithm.features.GrayFeatureGroup;
+import net.imglib2.algorithm.features.FeatureGroup;
 import net.imglib2.algorithm.features.Features;
 import net.imglib2.algorithm.features.RevampUtils;
 import net.imglib2.img.Img;
@@ -27,7 +27,7 @@ import java.util.*;
  */
 public class Classifier {
 
-	private final GrayFeatureGroup features;
+	private final FeatureGroup features;
 
 	private final List<String> classNames;
 
@@ -35,13 +35,13 @@ public class Classifier {
 
 	private boolean isTrained = false;
 
-	public Classifier(List<String> classNames, GrayFeatureGroup features, weka.classifiers.Classifier classifier) {
+	public Classifier(List<String> classNames, FeatureGroup features, weka.classifiers.Classifier classifier) {
 		this.classNames = Collections.unmodifiableList(classNames);
 		this.features = features;
 		this.classifier = classifier;
 	}
 
-	public GrayFeatureGroup features() {
+	public FeatureGroup features() {
 		return features;
 	}
 
@@ -51,7 +51,7 @@ public class Classifier {
 		return result;
 	}
 
-	public void segment(RandomAccessibleInterval<? extends IntegerType<?>> out, RandomAccessible<FloatType> image) {
+	public void segment(RandomAccessibleInterval<? extends IntegerType<?>> out, RandomAccessible<?> image) {
 		RandomAccessibleInterval<FloatType> featureValues = Features.applyOnImg(features, image, out);
 		RevampUtils.ops().run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelClassificationOp());
 	}

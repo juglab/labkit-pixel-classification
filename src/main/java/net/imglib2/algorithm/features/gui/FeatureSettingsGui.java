@@ -42,7 +42,7 @@ public class FeatureSettingsGui {
 
 	private GlobalsPanel globalsPanel;
 
-	public FeatureSettingsGui(GrayFeatureGroup fg) {
+	public FeatureSettingsGui(FeatureGroup fg) {
 		List<Holder> init = fg.features().stream().map(f -> new Holder(f)).collect(Collectors.toList());
 		model = new ListModel(init);
 		initGui(GlobalSettings.defaultSettings());
@@ -134,12 +134,12 @@ public class FeatureSettingsGui {
 		return button;
 	}
 
-	public static Optional<GrayFeatureGroup> show(GrayFeatureGroup fg) {
+	public static Optional<FeatureGroup> show(FeatureGroup fg) {
 		FeatureSettingsGui featureSettingsGui = new FeatureSettingsGui(fg);
 		return featureSettingsGui.showInternal();
 	}
 
-	private Optional<GrayFeatureGroup> showInternal() {
+	private Optional<FeatureGroup> showInternal() {
 		boolean ok = showResizeableOkCancelDialog("Select Pixel Features", content);
 		if(ok) {
 			GlobalSettings globalSettings = globalsPanel.get();
@@ -165,7 +165,7 @@ public class FeatureSettingsGui {
 	}
 
 	public static void main(String... args) {
-		System.out.println(FeatureSettingsGui.show(Features.group()));
+		System.out.println(FeatureSettingsGui.show(Features.grayGroup()));
 		System.out.println("finished");
 	}
 
@@ -230,8 +230,9 @@ public class FeatureSettingsGui {
 			fireContentsChanged(items, 0, items.size());
 		}
 
-		public GrayFeatureGroup features(GlobalSettings globalSettings) {
-			return Features.group( items.stream().map(h -> h.get(globalSettings)).collect(Collectors.toList()) );
+		public FeatureGroup features(GlobalSettings globalSettings) {
+			List<FeatureOp> featureOps = items.stream().map(h -> h.get(globalSettings)).collect(Collectors.toList());
+			return globalSettings.imageType().groupFactory().apply(featureOps);
 		}
 	}
 

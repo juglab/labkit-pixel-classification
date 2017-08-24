@@ -71,14 +71,14 @@ public class BorderEffectsTest {
 	public void testVariance() { testFeature(GroupedFeatures.variance()); }
 
 	public void testFeature(FeatureOp feature) {
-		GrayFeatureGroup group = Features.group(feature);
+		GrayFeatureGroup group = Features.grayGroup(feature);
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
 		RandomAccessibleInterval<FloatType> result = calculateResult(group);
 		Utils.assertImagesEqual(50.0, result, expected);
 	}
 
 	public void showDifference(FeatureOp feature) {
-		GrayFeatureGroup group = Features.group(feature);
+		GrayFeatureGroup group = Features.grayGroup(feature);
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
 		RandomAccessibleInterval<FloatType> result = calculateResult(group);
 		Utils.showPsnr(expected, result);
@@ -98,7 +98,7 @@ public class BorderEffectsTest {
 	}
 
 	public void showPsnrs() {
-		GrayFeatureGroup feature = Features.group(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(),
+		GrayFeatureGroup feature = Features.grayGroup(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(),
 				GroupedFeatures.differenceOfGaussians(), GroupedFeatures.sobelGradient(), GroupedFeatures.lipschitz(50),
 				GroupedFeatures.min(), GroupedFeatures.max(), GroupedFeatures.mean(), GroupedFeatures.median(),
 				GroupedFeatures.variance());

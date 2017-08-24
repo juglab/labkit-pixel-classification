@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
-public class GrayFeatureGroup implements FeatureGroup<FloatType> {
+public class GrayFeatureGroup implements FeatureGroup {
 
 	private final FeatureJoiner joiner;
 
@@ -24,8 +24,8 @@ public class GrayFeatureGroup implements FeatureGroup<FloatType> {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
-		joiner.apply(in, out);
+	public void apply(RandomAccessible<?> in, List<RandomAccessibleInterval<FloatType>> out) {
+		joiner.apply(RevampUtils.castRandomAccessible(in, getType()), out);
 	}
 
 	@Override
@@ -36,5 +36,10 @@ public class GrayFeatureGroup implements FeatureGroup<FloatType> {
 	@Override
 	public List<FeatureOp> features() {
 		return joiner.features();
+	}
+
+	@Override
+	public Class<FloatType> getType() {
+		return FloatType.class;
 	}
 }

@@ -24,7 +24,7 @@ public class FeatureJoiner {
 
 	public FeatureJoiner(List<FeatureOp> features) {
 		this.settings = checkGlobalSettings(features);
-		this.features = features.stream().flatMap(this::toStream).collect(Collectors.toList());
+		this.features = features;
 		this.count = this.features.stream().mapToInt(FeatureOp::count).sum();
 	}
 
@@ -41,10 +41,6 @@ public class FeatureJoiner {
 
 	public GlobalSettings globalSettings() {
 		return settings;
-	}
-
-	private Stream<? extends FeatureOp> toStream(FeatureOp f) {
-		return (f instanceof GrayFeatureGroup) ? ((FeatureJoiner) f).features.stream() : Stream.of(f);
 	}
 
 	public int count() {

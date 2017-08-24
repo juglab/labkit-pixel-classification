@@ -5,7 +5,7 @@ import ij.Prefs;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
-import net.imglib2.algorithm.features.GrayFeatureGroup;
+import net.imglib2.algorithm.features.FeatureGroup;
 import net.imglib2.img.Img;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
@@ -31,7 +31,7 @@ import static net.imglib2.algorithm.features.Features.applyOnImg;
  */
 public class Trainer {
 
-	private final GrayFeatureGroup features;
+	private final FeatureGroup features;
 
 	private final List<String> classNames;
 
@@ -67,13 +67,13 @@ public class Trainer {
 		training.train();
 	}
 
-	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, GrayFeatureGroup features) {
+	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, FeatureGroup features) {
 		return train(image, labeling, features, initRandomForest());
 	}
 
-	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, GrayFeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
+	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, FeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
 		List<String> classNames = getClassNames(labeling);
-		Classifier classifier = new Classifier(classNames, features, initialWekaClassifier); Training training = classifier.training();
+		Classifier classifier = new Classifier(classNames, features, initialWekaClassifier);
 		Trainer.of(classifier).trainLabeledImage(image, labeling);
 		return classifier;
 	}

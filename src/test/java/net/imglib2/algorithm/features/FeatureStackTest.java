@@ -42,13 +42,13 @@ public class FeatureStackTest {
 
 	public static void main(String... args) {
 		Img<FloatType> img = ImageJFunctions.convertFloat(squarePictureWithCenteredDot());
-		FeatureGroup<FloatType> group = Features.group(GroupedFeatures.lipschitz(0));
+		FeatureGroup group = Features.grayGroup(GroupedFeatures.lipschitz(0));
 		RandomAccessibleInterval<FloatType> result = Features.applyOnImg(group, img);
 		ImageJFunctions.show(result);
 	}
 
 	public static RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureOp feature) {
-		return Features.applyOnImg(Features.group(SingleFeatures.identity(), feature), image);
+		return Features.applyOnImg(Features.grayGroup(SingleFeatures.identity(), feature), image);
 	}
 
 	@Test
@@ -83,7 +83,7 @@ public class FeatureStackTest {
 	}
 
 	private List<String> getAttributeLabels(FeatureOp feature) {
-		return Features.group(SingleFeatures.identity(), feature).attributeLabels();
+		return Features.grayGroup(SingleFeatures.identity(), feature).attributeLabels();
 	}
 
 	@Test

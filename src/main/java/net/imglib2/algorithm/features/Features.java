@@ -24,17 +24,17 @@ import java.util.stream.Collectors;
  */
 public class Features {
 
-	public static <T> RandomAccessibleInterval<FloatType> applyOnImg(FeatureGroup<T> feature, RandomAccessibleInterval<T> image) {
+	public static <T> RandomAccessibleInterval<FloatType> applyOnImg(FeatureGroup feature, RandomAccessibleInterval<T> image) {
 		return applyOnImg(feature, Views.extendBorder(image), image);
 	}
 
-	public static <T> RandomAccessibleInterval<FloatType> applyOnImg(FeatureGroup<T> feature, RandomAccessible<T> extendedImage, Interval interval) {
+	public static <T> RandomAccessibleInterval<FloatType> applyOnImg(FeatureGroup feature, RandomAccessible<T> extendedImage, Interval interval) {
 		Img<FloatType> result = RevampUtils.ops().create().img(RevampUtils.extend(interval, 0, feature.count() - 1), new FloatType());
 		feature.apply(extendedImage, RevampUtils.slices(result));
 		return result;
 	}
 
-	public static List<Attribute> attributes(GrayFeatureGroup feature, List<String> classes) {
+	public static List<Attribute> attributes(FeatureGroup feature, List<String> classes) {
 		List<String> labels = feature.attributeLabels();
 		List<Attribute> attributes = new ArrayList<>();
 		labels.forEach(label -> attributes.add(new Attribute(label)));
@@ -69,11 +69,16 @@ public class Features {
 		return (T) (Object) Functions.unary(RevampUtils.ops(), aClass, RandomAccessibleInterval.class, RandomAccessibleInterval.class, allArgs);
 	}
 
-	public static GrayFeatureGroup group(FeatureOp... features) {
+	public static FeatureGroup group(FeatureOp... features) {
+		List<FeatureOp> t = Arrays.asList(features);
+		return features[0].globalSettings().imageType().groupFactory().apply(t);
+	}
+
+	public static GrayFeatureGroup grayGroup(FeatureOp... features) {
 		return new GrayFeatureGroup(Arrays.asList(features));
 	}
 
-	public static GrayFeatureGroup group(List<FeatureOp> features) {
+	public static GrayFeatureGroup grayGroup(List<FeatureOp> features) {
 		return new GrayFeatureGroup(features);
 	}
 
@@ -95,7 +100,7 @@ public class Features {
 		@Override
 		public GrayFeatureGroup deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext json) throws JsonParseException {
 			Type collectionType = new TypeToken<List<FeatureOp>>(){}.getType();
-			return group(json.<List<FeatureOp>>deserialize(jsonElement, collectionType));
+			return grayGroup(json.<List<FeatureOp>>deserialize(jsonElement, collectionType));
 		}
 	}
 
