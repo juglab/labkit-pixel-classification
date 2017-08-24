@@ -25,4 +25,6 @@ public interface FeatureGroup {
 	default boolean matches(RandomAccessible<?> in) {
 		return getType().isInstance(in.randomAccess().get());
 	}
+
+	GlobalSettings globalSettings();
 }

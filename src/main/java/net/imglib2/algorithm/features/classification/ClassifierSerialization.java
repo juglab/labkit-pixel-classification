@@ -1,7 +1,7 @@
 package net.imglib2.algorithm.features.classification;
 
 import com.google.gson.*;
-import net.imglib2.algorithm.features.Features;
+import net.imglib2.algorithm.features.gson.FeaturesGson;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -33,7 +33,7 @@ class ClassifierSerialization {
 	}
 
 	static Gson initGson() {
-		return Features.gsonModifiers(new GsonBuilder())
+		return FeaturesGson.gsonModifiers(new GsonBuilder())
 				.registerTypeAdapter(weka.classifiers.Classifier.class, new WekaSerializer())
 				.registerTypeAdapter(weka.classifiers.Classifier.class, new WekaDeserializer())
 				.create();

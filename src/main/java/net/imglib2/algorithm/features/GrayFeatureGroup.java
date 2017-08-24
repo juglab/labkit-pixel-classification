@@ -6,6 +6,7 @@ import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Matthias Arzt
@@ -16,6 +17,8 @@ public class GrayFeatureGroup implements FeatureGroup {
 
 	GrayFeatureGroup(List<FeatureOp> features) {
 		this.joiner = new FeatureJoiner(features);
+		if(globalSettings().imageType() != GlobalSettings.ImageType.GRAY_SCALE)
+			throw new IllegalArgumentException("GrayFeatureGroup requires ImageType to be gray scale");
 	}
 
 	@Override
@@ -41,5 +44,24 @@ public class GrayFeatureGroup implements FeatureGroup {
 	@Override
 	public Class<FloatType> getType() {
 		return FloatType.class;
+	}
+
+	@Override
+	public GlobalSettings globalSettings() {
+		return joiner.globalSettings();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof GrayFeatureGroup))
+			return false;
+		GrayFeatureGroup other = (GrayFeatureGroup) obj;
+		return getType().equals(other.getType()) &&
+				attributeLabels().equals(other.attributeLabels());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getType(), attributeLabels());
 	}
 }

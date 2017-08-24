@@ -8,6 +8,7 @@ import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -25,16 +26,8 @@ public class ColorFeatureGroup implements FeatureGroup {
 
 	ColorFeatureGroup(List<FeatureOp> features) {
 		this.joiner = new FeatureJoiner(features);
-	}
-
-	@Override
-	public List<FeatureOp> features() {
-		return joiner.features();
-	}
-
-	@Override
-	public Class<?> getType() {
-		return ARGBType.class;
+		if(globalSettings().imageType() != GlobalSettings.ImageType.COLOR)
+			throw new IllegalArgumentException("ColorFeatureGroup requires GlobalSettings.imageType() to be COLOR.");
 	}
 
 	@Override
@@ -53,6 +46,35 @@ public class ColorFeatureGroup implements FeatureGroup {
 	@Override
 	public List<String> attributeLabels() {
 		return prepend(joiner.globalSettings().imageType().channelNames(), joiner.attributeLabels());
+	}
+
+	@Override
+	public List<FeatureOp> features() {
+		return joiner.features();
+	}
+
+	@Override
+	public Class<?> getType() {
+		return ARGBType.class;
+	}
+
+	@Override
+	public GlobalSettings globalSettings() {
+		return joiner.globalSettings();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof ColorFeatureGroup))
+			return false;
+		ColorFeatureGroup other = (ColorFeatureGroup) obj;
+		return getType().equals(other.getType()) &&
+				attributeLabels().equals(other.attributeLabels());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getType(), attributeLabels());
 	}
 
 	// -- Helper methods --

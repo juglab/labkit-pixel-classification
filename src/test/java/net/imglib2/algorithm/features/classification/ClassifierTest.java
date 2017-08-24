@@ -2,6 +2,7 @@ package net.imglib2.algorithm.features.classification;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.*;
+import net.imglib2.algorithm.features.gson.FeaturesGson;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
@@ -68,7 +69,6 @@ public class ClassifierTest {
 		return Trainer.train(img, labeling, features);
 	}
 
-	@Ignore("Gson is broken")
 	@Test
 	public void testStoreLoad() throws IOException {
 		// setup
@@ -87,11 +87,11 @@ public class ClassifierTest {
 
 	@Test
 	public void testGson() {
-		GrayFeatureGroup feature = Features.grayGroup(SingleFeatures.gauss(1.0), SingleFeatures.gauss(1.0));
-		String serialized = Features.toJson(feature);
-		System.out.println(serialized);
-		GrayFeatureGroup fg = Features.fromJson(serialized);
-		System.out.println(fg);
+		FeatureGroup feature = Features.group(SingleFeatures.gauss(1.0), SingleFeatures.gauss(1.0));
+		String serialized = FeaturesGson.toJson(feature);
+		FeatureGroup feature2 = FeaturesGson.fromJson(serialized);
+		String serialized2 = FeaturesGson.toJson(feature2);
+		assertEquals(serialized, serialized2);
 	}
 
 	@Test
