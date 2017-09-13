@@ -150,8 +150,17 @@ public class RevampUtils {
 		return Converters.convert(input, floatToInt, new IntType());
 	}
 
-	public static RandomAccessibleInterval<FloatType> toFloat(RandomAccessibleInterval<IntType> input) {
-		Converter<IntType, FloatType> intToFloat = (in, out) -> out.set(in.get());
+	public static RandomAccessibleInterval<FloatType> toFloat(RandomAccessibleInterval<? extends RealType<?>> input) {
+		if(input.randomAccess().get() instanceof FloatType)
+			return uncheckedCast(input);
+		Converter<RealType<?>, FloatType> intToFloat = (in, out) -> out.set(in.getRealFloat());
+		return Converters.convert(input, intToFloat, new FloatType());
+	}
+
+	public static RandomAccessible<FloatType> randomAccessibleToFloat(RandomAccessible<? extends RealType<?>> input) {
+		if(input.randomAccess().get() instanceof FloatType)
+			return uncheckedCast(input);
+		Converter<RealType<?>, FloatType> intToFloat = (in, out) -> out.set(in.getRealFloat());
 		return Converters.convert(input, intToFloat, new FloatType());
 	}
 
