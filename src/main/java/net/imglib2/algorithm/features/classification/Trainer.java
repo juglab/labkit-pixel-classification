@@ -11,7 +11,6 @@ import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
@@ -47,15 +46,14 @@ public class Trainer {
 		return new Trainer(classifier);
 	}
 
-	public void trainLabeledImage(Img<FloatType> image, ImgLabeling<String, ?> labeling) {
+	public void trainLabeledImage(Img<FloatType> image, LabelRegions<String> labeling) {
 		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(applyOnImg(features, image));
 		trainLabeledFeatures(featureStack, labeling);
 	}
 
-	public void trainLabeledFeatures(RandomAccessible<? extends Composite<? extends RealType<?>>> features, ImgLabeling<String, ?> labeling) {
+	public void trainLabeledFeatures(RandomAccessible<? extends Composite<? extends RealType<?>>> features, LabelRegions<String> regions) {
 		RandomAccess<? extends Composite<? extends RealType<?>>> ra = features.randomAccess();
 		for(int classIndex = 0; classIndex < classNames.size(); classIndex++) {
-			final LabelRegions<String> regions = new LabelRegions<>(labeling);
 			LabelRegion<String> region = regions.getLabelRegion(classNames.get(classIndex));
 			Cursor<Void> cursor = region.cursor();
 			while(cursor.hasNext()) {
@@ -67,12 +65,12 @@ public class Trainer {
 		training.train();
 	}
 
-	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, FeatureGroup features) {
+	public static Classifier train(Img<FloatType> image, LabelRegions<String> labeling, FeatureGroup features) {
 		return train(image, labeling, features, initRandomForest());
 	}
 
-	public static Classifier train(Img<FloatType> image, ImgLabeling<String, IntType> labeling, FeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
-		List<String> classNames = getClassNames(labeling);
+	public static Classifier train(Img<FloatType> image, LabelRegions<String> labeling, FeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
+		List<String> classNames = new ArrayList<>(labeling.getExistingLabels());
 		Classifier classifier = new Classifier(classNames, features, initialWekaClassifier);
 		Trainer.of(classifier).trainLabeledImage(image, labeling);
 		return classifier;
@@ -92,11 +90,5 @@ public class Trainer {
 		// Set number of threads
 		rf.setNumThreads( Prefs.getThreads() );
 		return rf;
-	}
-
-	// -- Helper methods --
-
-	private static List<String> getClassNames(ImgLabeling<String, IntType> labeling) {
-		return new ArrayList<>(labeling.getMapping().getLabels());
 	}
 }
