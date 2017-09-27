@@ -1,5 +1,6 @@
 package net.imglib2.algorithm.features;
 
+import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.OpService;
 import net.imglib2.*;
 import net.imglib2.algorithm.gauss3.Gauss3;
@@ -20,8 +21,6 @@ import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
-import org.scijava.Context;
-import org.scijava.script.ScriptService;
 import weka.core.DenseInstance;
 
 import java.util.*;
@@ -36,15 +35,10 @@ import java.util.stream.Stream;
  */
 public class RevampUtils {
 
-	private static final OpService ops = new Context(OpService.class, ScriptService.class).service(OpService.class);
 	private static final float[] SOBEL_FILTER_X_VALUES = {1f,2f,1f,0f,0f,0f,-1f,-2f,-1f};
 	private static final RandomAccessibleInterval<FloatType> SOBEL_FILTER_X = ArrayImgs.floats(SOBEL_FILTER_X_VALUES, 3, 3);
 	private static final float[] SOBEL_FILTER_Y_VALUES = {1f,0f,-1f,2f,0f,-2f,1f,0f,-1f};
 	private static final RandomAccessibleInterval<FloatType> SOBEL_FILTER_Y = ArrayImgs.floats(SOBEL_FILTER_Y_VALUES, 3, 3);
-
-	public static OpService ops() {
-		return ops;
-	}
 
 	public static <T> List<RandomAccessibleInterval<T>> slices(RandomAccessibleInterval<T> output) {
 		int axis = output.numDimensions() - 1;
@@ -90,14 +84,14 @@ public class RevampUtils {
 		return Arrays.copyOf(longs, longs.length - 1);
 	}
 
-	public static RandomAccessibleInterval<FloatType> gauss(RandomAccessibleInterval<FloatType> image, double[] sigmas) {
-		RandomAccessibleInterval<FloatType> blurred = ops().create().img(image);
-		ops().filter().gauss(blurred, image, sigmas, new OutOfBoundsBorderFactory<>());
+	public static RandomAccessibleInterval<FloatType> gauss(OpService ops, RandomAccessibleInterval<FloatType> image, double[] sigmas) {
+		RandomAccessibleInterval<FloatType> blurred = ops.create().img(image);
+		ops.filter().gauss(blurred, image, sigmas, new OutOfBoundsBorderFactory<>());
 		return blurred;
 	}
 
-	public static RandomAccessibleInterval<FloatType> gauss(RandomAccessible<FloatType> input, Interval outputInterval, double[] sigmas) {
-		RandomAccessibleInterval<FloatType> blurred = RevampUtils.ops().create().img(outputInterval, new FloatType());
+	public static RandomAccessibleInterval<FloatType> gauss(OpEnvironment ops, RandomAccessible<FloatType> input, Interval outputInterval, double[] sigmas) {
+		RandomAccessibleInterval<FloatType> blurred = ops.create().img(outputInterval, new FloatType());
 		try {
 			Gauss3.gauss(sigmas, input, blurred, Executors.newSingleThreadExecutor());
 		} catch (IncompatibleTypeException e) {
@@ -113,11 +107,11 @@ public class RevampUtils {
 		return Intervals.expand(outputInterval, border);
 	}
 
-	public static RandomAccessibleInterval<FloatType> deriveX(RandomAccessible<FloatType> input, Interval outputInterval) {
+	public static RandomAccessibleInterval<FloatType> deriveX(OpEnvironment ops, RandomAccessible<FloatType> input, Interval outputInterval) {
 		if(outputInterval.numDimensions() != 2)
 			throw new IllegalArgumentException("Only two dimensional images supported.");
-		RandomAccessibleInterval<FloatType> output = RevampUtils.ops().create().img(outputInterval, new FloatType());
-		ops().filter().convolve(output, input, SOBEL_FILTER_X);
+		RandomAccessibleInterval<FloatType> output = ops.create().img(outputInterval, new FloatType());
+		ops.filter().convolve(output, input, SOBEL_FILTER_X);
 		return output;
 	}
 
@@ -127,11 +121,11 @@ public class RevampUtils {
 		return Intervals.expand(output, new long[]{1,1});
 	}
 
-	public static RandomAccessibleInterval<FloatType> deriveY(RandomAccessible<FloatType> input, Interval outputInterval) {
+	public static RandomAccessibleInterval<FloatType> deriveY(OpEnvironment ops, RandomAccessible<FloatType> input, Interval outputInterval) {
 		if(outputInterval.numDimensions() != 2)
 			throw new IllegalArgumentException("Only two dimensional images supported.");
-		RandomAccessibleInterval<FloatType> output = RevampUtils.ops().create().img(outputInterval, new FloatType());
-		ops().filter().convolve(output, input, SOBEL_FILTER_Y);
+		RandomAccessibleInterval<FloatType> output = ops.create().img(outputInterval, new FloatType());
+		ops.filter().convolve(output, input, SOBEL_FILTER_Y);
 		return output;
 	}
 
@@ -141,8 +135,8 @@ public class RevampUtils {
 		return Intervals.expand(output, new long[]{1,1});
 	}
 
-	public static RandomAccessibleInterval<FloatType> convolve(RandomAccessibleInterval<FloatType> blurred, RandomAccessibleInterval<FloatType> kernel) {
-		return ops().filter().convolve(blurred, kernel, new OutOfBoundsBorderFactory<>());
+	public static RandomAccessibleInterval<FloatType> convolve(OpService ops, RandomAccessibleInterval<FloatType> blurred, RandomAccessibleInterval<FloatType> kernel) {
+		return ops.filter().convolve(blurred, kernel, new OutOfBoundsBorderFactory<>());
 	}
 
 	public static RandomAccessibleInterval<IntType> toInt(RandomAccessibleInterval<FloatType> input) {
@@ -164,14 +158,14 @@ public class RevampUtils {
 		return Converters.convert(input, intToFloat, new FloatType());
 	}
 
-	static private Img<FloatType> copy(IterableInterval<FloatType> input) {
-		Img<FloatType> result = ops().create().img(input, input.firstElement());
-		ops().copy().iterableInterval(result, input);
+	static private Img<FloatType> copy(OpEnvironment ops, IterableInterval<FloatType> input) {
+		Img<FloatType> result = ops.create().img(input, input.firstElement());
+		ops.copy().iterableInterval(result, input);
 		return result;
 	}
 
-	public static Img<FloatType> copy(RandomAccessibleInterval<FloatType> input) {
-		return copy(Views.iterable(input));
+	public static Img<FloatType> copy(OpEnvironment ops, RandomAccessibleInterval<FloatType> input) {
+		return copy(ops, Views.iterable(input));
 	}
 
 	public static <T extends ComplexType<T>> boolean containsNaN(RandomAccessibleInterval<T> result) {

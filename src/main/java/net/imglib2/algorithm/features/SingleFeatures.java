@@ -1,5 +1,6 @@
 package net.imglib2.algorithm.features;
 
+import net.imagej.ops.OpEnvironment;
 import net.imglib2.algorithm.features.ops.*;
 
 /**
@@ -7,11 +8,16 @@ import net.imglib2.algorithm.features.ops.*;
  */
 public class SingleFeatures {
 
-	public static final SingleFeatures SingleFeatures = new SingleFeatures(GlobalSettings.defaultSettings());
+	private final OpEnvironment ops;
 
 	private final GlobalSettings globalSettings;
 
-	public SingleFeatures(GlobalSettings settings) {
+	public SingleFeatures(OpEnvironment ops) {
+		this(ops, GlobalSettings.defaultSettings());
+	}
+
+	public SingleFeatures(OpEnvironment ops, GlobalSettings settings) {
+		this.ops = ops;
 		this.globalSettings = settings;
 	}
 
@@ -54,6 +60,6 @@ public class SingleFeatures {
 	}
 
 	private FeatureOp createFeature(Class<? extends FeatureOp> aClass, Object... args) {
-		return Features.create(aClass, globalSettings, args);
+		return Features.create(ops, aClass, globalSettings, args);
 	}
 }

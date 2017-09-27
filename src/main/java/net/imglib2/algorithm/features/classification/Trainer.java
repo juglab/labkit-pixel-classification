@@ -2,12 +2,12 @@ package net.imglib2.algorithm.features.classification;
 
 import hr.irb.fastRandomForest.FastRandomForest;
 import ij.Prefs;
+import net.imagej.ops.OpEnvironment;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.features.FeatureGroup;
 import net.imglib2.img.Img;
-import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.numeric.RealType;
@@ -65,13 +65,13 @@ public class Trainer {
 		training.train();
 	}
 
-	public static <T> Classifier train(Img<T> image, LabelRegions<String> labeling, FeatureGroup features) {
-		return train(image, labeling, features, initRandomForest());
+	public static <T> Classifier train(OpEnvironment ops, Img<T> image, LabelRegions<String> labeling, FeatureGroup features) {
+		return train(ops, image, labeling, features, initRandomForest());
 	}
 
-	public static <T> Classifier train(Img<T> image, LabelRegions<String> labeling, FeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
+	public static <T> Classifier train(OpEnvironment ops, Img<T> image, LabelRegions<String> labeling, FeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
 		List<String> classNames = new ArrayList<>(labeling.getExistingLabels());
-		Classifier classifier = new Classifier(classNames, features, initialWekaClassifier);
+		Classifier classifier = new Classifier(ops, classNames, features, initialWekaClassifier);
 		Trainer.of(classifier).trainLabeledImage(image, labeling);
 		return classifier;
 	}

@@ -1,5 +1,6 @@
 package net.imglib2.algorithm.features.classification;
 
+import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.Ops;
 import net.imagej.ops.special.hybrid.AbstractUnaryHybridCF;
 import net.imagej.ops.special.hybrid.UnaryHybridCF;
@@ -36,10 +37,13 @@ public class Classifier {
 
 	private boolean isTrained = false;
 
-	public Classifier(List<String> classNames, FeatureGroup features, weka.classifiers.Classifier classifier) {
+	private final OpEnvironment ops;
+
+	public Classifier(OpEnvironment ops, List<String> classNames, FeatureGroup features, weka.classifiers.Classifier classifier) {
+		this.ops = Objects.requireNonNull(ops);
 		this.classNames = Collections.unmodifiableList(classNames);
-		this.features = features;
-		this.classifier = classifier;
+		this.features = Objects.requireNonNull(features);
+		this.classifier = Objects.requireNonNull(classifier);
 	}
 
 	public FeatureGroup features() {
@@ -51,14 +55,14 @@ public class Classifier {
 	}
 
 	public <T extends IntegerType<T> & NativeType<T>> Img<T> segment(RandomAccessibleInterval<?> image, T type) {
-		Img<T> result = RevampUtils.ops().create().img(image, type);
+		Img<T> result = ops.create().img(image, type);
 		segment(result, Views.extendBorder(image));
 		return result;
 	}
 
 	public void segment(RandomAccessibleInterval<? extends IntegerType<?>> out, RandomAccessible<?> image) {
 		RandomAccessibleInterval<FloatType> featureValues = Features.applyOnImg(features, image, out);
-		RevampUtils.ops().run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelClassificationOp());
+		ops.run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelClassificationOp());
 	}
 
 	public RandomAccessibleInterval<? extends IntegerType<?>> segmentLazyOnComposite(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> featureValues) {
@@ -66,7 +70,7 @@ public class Classifier {
 	}
 
 	public RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> predict(RandomAccessibleInterval<FloatType> image) {
-		Img<FloatType> img = RevampUtils.ops().create().img(RevampUtils.extend(image, 0, classNames.size()), new FloatType());
+		Img<FloatType> img = ops.create().img(RevampUtils.extend(image, 0, classNames.size()), new FloatType());
 		RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> collapsed = Views.collapse(img);
 		predict(collapsed, Views.extendBorder(image));
 		return collapsed;
@@ -74,7 +78,7 @@ public class Classifier {
 
 	public void predict(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> out, RandomAccessible<FloatType> image) {
 		RandomAccessibleInterval<FloatType> featureValues = Features.applyOnImg(features, image, out);
-		RevampUtils.ops().run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelPredictionOp());
+		ops.run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelPredictionOp());
 	}
 
 	public RandomAccessibleInterval<Composite<? extends RealType<?>>> predictLazyOnComposite(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> featureValues) {
@@ -94,11 +98,11 @@ public class Classifier {
 	}
 
 	public void store(String filename) throws IOException {
-		ClassifierSerialization.store(this, filename);
+		new ClassifierSerialization(ops).store(this, filename);
 	}
 
-	public static Classifier load(String filename) throws IOException {
-		return ClassifierSerialization.load(filename);
+	public static Classifier load(OpEnvironment ops, String filename) throws IOException {
+		return new ClassifierSerialization(ops).load(filename);
 	}
 
 	public Training training() {

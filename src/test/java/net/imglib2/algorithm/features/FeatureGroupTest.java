@@ -13,6 +13,8 @@ import static org.junit.Assert.assertNotEquals;
  */
 public class FeatureGroupTest {
 
+	private final SingleFeatures singleFeatures = new SingleFeatures(Utils.ops());
+
 	@Test
 	public void testEqualFeatureSettings() {
 		GlobalSettings settings = new GlobalSettings(GlobalSettings.ImageType.GRAY_SCALE, 2.0, 16.0, 1.0);
@@ -28,16 +30,16 @@ public class FeatureGroupTest {
 	}
 
 	private FeatureOp gaussFeature(GlobalSettings settingsA) {
-		return Features.create(SingleGaussFeature.class, settingsA,1.0);
+		return Features.create(Utils.ops(), SingleGaussFeature.class, settingsA, 1.0);
 	}
 
 	@Test
 	public void testEquals() {
-		FeatureGroup featureGroup = Features.group(SingleFeatures.SingleFeatures.gauss(3.0));
-		FeatureGroup equalFeatureGroup = Features.group(SingleFeatures.SingleFeatures.gauss(3.0));
-		FeatureGroup differentFeatureGroup = Features.group(SingleFeatures.SingleFeatures.gauss(4.0));
+		FeatureGroup featureGroup = Features.group(singleFeatures.gauss(3.0));
+		FeatureGroup equalFeatureGroup = Features.group(singleFeatures.gauss(3.0));
+		FeatureGroup differentFeatureGroup = Features.group(singleFeatures.gauss(4.0));
 		GlobalSettings settings = new GlobalSettings(GlobalSettings.ImageType.COLOR, 1.0, 16.0, 1.0);
-		FeatureGroup differentFeatureGroup2 = Features.group(new SingleFeatures(settings).gauss(3.0));
+		FeatureGroup differentFeatureGroup2 = Features.group(new SingleFeatures(Utils.ops(), settings).gauss(3.0));
 		assertEquals(featureGroup, equalFeatureGroup);
 		assertNotEquals(featureGroup, differentFeatureGroup);
 		assertNotEquals(featureGroup, differentFeatureGroup2);
@@ -45,18 +47,18 @@ public class FeatureGroupTest {
 
 	@Test
 	public void testSerialization() {
-		testSerialization(Features.group(SingleFeatures.SingleFeatures.gauss(1.0)));
+		testSerialization(Features.group(singleFeatures.gauss(1.0)));
 	}
 
 	@Test
 	public void testColoredSerialization() {
 		GlobalSettings settings = new GlobalSettings(GlobalSettings.ImageType.COLOR, 1.0, 16.0, 1.0);
-		testSerialization(Features.group(new SingleFeatures(settings).hessian(3.0)));
+		testSerialization(Features.group(new SingleFeatures(Utils.ops(), settings).hessian(3.0)));
 	}
 
 	private void testSerialization(FeatureGroup featureGroup) {
-		String json = FeaturesGson.toJson(featureGroup);
-		FeatureGroup object2 = FeaturesGson.fromJson(json);
+		String json = FeaturesGson.toJson(featureGroup, Utils.ops());
+		FeatureGroup object2 = FeaturesGson.fromJson(json, Utils.ops());
 		assertEquals(featureGroup, object2);
 	}
 

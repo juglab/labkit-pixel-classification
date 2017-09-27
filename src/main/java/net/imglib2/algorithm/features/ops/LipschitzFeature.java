@@ -19,7 +19,7 @@ public class LipschitzFeature extends AbstractGroupFeatureOp {
 
 	protected List<FeatureOp> initFeatures() {
 		return Arrays.stream(new double[]{5, 10, 15, 20, 25})
-				.mapToObj(slope -> Features.create(SingleLipschitzFeature.class, globalSettings(), slope, border))
+				.mapToObj(slope -> Features.create(ops(), SingleLipschitzFeature.class, globalSettings(), slope, border))
 				.collect(Collectors.toList());
 	}
 }

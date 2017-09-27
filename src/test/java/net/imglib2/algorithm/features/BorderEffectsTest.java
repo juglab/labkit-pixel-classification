@@ -12,12 +12,12 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static net.imglib2.algorithm.features.GroupedFeatures.*;
-
 /**
  * @author Matthias Arzt
  */
 public class BorderEffectsTest {
+
+	private GroupedFeatures groupedFeatures = new GroupedFeatures(Utils.ops());
 
 	private Interval bigInterval = new FinalInterval(new long[]{0, 0}, new long[]{150, 150});
 
@@ -25,50 +25,50 @@ public class BorderEffectsTest {
 
 	private final Img<FloatType> fullImage = ImageJFunctions.convertFloat(Utils.loadImage("bridge.png"));
 
-	private RandomAccessibleInterval<FloatType> image = RevampUtils.copy(Views.interval(fullImage, bigInterval));
+	private RandomAccessibleInterval<FloatType> image = RevampUtils.copy(Utils.ops(), Views.interval(fullImage, bigInterval));
 
 	@Test
 	public void testGauss() {
-		testFeature(GroupedFeatures.gauss());
+		testFeature(groupedFeatures.gauss());
 	}
 
 	@Test
 	public void testHessian() {
-		testFeature(GroupedFeatures.hessian());
+		testFeature(groupedFeatures.hessian());
 	}
 
 	@Test
 	public void testGabor() {
-		testFeature(GroupedFeatures.gabor());
+		testFeature(groupedFeatures.gabor());
 	}
 
 	@Test
 	public void testDifferenceOfGaussians() {
-		testFeature(GroupedFeatures.differenceOfGaussians());
+		testFeature(groupedFeatures.differenceOfGaussians());
 	}
 
 	@Test
-	public void testGradient() { testFeature(GroupedFeatures.sobelGradient()); }
+	public void testGradient() { testFeature(groupedFeatures.sobelGradient()); }
 
 	@Test
 	public void testLipschitz() {
-		testFeature(GroupedFeatures.lipschitz(50));
+		testFeature(groupedFeatures.lipschitz(50));
 	}
 
 	@Test
-	public void testMin() { testFeature(GroupedFeatures.min()); }
+	public void testMin() { testFeature(groupedFeatures.min()); }
 
 	@Test
-	public void testMax() { testFeature(GroupedFeatures.max()); }
+	public void testMax() { testFeature(groupedFeatures.max()); }
 
 	@Test
-	public void testMean() { testFeature(GroupedFeatures.mean()); }
+	public void testMean() { testFeature(groupedFeatures.mean()); }
 
 	@Test
-	public void testMedian() { testFeature(GroupedFeatures.median()); }
+	public void testMedian() { testFeature(groupedFeatures.median()); }
 
 	@Test
-	public void testVariance() { testFeature(GroupedFeatures.variance()); }
+	public void testVariance() { testFeature(groupedFeatures.variance()); }
 
 	public void testFeature(FeatureOp feature) {
 		GrayFeatureGroup group = Features.grayGroup(feature);
@@ -87,7 +87,7 @@ public class BorderEffectsTest {
 
 	public RandomAccessibleInterval<FloatType> calculateResult(GrayFeatureGroup feature) {
 		Interval featureInterval = RevampUtils.extend(interval, 0, feature.count() - 1);
-		RandomAccessibleInterval<FloatType> result = RevampUtils.ops().create().img(featureInterval, new FloatType());
+		RandomAccessibleInterval<FloatType> result = Utils.ops().create().img(featureInterval, new FloatType());
 		feature.apply(image, RevampUtils.slices(result));
 		return result;
 	}
@@ -98,10 +98,10 @@ public class BorderEffectsTest {
 	}
 
 	public void showPsnrs() {
-		GrayFeatureGroup feature = Features.grayGroup(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(),
-				GroupedFeatures.differenceOfGaussians(), GroupedFeatures.sobelGradient(), GroupedFeatures.lipschitz(50),
-				GroupedFeatures.min(), GroupedFeatures.max(), GroupedFeatures.mean(), GroupedFeatures.median(),
-				GroupedFeatures.variance());
+		GrayFeatureGroup feature = Features.grayGroup(groupedFeatures.gauss(), groupedFeatures.hessian(), groupedFeatures.gauss(),
+				groupedFeatures.differenceOfGaussians(), groupedFeatures.sobelGradient(), groupedFeatures.lipschitz(50),
+				groupedFeatures.min(), groupedFeatures.max(), groupedFeatures.mean(), groupedFeatures.median(),
+				groupedFeatures.variance());
 		RandomAccessibleInterval<FloatType> allResults = calculateResult(feature);
 		RandomAccessibleInterval<FloatType> allExpected = calculateExpected(feature);
 		int axis = image.numDimensions();
@@ -112,9 +112,5 @@ public class BorderEffectsTest {
 			String attribute = attributes.get(i);
 			System.out.println("Attribute: " + attribute + "   PSNR: " + Utils.psnr(expected, result));
 		}
-	}
-
-	public static void mainDisabled(String... args) {
-		new BorderEffectsTest().showDifference(GroupedFeatures.gabor());
 	}
 }

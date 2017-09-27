@@ -1,5 +1,6 @@
 package net.imglib2.algorithm.features.ops;
 
+import net.imagej.ops.OpEnvironment;
 import net.imglib2.*;
 import net.imglib2.algorithm.features.RevampUtils;
 import net.imglib2.algorithm.fft2.FFTConvolution;
@@ -138,7 +139,7 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 			fftConvolution.setOutput(slice);
 			fftConvolution.convolve();
 			if(legacyNormalize)
-				normalize(slice);
+				normalize(ops(), slice);
 		}
 
 		maxAndMinProjection(stack, max, min);
@@ -169,9 +170,9 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 		return min;
 	}
 
-	public static void normalize(RandomAccessibleInterval<FloatType> image2) {
-		DoubleType mean = RevampUtils.ops().stats().mean(Views.iterable(image2));
-		DoubleType stdDev = RevampUtils.ops().stats().stdDev(Views.iterable(image2));
+	static void normalize(OpEnvironment ops, RandomAccessibleInterval<FloatType> image2) {
+		DoubleType mean = ops.stats().mean(Views.iterable(image2));
+		DoubleType stdDev = ops.stats().stdDev(Views.iterable(image2));
 		float mean2 = (float) mean.get();
 		float invStdDev = (stdDev.get() == 0) ? 1 : (float) (1 / stdDev.get());
 		Views.iterable(image2).forEach(value -> value.set((value.get() - mean2) * invStdDev));

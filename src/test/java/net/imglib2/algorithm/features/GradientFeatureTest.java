@@ -1,8 +1,10 @@
 package net.imglib2.algorithm.features;
 
+import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.OpService;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
+import net.imglib2.algorithm.features.ops.SingleGradientFeature;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -20,7 +22,7 @@ public class GradientFeatureTest {
 	@Test
 	public void test() {
 		// setup
-		OpService ops = RevampUtils.ops();
+		OpEnvironment ops = Utils.ops();
 
 		Interval interval = new FinalInterval(new long[]{0, 0, 0}, new long[]{20, 20, 20});
 		Interval biggerInterval = Intervals.expand(interval, new long[]{10, 10, 10});
@@ -30,7 +32,7 @@ public class GradientFeatureTest {
 
 		// process
 		Img<FloatType> result = ops.create().img(interval, new FloatType());
-		SingleFeatures.gradient(0.0).apply(in, Collections.singletonList(result));
+		new SingleFeatures(ops).gradient(0.0).apply(in, Collections.singletonList(result));
 
 		// test
 		Img<FloatType> expected = ops.create().img(interval, new FloatType());

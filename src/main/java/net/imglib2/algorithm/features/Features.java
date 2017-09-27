@@ -1,5 +1,6 @@
 package net.imglib2.algorithm.features;
 
+import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.special.function.Functions;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
@@ -24,7 +25,7 @@ public class Features {
 	}
 
 	public static <T> RandomAccessibleInterval<FloatType> applyOnImg(FeatureGroup feature, RandomAccessible<T> extendedImage, Interval interval) {
-		Img<FloatType> result = RevampUtils.ops().create().img(RevampUtils.extend(interval, 0, feature.count() - 1), new FloatType());
+		Img<FloatType> result = feature.ops().create().img(RevampUtils.extend(interval, 0, feature.count() - 1), new FloatType());
 		feature.apply(extendedImage, RevampUtils.slices(result));
 		return result;
 	}
@@ -37,9 +38,9 @@ public class Features {
 		return attributes;
 	}
 
-	public static <T extends FeatureOp> T create(Class<T> aClass, GlobalSettings globalSettings, Object... args) {
+	public static <T extends FeatureOp> T create(OpEnvironment ops, Class<T> aClass, GlobalSettings globalSettings, Object... args) {
 		Object[] allArgs = RevampUtils.prepend(globalSettings, args);
-		return (T) (Object) Functions.unary(RevampUtils.ops(), aClass, RandomAccessibleInterval.class, RandomAccessibleInterval.class, allArgs);
+		return (T) (Object) Functions.unary(ops, aClass, RandomAccessibleInterval.class, RandomAccessibleInterval.class, allArgs);
 	}
 
 	public static FeatureGroup group(FeatureOp... features) {

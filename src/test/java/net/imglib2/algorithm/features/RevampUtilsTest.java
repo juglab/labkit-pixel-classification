@@ -24,27 +24,27 @@ public class RevampUtilsTest {
 		double[] sigmas = {5.0,2.0};
 		Interval output = new FinalInterval(new long[]{2, 5}, new long[]{9, 10});
 		Interval input = RevampUtils.gaussRequiredInput(output, sigmas);
-		testRequiredInput(output, input, (i, o) -> RevampUtils.gauss(i, o, sigmas));
+		testRequiredInput(output, input, (i, o) -> RevampUtils.gauss(Utils.ops(), i, o, sigmas));
 	}
 
 	@Test
 	public void TestDeriveXRequiredInput() {
 		Interval output = new FinalInterval(new long[]{2, 5}, new long[]{9, 10});
 		Interval input = RevampUtils.deriveXRequiredInput(output);
-		testRequiredInput(output, input, RevampUtils::deriveX);
+		testRequiredInput(output, input, (in, out) -> RevampUtils.deriveX(Utils.ops(), in, out));
 	}
 
 	@Test
 	public void TestDeriveYRequiredInput() {
 		Interval output = new FinalInterval(new long[]{2, 5}, new long[]{9, 10});
 		Interval input = RevampUtils.deriveYRequiredInput(output);
-		testRequiredInput(output, input, RevampUtils::deriveY);
+		testRequiredInput(output, input, (in, out) -> RevampUtils.deriveY(Utils.ops(), in, out));
 	}
 
 	private void testRequiredInput(Interval outputInterval, Interval inputInterval,
 		BiConsumer<RandomAccessible<FloatType>, Interval> operation)
 	{
-		Img<ByteType> inputAccessed = RevampUtils.ops().create().img(inputInterval, new ByteType());
+		Img<ByteType> inputAccessed = Utils.ops().create().img(inputInterval, new ByteType());
 		RandomAccessible<FloatType> input = recordAccessView(inputAccessed);
 		operation.accept(input, outputInterval);
 		inputAccessed.forEach(x -> assertEquals(1, x.get()));

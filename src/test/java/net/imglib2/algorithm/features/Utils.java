@@ -7,6 +7,8 @@ import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import net.imagej.ImageJ;
+import net.imagej.ops.OpEnvironment;
+import net.imagej.ops.OpService;
 import net.imglib2.*;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
@@ -24,6 +26,8 @@ import net.imglib2.util.Intervals;
 import net.imglib2.util.Pair;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
+import org.scijava.Context;
+import org.scijava.script.ScriptService;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -39,6 +43,12 @@ import static org.junit.Assert.fail;
  * @author Matthias Arzt
  */
 public class Utils {
+
+	private static final OpEnvironment ops = new Context(OpService.class, ScriptService.class).service(OpService.class);
+
+	public static OpEnvironment ops() {
+		return ops;
+	}
 
 	public static void assertImagesEqual(ImagePlus expected, ImagePlus actual) {
 		assertTrue(diffImagePlus(expected, actual) == 0);
@@ -156,7 +166,7 @@ public class Utils {
 	}
 
 	public static <T extends NumericType<T>> void showDifference(IterableInterval<T> expectedImage, IterableInterval<T> resultImage) {
-		show(RevampUtils.ops().math().subtract(expectedImage, resultImage));
+		show(ops().math().subtract(expectedImage, resultImage));
 	}
 
 	public static void show(Object... images) {
@@ -263,8 +273,8 @@ public class Utils {
 	}
 
 	public static Img<FloatType> copy(Img<FloatType> input) {
-		Img<FloatType> result = RevampUtils.ops().create().img(input);
-		RevampUtils.ops().copy().iterableInterval(result, input);
+		Img<FloatType> result = ops().create().img(input);
+		ops().copy().iterableInterval(result, input);
 		return result;
 	}
 

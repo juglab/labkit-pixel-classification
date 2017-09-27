@@ -1,5 +1,6 @@
 package net.imglib2.algorithm.features;
 
+import net.imagej.ops.OpEnvironment;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.ops.FeatureOp;
@@ -28,6 +29,11 @@ public class ColorFeatureGroup implements FeatureGroup {
 		this.joiner = new FeatureJoiner(features);
 		if(globalSettings().imageType() != GlobalSettings.ImageType.COLOR)
 			throw new IllegalArgumentException("ColorFeatureGroup requires GlobalSettings.imageType() to be COLOR.");
+	}
+
+	@Override
+	public OpEnvironment ops() {
+		return joiner.ops();
 	}
 
 	@Override

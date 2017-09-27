@@ -57,7 +57,7 @@ public class FeatureSettingsTest {
 		FeatureSetting fs = FeatureSetting.fromClass(TestFeature.class);
 		double sigma = 4.2;
 		fs.setParameter("sigma", sigma);
-		TestFeature f = (TestFeature) fs.newInstance(RevampUtils.ops(), GlobalSettings.defaultSettings());
+		TestFeature f = (TestFeature) fs.newInstance(Utils.ops(), GlobalSettings.defaultSettings());
 		assertTrue(f.isInitialized());
 		assertEquals(sigma, f.sigma(), 0.001);
 	}

@@ -24,9 +24,9 @@ public class ColorFeatureGroupTest {
 	private final GlobalSettings graySettings = new GlobalSettings(GlobalSettings.ImageType.GRAY_SCALE,
 			colorSettings.sigmas(), colorSettings.membraneThickness());
 
-	private final FeatureGroup colorGroup = new ColorFeatureGroup(new GroupedFeatures(colorSettings).gauss());
+	private final FeatureGroup colorGroup = new ColorFeatureGroup(new GroupedFeatures(Utils.ops(), colorSettings).gauss());
 
-	private final FeatureGroup grayGroup = Features.grayGroup(new GroupedFeatures(graySettings).gauss());
+	private final FeatureGroup grayGroup = Features.grayGroup(new GroupedFeatures(Utils.ops(), graySettings).gauss());
 
 	private final Img<ARGBType> image = ImageJFunctions.wrapRGBA(new ImagePlus("https://imagej.nih.gov/ij/images/clown.png"));
 

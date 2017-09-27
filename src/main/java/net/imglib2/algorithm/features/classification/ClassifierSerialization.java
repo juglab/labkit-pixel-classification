@@ -1,6 +1,7 @@
 package net.imglib2.algorithm.features.classification;
 
 import com.google.gson.*;
+import net.imagej.ops.OpEnvironment;
 import net.imglib2.algorithm.features.gson.FeaturesGson;
 
 import java.io.*;
@@ -14,11 +15,13 @@ import java.util.Base64;
  */
 class ClassifierSerialization {
 
-	private ClassifierSerialization() {
-		// prevent form being instantiated
+	private final OpEnvironment ops;
+
+	public ClassifierSerialization(OpEnvironment ops) {
+		this.ops = ops;
 	}
 
-	public static void store(Classifier classifier, String filename) throws IOException {
+	public void store(Classifier classifier, String filename) throws IOException {
 		try( FileWriter fw = new FileWriter(filename) ) {
 			Gson gson = initGson();
 			gson.toJson(classifier, Classifier.class, fw);
@@ -26,14 +29,16 @@ class ClassifierSerialization {
 		}
 	}
 
-	public static Classifier load(String filename) throws IOException {
+	public Classifier load(String filename) throws IOException {
 		try( FileReader fr = new FileReader(filename) ) {
 			return initGson().fromJson(fr, Classifier.class);
 		}
 	}
 
-	static Gson initGson() {
-		return FeaturesGson.gsonModifiers(new GsonBuilder())
+	private Gson initGson() {
+		return FeaturesGson.gsonModifiers(ops, new GsonBuilder())
+				.registerTypeHierarchyAdapter(OpEnvironment.class, new OpsSerialize())
+				.registerTypeHierarchyAdapter(OpEnvironment.class, new OpsDeserialize())
 				.registerTypeAdapter(weka.classifiers.Classifier.class, new WekaSerializer())
 				.registerTypeAdapter(weka.classifiers.Classifier.class, new WekaDeserializer())
 				.create();
@@ -59,7 +64,23 @@ class ClassifierSerialization {
 		}
 	}
 
-	static class WekaSerializer implements JsonSerializer<weka.classifiers.Classifier> {
+	private static class OpsSerialize implements JsonSerializer<OpEnvironment> {
+
+		@Override
+		public JsonElement serialize(OpEnvironment opEnvironment, Type type, JsonSerializationContext json) {
+			return new JsonObject();
+		}
+	}
+
+	private class OpsDeserialize implements JsonDeserializer<OpEnvironment> {
+
+		@Override
+		public OpEnvironment deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext json) throws JsonParseException {
+			return ops;
+		}
+	}
+
+	private static class WekaSerializer implements JsonSerializer<weka.classifiers.Classifier> {
 
 		@Override
 		public JsonElement serialize(weka.classifiers.Classifier classifier, Type type, JsonSerializationContext json) {
@@ -67,7 +88,7 @@ class ClassifierSerialization {
 		}
 	}
 
-	static class WekaDeserializer implements JsonDeserializer<weka.classifiers.Classifier> {
+	private static class WekaDeserializer implements JsonDeserializer<weka.classifiers.Classifier> {
 
 		@Override
 		public weka.classifiers.Classifier deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext json) throws JsonParseException {

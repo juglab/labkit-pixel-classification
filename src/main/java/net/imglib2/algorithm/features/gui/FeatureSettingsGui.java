@@ -1,5 +1,7 @@
 package net.imglib2.algorithm.features.gui;
 
+import net.imagej.ops.OpEnvironment;
+import net.imagej.ops.OpService;
 import net.imglib2.algorithm.features.*;
 
 import javax.swing.*;
@@ -40,9 +42,12 @@ public class FeatureSettingsGui {
 
 	private final FeatureSettingsDialog featureSettingsDialog = new FeatureSettingsDialog(context);
 
+	private final OpEnvironment ops;
+
 	private GlobalsPanel globalsPanel;
 
-	public FeatureSettingsGui(FeatureGroup fg) {
+	public FeatureSettingsGui(OpEnvironment ops, FeatureGroup fg) {
+		this.ops = ops;
 		List<Holder> init = fg.features().stream().map(f -> new Holder(f)).collect(Collectors.toList());
 		model = new ListModel(init);
 		initGui(GlobalSettings.defaultSettings());
@@ -134,8 +139,8 @@ public class FeatureSettingsGui {
 		return button;
 	}
 
-	public static Optional<FeatureGroup> show(FeatureGroup fg) {
-		FeatureSettingsGui featureSettingsGui = new FeatureSettingsGui(fg);
+	public static Optional<FeatureGroup> show(OpEnvironment ops, FeatureGroup fg) {
+		FeatureSettingsGui featureSettingsGui = new FeatureSettingsGui(ops, fg);
 		return featureSettingsGui.showInternal();
 	}
 
@@ -165,7 +170,8 @@ public class FeatureSettingsGui {
 	}
 
 	public static void main(String... args) {
-		System.out.println(FeatureSettingsGui.show(Features.grayGroup()));
+		OpEnvironment ops = new Context(OpService.class).service(OpService.class);
+		System.out.println(FeatureSettingsGui.show(ops, Features.grayGroup()));
 		System.out.println("finished");
 	}
 
@@ -194,7 +200,7 @@ public class FeatureSettingsGui {
 		}
 
 		public FeatureOp get(GlobalSettings globalSettings) {
-			return value.newInstance(RevampUtils.ops(), globalSettings);
+			return value.newInstance(ops, globalSettings);
 		}
 	}
 

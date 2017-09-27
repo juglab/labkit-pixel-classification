@@ -1,5 +1,6 @@
 package net.imglib2.algorithm.features;
 
+import net.imagej.ops.OpEnvironment;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.ops.FeatureOp;
@@ -18,12 +19,15 @@ public class FeatureJoiner {
 
 	private final GlobalSettings settings;
 
+	private final OpEnvironment ops;
+
 	private final List<FeatureOp> features;
 
 	private final int count;
 
 	public FeatureJoiner(List<FeatureOp> features) {
 		this.settings = checkGlobalSettings(features);
+		this.ops = checkOps(features);
 		this.features = features;
 		this.count = this.features.stream().mapToInt(FeatureOp::count).sum();
 	}
@@ -37,6 +41,12 @@ public class FeatureJoiner {
 		if(!allEqual)
 			throw new IllegalArgumentException("All features in a feature group must use the same global settings");
 		return settings;
+	}
+
+	private OpEnvironment checkOps(List<FeatureOp> features) {
+		if(features.isEmpty())
+			return null;
+		return features.get(0).ops();
 	}
 
 	public GlobalSettings globalSettings() {
@@ -66,5 +76,9 @@ public class FeatureJoiner {
 
 	public List<FeatureOp> features() {
 		return Collections.unmodifiableList(features);
+	}
+
+	public OpEnvironment ops() {
+		return ops;
 	}
 }

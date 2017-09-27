@@ -1,20 +1,26 @@
 package net.imglib2.algorithm.features;
 
+import net.imagej.ops.OpEnvironment;
 import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.algorithm.features.ops.SingleSphereShapedFeature;
 import net.imglib2.algorithm.features.ops.SobelGradientFeature;
 import net.imglib2.algorithm.features.ops.SphereShapedFeature;
 
 /**
- * Created by arzt on 20.07.17.
+ * @author Matthias Arzt
  */
 public class GroupedFeatures {
 
-	public static final GroupedFeatures GroupedFeatures = new GroupedFeatures(GlobalSettings.defaultSettings());
+	private final OpEnvironment ops;
 
 	private final GlobalSettings globalSettings;
 
-	public GroupedFeatures(GlobalSettings settings) {
+	public GroupedFeatures(OpEnvironment ops) {
+		this(ops, GlobalSettings.defaultSettings());
+	}
+
+	public GroupedFeatures(OpEnvironment ops, GlobalSettings settings) {
+		this.ops = ops;
 		this.globalSettings = settings;
 	}
 
@@ -77,6 +83,6 @@ public class GroupedFeatures {
 	}
 
 	private FeatureOp createFeature(Class<? extends FeatureOp> aClass, Object... args) {
-		return Features.create(aClass, globalSettings, args);
+		return Features.create(ops, aClass, globalSettings, args);
 	}
 }

@@ -47,7 +47,7 @@ public class SingleGradientFeature extends AbstractFeatureOp {
 
 		Interval expand = Intervals.expand(out, RevampUtils.nCopies(numDimensions, 1));
 		RandomAccessibleInterval<FloatType> blurred = gauss(in, expand, 0.4 * sigma);
-		RandomAccessibleInterval<FloatType> derivative = RevampUtils.ops().create().img(out);
+		RandomAccessibleInterval<FloatType> derivative = ops().create().img(out);
 
 		setZero(out);
 		for (int d = 0; d < numDimensions; d++) {
@@ -58,7 +58,7 @@ public class SingleGradientFeature extends AbstractFeatureOp {
 	}
 
 	private RandomAccessibleInterval<FloatType> gauss(RandomAccessible<FloatType> in, Interval outputInterval, double sigma) {
-		RandomAccessibleInterval<FloatType> blurred = RevampUtils.ops().create().img(outputInterval, new FloatType());
+		RandomAccessibleInterval<FloatType> blurred = ops().create().img(outputInterval, new FloatType());
 		try {
 			Gauss3.gauss(sigma, in, blurred);
 		} catch (IncompatibleTypeException e) {

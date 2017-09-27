@@ -5,7 +5,6 @@ import ij.ImageStack;
 import ij.plugin.filter.RankFilters;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.algorithm.morphology.Dilation;
@@ -16,7 +15,6 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.scijava.Context;
 import trainableSegmentation.FeatureStack;
 import weka.core.Instances;
 
@@ -26,8 +24,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static net.imglib2.algorithm.features.GroupedFeatures.*;
-import static net.imglib2.algorithm.features.SingleFeatures.*;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -38,17 +34,13 @@ public class FeatureStackTest {
 	private static ImagePlus bridgeImage = Utils.loadImage("nuclei.tif");
 
 	private static Img<FloatType> bridgeImg = ImagePlusAdapter.convertFloat(bridgeImage);
-	private OpService ops = new Context(OpService.class).service(OpService.class);
 
-	public static void main(String... args) {
-		Img<FloatType> img = ImageJFunctions.convertFloat(squarePictureWithCenteredDot());
-		FeatureGroup group = Features.grayGroup(GroupedFeatures.lipschitz(0));
-		RandomAccessibleInterval<FloatType> result = Features.applyOnImg(group, img);
-		ImageJFunctions.show(result);
-	}
+	private final GroupedFeatures groupedFeatures = new GroupedFeatures(Utils.ops());
 
-	public static RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureOp feature) {
-		return Features.applyOnImg(Features.grayGroup(SingleFeatures.identity(), feature), image);
+	private final SingleFeatures singleFeatures = new SingleFeatures(Utils.ops());
+
+	public RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureOp feature) {
+		return Features.applyOnImg(Features.grayGroup(singleFeatures.identity(), feature), image);
 	}
 
 	@Test
@@ -64,7 +56,7 @@ public class FeatureStackTest {
 
 	@Test
 	public void testGaussStack() {
-		testFeature(40, FeatureStack.GAUSSIAN, GroupedFeatures.gauss());
+		testFeature(40, FeatureStack.GAUSSIAN, groupedFeatures.gauss());
 	}
 
 	private void testFeature(float expectedPsnr, int oldFeatureId, FeatureOp newFeature) {
@@ -83,27 +75,27 @@ public class FeatureStackTest {
 	}
 
 	private List<String> getAttributeLabels(FeatureOp feature) {
-		return Features.grayGroup(SingleFeatures.identity(), feature).attributeLabels();
+		return Features.grayGroup(singleFeatures.identity(), feature).attributeLabels();
 	}
 
 	@Test
 	public void testHessianStack() {
-		testFeature(40, FeatureStack.HESSIAN, GroupedFeatures.hessian());
+		testFeature(40, FeatureStack.HESSIAN, groupedFeatures.hessian());
 	}
 
 	@Test
 	public void testDifferenceOfGaussian() {
-		testFeature(40, FeatureStack.DOG, GroupedFeatures.differenceOfGaussians());
+		testFeature(40, FeatureStack.DOG, groupedFeatures.differenceOfGaussians());
 	}
 
 	@Test
 	public void testSobel() {
-		testFeature(40, FeatureStack.SOBEL, GroupedFeatures.sobelGradient());
+		testFeature(40, FeatureStack.SOBEL, groupedFeatures.sobelGradient());
 	}
 
 	@Test
 	public void testLipschitz() {
-		testFeature(40, FeatureStack.LIPSCHITZ, GroupedFeatures.lipschitz(0));
+		testFeature(40, FeatureStack.LIPSCHITZ, groupedFeatures.lipschitz(0));
 	}
 
 	/** Show that there is a difference between HyperSphereShape and shape used by FilterRank. */
@@ -130,32 +122,32 @@ public class FeatureStackTest {
 
 	@Test
 	public void testMaximum() {
-		testFeature(27, FeatureStack.MAXIMUM, GroupedFeatures.max());
+		testFeature(27, FeatureStack.MAXIMUM, groupedFeatures.max());
 	}
 
 	@Test
 	public void testMinimum() {
-		testFeature(30, FeatureStack.MINIMUM, GroupedFeatures.min());
+		testFeature(30, FeatureStack.MINIMUM, groupedFeatures.min());
 	}
 
 	@Test
 	public void testMean() {
-		testFeature(40, FeatureStack.MEAN, GroupedFeatures.mean());
+		testFeature(40, FeatureStack.MEAN, groupedFeatures.mean());
 	}
 
 	@Test
 	public void testVariance() {
-		testFeature(30, FeatureStack.VARIANCE, GroupedFeatures.variance());
+		testFeature(30, FeatureStack.VARIANCE, groupedFeatures.variance());
 	}
 
 	@Test
 	public void testMedian() {
-		testFeature(30, FeatureStack.MEDIAN, GroupedFeatures.median());
+		testFeature(30, FeatureStack.MEDIAN, groupedFeatures.median());
 	}
 
 	@Test
 	public void testGabor() {
-		testFeature(30, FeatureStack.GABOR, GroupedFeatures.legacyGabor());
+		testFeature(30, FeatureStack.GABOR, groupedFeatures.legacyGabor());
 	}
 
 	private static RandomAccessibleInterval<FloatType> generateSingleFeature(ImagePlus image, int feature) {

@@ -43,7 +43,7 @@ public class SingleDifferenceOfGaussiansFeature extends AbstractFeatureOp {
 
 	private void dog(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {
 		try {
-			Img<FloatType> tmp = RevampUtils.ops().create().img(out);
+			Img<FloatType> tmp = ops().create().img(out);
 			Gauss3.gauss(sigma1 * 0.4, in, tmp);
 			Gauss3.gauss(sigma2 * 0.4, in, out);
 			Views.interval(Views.pair(tmp, out), out).forEach(p -> p.getB().sub(p.getA()));

@@ -1,7 +1,6 @@
 package net.imglib2.algorithm.features.ops;
 
 import net.imglib2.algorithm.features.Features;
-import net.imglib2.algorithm.features.GlobalSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +28,7 @@ public abstract class AbstractSigmaGroupFeatureOp extends AbstractGroupFeatureOp
 	protected List<FeatureOp> initFeatures() {
 		Class<? extends FeatureOp> featureClass = getSingleFeatureClass();
 		return initSigmas().stream()
-				.map(sigma -> Features.create(featureClass, globalSettings(), sigma))
+				.map(sigma -> Features.create(ops(), featureClass, globalSettings(), sigma))
 				.collect(Collectors.toList());
 	}
 

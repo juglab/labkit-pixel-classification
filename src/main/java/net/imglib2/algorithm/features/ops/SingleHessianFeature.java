@@ -51,13 +51,13 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 	private static final int SQUARE_EIGENVALUE_DIFFERENCE = 6;
 	private static final int NORMALIZED_EIGENVALUE_DIFFERENCE = 7;
 
-	public static RandomAccessibleInterval<FloatType> calculateHessianOnChannel(Img<FloatType> image, double sigma) {
-		Img<FloatType> features = RevampUtils.ops().create().img(RevampUtils.extend(image, 0, 7), new FloatType());
+	public RandomAccessibleInterval<FloatType> calculateHessianOnChannel(Img<FloatType> image, double sigma) {
+		Img<FloatType> features = ops().create().img(RevampUtils.extend(image, 0, 7), new FloatType());
 		calculateHessianOnChannel(Views.extendBorder(image), features, sigma);
 		return features;
 	}
 
-	private static void calculateHessianOnChannel(RandomAccessible<FloatType> image, RandomAccessibleInterval<FloatType> out, double sigma) {
+	private void calculateHessianOnChannel(RandomAccessible<FloatType> image, RandomAccessibleInterval<FloatType> out, double sigma) {
 		double[] sigmas = {0.4 * sigma, 0.4 * sigma};
 
 		Interval secondDerivativeInterval = RevampUtils.removeLastDimension(out);
@@ -66,12 +66,12 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 		Interval blurredInterval = Intervals.union(
 				RevampUtils.deriveXRequiredInput(firstDerivativeInterval), RevampUtils.deriveYRequiredInput(firstDerivativeInterval));
 
-		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(image, blurredInterval, sigmas);
-		RandomAccessibleInterval<FloatType> dx = RevampUtils.deriveX(blurred, firstDerivativeInterval);
-		RandomAccessibleInterval<FloatType> dy = RevampUtils.deriveY(blurred, firstDerivativeInterval);
-		RandomAccess<FloatType> dxx = RevampUtils.deriveX(dx, secondDerivativeInterval).randomAccess();
-		RandomAccess<FloatType> dxy = RevampUtils.deriveY(dx, secondDerivativeInterval).randomAccess();
-		RandomAccess<FloatType> dyy = RevampUtils.deriveY(dy, secondDerivativeInterval).randomAccess();
+		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(ops(), image, blurredInterval, sigmas);
+		RandomAccessibleInterval<FloatType> dx = RevampUtils.deriveX(ops(), blurred, firstDerivativeInterval);
+		RandomAccessibleInterval<FloatType> dy = RevampUtils.deriveY(ops(), blurred, firstDerivativeInterval);
+		RandomAccess<FloatType> dxx = RevampUtils.deriveX(ops(), dx, secondDerivativeInterval).randomAccess();
+		RandomAccess<FloatType> dxy = RevampUtils.deriveY(ops(), dx, secondDerivativeInterval).randomAccess();
+		RandomAccess<FloatType> dyy = RevampUtils.deriveY(ops(), dy, secondDerivativeInterval).randomAccess();
 
 		Cursor<RealComposite<FloatType>> cursor = Views.iterable(Views.collapseReal(out)).cursor();
 		while (cursor.hasNext()) {

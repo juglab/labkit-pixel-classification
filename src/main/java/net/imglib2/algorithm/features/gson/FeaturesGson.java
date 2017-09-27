@@ -1,6 +1,7 @@
 package net.imglib2.algorithm.features.gson;
 
 import com.google.gson.*;
+import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.OpService;
 import net.imglib2.algorithm.features.*;
 import net.imglib2.algorithm.features.ops.FeatureOp;
@@ -14,24 +15,24 @@ import java.util.List;
  */
 public class FeaturesGson {
 
-	public static FeatureGroup fromJson(String serialized) {
-		Gson gson = initGson();
+	public static FeatureGroup fromJson(String serialized, OpEnvironment ops) {
+		Gson gson = initGson(ops);
 		return gson.fromJson(serialized, FeatureGroup.class);
 	}
 
-	public static String toJson(FeatureGroup featureGroup) {
-		Gson gson = initGson();
+	public static String toJson(FeatureGroup featureGroup, OpEnvironment ops) {
+		Gson gson = initGson(ops);
 		return gson.toJson(featureGroup, FeatureGroup.class);
 	}
 
-	private static Gson initGson() {
-		return gsonModifiers(new GsonBuilder()).create();
+	private static Gson initGson(OpEnvironment ops) {
+		return gsonModifiers(ops, new GsonBuilder()).create();
 	}
 
-	public static GsonBuilder gsonModifiers(GsonBuilder builder) {
+	public static GsonBuilder gsonModifiers(OpEnvironment ops, GsonBuilder builder) {
 		return builder
 				.registerTypeHierarchyAdapter(FeatureGroup.class, new FeatureGroupSerializer())
-				.registerTypeHierarchyAdapter(FeatureGroup.class, new FeatureGroupDeserializer(RevampUtils.ops()));
+				.registerTypeHierarchyAdapter(FeatureGroup.class, new FeatureGroupDeserializer(ops));
 	}
 
 	private static class FeatureGroupSerializer implements JsonSerializer<FeatureGroup> {
@@ -62,10 +63,10 @@ public class FeaturesGson {
 
 	private static class FeatureGroupDeserializer implements JsonDeserializer<FeatureGroup> {
 
-		private final OpService opService;
+		private final OpEnvironment ops;
 
-		FeatureGroupDeserializer(OpService opService) {
-			this.opService = opService;
+		FeatureGroupDeserializer(OpEnvironment ops) {
+			this.ops = ops;
 		}
 
 		@Override
@@ -88,7 +89,7 @@ public class FeaturesGson {
 			FeatureSetting fs = FeatureSetting.fromClass(classForName(className));
 			for(String p : fs.parameters())
 				fs.setParameter(p, json.deserialize(o.get(p), fs.getParameterType(p)));
-			return fs.newInstance(opService, globalSettings);
+			return fs.newInstance(ops, globalSettings);
 		}
 
 		private Class<? extends FeatureOp> classForName(String className) {

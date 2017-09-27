@@ -1,5 +1,6 @@
 package net.imglib2.algorithm.features;
 
+import net.imagej.ops.OpEnvironment;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.ops.FeatureOp;
@@ -20,6 +21,11 @@ public class GrayFeatureGroup implements FeatureGroup {
 		this.joiner = new FeatureJoiner(features);
 		if(globalSettings().imageType() != GlobalSettings.ImageType.GRAY_SCALE)
 			throw new IllegalArgumentException("GrayFeatureGroup requires ImageType to be gray scale");
+	}
+
+	@Override
+	public OpEnvironment ops() {
+		return joiner.ops();
 	}
 
 	@Override

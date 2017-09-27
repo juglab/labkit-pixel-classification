@@ -50,7 +50,7 @@ public class SingleLipschitzFeature extends AbstractFeatureOp {
 
 	private void apply(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {
 		Interval expandedInterval = Intervals.expand(out, nCopies(out.numDimensions(), border));
-		Img<FloatType> tmp = RevampUtils.ops().create().img(expandedInterval, new FloatType());
+		Img<FloatType> tmp = ops().create().img(expandedInterval, new FloatType());
 		copy(tmp, in);
 		lipschitz(tmp);
 		outEquals255PlusAMinusB(Views.iterable(out), in, tmp); // out = 255 + in - tmp
@@ -90,7 +90,6 @@ public class SingleLipschitzFeature extends AbstractFeatureOp {
 
 	<T extends RealType<T>> void lipschitz(RandomAccessibleInterval<T> inOut) {
 		int n = inOut.numDimensions();
-		Interval interval = new FinalInterval(nCopies(n, -1), nCopies(n, 1));
 		for(Localizable location : RevampUtils.neigborsLocations(n)) {
 			if(!isZero(location))
 				forward(Views.extendBorder(inOut), inOut, locationToArray(location));

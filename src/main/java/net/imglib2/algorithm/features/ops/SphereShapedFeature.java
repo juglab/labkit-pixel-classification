@@ -24,7 +24,7 @@ public class SphereShapedFeature extends AbstractGroupFeatureOp {
 
 	protected List<FeatureOp> initFeatures() {
 		return globalSettings().sigmas().stream()
-				.map(r -> Features.create(SingleSphereShapedFeature.class, globalSettings(), r, operation))
+				.map(r -> Features.create(ops(), SingleSphereShapedFeature.class, globalSettings(), r, operation))
 				.collect(Collectors.toList());
 	}
 }
