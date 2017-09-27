@@ -9,6 +9,7 @@ import net.imglib2.algorithm.features.Features;
 import net.imglib2.algorithm.features.RevampUtils;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ByteType;
@@ -45,8 +46,12 @@ public class Classifier {
 		return features;
 	}
 
-	public RandomAccessibleInterval<? extends IntegerType<?>> segment(RandomAccessibleInterval<FloatType> image) {
-		Img<ByteType> result = RevampUtils.ops().create().img(image, new ByteType());
+	public Img<ByteType> segment(RandomAccessibleInterval<?> image) {
+		return segment(image, new ByteType());
+	}
+
+	public <T extends IntegerType<T> & NativeType<T>> Img<T> segment(RandomAccessibleInterval<?> image, T type) {
+		Img<T> result = RevampUtils.ops().create().img(image, type);
 		segment(result, Views.extendBorder(image));
 		return result;
 	}

@@ -6,12 +6,12 @@ import net.imglib2.algorithm.features.gson.FeaturesGson;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
+import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
-import org.junit.Ignore;
 import org.junit.Test;
 import weka.classifiers.meta.RandomCommittee;
 
@@ -33,16 +33,16 @@ public class ClassifierTest {
 
 	private Img<FloatType> img = ImageJFunctions.convertFloat(Utils.loadImage("nuclei.tif"));
 
-	private ImgLabeling<String, IntType> labeling = loadLabeling("nucleiLabeling.tif");
+	private LabelRegions<String> labeling = loadLabeling("nucleiLabeling.tif");
 
-	static public ImgLabeling<String, IntType> loadLabeling(String file) {
+	static public LabelRegions<String> loadLabeling(String file) {
 		Img<? extends IntegerType<?>> img = ImageJFunctions.wrapByte(Utils.loadImage(file));
 		final ImgLabeling<String, IntType> labeling = new ImgLabeling<>(RevampUtils.ops().create().img(img, new IntType()));
 		Views.interval(Views.pair(img, labeling), labeling).forEach( p -> {
 			int value = p.getA().getInteger();
 			if(value != 0) p.getB().add(Integer.toString(value));
 		} );
-		return labeling;
+		return new LabelRegions<>(labeling);
 	}
 
 	@Test

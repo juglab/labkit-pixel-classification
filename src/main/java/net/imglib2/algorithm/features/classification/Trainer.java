@@ -46,7 +46,7 @@ public class Trainer {
 		return new Trainer(classifier);
 	}
 
-	public void trainLabeledImage(Img<FloatType> image, LabelRegions<String> labeling) {
+	public <T> void trainLabeledImage(Img<T> image, LabelRegions<String> labeling) {
 		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(applyOnImg(features, image));
 		trainLabeledFeatures(featureStack, labeling);
 	}
@@ -65,11 +65,11 @@ public class Trainer {
 		training.train();
 	}
 
-	public static Classifier train(Img<FloatType> image, LabelRegions<String> labeling, FeatureGroup features) {
+	public static <T> Classifier train(Img<T> image, LabelRegions<String> labeling, FeatureGroup features) {
 		return train(image, labeling, features, initRandomForest());
 	}
 
-	public static Classifier train(Img<FloatType> image, LabelRegions<String> labeling, FeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
+	public static <T> Classifier train(Img<T> image, LabelRegions<String> labeling, FeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
 		List<String> classNames = new ArrayList<>(labeling.getExistingLabels());
 		Classifier classifier = new Classifier(classNames, features, initialWekaClassifier);
 		Trainer.of(classifier).trainLabeledImage(image, labeling);
