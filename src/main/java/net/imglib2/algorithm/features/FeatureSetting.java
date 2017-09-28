@@ -27,8 +27,26 @@ public class FeatureSetting {
 
 	private FeatureSetting(CommandInfo commandInfo, Function<String, ?> parameterSupplier) {
 		this.commandInfo = commandInfo;
-		for(String parameter : parameters())
+		for(String parameter : initParameters())
 			parameterValues.put(parameter, parameterSupplier.apply(parameter));
+	}
+
+	public FeatureSetting(Class<? extends FeatureOp> featureClass, Object... args) {
+		this(new CommandInfo(featureClass), ignore -> null);
+		for(Map.Entry<String, ?> entry : argsToMap(args).entrySet())
+			setParameter(entry.getKey(), entry.getValue());
+	}
+
+	private static Map<String, Object> argsToMap(Object[] args) {
+		Map<String, Object> map = new HashMap<>();
+		if(args.length % 2 != 0) throw new IllegalArgumentException();
+		for (int i = 0; i < args.length; i += 2) {
+			Object key = args[i];
+			Object value = args[i + 1];
+			if(!(key instanceof String)) throw new IllegalArgumentException();
+			map.put((String) key, value);
+		}
+		return map;
 	}
 
 	public static FeatureSetting fromClass(Class<? extends FeatureOp> featureClass) {
@@ -65,7 +83,11 @@ public class FeatureSetting {
 		return delegateObject;
 	}
 
-	public List<String> parameters() {
+	public Set<String> parameters() {
+		return parameterValues.keySet();
+	}
+
+	private List<String> initParameters() {
 		List<String> parameters = new ArrayList<>();
 		commandInfo.inputs().forEach(mi -> {
 			if(isParameterValid(mi)) parameters.add(mi.getName());
@@ -74,6 +96,8 @@ public class FeatureSetting {
 	}
 
 	public <T> void setParameter(String name, T value) {
+		if(!parameterValues.containsKey(name))
+			throw new IllegalArgumentException("Invalid parameter key: " + name + " for feature: " + commandInfo.getTitle());
 		parameterValues.put(name, value);
 	}
 

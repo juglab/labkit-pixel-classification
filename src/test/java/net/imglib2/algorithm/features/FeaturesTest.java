@@ -9,9 +9,4 @@ import static org.junit.Assert.assertNotNull;
  * @author Matthias Arzt
  */
 public class FeaturesTest {
-	@Test
-	public void testCreate() {
-		SingleGaussFeature op = Features.create(Utils.ops(), SingleGaussFeature.class, GlobalSettings.defaultSettings(), 1.3);
-		assertNotNull(op);
-	}
 }

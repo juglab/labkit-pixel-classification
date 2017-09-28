@@ -40,10 +40,6 @@ public class ClassifierTest {
 
 	private final OpEnvironment ops = Utils.ops();
 
-	private final SingleFeatures singleFeatures = new SingleFeatures(ops);
-
-	private final GroupedFeatures groupedFeatures = new GroupedFeatures(ops);
-
 	static public LabelRegions<String> loadLabeling(String file) {
 		Img<? extends IntegerType<?>> img = ImageJFunctions.wrapByte(Utils.loadImage(file));
 		final ImgLabeling<String, IntType> labeling = new ImgLabeling<>(Utils.ops().create().img(img, new IntType()));
@@ -72,9 +68,7 @@ public class ClassifierTest {
 
 	private Classifier trainClassifier() {
 		GlobalSettings settings = new GlobalSettings(GlobalSettings.ImageType.GRAY_SCALE, Arrays.asList(1.0, 8.0, 16.0), 3.0);
-		SingleFeatures sf = new SingleFeatures(ops, settings);
-		GroupedFeatures gf = new GroupedFeatures(ops, settings);
-		GrayFeatureGroup features = Features.grayGroup(sf.identity(), gf.gauss());
+		FeatureGroup features = Features.group(Utils.ops(), settings, SingleFeatures.identity(), GroupedFeatures.gauss());
 		return Trainer.train(ops, img, labeling, features);
 	}
 
@@ -102,7 +96,7 @@ public class ClassifierTest {
 
 	@Test
 	public void testGson() {
-		FeatureGroup feature = Features.group(singleFeatures.gauss(1.0), singleFeatures.gauss(1.0));
+		FeatureGroup feature = Features.group(Utils.ops(), GlobalSettings.defaultSettings(), SingleFeatures.gauss(1.0), SingleFeatures.gauss(1.0));
 		String serialized = FeaturesGson.toJson(feature);
 		FeatureGroup feature2 = FeaturesGson.fromJson(serialized, ops);
 		String serialized2 = FeaturesGson.toJson(feature2);
@@ -111,7 +105,7 @@ public class ClassifierTest {
 
 	@Test
 	public void testDifferentWekaClassifiers() {
-		GrayFeatureGroup features = Features.grayGroup(singleFeatures.identity(), groupedFeatures.gauss());
+		FeatureGroup features = Features.group(Utils.ops(), GlobalSettings.defaultSettings(), SingleFeatures.identity(), GroupedFeatures.gauss());
 		Classifier classifier = Trainer.train(ops, img, labeling, features, new RandomCommittee());
 		RandomAccessibleInterval<? extends IntegerType> result = classifier.segment(img);
 		checkExpected(result, classifier.classNames());

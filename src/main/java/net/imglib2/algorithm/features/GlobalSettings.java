@@ -70,17 +70,14 @@ public final class GlobalSettings {
 	}
 
 	public enum ImageType {
-		COLOR(ColorFeatureGroup::new, "red", "green", "blue"),
-		GRAY_SCALE(GrayFeatureGroup::new, "");
-
-		private final Function<List<FeatureOp>, FeatureGroup> groupFactory;
+		COLOR("red", "green", "blue"),
+		GRAY_SCALE("");
 
 		private final int channelCount;
 
 		private final List<String> channelNames;
 
-		ImageType(Function<List<FeatureOp>, FeatureGroup> groupFactory, String... names) {
-			this.groupFactory = groupFactory;
+		ImageType(String... names) {
 			channelCount = names.length;
 			channelNames = Arrays.asList(names);
 		}
@@ -91,10 +88,6 @@ public final class GlobalSettings {
 
 		public List<String> channelNames() {
 			return channelNames;
-		}
-
-		public Function<List<FeatureOp>, FeatureGroup> groupFactory() {
-			return groupFactory;
 		}
 	}
 }

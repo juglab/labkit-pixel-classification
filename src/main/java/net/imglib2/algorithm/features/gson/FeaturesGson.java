@@ -72,23 +72,23 @@ public class FeaturesGson {
 		public FeatureGroup deserialize(JsonElement element, Type type, JsonDeserializationContext json) throws JsonParseException {
 			JsonObject object = element.getAsJsonObject();
 			GlobalSettings globalSettings = json.deserialize(object.get("globals"), GlobalSettings.class);
-			List<FeatureOp> features = deserializeFeatures(object.get("ops").getAsJsonArray(), globalSettings, json);
-			return globalSettings.imageType().groupFactory().apply(features);
+			List<FeatureSetting> features = deserializeFeatures(object.get("ops").getAsJsonArray(), json);
+			return Features.group(ops, globalSettings, features);
 		}
 
-		private List<FeatureOp> deserializeFeatures(JsonArray ops, GlobalSettings globalSettings, JsonDeserializationContext json) {
-			List<FeatureOp> features = new ArrayList<>();
-			ops.forEach(element -> features.add(deserializeFeature(element, globalSettings, json)));
+		private List<FeatureSetting> deserializeFeatures(JsonArray ops, JsonDeserializationContext json) {
+			List<FeatureSetting> features = new ArrayList<>();
+			ops.forEach(element -> features.add(deserializeFeature(element, json)));
 			return features;
 		}
 
-		private FeatureOp deserializeFeature(JsonElement element, GlobalSettings globalSettings, JsonDeserializationContext json) {
+		private FeatureSetting deserializeFeature(JsonElement element, JsonDeserializationContext json) {
 			JsonObject o = element.getAsJsonObject();
 			String className = o.get("class").getAsString();
 			FeatureSetting fs = FeatureSetting.fromClass(classForName(className));
 			for(String p : fs.parameters())
 				fs.setParameter(p, json.deserialize(o.get(p), fs.getParameterType(p)));
-			return fs.newInstance(ops, globalSettings);
+			return fs;
 		}
 
 		private Class<? extends FeatureOp> classForName(String className) {

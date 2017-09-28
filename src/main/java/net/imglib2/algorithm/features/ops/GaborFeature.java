@@ -1,6 +1,7 @@
 package net.imglib2.algorithm.features.ops;
 
-import net.imglib2.algorithm.features.Features;
+import net.imglib2.algorithm.features.FeatureSetting;
+import net.imglib2.algorithm.features.SingleFeatures;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -17,9 +18,9 @@ public class GaborFeature extends AbstractGroupFeatureOp {
 	private boolean legacyNormalize = false;
 
 	@Override
-	protected List<FeatureOp> initFeatures() {
+	protected List<FeatureSetting> initFeatures() {
 		int nAngles = 10;
-		List<FeatureOp> features = new ArrayList<>();
+		List<FeatureSetting> features = new ArrayList<>();
 		for(int i=0; i < 2; i++)
 			for(double gamma = 1; gamma >= 0.25; gamma /= 2)
 				for(int frequency = 2; frequency<3; frequency ++)
@@ -39,7 +40,9 @@ public class GaborFeature extends AbstractGroupFeatureOp {
 		return features;
 	}
 
-	private FeatureOp createGaborFeature(double v, double gamma, double psi, int frequency, int nAngles) {
-		return Features.create(ops(), SingleGaborFeature.class, globalSettings(), v, gamma, psi, frequency, nAngles, legacyNormalize);
+	private FeatureSetting createGaborFeature(double sigma, double gamma, double psi, int frequency, int nAngles) {
+		return legacyNormalize ?
+				SingleFeatures.legacyGabor(sigma, gamma, psi, frequency, nAngles) :
+				SingleFeatures.gabor(sigma, gamma, psi, frequency, nAngles);
 	}
 }

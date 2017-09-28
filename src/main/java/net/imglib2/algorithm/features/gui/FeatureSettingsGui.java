@@ -5,9 +5,7 @@ import net.imagej.ops.OpService;
 import net.imglib2.algorithm.features.*;
 
 import javax.swing.*;
-import javax.swing.text.NumberFormatter;
 import java.awt.*;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
 import java.util.List;
@@ -60,7 +58,7 @@ public class FeatureSettingsGui {
 	}
 
 	public FeatureGroup get() {
-		return model.features(globalsPanel.get());
+		return Features.group(ops, globalsPanel.get(), model.features());
 	}
 
 	private void initGui(GlobalSettings globals) {
@@ -180,7 +178,7 @@ public class FeatureSettingsGui {
 
 	public static void main(String... args) {
 		Context context = new Context();
-		System.out.println(FeatureSettingsGui.show(context, Features.grayGroup()));
+		System.out.println(FeatureSettingsGui.show(context, Features.group(context.service(OpService.class), GlobalSettings.defaultSettings())));
 		System.out.println("finished");
 	}
 
@@ -208,8 +206,8 @@ public class FeatureSettingsGui {
 			return value.getName() + " " + joiner;
 		}
 
-		public FeatureOp get(GlobalSettings globalSettings) {
-			return value.newInstance(ops, globalSettings);
+		public FeatureSetting get() {
+			return value;
 		}
 	}
 
@@ -245,9 +243,8 @@ public class FeatureSettingsGui {
 			fireContentsChanged(items, 0, items.size());
 		}
 
-		public FeatureGroup features(GlobalSettings globalSettings) {
-			List<FeatureOp> featureOps = items.stream().map(h -> h.get(globalSettings)).collect(Collectors.toList());
-			return globalSettings.imageType().groupFactory().apply(featureOps);
+		public List<FeatureSetting> features() {
+			return items.stream().map(h -> h.get()).collect(Collectors.toList());
 		}
 	}
 

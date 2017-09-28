@@ -35,12 +35,8 @@ public class FeatureStackTest {
 
 	private static Img<FloatType> bridgeImg = ImagePlusAdapter.convertFloat(bridgeImage);
 
-	private final GroupedFeatures groupedFeatures = new GroupedFeatures(Utils.ops());
-
-	private final SingleFeatures singleFeatures = new SingleFeatures(Utils.ops());
-
-	public RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureOp feature) {
-		return Features.applyOnImg(Features.grayGroup(singleFeatures.identity(), feature), image);
+	public RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureSetting feature) {
+		return Features.applyOnImg(Features.group(Utils.ops(), GlobalSettings.defaultSettings(), SingleFeatures.identity(), feature), image);
 	}
 
 	@Test
@@ -56,10 +52,10 @@ public class FeatureStackTest {
 
 	@Test
 	public void testGaussStack() {
-		testFeature(40, FeatureStack.GAUSSIAN, groupedFeatures.gauss());
+		testFeature(40, FeatureStack.GAUSSIAN, GroupedFeatures.gauss());
 	}
 
-	private void testFeature(float expectedPsnr, int oldFeatureId, FeatureOp newFeature) {
+	private void testFeature(float expectedPsnr, int oldFeatureId, FeatureSetting newFeature) {
 		RandomAccessibleInterval<FloatType> expected = generateSingleFeature(bridgeImage, oldFeatureId);
 		RandomAccessibleInterval<FloatType> result = createStack(bridgeImg, newFeature);
 		Utils.assertImagesEqual(expectedPsnr, expected, result);
@@ -74,28 +70,28 @@ public class FeatureStackTest {
 		return IntStream.range(0, instances.classIndex()).mapToObj(i -> instances.attribute(i).name()).collect(Collectors.toList());
 	}
 
-	private List<String> getAttributeLabels(FeatureOp feature) {
-		return Features.grayGroup(singleFeatures.identity(), feature).attributeLabels();
+	private List<String> getAttributeLabels(FeatureSetting feature) {
+		return Features.group(Utils.ops(), GlobalSettings.defaultSettings(), SingleFeatures.identity(), feature).attributeLabels();
 	}
 
 	@Test
 	public void testHessianStack() {
-		testFeature(40, FeatureStack.HESSIAN, groupedFeatures.hessian());
+		testFeature(40, FeatureStack.HESSIAN, GroupedFeatures.hessian());
 	}
 
 	@Test
 	public void testDifferenceOfGaussian() {
-		testFeature(40, FeatureStack.DOG, groupedFeatures.differenceOfGaussians());
+		testFeature(40, FeatureStack.DOG, GroupedFeatures.differenceOfGaussians());
 	}
 
 	@Test
 	public void testSobel() {
-		testFeature(40, FeatureStack.SOBEL, groupedFeatures.sobelGradient());
+		testFeature(40, FeatureStack.SOBEL, GroupedFeatures.sobelGradient());
 	}
 
 	@Test
 	public void testLipschitz() {
-		testFeature(40, FeatureStack.LIPSCHITZ, groupedFeatures.lipschitz(0));
+		testFeature(40, FeatureStack.LIPSCHITZ, GroupedFeatures.lipschitz(0));
 	}
 
 	/** Show that there is a difference between HyperSphereShape and shape used by FilterRank. */
@@ -122,32 +118,32 @@ public class FeatureStackTest {
 
 	@Test
 	public void testMaximum() {
-		testFeature(27, FeatureStack.MAXIMUM, groupedFeatures.max());
+		testFeature(27, FeatureStack.MAXIMUM, GroupedFeatures.max());
 	}
 
 	@Test
 	public void testMinimum() {
-		testFeature(30, FeatureStack.MINIMUM, groupedFeatures.min());
+		testFeature(30, FeatureStack.MINIMUM, GroupedFeatures.min());
 	}
 
 	@Test
 	public void testMean() {
-		testFeature(40, FeatureStack.MEAN, groupedFeatures.mean());
+		testFeature(40, FeatureStack.MEAN, GroupedFeatures.mean());
 	}
 
 	@Test
 	public void testVariance() {
-		testFeature(30, FeatureStack.VARIANCE, groupedFeatures.variance());
+		testFeature(30, FeatureStack.VARIANCE, GroupedFeatures.variance());
 	}
 
 	@Test
 	public void testMedian() {
-		testFeature(30, FeatureStack.MEDIAN, groupedFeatures.median());
+		testFeature(30, FeatureStack.MEDIAN, GroupedFeatures.median());
 	}
 
 	@Test
 	public void testGabor() {
-		testFeature(30, FeatureStack.GABOR, groupedFeatures.legacyGabor());
+		testFeature(30, FeatureStack.GABOR, GroupedFeatures.legacyGabor());
 	}
 
 	private static RandomAccessibleInterval<FloatType> generateSingleFeature(ImagePlus image, int feature) {

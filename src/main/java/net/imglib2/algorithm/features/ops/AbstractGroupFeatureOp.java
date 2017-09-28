@@ -3,10 +3,12 @@ package net.imglib2.algorithm.features.ops;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.FeatureJoiner;
+import net.imglib2.algorithm.features.FeatureSetting;
 import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Matthias Arzt
@@ -17,10 +19,11 @@ public abstract class AbstractGroupFeatureOp extends AbstractFeatureOp {
 
 	@Override
 	public void initialize() {
-		featureGroup = new FeatureJoiner(initFeatures());
+		featureGroup = new FeatureJoiner(initFeatures().stream().map(x -> x.newInstance(ops(), globalSettings()))
+				.collect(Collectors.toList()));
 	}
 
-	protected abstract List<FeatureOp> initFeatures();
+	protected abstract List<FeatureSetting> initFeatures();
 
 	@Override
 	public int count() {

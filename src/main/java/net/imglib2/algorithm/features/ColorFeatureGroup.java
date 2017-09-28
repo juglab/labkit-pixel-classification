@@ -7,7 +7,6 @@ import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.real.FloatType;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.IntPredicate;
@@ -21,12 +20,9 @@ public class ColorFeatureGroup implements FeatureGroup {
 
 	private final FeatureJoiner joiner;
 
-	ColorFeatureGroup(FeatureOp... features) {
-		this(Arrays.asList(features));
-	}
-
-	ColorFeatureGroup(List<FeatureOp> features) {
-		this.joiner = new FeatureJoiner(features);
+	ColorFeatureGroup(OpEnvironment ops, GlobalSettings globals, List<FeatureSetting> features) {
+		List<FeatureOp> featuresOps = features.stream().map(x -> x.newInstance(ops, globals)).collect(Collectors.toList());
+		this.joiner = new FeatureJoiner(featuresOps);
 		if(globalSettings().imageType() != GlobalSettings.ImageType.COLOR)
 			throw new IllegalArgumentException("ColorFeatureGroup requires GlobalSettings.imageType() to be COLOR.");
 	}

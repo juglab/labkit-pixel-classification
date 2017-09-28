@@ -9,6 +9,7 @@ import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Matthias Arzt
@@ -17,8 +18,9 @@ public class GrayFeatureGroup implements FeatureGroup {
 
 	private final FeatureJoiner joiner;
 
-	GrayFeatureGroup(List<FeatureOp> features) {
-		this.joiner = new FeatureJoiner(features);
+	GrayFeatureGroup(OpEnvironment ops, GlobalSettings globals, List<FeatureSetting> features) {
+		List<FeatureOp> featureOps = features.stream().map(x -> x.newInstance(ops, globals)).collect(Collectors.toList());
+		this.joiner = new FeatureJoiner(featureOps);
 		if(globalSettings().imageType() != GlobalSettings.ImageType.GRAY_SCALE)
 			throw new IllegalArgumentException("GrayFeatureGroup requires ImageType to be gray scale");
 	}

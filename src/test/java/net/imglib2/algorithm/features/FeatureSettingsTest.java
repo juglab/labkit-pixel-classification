@@ -11,6 +11,7 @@ import org.scijava.plugin.Parameter;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -28,8 +29,8 @@ public class FeatureSettingsTest {
 	@Test
 	public void testListParameters() {
 		FeatureSetting fs = FeatureSetting.fromClass(TestFeature.class);
-		List<String> parameters = fs.parameters();
-		assertEquals(Collections.singletonList("sigma"), parameters);
+		Set<String> parameters = fs.parameters();
+		assertEquals(Collections.singleton("sigma"), parameters);
 	}
 
 	@Test

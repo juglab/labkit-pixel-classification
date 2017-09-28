@@ -9,6 +9,7 @@ import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -24,9 +25,9 @@ public class ColorFeatureGroupTest {
 	private final GlobalSettings graySettings = new GlobalSettings(GlobalSettings.ImageType.GRAY_SCALE,
 			colorSettings.sigmas(), colorSettings.membraneThickness());
 
-	private final FeatureGroup colorGroup = new ColorFeatureGroup(new GroupedFeatures(Utils.ops(), colorSettings).gauss());
+	private final FeatureGroup colorGroup = new ColorFeatureGroup(Utils.ops(), colorSettings, Collections.singletonList(GroupedFeatures.gauss()));
 
-	private final FeatureGroup grayGroup = Features.grayGroup(new GroupedFeatures(Utils.ops(), graySettings).gauss());
+	private final FeatureGroup grayGroup = new GrayFeatureGroup(Utils.ops(), graySettings, Collections.singletonList(GroupedFeatures.gauss()));
 
 	private final Img<ARGBType> image = ImageJFunctions.wrapRGBA(new ImagePlus("https://imagej.nih.gov/ij/images/clown.png"));
 

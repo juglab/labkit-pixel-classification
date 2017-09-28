@@ -19,7 +19,7 @@ public class FeatureSettingsGuiTest {
 		Context context = new Context(OpService.class);
 		OpService ops = context.service(OpService.class);
 		GlobalSettings settings = GlobalSettings.defaultSettings();
-		FeatureGroup fg = Features.grayGroup(new GroupedFeatures(ops, settings).gauss());
+		FeatureGroup fg = Features.group(ops, settings, GroupedFeatures.gauss());
 		FeatureSettingsGui gui = new FeatureSettingsGui(context, fg);
 		showFrame(gui.getComponent());
 		System.out.println(FeaturesGson.toJson(fg));

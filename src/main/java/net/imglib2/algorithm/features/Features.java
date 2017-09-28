@@ -1,11 +1,9 @@
 package net.imglib2.algorithm.features;
 
 import net.imagej.ops.OpEnvironment;
-import net.imagej.ops.special.function.Functions;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
@@ -38,21 +36,18 @@ public class Features {
 		return attributes;
 	}
 
-	public static <T extends FeatureOp> T create(OpEnvironment ops, Class<T> aClass, GlobalSettings globalSettings, Object... args) {
-		Object[] allArgs = RevampUtils.prepend(globalSettings, args);
-		return (T) (Object) Functions.unary(ops, aClass, RandomAccessibleInterval.class, RandomAccessibleInterval.class, allArgs);
+	public static FeatureGroup group(OpEnvironment ops, GlobalSettings globals, FeatureSetting... featuresSettings) {
+		List<FeatureSetting> features = Arrays.asList(featuresSettings);
+		return group(ops, globals, features);
 	}
 
-	public static FeatureGroup group(FeatureOp... features) {
-		List<FeatureOp> t = Arrays.asList(features);
-		return features[0].globalSettings().imageType().groupFactory().apply(t);
-	}
-
-	public static GrayFeatureGroup grayGroup(FeatureOp... features) {
-		return new GrayFeatureGroup(Arrays.asList(features));
-	}
-
-	public static GrayFeatureGroup grayGroup(List<FeatureOp> features) {
-		return new GrayFeatureGroup(features);
+	public static FeatureGroup group(OpEnvironment ops, GlobalSettings globals, List<FeatureSetting> features) {
+		switch (globals.imageType()) {
+			case COLOR:
+				return new ColorFeatureGroup(ops, globals, features);
+			case GRAY_SCALE:
+				return new GrayFeatureGroup(ops, globals, features);
+		}
+		throw new AssertionError();
 	}
 }
