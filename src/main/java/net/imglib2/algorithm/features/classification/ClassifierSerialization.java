@@ -21,16 +21,14 @@ class ClassifierSerialization {
 		this.ops = ops;
 	}
 
-	public void store(Classifier classifier, String filename) throws IOException {
-		try( FileWriter fw = new FileWriter(filename) ) {
-			Gson gson = initGson();
-			gson.toJson(classifier, Classifier.class, fw);
-			fw.append("\n");
+	public void store(Classifier classifier, OutputStream out) throws IOException {
+		try( Writer fw = new OutputStreamWriter(out) ) {
+			initGson().toJson(classifier, Classifier.class, fw);
 		}
 	}
 
-	public Classifier load(String filename) throws IOException {
-		try( FileReader fr = new FileReader(filename) ) {
+	public Classifier load(InputStream in) throws IOException {
+		try( Reader fr = new InputStreamReader(in) ) {
 			return initGson().fromJson(fr, Classifier.class);
 		}
 	}

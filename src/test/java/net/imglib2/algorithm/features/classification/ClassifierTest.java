@@ -17,7 +17,11 @@ import org.junit.Test;
 import weka.classifiers.meta.RandomCommittee;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -80,9 +84,15 @@ public class ClassifierTest {
 		Classifier classifier = trainClassifier();
 		// store
 		File temporaryFile = File.createTempFile("classifier", ".tmp");
-		classifier.store(temporaryFile.getPath());
+		try( OutputStream out = new FileOutputStream(temporaryFile.getPath()) ) {
+			classifier.store(out);
+		}
 		// load
-		Classifier classifier2 = Classifier.load(ops, temporaryFile.getPath());
+		Classifier result1;
+		try( InputStream in = new FileInputStream(temporaryFile.getPath()) ) {
+			result1 = Classifier.load(ops, in);
+		}
+		Classifier classifier2 = result1;
 		temporaryFile.delete();
 		// test
 		RandomAccessibleInterval<? extends IntegerType<?>> result = classifier.segment(img);

@@ -97,12 +97,12 @@ public class Classifier {
 		return classNames;
 	}
 
-	public void store(String filename) throws IOException {
-		new ClassifierSerialization(ops).store(this, filename);
+	public void store(OutputStream out) throws IOException {
+		new ClassifierSerialization(ops).store(this, out);
 	}
 
-	public static Classifier load(OpEnvironment ops, String filename) throws IOException {
-		return new ClassifierSerialization(ops).load(filename);
+	public static Classifier load(OpEnvironment ops, InputStream in) throws IOException {
+		return new ClassifierSerialization(ops).load(in);
 	}
 
 	public Training training() {
