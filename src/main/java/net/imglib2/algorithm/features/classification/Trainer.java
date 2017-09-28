@@ -18,8 +18,12 @@ import net.imglib2.view.composite.GenericComposite;
 import weka.classifiers.AbstractClassifier;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static net.imglib2.algorithm.features.Features.applyOnImg;
 
@@ -46,15 +50,19 @@ public class Trainer {
 		return new Trainer(classifier);
 	}
 
-	public <T> void trainLabeledImage(Img<T> image, LabelRegions<String> labeling) {
+	public <L> void trainLabeledImage(Img<?> image, LabelRegions<L> labeling) {
 		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(applyOnImg(features, image));
 		trainLabeledFeatures(featureStack, labeling);
 	}
 
-	public void trainLabeledFeatures(RandomAccessible<? extends Composite<? extends RealType<?>>> features, LabelRegions<String> regions) {
+	public <L> void trainLabeledFeatures(RandomAccessible<? extends Composite<? extends RealType<?>>> features, LabelRegions<L> regions) {
 		RandomAccess<? extends Composite<? extends RealType<?>>> ra = features.randomAccess();
+		Map<String, L> kayMap = createKeyMap(regions);
 		for(int classIndex = 0; classIndex < classNames.size(); classIndex++) {
-			LabelRegion<String> region = regions.getLabelRegion(classNames.get(classIndex));
+			L label = kayMap.get(classNames.get(classIndex));
+			if(label == null)
+				continue;
+			LabelRegion<L> region = regions.getLabelRegion(label);
 			Cursor<Void> cursor = region.cursor();
 			while(cursor.hasNext()) {
 				cursor.next();
@@ -65,12 +73,18 @@ public class Trainer {
 		training.train();
 	}
 
-	public static <T> Classifier train(OpEnvironment ops, Img<T> image, LabelRegions<String> labeling, FeatureGroup features) {
+	private <L> Map<String,L> createKeyMap(LabelRegions<L> regions) {
+		Map<String, L> map = new HashMap<>();
+		regions.getExistingLabels().forEach(label -> map.put(label.toString(), label));
+		return map;
+	}
+
+	public static Classifier train(OpEnvironment ops, Img<?> image, LabelRegions<?> labeling, FeatureGroup features) {
 		return train(ops, image, labeling, features, initRandomForest());
 	}
 
-	public static <T> Classifier train(OpEnvironment ops, Img<T> image, LabelRegions<String> labeling, FeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
-		List<String> classNames = new ArrayList<>(labeling.getExistingLabels());
+	public static Classifier train(OpEnvironment ops, Img<?> image, LabelRegions<?> labeling, FeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
+		List<String> classNames = labeling.getExistingLabels().stream().map(Object::toString).collect(Collectors.toList());
 		Classifier classifier = new Classifier(ops, classNames, features, initialWekaClassifier);
 		Trainer.of(classifier).trainLabeledImage(image, labeling);
 		return classifier;
