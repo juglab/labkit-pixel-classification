@@ -2,7 +2,6 @@ package net.imglib2.algorithm.features.gson;
 
 import com.google.gson.*;
 import net.imagej.ops.OpEnvironment;
-import net.imagej.ops.OpService;
 import net.imglib2.algorithm.features.*;
 import net.imglib2.algorithm.features.ops.FeatureOp;
 
@@ -16,17 +15,17 @@ import java.util.List;
 public class FeaturesGson {
 
 	public static FeatureGroup fromJson(String serialized, OpEnvironment ops) {
-		Gson gson = initGson(ops);
+		Gson gson = new GsonBuilder()
+				.registerTypeHierarchyAdapter(FeatureGroup.class, new FeatureGroupDeserializer(ops))
+				.create();
 		return gson.fromJson(serialized, FeatureGroup.class);
 	}
 
-	public static String toJson(FeatureGroup featureGroup, OpEnvironment ops) {
-		Gson gson = initGson(ops);
+	public static String toJson(FeatureGroup featureGroup) {
+		Gson gson = new GsonBuilder()
+				.registerTypeHierarchyAdapter(FeatureGroup.class, new FeatureGroupSerializer())
+				.create();
 		return gson.toJson(featureGroup, FeatureGroup.class);
-	}
-
-	private static Gson initGson(OpEnvironment ops) {
-		return gsonModifiers(ops, new GsonBuilder()).create();
 	}
 
 	public static GsonBuilder gsonModifiers(OpEnvironment ops, GsonBuilder builder) {

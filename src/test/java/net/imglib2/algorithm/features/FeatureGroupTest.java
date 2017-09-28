@@ -57,7 +57,7 @@ public class FeatureGroupTest {
 	}
 
 	private void testSerialization(FeatureGroup featureGroup) {
-		String json = FeaturesGson.toJson(featureGroup, Utils.ops());
+		String json = FeaturesGson.toJson(featureGroup);
 		FeatureGroup object2 = FeaturesGson.fromJson(json, Utils.ops());
 		assertEquals(featureGroup, object2);
 	}

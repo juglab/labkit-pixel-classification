@@ -103,9 +103,9 @@ public class ClassifierTest {
 	@Test
 	public void testGson() {
 		FeatureGroup feature = Features.group(singleFeatures.gauss(1.0), singleFeatures.gauss(1.0));
-		String serialized = FeaturesGson.toJson(feature, ops);
+		String serialized = FeaturesGson.toJson(feature);
 		FeatureGroup feature2 = FeaturesGson.fromJson(serialized, ops);
-		String serialized2 = FeaturesGson.toJson(feature2, ops);
+		String serialized2 = FeaturesGson.toJson(feature2);
 		assertEquals(serialized, serialized2);
 	}
 
