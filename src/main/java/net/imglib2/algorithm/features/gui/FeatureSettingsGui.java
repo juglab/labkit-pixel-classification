@@ -53,6 +53,14 @@ public class FeatureSettingsGui {
 		initGui(GlobalSettings.defaultSettings());
 	}
 
+	public JComponent getComponent() {
+		return content;
+	}
+
+	public FeatureGroup get() {
+		return model.features(globalsPanel.get());
+	}
+
 	private void initGui(GlobalSettings globals) {
 		list.setModel(model);
 		content.setLayout(new MigLayout("insets 0", "[grow]","[][grow][]"));
@@ -147,13 +155,13 @@ public class FeatureSettingsGui {
 	private Optional<FeatureGroup> showInternal() {
 		boolean ok = showResizeableOkCancelDialog("Select Pixel Features", content);
 		if(ok) {
-			GlobalSettings globalSettings = globalsPanel.get();
-			return Optional.of(model.features(globalSettings));
+			FeatureGroup features = get();
+			return Optional.of(features);
 		} else
 			return Optional.empty();
 	}
 
-	public static boolean showResizeableOkCancelDialog(String title, JPanel content) {
+	private static boolean showResizeableOkCancelDialog(String title, JPanel content) {
 		JDialog dialog = new JDialog((Frame) null, title, true);
 		JOptionPane optionPane = new JOptionPane(content, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
 		dialog.setContentPane(optionPane);
@@ -285,5 +293,5 @@ public class FeatureSettingsGui {
 			list.stream().map(Object::toString).forEach(joiner::add);
 			return joiner.toString();
 		}
-	};
+	}
 }
