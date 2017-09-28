@@ -16,10 +16,11 @@ import javax.swing.*;
 public class FeatureSettingsGuiTest {
 
 	public static void main(String... args) throws InterruptedException {
-		OpService ops = new Context(OpService.class).service(OpService.class);
+		Context context = new Context(OpService.class);
+		OpService ops = context.service(OpService.class);
 		GlobalSettings settings = GlobalSettings.defaultSettings();
 		FeatureGroup fg = Features.grayGroup(new GroupedFeatures(ops, settings).gauss());
-		FeatureSettingsGui gui = new FeatureSettingsGui(ops, fg);
+		FeatureSettingsGui gui = new FeatureSettingsGui(context, fg);
 		showFrame(gui.getComponent());
 		System.out.println(FeaturesGson.toJson(fg));
 	}

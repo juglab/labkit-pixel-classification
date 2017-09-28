@@ -38,19 +38,21 @@ public class FeatureSettingsGui {
 
 	private final JList<Holder> list = new JList<>();
 
-	private final Context context = new Context();
+	private final Context context;
 
-	private final FeatureSettingsDialog featureSettingsDialog = new FeatureSettingsDialog(context);
+	private final FeatureSettingsDialog featureSettingsDialog;
 
 	private final OpEnvironment ops;
 
 	private GlobalsPanel globalsPanel;
 
-	public FeatureSettingsGui(OpEnvironment ops, FeatureGroup fg) {
-		this.ops = ops;
+	public FeatureSettingsGui(Context context, FeatureGroup fg) {
+		this.context = context;
+		this.ops = context.service(OpService.class);
+		featureSettingsDialog = new FeatureSettingsDialog(this.context);
 		List<Holder> init = fg.features().stream().map(f -> new Holder(f)).collect(Collectors.toList());
 		model = new ListModel(init);
-		initGui(GlobalSettings.defaultSettings());
+		initGui(fg.globalSettings());
 	}
 
 	public JComponent getComponent() {
@@ -95,8 +97,7 @@ public class FeatureSettingsGui {
 			sigmasField.setValue(globalSettings.sigmas());
 			add(sigmasField, "grow, wrap");
 			add(new JLabel("membrane thickness"));
-			thicknessField = new JFormattedTextField(new NumberFormatter(NumberFormat.getInstance()));
-			thicknessField.setValue(globalSettings.membraneThickness());
+			thicknessField = new JFormattedTextField(globalSettings.membraneThickness());
 			add(thicknessField, "grow, wrap");
 		}
 
@@ -147,8 +148,8 @@ public class FeatureSettingsGui {
 		return button;
 	}
 
-	public static Optional<FeatureGroup> show(OpEnvironment ops, FeatureGroup fg) {
-		FeatureSettingsGui featureSettingsGui = new FeatureSettingsGui(ops, fg);
+	public static Optional<FeatureGroup> show(Context context, FeatureGroup fg) {
+		FeatureSettingsGui featureSettingsGui = new FeatureSettingsGui(context, fg);
 		return featureSettingsGui.showInternal();
 	}
 
@@ -178,8 +179,8 @@ public class FeatureSettingsGui {
 	}
 
 	public static void main(String... args) {
-		OpEnvironment ops = new Context(OpService.class).service(OpService.class);
-		System.out.println(FeatureSettingsGui.show(ops, Features.grayGroup()));
+		Context context = new Context();
+		System.out.println(FeatureSettingsGui.show(context, Features.grayGroup()));
 		System.out.println("finished");
 	}
 
