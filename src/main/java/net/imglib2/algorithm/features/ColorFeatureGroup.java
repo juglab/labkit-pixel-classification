@@ -20,6 +20,10 @@ public class ColorFeatureGroup implements FeatureGroup {
 
 	private final FeatureJoiner joiner;
 
+	ColorFeatureGroup(OpEnvironment ops, FeatureSettings settings) {
+		this(ops, settings.globals(), settings.features());
+	}
+
 	ColorFeatureGroup(OpEnvironment ops, GlobalSettings globals, List<FeatureSetting> features) {
 		List<FeatureOp> featuresOps = features.stream().map(x -> x.newInstance(ops, globals)).collect(Collectors.toList());
 		this.joiner = new FeatureJoiner(featuresOps);

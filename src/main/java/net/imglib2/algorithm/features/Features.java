@@ -42,11 +42,16 @@ public class Features {
 	}
 
 	public static FeatureGroup group(OpEnvironment ops, GlobalSettings globals, List<FeatureSetting> features) {
-		switch (globals.imageType()) {
+		FeatureSettings featureSettings = new FeatureSettings(globals, features);
+		return group(ops, featureSettings);
+	}
+
+	private static FeatureGroup group(OpEnvironment ops, FeatureSettings featureSettings) {
+		switch (featureSettings.globals().imageType()) {
 			case COLOR:
-				return new ColorFeatureGroup(ops, globals, features);
+				return new ColorFeatureGroup(ops, featureSettings);
 			case GRAY_SCALE:
-				return new GrayFeatureGroup(ops, globals, features);
+				return new GrayFeatureGroup(ops, featureSettings);
 		}
 		throw new AssertionError();
 	}

@@ -41,6 +41,11 @@ public class FeatureSetting {
 			setParameter(entry.getKey(), entry.getValue());
 	}
 
+	public FeatureSetting(FeatureSetting featureSetting) {
+		this.commandInfo = featureSetting.commandInfo;
+		this.parameterValues.putAll(featureSetting.parameterValues);
+	}
+
 	private static Map<String, Object> argsToMap(Object[] args) {
 		Map<String, Object> map = new HashMap<>();
 		if(args.length % 2 != 0) throw new IllegalArgumentException();

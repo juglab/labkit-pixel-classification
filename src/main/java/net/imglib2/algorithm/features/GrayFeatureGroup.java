@@ -20,7 +20,11 @@ public class GrayFeatureGroup implements FeatureGroup {
 
 	private final FeatureJoiner joiner;
 
-	GrayFeatureGroup(OpEnvironment ops, GlobalSettings globals, List<FeatureSetting> features) {
+	GrayFeatureGroup(OpEnvironment ops, FeatureSettings settings) {
+		this(ops, settings.globals(), settings.features());
+	}
+
+	private GrayFeatureGroup(OpEnvironment ops, GlobalSettings globals, List<FeatureSetting> features) {
 		List<FeatureOp> featureOps = features.stream().map(x -> x.newInstance(ops, globals)).collect(Collectors.toList());
 		this.joiner = new FeatureJoiner(featureOps);
 		if(globalSettings().imageType() != GlobalSettings.ImageType.GRAY_SCALE)
