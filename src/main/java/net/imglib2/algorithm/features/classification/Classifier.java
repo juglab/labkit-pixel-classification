@@ -1,5 +1,9 @@
 package net.imglib2.algorithm.features.classification;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.Ops;
 import net.imagej.ops.special.hybrid.AbstractUnaryHybridCF;
@@ -8,6 +12,7 @@ import net.imglib2.*;
 import net.imglib2.algorithm.features.FeatureGroup;
 import net.imglib2.algorithm.features.Features;
 import net.imglib2.algorithm.features.RevampUtils;
+import net.imglib2.algorithm.features.gson.FeaturesGson;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.type.NativeType;
@@ -21,7 +26,6 @@ import net.imglib2.view.composite.GenericComposite;
 import weka.core.Attribute;
 import weka.core.Instances;
 
-import java.io.*;
 import java.util.*;
 
 /**
@@ -97,20 +101,30 @@ public class Classifier {
 		return classNames;
 	}
 
-	public void store(OutputStream out) throws IOException {
-		new ClassifierSerialization(ops).store(this, out);
-	}
-
-	public static Classifier load(OpEnvironment ops, InputStream in) throws IOException {
-		return new ClassifierSerialization(ops).load(in);
-	}
-
 	public Training training() {
 		return new MyTrainingData();
 	}
 
 	public boolean isTrained() {
 		return isTrained;
+	}
+
+	public JsonElement toJsonTree() {
+		JsonObject json = new JsonObject();
+		json.add("features", FeaturesGson.toJsonTree(features));
+		json.add("classNames", new Gson().toJsonTree(classNames));
+		json.add("classifier", ClassifierSerialization.wekaToJson(classifier));
+		return json;
+	}
+
+	public static Classifier fromJson(OpEnvironment ops, JsonElement json) {
+		JsonObject object = json.getAsJsonObject();
+		return new Classifier(
+				ops,
+				new Gson().fromJson(object.get("classNames"), new TypeToken<List<String>>() {}.getType()),
+				FeaturesGson.fromJson(ops, object.get("features")),
+				ClassifierSerialization.jsonToWeka(object.get("classifier"))
+		);
 	}
 
 	private class MyTrainingData implements Training {

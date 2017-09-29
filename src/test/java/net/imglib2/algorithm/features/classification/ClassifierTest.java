@@ -1,5 +1,7 @@
 package net.imglib2.algorithm.features.classification;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import net.imagej.ops.OpEnvironment;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.features.*;
@@ -21,7 +23,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -78,15 +82,9 @@ public class ClassifierTest {
 		Classifier classifier = trainClassifier();
 		// store
 		File temporaryFile = File.createTempFile("classifier", ".tmp");
-		try( OutputStream out = new FileOutputStream(temporaryFile.getPath()) ) {
-			classifier.store(out);
-		}
+		JsonElement json = classifier.toJsonTree();
 		// load
-		Classifier result1;
-		try( InputStream in = new FileInputStream(temporaryFile.getPath()) ) {
-			result1 = Classifier.load(ops, in);
-		}
-		Classifier classifier2 = result1;
+		Classifier classifier2 = Classifier.fromJson(ops, json);
 		temporaryFile.delete();
 		// test
 		RandomAccessibleInterval<? extends IntegerType<?>> result = classifier.segment(img);
@@ -97,9 +95,9 @@ public class ClassifierTest {
 	@Test
 	public void testGson() {
 		FeatureGroup feature = Features.group(Utils.ops(), GlobalSettings.defaultSettings(), SingleFeatures.gauss(1.0), SingleFeatures.gauss(1.0));
-		String serialized = FeaturesGson.toJson(feature);
-		FeatureGroup feature2 = FeaturesGson.fromJson(serialized, ops);
-		String serialized2 = FeaturesGson.toJson(feature2);
+		JsonElement serialized = FeaturesGson.toJsonTree(feature);
+		FeatureGroup feature2 = FeaturesGson.fromJson(ops, serialized);
+		JsonElement serialized2 = FeaturesGson.toJsonTree(feature2);
 		assertEquals(serialized, serialized2);
 	}
 

@@ -1,5 +1,6 @@
 package net.imglib2.algorithm.features;
 
+import com.google.gson.JsonElement;
 import net.imagej.ops.OpEnvironment;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;

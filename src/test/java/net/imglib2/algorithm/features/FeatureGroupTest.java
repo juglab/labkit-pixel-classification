@@ -1,5 +1,6 @@
 package net.imglib2.algorithm.features;
 
+import com.google.gson.JsonElement;
 import net.imagej.ops.OpEnvironment;
 import net.imglib2.algorithm.features.gson.FeaturesGson;
 import org.junit.Test;
@@ -38,8 +39,8 @@ public class FeatureGroupTest {
 	}
 
 	private void testSerialization(FeatureGroup featureGroup) {
-		String json = FeaturesGson.toJson(featureGroup);
-		FeatureGroup object2 = FeaturesGson.fromJson(json, Utils.ops());
+		JsonElement json = FeaturesGson.toJsonTree(featureGroup);
+		FeatureGroup object2 = FeaturesGson.fromJson(Utils.ops(), json);
 		assertEquals(featureGroup, object2);
 	}
 

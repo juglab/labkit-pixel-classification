@@ -1,5 +1,9 @@
 package net.imglib2.algorithm.features;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.OpInfo;
 import net.imglib2.algorithm.features.ops.FeatureOp;
@@ -131,6 +135,23 @@ public class FeatureSetting {
 		return commandInfo.getPluginClass().getSimpleName();
 	}
 
+	public static FeatureSetting fromJson(JsonElement element) {
+		JsonObject o = element.getAsJsonObject();
+		String className = o.get("class").getAsString();
+		FeatureSetting fs = FeatureSetting.fromClass(classForName(className));
+		for(String p : fs.parameters())
+			fs.setParameter(p, new Gson().fromJson(o.get(p), fs.getParameterType(p)));
+		return fs;
+	}
+
+	public JsonElement toJsonTree() {
+		JsonObject jsonObject = new JsonObject();
+		jsonObject.add("class", new JsonPrimitive(commandInfo.getDelegateClassName()));
+		for(String parameter : parameters())
+			jsonObject.add(parameter, new Gson().toJsonTree(getParameter(parameter), getParameterType(parameter)));
+		return jsonObject;
+	}
+
 	// -- Helper methods --
 
 	private static final List<String> EXCLUDE = Arrays.asList("in", "out", "globalSettings");
@@ -138,5 +159,15 @@ public class FeatureSetting {
 	private boolean isParameterValid(ModuleItem<?> mi) {
 		return !(EXCLUDE.contains(mi.getName())) &&
 				!SciJavaService.class.isAssignableFrom(mi.getType());
+	}
+
+	private static Class<? extends FeatureOp> classForName(String className) {
+		try {
+			@SuppressWarnings("unchecked")
+			Class<? extends FeatureOp> tClass = (Class<? extends FeatureOp>) Class.forName(className);
+			return tClass;
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

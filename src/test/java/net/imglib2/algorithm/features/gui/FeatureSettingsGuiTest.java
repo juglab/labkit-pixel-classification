@@ -22,7 +22,7 @@ public class FeatureSettingsGuiTest {
 		FeatureGroup fg = Features.group(ops, settings, GroupedFeatures.gauss());
 		FeatureSettingsGui gui = new FeatureSettingsGui(context, fg);
 		showFrame(gui.getComponent());
-		System.out.println(FeaturesGson.toJson(fg));
+		System.out.println(FeaturesGson.toJsonTree(fg));
 	}
 
 	private static void showFrame(JComponent component) throws InterruptedException {

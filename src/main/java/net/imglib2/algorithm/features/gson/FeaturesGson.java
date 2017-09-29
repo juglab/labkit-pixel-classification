@@ -5,7 +5,6 @@ import net.imagej.ops.OpEnvironment;
 import net.imglib2.algorithm.features.*;
 import net.imglib2.algorithm.features.ops.FeatureOp;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,91 +13,30 @@ import java.util.List;
  */
 public class FeaturesGson {
 
-	public static FeatureGroup fromJson(String serialized, OpEnvironment ops) {
-		Gson gson = new GsonBuilder()
-				.registerTypeHierarchyAdapter(FeatureGroup.class, new FeatureGroupDeserializer(ops))
-				.create();
-		return gson.fromJson(serialized, FeatureGroup.class);
+	public static FeatureGroup fromJson(OpEnvironment ops, JsonElement json) {
+		JsonObject json1 = json.getAsJsonObject();
+		GlobalSettings globalSettings = new Gson().fromJson(json1.get("globals"), GlobalSettings.class);
+		List<FeatureSetting> features = deserializeFeatureSettingsList(json1.get("ops").getAsJsonArray());
+		return Features.group(ops, globalSettings, features);
 	}
 
-	public static String toJson(FeatureGroup featureGroup) {
-		Gson gson = new GsonBuilder()
-				.registerTypeHierarchyAdapter(FeatureGroup.class, new FeatureGroupSerializer())
-				.create();
-		return gson.toJson(featureGroup, FeatureGroup.class);
+	public static JsonElement toJsonTree(FeatureGroup featureGroup) {
+		JsonObject object = new JsonObject();
+		object.add("globals", new Gson().toJsonTree(featureGroup.globalSettings()));
+		object.add("ops", serialize(featureGroup.features()));
+		return object;
 	}
 
-	public static GsonBuilder gsonModifiers(OpEnvironment ops, GsonBuilder builder) {
-		return builder
-				.registerTypeHierarchyAdapter(FeatureGroup.class, new FeatureGroupSerializer())
-				.registerTypeHierarchyAdapter(FeatureGroup.class, new FeatureGroupDeserializer(ops));
+	private static JsonElement serialize(List<FeatureOp> features) {
+		JsonArray array = new JsonArray();
+		features.forEach(feature -> array.add(FeatureSetting.fromOp(feature).toJsonTree()));
+		return array;
 	}
 
-	private static class FeatureGroupSerializer implements JsonSerializer<FeatureGroup> {
-
-		@Override
-		public JsonElement serialize(FeatureGroup f, Type type, JsonSerializationContext json) {
-			JsonObject object = new JsonObject();
-			object.add("globals", json.serialize(f.globalSettings(), GlobalSettings.class));
-			object.add("ops", serializeFeatures(f.features(), json));
-			return object;
-		}
-
-		private JsonElement serializeFeatures(List<FeatureOp> features, JsonSerializationContext json) {
-			JsonArray array = new JsonArray();
-			features.forEach(feature -> array.add(serializeFeature(feature, json)));
-			return array;
-		}
-
-		private JsonElement serializeFeature(FeatureOp op, JsonSerializationContext json) {
-			FeatureSetting fs = FeatureSetting.fromOp(op);
-			JsonObject jsonObject = new JsonObject();
-			jsonObject.add("class", new JsonPrimitive(op.getClass().getName()));
-			for(String parameter : fs.parameters())
-				jsonObject.add(parameter, json.serialize(fs.getParameter(parameter), fs.getParameterType(parameter)));
-			return jsonObject;
-		}
+	private static List<FeatureSetting> deserializeFeatureSettingsList(JsonArray ops) {
+		List<FeatureSetting> features = new ArrayList<>();
+		ops.forEach(element -> features.add(FeatureSetting.fromJson(element)));
+		return features;
 	}
 
-	private static class FeatureGroupDeserializer implements JsonDeserializer<FeatureGroup> {
-
-		private final OpEnvironment ops;
-
-		FeatureGroupDeserializer(OpEnvironment ops) {
-			this.ops = ops;
-		}
-
-		@Override
-		public FeatureGroup deserialize(JsonElement element, Type type, JsonDeserializationContext json) throws JsonParseException {
-			JsonObject object = element.getAsJsonObject();
-			GlobalSettings globalSettings = json.deserialize(object.get("globals"), GlobalSettings.class);
-			List<FeatureSetting> features = deserializeFeatures(object.get("ops").getAsJsonArray(), json);
-			return Features.group(ops, globalSettings, features);
-		}
-
-		private List<FeatureSetting> deserializeFeatures(JsonArray ops, JsonDeserializationContext json) {
-			List<FeatureSetting> features = new ArrayList<>();
-			ops.forEach(element -> features.add(deserializeFeature(element, json)));
-			return features;
-		}
-
-		private FeatureSetting deserializeFeature(JsonElement element, JsonDeserializationContext json) {
-			JsonObject o = element.getAsJsonObject();
-			String className = o.get("class").getAsString();
-			FeatureSetting fs = FeatureSetting.fromClass(classForName(className));
-			for(String p : fs.parameters())
-				fs.setParameter(p, json.deserialize(o.get(p), fs.getParameterType(p)));
-			return fs;
-		}
-
-		private Class<? extends FeatureOp> classForName(String className) {
-			try {
-				@SuppressWarnings("unchecked")
-				Class<? extends FeatureOp> tClass = (Class<? extends FeatureOp>) Class.forName(className);
-				return tClass;
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
 }
