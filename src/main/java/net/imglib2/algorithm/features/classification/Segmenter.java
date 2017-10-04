@@ -111,7 +111,7 @@ public class Segmenter {
 
 	public JsonElement toJsonTree() {
 		JsonObject json = new JsonObject();
-		json.add("features", FeaturesGson.toJsonTree(features));
+		json.add("features", FeaturesGson.toJsonTree(features.settings()));
 		json.add("classNames", new Gson().toJsonTree(classNames));
 		json.add("classifier", ClassifierSerialization.wekaToJson(classifier));
 		return json;
@@ -122,7 +122,7 @@ public class Segmenter {
 		return new Segmenter(
 				ops,
 				new Gson().fromJson(object.get("classNames"), new TypeToken<List<String>>() {}.getType()),
-				FeaturesGson.fromJson(ops, object.get("features")),
+				Features.group(ops, FeaturesGson.fromJson(object.get("features"))),
 				ClassifierSerialization.jsonToWeka(object.get("classifier"))
 		);
 	}

@@ -61,4 +61,13 @@ public class FeatureSettings {
 		ops.forEach(element -> features.add(FeatureSetting.fromJson(element)));
 		return features;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof FeatureSettings))
+			return false;
+		FeatureSettings fs = (FeatureSettings) obj;
+		return this.globals().equals(fs.globals()) &&
+				this.features().equals(fs.features());
+	}
 }

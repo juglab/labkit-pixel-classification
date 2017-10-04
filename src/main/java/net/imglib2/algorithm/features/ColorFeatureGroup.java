@@ -20,14 +20,13 @@ public class ColorFeatureGroup implements FeatureGroup {
 
 	private final FeatureJoiner joiner;
 
-	ColorFeatureGroup(OpEnvironment ops, FeatureSettings settings) {
-		this(ops, settings.globals(), settings.features());
-	}
+	private final FeatureSettings settings;
 
-	ColorFeatureGroup(OpEnvironment ops, GlobalSettings globals, List<FeatureSetting> features) {
-		List<FeatureOp> featuresOps = features.stream().map(x -> x.newInstance(ops, globals)).collect(Collectors.toList());
+	ColorFeatureGroup(OpEnvironment ops, FeatureSettings settings) {
+		this.settings = settings;
+		List<FeatureOp> featuresOps = settings.features().stream().map(x -> x.newInstance(ops, settings.globals())).collect(Collectors.toList());
 		this.joiner = new FeatureJoiner(featuresOps);
-		if(globalSettings().imageType() != GlobalSettings.ImageType.COLOR)
+		if(settings.globals().imageType() != GlobalSettings.ImageType.COLOR)
 			throw new IllegalArgumentException("ColorFeatureGroup requires GlobalSettings.imageType() to be COLOR.");
 	}
 
@@ -55,6 +54,11 @@ public class ColorFeatureGroup implements FeatureGroup {
 	}
 
 	@Override
+	public FeatureSettings settings() {
+		return settings;
+	}
+
+	@Override
 	public List<FeatureOp> features() {
 		return joiner.features();
 	}
@@ -62,20 +66,6 @@ public class ColorFeatureGroup implements FeatureGroup {
 	@Override
 	public Class<?> getType() {
 		return ARGBType.class;
-	}
-
-	@Override
-	public GlobalSettings globalSettings() {
-		return joiner.globalSettings();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if(!(obj instanceof ColorFeatureGroup))
-			return false;
-		ColorFeatureGroup other = (ColorFeatureGroup) obj;
-		return getType().equals(other.getType()) &&
-				attributeLabels().equals(other.attributeLabels());
 	}
 
 	@Override

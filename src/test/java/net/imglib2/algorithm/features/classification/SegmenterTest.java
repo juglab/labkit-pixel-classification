@@ -86,15 +86,6 @@ public class SegmenterTest {
 	}
 
 	@Test
-	public void testGson() {
-		FeatureGroup feature = Features.group(Utils.ops(), GlobalSettings.defaultSettings(), SingleFeatures.gauss(1.0), SingleFeatures.gauss(1.0));
-		JsonElement serialized = FeaturesGson.toJsonTree(feature);
-		FeatureGroup feature2 = FeaturesGson.fromJson(ops, serialized);
-		JsonElement serialized2 = FeaturesGson.toJsonTree(feature2);
-		assertEquals(serialized, serialized2);
-	}
-
-	@Test
 	public void testDifferentWekaClassifiers() {
 		FeatureGroup features = Features.group(Utils.ops(), GlobalSettings.defaultSettings(), SingleFeatures.identity(), GroupedFeatures.gauss());
 		Segmenter segmenter = Trainer.train(ops, img, labeling, features, new RandomCommittee());

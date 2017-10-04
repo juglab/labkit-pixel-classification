@@ -157,6 +157,15 @@ public class FeatureSetting {
 		return jsonObject;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof FeatureSetting))
+			return false;
+		FeatureSetting fs = (FeatureSetting) obj;
+		return this.commandInfo.getPluginClass().equals(fs.commandInfo.getPluginClass()) &&
+				this.parameterValues.equals(fs.parameterValues);
+	}
+
 	// -- Helper methods --
 
 	private static final List<String> EXCLUDE = Arrays.asList("in", "out", "globalSettings");

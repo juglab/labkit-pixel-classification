@@ -46,7 +46,7 @@ public class Features {
 		return group(ops, featureSettings);
 	}
 
-	private static FeatureGroup group(OpEnvironment ops, FeatureSettings featureSettings) {
+	public static FeatureGroup group(OpEnvironment ops, FeatureSettings featureSettings) {
 		switch (featureSettings.globals().imageType()) {
 			case COLOR:
 				return new ColorFeatureGroup(ops, featureSettings);

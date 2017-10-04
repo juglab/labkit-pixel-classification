@@ -20,14 +20,14 @@ public class GrayFeatureGroup implements FeatureGroup {
 
 	private final FeatureJoiner joiner;
 
-	GrayFeatureGroup(OpEnvironment ops, FeatureSettings settings) {
-		this(ops, settings.globals(), settings.features());
-	}
+	private final FeatureSettings settings;
 
-	private GrayFeatureGroup(OpEnvironment ops, GlobalSettings globals, List<FeatureSetting> features) {
-		List<FeatureOp> featureOps = features.stream().map(x -> x.newInstance(ops, globals)).collect(Collectors.toList());
+	GrayFeatureGroup(OpEnvironment ops, FeatureSettings settings) {
+		this.settings = settings;
+		List<FeatureOp> featureOps = settings.features().stream()
+				.map(x -> x.newInstance(ops, settings.globals())).collect(Collectors.toList());
 		this.joiner = new FeatureJoiner(featureOps);
-		if(globalSettings().imageType() != GlobalSettings.ImageType.GRAY_SCALE)
+		if(settings.globals().imageType() != GlobalSettings.ImageType.GRAY_SCALE)
 			throw new IllegalArgumentException("GrayFeatureGroup requires ImageType to be gray scale");
 	}
 
@@ -54,6 +54,11 @@ public class GrayFeatureGroup implements FeatureGroup {
 	}
 
 	@Override
+	public FeatureSettings settings() {
+		return settings;
+	}
+
+	@Override
 	public List<FeatureOp> features() {
 		return joiner.features();
 	}
@@ -61,20 +66,6 @@ public class GrayFeatureGroup implements FeatureGroup {
 	@Override
 	public Class<FloatType> getType() {
 		return FloatType.class;
-	}
-
-	@Override
-	public GlobalSettings globalSettings() {
-		return joiner.globalSettings();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if(!(obj instanceof GrayFeatureGroup))
-			return false;
-		GrayFeatureGroup other = (GrayFeatureGroup) obj;
-		return getType().equals(other.getType()) &&
-				attributeLabels().equals(other.attributeLabels());
 	}
 
 	@Override

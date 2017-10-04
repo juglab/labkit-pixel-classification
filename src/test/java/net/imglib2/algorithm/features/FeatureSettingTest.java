@@ -70,6 +70,14 @@ public class FeatureSettingTest {
 		assertEquals(double.class, type);
 	}
 
+	@Test
+	public void testEquals() {
+		FeatureSetting fs1 = FeatureSetting.fromClass(TestFeature.class);
+		FeatureSetting fs2 = FeatureSetting.fromClass(TestFeature.class);
+		boolean equal = fs1.equals(fs2);
+		assertTrue(equal);
+	}
+
 	public static class TestFeature extends AbstractFeatureOp {
 
 		@Parameter

@@ -22,6 +22,8 @@ public interface FeatureGroup {
 
 	List<String> attributeLabels();
 
+	FeatureSettings settings();
+
 	List<FeatureOp> features();
 
 	Class<?> getType();
@@ -29,6 +31,4 @@ public interface FeatureGroup {
 	default boolean matches(RandomAccessible<?> in) {
 		return getType().isInstance(in.randomAccess().get());
 	}
-
-	GlobalSettings globalSettings();
 }
