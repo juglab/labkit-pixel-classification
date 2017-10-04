@@ -1,15 +1,12 @@
 package net.imglib2.algorithm.features.classification;
 
 import com.google.gson.*;
-import net.imagej.ops.OpEnvironment;
-import net.imglib2.algorithm.features.gson.FeaturesGson;
 
 import java.io.*;
-import java.lang.reflect.Type;
 import java.util.Base64;
 
 /**
- * Helper to {@link Classifier} for loading and storing.
+ * Helper for conversions between {@link weka.classifiers.Classifier} and {@link JsonElement}.
  *
  * @author Matthias Arzt
  */
