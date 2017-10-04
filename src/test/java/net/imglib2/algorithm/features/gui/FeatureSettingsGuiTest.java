@@ -1,11 +1,9 @@
 package net.imglib2.algorithm.features.gui;
 
 import net.imagej.ops.OpService;
-import net.imglib2.algorithm.features.FeatureGroup;
-import net.imglib2.algorithm.features.Features;
+import net.imglib2.algorithm.features.FeatureSettings;
 import net.imglib2.algorithm.features.GlobalSettings;
 import net.imglib2.algorithm.features.GroupedFeatures;
-import net.imglib2.algorithm.features.gson.FeaturesGson;
 import org.scijava.Context;
 
 import javax.swing.*;
@@ -17,12 +15,11 @@ public class FeatureSettingsGuiTest {
 
 	public static void main(String... args) throws InterruptedException {
 		Context context = new Context(OpService.class);
-		OpService ops = context.service(OpService.class);
 		GlobalSettings settings = GlobalSettings.defaultSettings();
-		FeatureGroup fg = Features.group(ops, settings, GroupedFeatures.gauss());
-		FeatureSettingsGui gui = new FeatureSettingsGui(context, fg);
+		FeatureSettings fs = new FeatureSettings(settings, GroupedFeatures.gauss());
+		FeatureSettingsGui gui = new FeatureSettingsGui(context, fs);
 		showFrame(gui.getComponent());
-		System.out.println(FeaturesGson.toJsonTree(fg));
+		System.out.println(gui.get().toJson());
 	}
 
 	private static void showFrame(JComponent component) throws InterruptedException {

@@ -44,21 +44,21 @@ public class FeatureSettingsGui {
 
 	private GlobalsPanel globalsPanel;
 
-	public FeatureSettingsGui(Context context, FeatureGroup fg) {
+	public FeatureSettingsGui(Context context, FeatureSettings fs) {
 		this.context = context;
 		this.ops = context.service(OpService.class);
 		featureSettingsDialog = new FeatureSettingsDialog(this.context);
-		List<Holder> init = fg.features().stream().map(f -> new Holder(f)).collect(Collectors.toList());
+		List<Holder> init = fs.features().stream().map(f -> new Holder(f)).collect(Collectors.toList());
 		model = new ListModel(init);
-		initGui(fg.globalSettings());
+		initGui(fs.globals());
 	}
 
 	public JComponent getComponent() {
 		return content;
 	}
 
-	public FeatureGroup get() {
-		return Features.group(ops, globalsPanel.get(), model.features());
+	public FeatureSettings get() {
+		return new FeatureSettings(globalsPanel.get(), model.features());
 	}
 
 	private void initGui(GlobalSettings globals) {
@@ -146,15 +146,15 @@ public class FeatureSettingsGui {
 		return button;
 	}
 
-	public static Optional<FeatureGroup> show(Context context, FeatureGroup fg) {
+	public static Optional<FeatureSettings> show(Context context, FeatureSettings fg) {
 		FeatureSettingsGui featureSettingsGui = new FeatureSettingsGui(context, fg);
 		return featureSettingsGui.showInternal();
 	}
 
-	private Optional<FeatureGroup> showInternal() {
+	private Optional<FeatureSettings> showInternal() {
 		boolean ok = showResizeableOkCancelDialog("Select Pixel Features", content);
 		if(ok) {
-			FeatureGroup features = get();
+			FeatureSettings features = get();
 			return Optional.of(features);
 		} else
 			return Optional.empty();
@@ -178,7 +178,7 @@ public class FeatureSettingsGui {
 
 	public static void main(String... args) {
 		Context context = new Context();
-		System.out.println(FeatureSettingsGui.show(context, Features.group(context.service(OpService.class), GlobalSettings.defaultSettings())));
+		System.out.println(FeatureSettingsGui.show(context, new FeatureSettings(GlobalSettings.defaultSettings())));
 		System.out.println("finished");
 	}
 
@@ -190,8 +190,8 @@ public class FeatureSettingsGui {
 			this.value = FeatureSetting.fromClass(featureClass);
 		}
 
-		public Holder(FeatureOp f) {
-			this.value = FeatureSetting.fromOp(f);
+		public Holder(FeatureSetting f) {
+			this.value = f;
 		}
 
 		void edit() {
