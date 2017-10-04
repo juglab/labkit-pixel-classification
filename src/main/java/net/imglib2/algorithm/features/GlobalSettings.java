@@ -15,6 +15,10 @@ public final class GlobalSettings {
 		return new GlobalSettings(ImageType.GRAY_SCALE, 1.0, 16.0, 1.0);
 	}
 
+	public static GlobalSettings default3dSettings() {
+		return new GlobalSettings(ImageType.GRAY_SCALE, 1.0, 8.0, 1.0);
+	}
+
 	private final ImageType imageType;
 
 	private final List<Double> sigmas;

@@ -6,6 +6,7 @@ import net.imglib2.algorithm.features.ops.SingleDifferenceOfGaussiansFeature;
 import net.imglib2.algorithm.features.ops.SingleGaborFeature;
 import net.imglib2.algorithm.features.ops.SingleGaussFeature;
 import net.imglib2.algorithm.features.ops.SingleGradientFeature;
+import net.imglib2.algorithm.features.ops.SingleHessian3DFeature;
 import net.imglib2.algorithm.features.ops.SingleHessianFeature;
 import net.imglib2.algorithm.features.ops.SingleLipschitzFeature;
 import net.imglib2.algorithm.features.ops.SingleSobelGradientFeature;
@@ -59,6 +60,10 @@ public class SingleFeatures {
 
 	public static FeatureSetting sphereOperation(double radius, String operation) {
 		return createFeature(SingleSphereShapedFeature.class, "radius", radius, "operation", operation);
+	}
+
+	public static FeatureSetting hessian3d(double sigma, boolean absoluteValues) {
+		return createFeature(SingleHessian3DFeature.class, "sigma", sigma, "absoluteValues", absoluteValues);
 	}
 
 	private static FeatureSetting createFeature(Class<? extends FeatureOp> aClass, Object... args) {

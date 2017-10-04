@@ -10,6 +10,7 @@ import net.imagej.ops.special.hybrid.AbstractUnaryHybridCF;
 import net.imagej.ops.special.hybrid.UnaryHybridCF;
 import net.imglib2.*;
 import net.imglib2.algorithm.features.FeatureGroup;
+import net.imglib2.algorithm.features.FeatureSetting;
 import net.imglib2.algorithm.features.FeatureSettings;
 import net.imglib2.algorithm.features.Features;
 import net.imglib2.algorithm.features.RevampUtils;
@@ -53,6 +54,8 @@ public class Segmenter {
 	public FeatureGroup features() {
 		return features;
 	}
+
+	public FeatureSettings settings() { return features.settings(); }
 
 	public Img<ByteType> segment(RandomAccessibleInterval<?> image) {
 		return segment(image, new ByteType());

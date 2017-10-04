@@ -165,5 +165,11 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>imagescience</artifactId>
+			<version>3.0.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

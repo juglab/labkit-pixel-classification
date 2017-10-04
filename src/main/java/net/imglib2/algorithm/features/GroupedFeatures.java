@@ -73,6 +73,10 @@ public class GroupedFeatures {
 		return createFeature(net.imglib2.algorithm.features.ops.DifferenceOfGaussiansFeature.class);
 	}
 
+	public static FeatureSetting hessian3D(boolean absoluteValues) {
+		return createFeature(net.imglib2.algorithm.features.ops.Hessian3DFeature.class, "absoluteValues", absoluteValues);
+	}
+
 	private static FeatureSetting createFeature(Class<? extends FeatureOp> aClass, Object... args) {
 		return new FeatureSetting(aClass, args);
 	}

@@ -35,7 +35,7 @@ public class FeatureStackTest {
 
 	private static Img<FloatType> bridgeImg = ImagePlusAdapter.convertFloat(bridgeImage);
 
-	public RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureSetting feature) {
+	public static RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureSetting feature) {
 		return Features.applyOnImg(Features.group(Utils.ops(), GlobalSettings.defaultSettings(), SingleFeatures.identity(), feature), image);
 	}
 
@@ -65,12 +65,15 @@ public class FeatureStackTest {
 	}
 
 	private List<String> oldAttributes(int featureConstant) {
-		FeatureStack stack = getFeatureStack(bridgeImage, getEnabledFeatures(featureConstant));
+		return oldAttributes(getFeatureStack(bridgeImage, getEnabledFeatures(featureConstant)));
+	}
+
+	public static List<String> oldAttributes(FeatureStack stack) {
 		Instances instances = stack.createInstances(new ArrayList<>(Arrays.asList("class1", "class2")));
 		return IntStream.range(0, instances.classIndex()).mapToObj(i -> instances.attribute(i).name()).collect(Collectors.toList());
 	}
 
-	private List<String> getAttributeLabels(FeatureSetting feature) {
+	public static List<String> getAttributeLabels(FeatureSetting feature) {
 		return Features.group(Utils.ops(), GlobalSettings.defaultSettings(), SingleFeatures.identity(), feature).attributeLabels();
 	}
 
