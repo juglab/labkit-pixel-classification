@@ -31,7 +31,7 @@ import java.util.*;
 /**
  * @author Matthias Arzt
  */
-public class Classifier {
+public class Segmenter {
 
 	private final FeatureGroup features;
 
@@ -43,7 +43,7 @@ public class Classifier {
 
 	private final OpEnvironment ops;
 
-	public Classifier(OpEnvironment ops, List<String> classNames, FeatureGroup features, weka.classifiers.Classifier classifier) {
+	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureGroup features, weka.classifiers.Classifier classifier) {
 		this.ops = Objects.requireNonNull(ops);
 		this.classNames = Collections.unmodifiableList(classNames);
 		this.features = Objects.requireNonNull(features);
@@ -117,9 +117,9 @@ public class Classifier {
 		return json;
 	}
 
-	public static Classifier fromJson(OpEnvironment ops, JsonElement json) {
+	public static Segmenter fromJson(OpEnvironment ops, JsonElement json) {
 		JsonObject object = json.getAsJsonObject();
-		return new Classifier(
+		return new Segmenter(
 				ops,
 				new Gson().fromJson(object.get("classNames"), new TypeToken<List<String>>() {}.getType()),
 				FeaturesGson.fromJson(ops, object.get("features")),

@@ -17,18 +17,16 @@ import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.GenericComposite;
 import weka.classifiers.AbstractClassifier;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static net.imglib2.algorithm.features.Features.applyOnImg;
 
 /**
- * {@linke Trainer} simplifies training a {@link Classifier}
+ * {@linke Trainer} simplifies training a {@link Segmenter}
  *
  * @author Matthias Arzt
  */
@@ -40,14 +38,14 @@ public class Trainer {
 
 	private final Training training;
 
-	private Trainer(Classifier classifier) {
-		features = classifier.features();
-		training = classifier.training();
-		classNames = classifier.classNames();
+	private Trainer(Segmenter segmenter) {
+		features = segmenter.features();
+		training = segmenter.training();
+		classNames = segmenter.classNames();
 	}
 
-	public static Trainer of(Classifier classifier) {
-		return new Trainer(classifier);
+	public static Trainer of(Segmenter segmenter) {
+		return new Trainer(segmenter);
 	}
 
 	public <L> void trainLabeledImage(Img<?> image, LabelRegions<L> labeling) {
@@ -79,15 +77,15 @@ public class Trainer {
 		return map;
 	}
 
-	public static Classifier train(OpEnvironment ops, Img<?> image, LabelRegions<?> labeling, FeatureGroup features) {
+	public static Segmenter train(OpEnvironment ops, Img<?> image, LabelRegions<?> labeling, FeatureGroup features) {
 		return train(ops, image, labeling, features, initRandomForest());
 	}
 
-	public static Classifier train(OpEnvironment ops, Img<?> image, LabelRegions<?> labeling, FeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
+	public static Segmenter train(OpEnvironment ops, Img<?> image, LabelRegions<?> labeling, FeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
 		List<String> classNames = labeling.getExistingLabels().stream().map(Object::toString).collect(Collectors.toList());
-		Classifier classifier = new Classifier(ops, classNames, features, initialWekaClassifier);
-		Trainer.of(classifier).trainLabeledImage(image, labeling);
-		return classifier;
+		Segmenter segmenter = new Segmenter(ops, classNames, features, initialWekaClassifier);
+		Trainer.of(segmenter).trainLabeledImage(image, labeling);
+		return segmenter;
 	}
 
 	public static AbstractClassifier initRandomForest() {

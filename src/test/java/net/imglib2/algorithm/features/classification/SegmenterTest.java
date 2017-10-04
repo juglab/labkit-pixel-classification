@@ -1,6 +1,5 @@
 package net.imglib2.algorithm.features.classification;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import net.imagej.ops.OpEnvironment;
 import net.imglib2.RandomAccessibleInterval;
@@ -19,24 +18,18 @@ import org.junit.Test;
 import weka.classifiers.meta.RandomCommittee;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
 /**
- * Tests {@link Classifier}
+ * Tests {@link Segmenter}
  *
  * @author Matthias Arzt
  */
-public class ClassifierTest {
+public class SegmenterTest {
 
 	private Img<FloatType> img = ImageJFunctions.convertFloat(Utils.loadImage("nuclei.tif"));
 
@@ -56,9 +49,9 @@ public class ClassifierTest {
 
 	@Test
 	public void testClassification() {
-		Classifier classifier = trainClassifier();
-		RandomAccessibleInterval<? extends IntegerType> result = classifier.segment(img);
-		checkExpected(result, classifier.classNames());
+		Segmenter segmenter = trainClassifier();
+		RandomAccessibleInterval<? extends IntegerType> result = segmenter.segment(img);
+		checkExpected(result, segmenter.classNames());
 	}
 
 	private void checkExpected(RandomAccessibleInterval<? extends IntegerType> result, List<String> classNames) {
@@ -70,7 +63,7 @@ public class ClassifierTest {
 		});
 	}
 
-	private Classifier trainClassifier() {
+	private Segmenter trainClassifier() {
 		GlobalSettings settings = new GlobalSettings(GlobalSettings.ImageType.GRAY_SCALE, Arrays.asList(1.0, 8.0, 16.0), 3.0);
 		FeatureGroup features = Features.group(Utils.ops(), settings, SingleFeatures.identity(), GroupedFeatures.gauss());
 		return Trainer.train(ops, img, labeling, features);
@@ -79,16 +72,16 @@ public class ClassifierTest {
 	@Test
 	public void testStoreLoad() throws IOException {
 		// setup
-		Classifier classifier = trainClassifier();
+		Segmenter segmenter = trainClassifier();
 		// store
 		File temporaryFile = File.createTempFile("classifier", ".tmp");
-		JsonElement json = classifier.toJsonTree();
+		JsonElement json = segmenter.toJsonTree();
 		// load
-		Classifier classifier2 = Classifier.fromJson(ops, json);
+		Segmenter segmenter2 = Segmenter.fromJson(ops, json);
 		temporaryFile.delete();
 		// test
-		RandomAccessibleInterval<? extends IntegerType<?>> result = classifier.segment(img);
-		RandomAccessibleInterval<? extends IntegerType<?>> result2 = classifier2.segment(img);
+		RandomAccessibleInterval<? extends IntegerType<?>> result = segmenter.segment(img);
+		RandomAccessibleInterval<? extends IntegerType<?>> result2 = segmenter2.segment(img);
 		Utils.<IntegerType>assertImagesEqual(result, result2);
 	}
 
@@ -104,8 +97,8 @@ public class ClassifierTest {
 	@Test
 	public void testDifferentWekaClassifiers() {
 		FeatureGroup features = Features.group(Utils.ops(), GlobalSettings.defaultSettings(), SingleFeatures.identity(), GroupedFeatures.gauss());
-		Classifier classifier = Trainer.train(ops, img, labeling, features, new RandomCommittee());
-		RandomAccessibleInterval<? extends IntegerType> result = classifier.segment(img);
-		checkExpected(result, classifier.classNames());
+		Segmenter segmenter = Trainer.train(ops, img, labeling, features, new RandomCommittee());
+		RandomAccessibleInterval<? extends IntegerType> result = segmenter.segment(img);
+		checkExpected(result, segmenter.classNames());
 	}
 }
