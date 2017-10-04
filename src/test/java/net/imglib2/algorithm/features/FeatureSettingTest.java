@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Matthias Arzt
  */
-public class FeatureSettingsTest {
+public class FeatureSettingTest {
 	@Test
 	public void testCreation() {
 		FeatureSetting fs = FeatureSetting.fromClass(TestFeature.class);
