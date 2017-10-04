@@ -24,11 +24,11 @@ final public class GsonUtils {
 		// prevent from instantiation.
 	}
 
-	private Gson gson() {
+	private static Gson gson() {
 		return new Gson();
 	}
 
-	void write(JsonElement json, String filename) {
+	public static void write(JsonElement json, String filename) {
 		try(Writer writer = new FileWriter(filename)) {
 			gson().toJson(json, writer);
 		}
@@ -37,7 +37,7 @@ final public class GsonUtils {
 		}
 	}
 
-	JsonElement read(String filename) {
+	public static JsonElement read(String filename) {
 		try(Reader reader = new FileReader(filename)) {
 			return gson().fromJson(reader, JsonElement.class);
 		}
@@ -46,7 +46,7 @@ final public class GsonUtils {
 		}
 	}
 
-	void write(JsonElement json, OutputStream out) {
+	public static void write(JsonElement json, OutputStream out) {
 		try(Writer writer = new OutputStreamWriter(out)) {
 			gson().toJson(json, writer);
 		}
@@ -55,7 +55,7 @@ final public class GsonUtils {
 		}
 	}
 
-	JsonElement read(InputStream in) {
+	public static JsonElement read(InputStream in) {
 		try(Reader reader = new InputStreamReader(in)) {
 			return gson().fromJson(reader, JsonElement.class);
 		}
@@ -64,7 +64,7 @@ final public class GsonUtils {
 		}
 	}
 
-	String toString(JsonElement json) {
+	public static String toString(JsonElement json) {
 		try(Writer writer = new StringWriter()) {
 			gson().toJson(json, writer);
 			return writer.toString();
@@ -73,7 +73,7 @@ final public class GsonUtils {
 		}
 	}
 
-	JsonElement fromString(String text) {
+	public static JsonElement fromString(String text) {
 		try(Reader reader = new StringReader(text)) {
 			return gson().fromJson(reader, JsonElement.class);
 		}
