@@ -43,7 +43,7 @@ public class FeatureSettings {
 		return object;
 	}
 
-	public FeatureSettings fromJson(JsonElement json) {
+	public static FeatureSettings fromJson(JsonElement json) {
 		JsonObject object = json.getAsJsonObject();
 		GlobalSettings globalSettings = new Gson().fromJson(object.get("globals"), GlobalSettings.class);
 		List<FeatureSetting> features = deserializeFeatureSettingsList(object.get("ops").getAsJsonArray());

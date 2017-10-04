@@ -10,9 +10,9 @@ import net.imagej.ops.special.hybrid.AbstractUnaryHybridCF;
 import net.imagej.ops.special.hybrid.UnaryHybridCF;
 import net.imglib2.*;
 import net.imglib2.algorithm.features.FeatureGroup;
+import net.imglib2.algorithm.features.FeatureSettings;
 import net.imglib2.algorithm.features.Features;
 import net.imglib2.algorithm.features.RevampUtils;
-import net.imglib2.algorithm.features.gson.FeaturesGson;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.type.NativeType;
@@ -111,7 +111,7 @@ public class Segmenter {
 
 	public JsonElement toJsonTree() {
 		JsonObject json = new JsonObject();
-		json.add("features", FeaturesGson.toJsonTree(features.settings()));
+		json.add("features", features.settings().toJson());
 		json.add("classNames", new Gson().toJsonTree(classNames));
 		json.add("classifier", ClassifierSerialization.wekaToJson(classifier));
 		return json;
@@ -122,7 +122,7 @@ public class Segmenter {
 		return new Segmenter(
 				ops,
 				new Gson().fromJson(object.get("classNames"), new TypeToken<List<String>>() {}.getType()),
-				Features.group(ops, FeaturesGson.fromJson(object.get("features"))),
+				Features.group(ops, FeatureSettings.fromJson(object.get("features"))),
 				ClassifierSerialization.jsonToWeka(object.get("classifier"))
 		);
 	}
