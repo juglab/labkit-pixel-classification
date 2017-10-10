@@ -40,13 +40,10 @@ public class FeatureSettingsGui {
 
 	private final FeatureSettingsDialog featureSettingsDialog;
 
-	private final OpEnvironment ops;
-
 	private GlobalsPanel globalsPanel;
 
 	public FeatureSettingsGui(Context context, FeatureSettings fs) {
 		this.context = context;
-		this.ops = context.service(OpService.class);
 		featureSettingsDialog = new FeatureSettingsDialog(this.context);
 		List<Holder> init = fs.features().stream().map(f -> new Holder(f)).collect(Collectors.toList());
 		model = new ListModel(init);
