@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class)
+@Plugin(type = FeatureOp.class, label = "Single Gabor Feature 2D")
 public class SingleGaborFeature extends AbstractFeatureOp {
 
 	@Parameter

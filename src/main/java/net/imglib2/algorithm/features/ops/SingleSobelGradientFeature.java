@@ -19,7 +19,7 @@ import java.util.function.ToDoubleFunction;
  * ImgLib2 version of trainable segmentation's Sobel feature.
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class)
+@Plugin(type = FeatureOp.class, label = "Single Sobel Gradient Feature 2D")
 public class SingleSobelGradientFeature extends AbstractFeatureOp {
 
 	@Parameter

@@ -16,6 +16,7 @@ import net.imglib2.algorithm.features.ops.FeatureOp;
 import net.miginfocom.swing.MigLayout;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
+import org.scijava.InstantiableException;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleException;
 import org.scijava.module.process.PreprocessorPlugin;
@@ -108,13 +109,22 @@ public class FeatureSettingsGui {
 	private JPopupMenu initMenu() {
 		JPopupMenu menu = new JPopupMenu();
 		List<PluginInfo<FeatureOp>> pi = context.service(PluginService.class).getPluginsOfType(FeatureOp.class);
-		List<Class<? extends FeatureOp>> choices = pi.stream().map(PluginInfo::getPluginClass).collect(Collectors.toList());
-		for(Class<? extends FeatureOp> choice : choices) {
-			JMenuItem item = new JMenuItem(choice.getSimpleName());
-			item.addActionListener(l -> addPressed(choice));
-			menu.add(item);
+		for(PluginInfo<FeatureOp> pluginInfo : pi) {
+			try {
+				Class<? extends FeatureOp> choice = pluginInfo.loadClass();
+				JMenuItem item = new JMenuItem(getLabel(pluginInfo));
+				item.addActionListener(l -> addPressed(choice));
+				menu.add(item);
+			} catch (InstantiableException e) {
+				// ignore
+			}
 		}
 		return menu;
+	}
+
+	private String getLabel(PluginInfo<FeatureOp> pluginInfo) throws InstantiableException {
+		String label = pluginInfo.getLabel();
+		return label.isEmpty() ? pluginInfo.loadClass().getSimpleName() : label;
 	}
 
 	private void removePressed() {

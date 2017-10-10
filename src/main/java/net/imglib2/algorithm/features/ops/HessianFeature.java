@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class)
+@Plugin(type = FeatureOp.class, label = "Hessian Feature 2D")
 public class HessianFeature extends AbstractSigmaGroupFeatureOp {
 
 	public HessianFeature() {

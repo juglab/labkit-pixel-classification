@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class)
+@Plugin(type = FeatureOp.class, label = "Single Hessian Feature 2D")
 public class SingleHessianFeature extends AbstractFeatureOp {
 
 	@Parameter

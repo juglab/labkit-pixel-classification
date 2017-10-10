@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class)
+@Plugin(type = FeatureOp.class, label = "Sobel Gradient Feature 2D")
 public class SobelGradientFeature extends AbstractSigmaGroupFeatureOp {
 
 	public SobelGradientFeature() {

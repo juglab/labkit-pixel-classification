@@ -15,7 +15,7 @@ import java.util.List;
  * @author Matthias Arzt
  */
 
-@Plugin(type = FeatureOp.class)
+@Plugin(type = FeatureOp.class, label = "Original Image")
 public class IdendityFeature extends AbstractFeatureOp {
 
 	@Override
