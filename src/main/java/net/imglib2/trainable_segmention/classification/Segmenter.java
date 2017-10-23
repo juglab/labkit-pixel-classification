@@ -71,10 +71,6 @@ public class Segmenter {
 		ops.run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelClassificationOp());
 	}
 
-	public RandomAccessibleInterval<? extends IntegerType<?>> segmentLazyOnComposite(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> featureValues) {
-		return Views.interval(new MappingView<>(featureValues, pixelClassificationOp()), featureValues);
-	}
-
 	public RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> predict(RandomAccessibleInterval<FloatType> image) {
 		Img<FloatType> img = ops.create().img(RevampUtils.extend(image, 0, classNames.size()), new FloatType());
 		RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> collapsed = Views.collapse(img);
@@ -85,10 +81,6 @@ public class Segmenter {
 	public void predict(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> out, RandomAccessible<FloatType> image) {
 		RandomAccessibleInterval<FloatType> featureValues = Features.applyOnImg(features, image, out);
 		ops.run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelPredictionOp());
-	}
-
-	public RandomAccessibleInterval<Composite<? extends RealType<?>>> predictLazyOnComposite(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> featureValues) {
-		return Views.interval(new MappingView<>(featureValues, pixelPredictionOp()), featureValues);
 	}
 
 	public UnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>> pixelPredictionOp() {
