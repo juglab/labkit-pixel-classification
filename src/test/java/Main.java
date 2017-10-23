@@ -1,4 +1,4 @@
-import net.imglib2.algorithm.features.classification.SegmenterTest;
+import net.imglib2.trainable_segmention.classification.SegmenterTest;
 
 /**
  * Created by arzt on 28.06.17.
