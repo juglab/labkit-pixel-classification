@@ -1,16 +1,15 @@
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
-import net.imglib2.trainable_segmention.ops.FeatureOp;
-import net.imglib2.trainable_segmention.ops.IdendityFeature;
-import net.imglib2.trainable_segmention.ops.SingleDifferenceOfGaussiansFeature;
-import net.imglib2.trainable_segmention.ops.SingleGaborFeature;
-import net.imglib2.trainable_segmention.ops.SingleGaussFeature;
-import net.imglib2.trainable_segmention.ops.SingleGradientFeature;
-import net.imglib2.trainable_segmention.ops.SingleHessian3DFeature;
-import net.imglib2.trainable_segmention.ops.SingleHessianFeature;
-import net.imglib2.trainable_segmention.ops.SingleLipschitzFeature;
-import net.imglib2.trainable_segmention.ops.SingleSobelGradientFeature;
-import net.imglib2.trainable_segmention.ops.SingleSphereShapedFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.dog.SingleDifferenceOfGaussiansFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.SingleGaborFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleGradientFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessian3DFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessianFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.SingleLipschitzFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleSobelGradientFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 
 /**

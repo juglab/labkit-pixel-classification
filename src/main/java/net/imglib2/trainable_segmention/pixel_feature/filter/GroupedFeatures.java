@@ -1,16 +1,15 @@
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
-import net.imglib2.trainable_segmention.ops.DifferenceOfGaussiansFeature;
-import net.imglib2.trainable_segmention.ops.FeatureOp;
-import net.imglib2.trainable_segmention.ops.GaussFeature;
-import net.imglib2.trainable_segmention.ops.GradientFeature;
-import net.imglib2.trainable_segmention.ops.LipschitzFeature;
-import net.imglib2.trainable_segmention.ops.SingleSphereShapedFeature;
-import net.imglib2.trainable_segmention.ops.GaborFeature;
-import net.imglib2.trainable_segmention.ops.SobelGradientFeature;
-import net.imglib2.trainable_segmention.ops.SphereShapedFeature;
-import net.imglib2.trainable_segmention.ops.Hessian3DFeature;
-import net.imglib2.trainable_segmention.ops.HessianFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.GradientFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.LipschitzFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.GaborFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SobelGradientFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.Hessian3DFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.HessianFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 
 import static java.lang.Boolean.FALSE;

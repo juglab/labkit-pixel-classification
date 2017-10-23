@@ -3,7 +3,6 @@ package net.imglib2.trainable_segmention.classification;
 import com.google.gson.JsonElement;
 import net.imagej.ops.OpEnvironment;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.features.*;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;

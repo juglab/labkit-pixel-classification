@@ -1,7 +1,5 @@
 package net.imglib2.trainable_segmention.gui;
 
-import net.imglib2.algorithm.features.*;
-
 import javax.swing.*;
 import java.awt.*;
 import java.text.ParseException;
@@ -12,7 +10,7 @@ import java.util.stream.Stream;
 
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmention.ops.FeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.miginfocom.swing.MigLayout;

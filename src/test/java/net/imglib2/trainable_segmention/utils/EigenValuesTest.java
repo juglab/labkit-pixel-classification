@@ -1,5 +1,6 @@
 package net.imglib2.trainable_segmention.utils;
 
+import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.EigenValues;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

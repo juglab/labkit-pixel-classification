@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.OpInfo;
-import net.imglib2.trainable_segmention.ops.FeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import org.scijava.command.CommandInfo;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleException;
