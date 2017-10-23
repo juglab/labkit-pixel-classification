@@ -1,4 +1,4 @@
-package net.imglib2.trainable_segmention;
+package net.imglib2.trainable_segmention.pixel_feature.settings;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

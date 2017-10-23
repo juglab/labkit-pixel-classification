@@ -1,10 +1,14 @@
-package net.imglib2.trainable_segmention;
+package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import net.imagej.ops.OpEnvironment;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
+import net.imglib2.trainable_segmention.RevampUtils;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import weka.core.Attribute;

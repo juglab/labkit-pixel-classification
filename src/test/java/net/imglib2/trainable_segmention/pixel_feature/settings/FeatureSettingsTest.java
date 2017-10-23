@@ -1,6 +1,9 @@
-package net.imglib2.trainable_segmention;
+package net.imglib2.trainable_segmention.pixel_feature.settings;
 
 import com.google.gson.JsonElement;
+import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

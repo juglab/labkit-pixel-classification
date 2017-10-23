@@ -1,9 +1,10 @@
-package net.imglib2.trainable_segmention;
+package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imagej.ops.OpEnvironment;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.ops.FeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.ArrayList;

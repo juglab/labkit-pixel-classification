@@ -1,4 +1,4 @@
-package net.imglib2.trainable_segmention;
+package net.imglib2.trainable_segmention.pixel_feature.settings;
 
 import java.util.*;
 import java.util.List;

@@ -1,4 +1,4 @@
-package net.imglib2.trainable_segmention;
+package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import static org.junit.Assert.assertNotNull;
 

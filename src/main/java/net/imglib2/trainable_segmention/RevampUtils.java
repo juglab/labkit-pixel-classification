@@ -277,7 +277,7 @@ public class RevampUtils {
 		return result;
 	}
 
-	static <T> RandomAccessible<T> castRandomAccessible(RandomAccessible<?> input, Class<T> tClass) {
+	public static <T> RandomAccessible<T> castRandomAccessible(RandomAccessible<?> input, Class<T> tClass) {
 		if(tClass.isInstance(input.randomAccess().get()))
 			return uncheckedCast(input);
 		throw new IllegalArgumentException("RandomAccessible input must be of type " + tClass.getName());

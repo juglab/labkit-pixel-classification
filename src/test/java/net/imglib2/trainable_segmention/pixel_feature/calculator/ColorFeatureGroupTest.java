@@ -1,9 +1,18 @@
-package net.imglib2.trainable_segmention;
+package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import ij.ImagePlus;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.trainable_segmention.RevampUtils;
+import net.imglib2.trainable_segmention.Utils;
+import net.imglib2.trainable_segmention.pixel_feature.calculator.ColorFeatureGroup;
+import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureGroup;
+import net.imglib2.trainable_segmention.pixel_feature.calculator.Features;
+import net.imglib2.trainable_segmention.pixel_feature.calculator.GrayFeatureGroup;
+import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;

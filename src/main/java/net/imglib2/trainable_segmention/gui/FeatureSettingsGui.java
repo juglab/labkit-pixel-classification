@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import net.imglib2.trainable_segmention.FeatureSetting;
-import net.imglib2.trainable_segmention.FeatureSettings;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.ops.FeatureOp;
-import net.imglib2.trainable_segmention.GlobalSettings;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.miginfocom.swing.MigLayout;
 import org.scijava.AbstractContextual;

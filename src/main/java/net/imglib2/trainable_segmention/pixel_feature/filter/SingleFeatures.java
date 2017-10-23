@@ -1,4 +1,4 @@
-package net.imglib2.trainable_segmention;
+package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imglib2.trainable_segmention.ops.FeatureOp;
 import net.imglib2.trainable_segmention.ops.IdendityFeature;
@@ -11,6 +11,7 @@ import net.imglib2.trainable_segmention.ops.SingleHessianFeature;
 import net.imglib2.trainable_segmention.ops.SingleLipschitzFeature;
 import net.imglib2.trainable_segmention.ops.SingleSobelGradientFeature;
 import net.imglib2.trainable_segmention.ops.SingleSphereShapedFeature;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 
 /**
  * @author Matthias Arzt

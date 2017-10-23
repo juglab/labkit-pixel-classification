@@ -1,6 +1,6 @@
 package net.imglib2.trainable_segmention.ops;
 
-import net.imglib2.trainable_segmention.FeatureSetting;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 
 import java.util.ArrayList;
 import java.util.List;

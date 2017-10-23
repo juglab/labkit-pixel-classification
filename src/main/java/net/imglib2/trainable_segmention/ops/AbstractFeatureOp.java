@@ -2,7 +2,7 @@ package net.imglib2.trainable_segmention.ops;
 
 import net.imagej.ops.special.function.AbstractUnaryFunctionOp;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmention.GlobalSettings;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.real.FloatType;

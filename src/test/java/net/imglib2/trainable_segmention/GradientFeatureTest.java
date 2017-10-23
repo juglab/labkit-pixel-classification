@@ -4,6 +4,8 @@ import net.imagej.ops.OpEnvironment;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.img.Img;
+import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import org.junit.Test;

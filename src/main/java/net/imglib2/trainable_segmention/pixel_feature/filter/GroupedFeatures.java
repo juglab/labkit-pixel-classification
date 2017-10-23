@@ -1,4 +1,4 @@
-package net.imglib2.trainable_segmention;
+package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imglib2.trainable_segmention.ops.DifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.ops.FeatureOp;
@@ -11,6 +11,7 @@ import net.imglib2.trainable_segmention.ops.SobelGradientFeature;
 import net.imglib2.trainable_segmention.ops.SphereShapedFeature;
 import net.imglib2.trainable_segmention.ops.Hessian3DFeature;
 import net.imglib2.trainable_segmention.ops.HessianFeature;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;

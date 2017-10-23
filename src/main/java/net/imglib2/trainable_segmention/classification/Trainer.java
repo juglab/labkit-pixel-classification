@@ -6,7 +6,7 @@ import net.imagej.ops.OpEnvironment;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
-import net.imglib2.trainable_segmention.FeatureGroup;
+import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureGroup;
 import net.imglib2.img.Img;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static net.imglib2.trainable_segmention.Features.applyOnImg;
+import static net.imglib2.trainable_segmention.pixel_feature.calculator.Features.applyOnImg;
 
 /**
  * {@linke Trainer} simplifies training a {@link Segmenter}
