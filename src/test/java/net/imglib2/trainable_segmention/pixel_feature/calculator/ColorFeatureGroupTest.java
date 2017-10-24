@@ -6,10 +6,6 @@ import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.ColorFeatureGroup;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureGroup;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.Features;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.GrayFeatureGroup;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -33,10 +29,10 @@ public class ColorFeatureGroupTest {
 	private final GlobalSettings graySettings = new GlobalSettings(GlobalSettings.ImageType.GRAY_SCALE,
 			colorSettings.sigmas(), colorSettings.membraneThickness());
 
-	private final FeatureGroup colorGroup = new ColorFeatureGroup(Utils.ops(),
+	private final FeatureGroup colorGroup = new AbstractFeatureGroup(Utils.ops(),
 			new FeatureSettings(colorSettings, GroupedFeatures.gauss()));
 
-	private final FeatureGroup grayGroup = new GrayFeatureGroup(Utils.ops(),
+	private final FeatureGroup grayGroup = new AbstractFeatureGroup(Utils.ops(),
 			new FeatureSettings(graySettings, GroupedFeatures.gauss()));
 
 	private final Img<ARGBType> image = ImageJFunctions.wrapRGBA(new ImagePlus("https://imagej.nih.gov/ij/images/clown.png"));

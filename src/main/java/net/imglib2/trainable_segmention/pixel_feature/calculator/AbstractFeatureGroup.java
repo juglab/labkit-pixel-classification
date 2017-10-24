@@ -10,32 +10,36 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-abstract class AbstractFeatureGroup implements FeatureGroup {
+class AbstractFeatureGroup implements FeatureGroup {
 
-	protected final FeatureJoiner joiner;
+	private final FeatureJoiner joiner;
 
-	protected final FeatureSettings settings;
+	private final FeatureSettings settings;
 
-	protected AbstractFeatureGroup(OpEnvironment ops, FeatureSettings settings) {
+	private final InputPreprocessor preprocessor;
+
+	AbstractFeatureGroup(OpEnvironment ops, FeatureSettings settings) {
 		this.settings = settings;
 		List<FeatureOp> featureOps = settings.features().stream()
 				.map(x -> x.newInstance(ops, settings.globals())).collect(Collectors.toList());
 		this.joiner = new FeatureJoiner(featureOps);
-		checkImageType(settings);
+		this.preprocessor = initPreprocessor(settings.globals().imageType());
 	}
 
-	private void checkImageType(FeatureSettings settings) {
-		GlobalSettings.ImageType expected = getImageType();
-		if(settings.globals().imageType() != expected)
-			throw new IllegalArgumentException("ColorFeatureGroup requires GlobalSettings.imageType() to be " + expected + ".");
+	private InputPreprocessor initPreprocessor(GlobalSettings.ImageType imageType) {
+		switch (imageType) {
+			case COLOR:
+				return new ColorInputPreprocessor();
+			case GRAY_SCALE:
+				return new GrayInputPreprocessor();
+			default:
+				throw new UnsupportedOperationException("Unsupported ImageType: " + settings().globals().imageType());
+		}
 	}
-
-	protected abstract GlobalSettings.ImageType getImageType();
 
 	@Override
 	public OpEnvironment ops() {
@@ -53,6 +57,11 @@ abstract class AbstractFeatureGroup implements FeatureGroup {
 	}
 
 	@Override
+	public Class<?> getType() {
+		return preprocessor.getType();
+	}
+
+	@Override
 	public int count() {
 		return joiner.count() * channelCount();
 	}
@@ -66,13 +75,11 @@ abstract class AbstractFeatureGroup implements FeatureGroup {
 	public void apply(RandomAccessible<?> input, List<RandomAccessibleInterval<FloatType>> output) {
 		if(!getType().isInstance(input.randomAccess().get()))
 			throw new IllegalArgumentException();
-		List<RandomAccessible<FloatType>> channels = getChannels(input);
+		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
 		List<List<RandomAccessibleInterval<FloatType>>> outputs = split(output, channels.size());
 		for (int i = 0; i < settings().globals().imageType().channelCount(); i++)
 			joiner.apply(channels.get(i), outputs.get(i));
 	}
-
-	protected abstract List<RandomAccessible<FloatType>> getChannels(RandomAccessible<?> input);
 
 	// -- Helper methods --
 

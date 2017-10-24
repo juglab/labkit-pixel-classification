@@ -19,19 +19,15 @@ import java.util.stream.Collectors;
 /**
  * @author Matthias Arzt
  */
-public class GrayFeatureGroup extends AbstractFeatureGroup {
-
-	GrayFeatureGroup(OpEnvironment ops, FeatureSettings settings) {
-		super(ops, settings);
-	}
+public class GrayInputPreprocessor implements InputPreprocessor {
 
 	@Override
-	protected GlobalSettings.ImageType getImageType() {
+	public GlobalSettings.ImageType getImageType() {
 		return GlobalSettings.ImageType.GRAY_SCALE;
 	}
 
 	@Override
-	protected List<RandomAccessible<FloatType>> getChannels(RandomAccessible<?> input) {
+	public List<RandomAccessible<FloatType>> getChannels(RandomAccessible<?> input) {
 		if(!(input.randomAccess().get() instanceof RealType))
 			throw new IllegalArgumentException();
 		return Collections.singletonList(RevampUtils.randomAccessibleToFloat(RevampUtils.uncheckedCast(input)));

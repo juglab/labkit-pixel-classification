@@ -17,19 +17,15 @@ import java.util.stream.IntStream;
 /**
  * @author Matthias Arzt
  */
-public class ColorFeatureGroup extends AbstractFeatureGroup {
-
-	ColorFeatureGroup(OpEnvironment ops, FeatureSettings settings) {
-		super(ops, settings);
-	}
+public class ColorInputPreprocessor implements InputPreprocessor {
 
 	@Override
-	protected GlobalSettings.ImageType getImageType() {
+	public GlobalSettings.ImageType getImageType() {
 		return GlobalSettings.ImageType.COLOR;
 	}
 
 	@Override
-	protected List<RandomAccessible<FloatType>> getChannels(RandomAccessible<?> input) {
+	public List<RandomAccessible<FloatType>> getChannels(RandomAccessible<?> input) {
 		return RevampUtils.splitChannels(RevampUtils.castRandomAccessible(input, ARGBType.class));
 	}
 

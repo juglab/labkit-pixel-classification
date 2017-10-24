@@ -51,12 +51,6 @@ public class Features {
 	}
 
 	public static FeatureGroup group(OpEnvironment ops, FeatureSettings featureSettings) {
-		switch (featureSettings.globals().imageType()) {
-			case COLOR:
-				return new ColorFeatureGroup(ops, featureSettings);
-			case GRAY_SCALE:
-				return new GrayFeatureGroup(ops, featureSettings);
-		}
-		throw new AssertionError();
+		return new AbstractFeatureGroup(ops, featureSettings);
 	}
 }
