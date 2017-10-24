@@ -18,29 +18,12 @@ import java.util.stream.Collectors;
 /**
  * @author Matthias Arzt
  */
-public class GrayFeatureGroup implements FeatureGroup {
-
-	private final FeatureJoiner joiner;
-
-	private final FeatureSettings settings;
+public class GrayFeatureGroup extends AbstractFeatureGroup {
 
 	GrayFeatureGroup(OpEnvironment ops, FeatureSettings settings) {
-		this.settings = settings;
-		List<FeatureOp> featureOps = settings.features().stream()
-				.map(x -> x.newInstance(ops, settings.globals())).collect(Collectors.toList());
-		this.joiner = new FeatureJoiner(featureOps);
+		super(ops, settings);
 		if(settings.globals().imageType() != GlobalSettings.ImageType.GRAY_SCALE)
 			throw new IllegalArgumentException("GrayFeatureGroup requires ImageType to be gray scale");
-	}
-
-	@Override
-	public OpEnvironment ops() {
-		return joiner.ops();
-	}
-
-	@Override
-	public int count() {
-		return joiner.count();
 	}
 
 	@Override
@@ -51,27 +34,7 @@ public class GrayFeatureGroup implements FeatureGroup {
 	}
 
 	@Override
-	public List<String> attributeLabels() {
-		return joiner.attributeLabels();
-	}
-
-	@Override
-	public FeatureSettings settings() {
-		return settings;
-	}
-
-	@Override
-	public List<FeatureOp> features() {
-		return joiner.features();
-	}
-
-	@Override
 	public Class<FloatType> getType() {
 		return FloatType.class;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(getType(), attributeLabels());
 	}
 }
