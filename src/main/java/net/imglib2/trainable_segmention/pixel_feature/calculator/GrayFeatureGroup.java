@@ -11,6 +11,7 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -22,19 +23,22 @@ public class GrayFeatureGroup extends AbstractFeatureGroup {
 
 	GrayFeatureGroup(OpEnvironment ops, FeatureSettings settings) {
 		super(ops, settings);
-		if(settings.globals().imageType() != GlobalSettings.ImageType.GRAY_SCALE)
-			throw new IllegalArgumentException("GrayFeatureGroup requires ImageType to be gray scale");
 	}
 
 	@Override
-	public void apply(RandomAccessible<?> in, List<RandomAccessibleInterval<FloatType>> out) {
-		if(!(in.randomAccess().get() instanceof RealType))
+	protected GlobalSettings.ImageType getImageType() {
+		return GlobalSettings.ImageType.GRAY_SCALE;
+	}
+
+	@Override
+	protected List<RandomAccessible<FloatType>> getChannels(RandomAccessible<?> input) {
+		if(!(input.randomAccess().get() instanceof RealType))
 			throw new IllegalArgumentException();
-		joiner.apply(RevampUtils.randomAccessibleToFloat(RevampUtils.uncheckedCast(in)), out);
+		return Collections.singletonList(RevampUtils.randomAccessibleToFloat(RevampUtils.uncheckedCast(input)));
 	}
 
 	@Override
-	public Class<FloatType> getType() {
-		return FloatType.class;
+	public Class<?> getType() {
+		return RealType.class;
 	}
 }
