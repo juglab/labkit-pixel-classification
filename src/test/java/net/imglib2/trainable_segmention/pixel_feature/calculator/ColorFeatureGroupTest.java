@@ -6,10 +6,6 @@ import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.ColorFeatureGroup;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureGroup;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.Features;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.GrayFeatureGroup;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -33,10 +29,10 @@ public class ColorFeatureGroupTest {
 	private final GlobalSettings graySettings = new GlobalSettings(GlobalSettings.ImageType.GRAY_SCALE,
 			colorSettings.sigmas(), colorSettings.membraneThickness());
 
-	private final FeatureGroup colorGroup = new ColorFeatureGroup(Utils.ops(),
+	private final FeatureCalculator colorGroup = new FeatureCalculator(Utils.ops(),
 			new FeatureSettings(colorSettings, GroupedFeatures.gauss()));
 
-	private final FeatureGroup grayGroup = new GrayFeatureGroup(Utils.ops(),
+	private final FeatureCalculator grayGroup = new FeatureCalculator(Utils.ops(),
 			new FeatureSettings(graySettings, GroupedFeatures.gauss()));
 
 	private final Img<ARGBType> image = ImageJFunctions.wrapRGBA(new ImagePlus("https://imagej.nih.gov/ij/images/clown.png"));
@@ -48,12 +44,12 @@ public class ColorFeatureGroupTest {
 
 	@Test
 	public void testImage() {
-		RandomAccessibleInterval<FloatType> result = Features.applyOnImg(colorGroup, image);
+		RandomAccessibleInterval<FloatType> result = colorGroup.apply(image);
 
 		List<RandomAccessibleInterval<FloatType>> results = RevampUtils.slices(result);
 		List<RandomAccessibleInterval<FloatType>> channels = RevampUtils.splitChannels(image);
 		for (int i = 0; i < 3; i++) {
-			RandomAccessibleInterval<FloatType> expected = RevampUtils.slices(Features.applyOnImg(grayGroup, channels.get(i))).get(0);
+			RandomAccessibleInterval<FloatType> expected = RevampUtils.slices(grayGroup.apply(channels.get(i))).get(0);
 			Utils.assertImagesEqual(35, expected, results.get(i));
 		}
 	}

@@ -166,6 +166,11 @@ public class FeatureSetting {
 				this.parameterValues.equals(fs.parameterValues);
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(commandInfo.getPluginClass(), parameterValues);
+	}
+
 	// -- Helper methods --
 
 	private static final List<String> EXCLUDE = Arrays.asList("in", "out", "globalSettings");

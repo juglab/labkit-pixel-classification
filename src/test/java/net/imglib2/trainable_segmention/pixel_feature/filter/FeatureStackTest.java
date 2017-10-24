@@ -12,10 +12,9 @@ import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.trainable_segmention.Utils;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.Features;
-import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
-import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
+import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Ignore;
@@ -41,7 +40,8 @@ public class FeatureStackTest {
 	private static Img<FloatType> bridgeImg = ImagePlusAdapter.convertFloat(bridgeImage);
 
 	public static RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureSetting feature) {
-		return Features.applyOnImg(Features.group(Utils.ops(), GlobalSettings.defaultSettings(), SingleFeatures.identity(), feature), image);
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.defaultSettings(), Arrays.asList(SingleFeatures.identity(), feature));
+		return new FeatureCalculator(Utils.ops(), featureSettings).apply(image);
 	}
 
 	@Test
@@ -79,7 +79,8 @@ public class FeatureStackTest {
 	}
 
 	public static List<String> getAttributeLabels(FeatureSetting feature) {
-		return Features.group(Utils.ops(), GlobalSettings.defaultSettings(), SingleFeatures.identity(), feature).attributeLabels();
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.defaultSettings(), Arrays.asList(SingleFeatures.identity(), feature));
+		return new FeatureCalculator(Utils.ops(), featureSettings).attributeLabels();
 	}
 
 	@Test

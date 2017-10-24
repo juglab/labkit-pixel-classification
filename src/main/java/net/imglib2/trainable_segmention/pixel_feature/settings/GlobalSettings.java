@@ -53,7 +53,7 @@ public final class GlobalSettings {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(sigmas, membraneThickness);
+		return Objects.hash(sigmas, membraneThickness, imageType);
 	}
 
 	@Override
