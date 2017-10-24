@@ -76,7 +76,9 @@ public class FeatureSettingTest {
 		FeatureSetting fs1 = FeatureSetting.fromClass(TestFeature.class);
 		FeatureSetting fs2 = FeatureSetting.fromClass(TestFeature.class);
 		boolean equal = fs1.equals(fs2);
+		boolean equalHashes = fs1.hashCode() == fs2.hashCode();
 		assertTrue(equal);
+		assertTrue(equalHashes);
 	}
 
 	public static class TestFeature extends AbstractFeatureOp {

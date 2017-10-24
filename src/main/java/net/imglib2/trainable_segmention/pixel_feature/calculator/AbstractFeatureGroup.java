@@ -74,12 +74,6 @@ abstract class AbstractFeatureGroup implements FeatureGroup {
 
 	protected abstract List<RandomAccessible<FloatType>> getChannels(RandomAccessible<?> input);
 
-	// TODO: Why calculate hash code? Should this method be moved to FeatureSettings
-	@Override
-	public int hashCode() {
-		return Objects.hash(getType(), attributeLabels());
-	}
-
 	// -- Helper methods --
 
 	private int channelCount() {

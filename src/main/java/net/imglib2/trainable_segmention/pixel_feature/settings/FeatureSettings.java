@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -69,5 +70,10 @@ public class FeatureSettings {
 		FeatureSettings fs = (FeatureSettings) obj;
 		return this.globals().equals(fs.globals()) &&
 				this.features().equals(fs.features());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(globals(), features());
 	}
 }

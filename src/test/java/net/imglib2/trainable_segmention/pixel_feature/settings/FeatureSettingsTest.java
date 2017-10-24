@@ -25,6 +25,7 @@ public class FeatureSettingsTest {
 		assertEquals(featureGroup, equalFeatureGroup);
 		assertNotEquals(featureGroup, differentFeatureGroup);
 		assertNotEquals(featureGroup, differentFeatureGroup2);
+		assertEquals(featureGroup.hashCode(), equalFeatureGroup.hashCode());
 	}
 
 	@Test
