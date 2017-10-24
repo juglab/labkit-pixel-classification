@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static net.imglib2.trainable_segmention.pixel_feature.calculator.Features.applyOnImg;
-
 /**
  * {@linke Trainer} simplifies training a {@link Segmenter}
  *
@@ -49,7 +47,7 @@ public class Trainer {
 	}
 
 	public <L> void trainLabeledImage(Img<?> image, LabelRegions<L> labeling) {
-		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(applyOnImg(features, image));
+		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(features.apply(image));
 		trainLabeledFeatures(featureStack, labeling);
 	}
 

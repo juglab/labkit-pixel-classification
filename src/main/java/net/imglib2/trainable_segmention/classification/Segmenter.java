@@ -11,7 +11,6 @@ import net.imagej.ops.special.hybrid.UnaryHybridCF;
 import net.imglib2.*;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureGroup;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.Features;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
@@ -27,6 +26,8 @@ import weka.core.Attribute;
 import weka.core.Instances;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Matthias Arzt
@@ -67,7 +68,7 @@ public class Segmenter {
 	}
 
 	public void segment(RandomAccessibleInterval<? extends IntegerType<?>> out, RandomAccessible<?> image) {
-		RandomAccessibleInterval<FloatType> featureValues = Features.applyOnImg(features, image, out);
+		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
 		ops.run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelClassificationOp());
 	}
 
@@ -79,7 +80,7 @@ public class Segmenter {
 	}
 
 	public void predict(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> out, RandomAccessible<FloatType> image) {
-		RandomAccessibleInterval<FloatType> featureValues = Features.applyOnImg(features, image, out);
+		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
 		ops.run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelPredictionOp());
 	}
 
@@ -116,7 +117,7 @@ public class Segmenter {
 		return new Segmenter(
 				ops,
 				new Gson().fromJson(object.get("classNames"), new TypeToken<List<String>>() {}.getType()),
-				Features.group(ops, FeatureSettings.fromJson(object.get("features"))),
+				new FeatureGroup(ops, FeatureSettings.fromJson(object.get("features"))),
 				ClassifierSerialization.jsonToWeka(object.get("classifier"))
 		);
 	}
@@ -128,7 +129,7 @@ public class Segmenter {
 		final int featureCount;
 
 		MyTrainingData() {
-			this.instances = new Instances("segment", new ArrayList<>(Features.attributes(features, classNames)), 1);
+			this.instances = new Instances("segment", new ArrayList<>(attributes()), 1);
 			this.featureCount = features.count();
 			instances.setClassIndex(featureCount);
 		}
@@ -149,10 +150,17 @@ public class Segmenter {
 
 	// -- Helper methods --
 
-	Attribute[] attributesAsArray() {
-		List<Attribute> attributes = Features.attributes(features, classNames);
+	private Attribute[] attributesAsArray() {
+		List<Attribute> attributes = attributes();
 		return attributes.toArray(new Attribute[attributes.size()]);
 	}
+
+	private List<Attribute> attributes() {
+		Stream<Attribute> featureAttributes = features.attributeLabels().stream().map(Attribute::new);
+		Stream<Attribute> classAttribute = Stream.of(new Attribute("class", classNames));
+		return Stream.concat(featureAttributes, classAttribute).collect(Collectors.toList());
+	}
+
 
 	// -- Helper classes --
 

@@ -44,12 +44,12 @@ public class ColorFeatureGroupTest {
 
 	@Test
 	public void testImage() {
-		RandomAccessibleInterval<FloatType> result = Features.applyOnImg(colorGroup, image);
+		RandomAccessibleInterval<FloatType> result = colorGroup.apply(image);
 
 		List<RandomAccessibleInterval<FloatType>> results = RevampUtils.slices(result);
 		List<RandomAccessibleInterval<FloatType>> channels = RevampUtils.splitChannels(image);
 		for (int i = 0; i < 3; i++) {
-			RandomAccessibleInterval<FloatType> expected = RevampUtils.slices(Features.applyOnImg(grayGroup, channels.get(i))).get(0);
+			RandomAccessibleInterval<FloatType> expected = RevampUtils.slices(grayGroup.apply(channels.get(i))).get(0);
 			Utils.assertImagesEqual(35, expected, results.get(i));
 		}
 	}

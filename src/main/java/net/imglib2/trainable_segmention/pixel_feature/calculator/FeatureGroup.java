@@ -1,13 +1,17 @@
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import net.imagej.ops.OpEnvironment;
+import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.img.Img;
+import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureJoiner;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.Views;
 
 import java.util.List;
 import java.util.function.IntPredicate;
@@ -22,7 +26,7 @@ public class FeatureGroup {
 
 	private final InputPreprocessor preprocessor;
 
-	FeatureGroup(OpEnvironment ops, FeatureSettings settings) {
+	public FeatureGroup(OpEnvironment ops, FeatureSettings settings) {
 		this.settings = settings;
 		List<FeatureOp> featureOps = settings.features().stream()
 				.map(x -> x.newInstance(ops, settings.globals())).collect(Collectors.toList());
@@ -73,6 +77,17 @@ public class FeatureGroup {
 		for (int i = 0; i < settings().globals().imageType().channelCount(); i++)
 			joiner.apply(channels.get(i), outputs.get(i));
 	}
+
+	public RandomAccessibleInterval<FloatType> apply(RandomAccessibleInterval<?> image) {
+		return apply(Views.extendBorder(image), image);
+	}
+
+	public RandomAccessibleInterval<FloatType> apply(RandomAccessible<?> extendedImage, Interval interval) {
+		Img<FloatType> result = ops().create().img(RevampUtils.extend(interval, 0, count() - 1), new FloatType());
+		apply(extendedImage, RevampUtils.slices(result));
+		return result;
+	}
+
 
 	// -- Helper methods --
 

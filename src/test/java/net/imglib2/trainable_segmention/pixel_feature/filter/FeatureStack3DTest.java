@@ -7,7 +7,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureGroup;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.Hessian3DFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.Features;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.img.Img;
@@ -20,6 +20,7 @@ import org.scijava.Context;
 import trainableSegmentation.FeatureStack3D;
 import trainableSegmentation.FeatureStackArray;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -52,7 +53,7 @@ public class FeatureStack3DTest {
 		List<String> actualLabels = getAttributeLabels(group);
 		assertEquals(expectedLabels, actualLabels);
 		RandomAccessibleInterval<FloatType> expected = getImage(fsa);
-		RandomAccessibleInterval<FloatType> result = Features.applyOnImg(group, img);
+		RandomAccessibleInterval<FloatType> result = group.apply(img);
 		Utils.assertImagesEqual(40, expected, result);
 	}
 
@@ -62,7 +63,8 @@ public class FeatureStack3DTest {
 	}
 
 	private FeatureGroup setupFeatureGroup(FeatureSetting featureSetting) {
-		return Features.group(Utils.ops(), GlobalSettings.default3dSettings(), SingleFeatures.identity(), featureSetting);
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3dSettings(), Arrays.asList(SingleFeatures.identity(), featureSetting));
+		return new FeatureGroup(Utils.ops(), featureSettings);
 	}
 
 	private RandomAccessibleInterval<FloatType> getImage(FeatureStackArray fsa) {
