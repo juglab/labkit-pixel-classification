@@ -10,12 +10,14 @@ import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureGroup;
 import net.imglib2.img.Img;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.GenericComposite;
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 
 import java.util.HashMap;
 import java.util.List;
@@ -75,11 +77,11 @@ public class Trainer {
 		return map;
 	}
 
-	public static Segmenter train(OpEnvironment ops, Img<?> image, LabelRegions<?> labeling, FeatureGroup features) {
+	public static Segmenter train(OpEnvironment ops, Img<?> image, LabelRegions<?> labeling, FeatureSettings features) {
 		return train(ops, image, labeling, features, initRandomForest());
 	}
 
-	public static Segmenter train(OpEnvironment ops, Img<?> image, LabelRegions<?> labeling, FeatureGroup features, weka.classifiers.Classifier initialWekaClassifier) {
+	public static Segmenter train(OpEnvironment ops, Img<?> image, LabelRegions<?> labeling, FeatureSettings features, Classifier initialWekaClassifier) {
 		List<String> classNames = labeling.getExistingLabels().stream().map(Object::toString).collect(Collectors.toList());
 		Segmenter segmenter = new Segmenter(ops, classNames, features, initialWekaClassifier);
 		Trainer.of(segmenter).trainLabeledImage(image, labeling);

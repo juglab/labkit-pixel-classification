@@ -68,10 +68,9 @@ public class SegmenterTest {
 	}
 
 	private Segmenter trainClassifier() {
-		GlobalSettings settings = new GlobalSettings(GlobalSettings.ImageType.GRAY_SCALE, Arrays.asList(1.0, 8.0, 16.0), 3.0);
-		FeatureSettings featureSettings = new FeatureSettings(settings, Arrays.asList(SingleFeatures.identity(), GroupedFeatures.gauss()));
-		FeatureGroup features = new FeatureGroup(Utils.ops(), featureSettings);
-		return Trainer.train(ops, img, labeling, features);
+		GlobalSettings globals = new GlobalSettings(GlobalSettings.ImageType.GRAY_SCALE, Arrays.asList(1.0, 8.0, 16.0), 3.0);
+		FeatureSettings featureSettings = new FeatureSettings(globals, SingleFeatures.identity(), GroupedFeatures.gauss());
+		return Trainer.train(ops, img, labeling, featureSettings);
 	}
 
 	@Test
@@ -93,8 +92,7 @@ public class SegmenterTest {
 	@Test
 	public void testDifferentWekaClassifiers() {
 		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.defaultSettings(), Arrays.asList(SingleFeatures.identity(), GroupedFeatures.gauss()));
-		FeatureGroup features = new FeatureGroup(Utils.ops(), featureSettings);
-		Segmenter segmenter = Trainer.train(ops, img, labeling, features, new RandomCommittee());
+		Segmenter segmenter = Trainer.train(ops, img, labeling, featureSettings, new RandomCommittee());
 		RandomAccessibleInterval<? extends IntegerType> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());
 	}

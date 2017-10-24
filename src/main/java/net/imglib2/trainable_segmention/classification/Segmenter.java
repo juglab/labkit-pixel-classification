@@ -22,6 +22,7 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.GenericComposite;
+import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Instances;
 
@@ -44,11 +45,15 @@ public class Segmenter {
 
 	private final OpEnvironment ops;
 
-	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureGroup features, weka.classifiers.Classifier classifier) {
+	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureGroup features, Classifier classifier) {
 		this.ops = Objects.requireNonNull(ops);
 		this.classNames = Collections.unmodifiableList(classNames);
 		this.features = Objects.requireNonNull(features);
 		this.classifier = Objects.requireNonNull(classifier);
+	}
+
+	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureSettings features, Classifier classifier) {
+		this(ops, classNames, new FeatureGroup(ops, features), classifier);
 	}
 
 	public FeatureGroup features() {
@@ -117,7 +122,7 @@ public class Segmenter {
 		return new Segmenter(
 				ops,
 				new Gson().fromJson(object.get("classNames"), new TypeToken<List<String>>() {}.getType()),
-				new FeatureGroup(ops, FeatureSettings.fromJson(object.get("features"))),
+				FeatureSettings.fromJson(object.get("features")),
 				ClassifierSerialization.jsonToWeka(object.get("classifier"))
 		);
 	}
