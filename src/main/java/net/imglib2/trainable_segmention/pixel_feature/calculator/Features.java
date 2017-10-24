@@ -51,6 +51,6 @@ public class Features {
 	}
 
 	public static FeatureGroup group(OpEnvironment ops, FeatureSettings featureSettings) {
-		return new AbstractFeatureGroup(ops, featureSettings);
+		return new FeatureGroup(ops, featureSettings);
 	}
 }
