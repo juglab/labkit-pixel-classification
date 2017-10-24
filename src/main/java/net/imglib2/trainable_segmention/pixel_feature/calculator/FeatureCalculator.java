@@ -18,7 +18,7 @@ import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class FeatureGroup {
+public class FeatureCalculator {
 
 	private final FeatureJoiner joiner;
 
@@ -26,7 +26,7 @@ public class FeatureGroup {
 
 	private final InputPreprocessor preprocessor;
 
-	public FeatureGroup(OpEnvironment ops, FeatureSettings settings) {
+	public FeatureCalculator(OpEnvironment ops, FeatureSettings settings) {
 		this.settings = settings;
 		List<FeatureOp> featureOps = settings.features().stream()
 				.map(x -> x.newInstance(ops, settings.globals())).collect(Collectors.toList());

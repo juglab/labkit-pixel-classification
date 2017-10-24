@@ -7,7 +7,6 @@ import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegions;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureGroup;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;

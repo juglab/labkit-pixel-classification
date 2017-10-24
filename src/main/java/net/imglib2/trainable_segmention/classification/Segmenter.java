@@ -9,7 +9,7 @@ import net.imagej.ops.Ops;
 import net.imagej.ops.special.hybrid.AbstractUnaryHybridCF;
 import net.imagej.ops.special.hybrid.UnaryHybridCF;
 import net.imglib2.*;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureGroup;
+import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.img.Img;
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
  */
 public class Segmenter {
 
-	private final FeatureGroup features;
+	private final FeatureCalculator features;
 
 	private final List<String> classNames;
 
@@ -45,7 +45,7 @@ public class Segmenter {
 
 	private final OpEnvironment ops;
 
-	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureGroup features, Classifier classifier) {
+	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureCalculator features, Classifier classifier) {
 		this.ops = Objects.requireNonNull(ops);
 		this.classNames = Collections.unmodifiableList(classNames);
 		this.features = Objects.requireNonNull(features);
@@ -53,10 +53,10 @@ public class Segmenter {
 	}
 
 	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureSettings features, Classifier classifier) {
-		this(ops, classNames, new FeatureGroup(ops, features), classifier);
+		this(ops, classNames, new FeatureCalculator(ops, features), classifier);
 	}
 
-	public FeatureGroup features() {
+	public FeatureCalculator features() {
 		return features;
 	}
 

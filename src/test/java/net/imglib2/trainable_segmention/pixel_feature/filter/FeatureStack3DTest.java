@@ -4,7 +4,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureGroup;
+import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.Hessian3DFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
@@ -48,7 +48,7 @@ public class FeatureStack3DTest {
 	@Test
 	public void testHessian() {
 		FeatureStackArray fsa = calculateFeatureStack(FeatureStack3D.HESSIAN);
-		FeatureGroup group = setupFeatureGroup(FeatureSetting.fromClass(Hessian3DFeature.class));
+		FeatureCalculator group = setupFeatureGroup(FeatureSetting.fromClass(Hessian3DFeature.class));
 		List<String> expectedLabels = oldAttributes(fsa);
 		List<String> actualLabels = getAttributeLabels(group);
 		assertEquals(expectedLabels, actualLabels);
@@ -62,9 +62,9 @@ public class FeatureStack3DTest {
 		FeatureStackArray fsa = calculateFeatureStack(FeatureStack3D.DERIVATIVES);
 	}
 
-	private FeatureGroup setupFeatureGroup(FeatureSetting featureSetting) {
+	private FeatureCalculator setupFeatureGroup(FeatureSetting featureSetting) {
 		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3dSettings(), Arrays.asList(SingleFeatures.identity(), featureSetting));
-		return new FeatureGroup(Utils.ops(), featureSettings);
+		return new FeatureCalculator(Utils.ops(), featureSettings);
 	}
 
 	private RandomAccessibleInterval<FloatType> getImage(FeatureStackArray fsa) {
@@ -83,7 +83,7 @@ public class FeatureStack3DTest {
 		return stack.getFeatureStackArray();
 	}
 
-	private List<String> getAttributeLabels(FeatureGroup group) {
+	private List<String> getAttributeLabels(FeatureCalculator group) {
 		return group.attributeLabels();
 	}
 

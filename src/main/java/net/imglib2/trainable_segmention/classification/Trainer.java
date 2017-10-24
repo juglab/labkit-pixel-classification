@@ -6,7 +6,7 @@ import net.imagej.ops.OpEnvironment;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureGroup;
+import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.img.Img;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  */
 public class Trainer {
 
-	private final FeatureGroup features;
+	private final FeatureCalculator features;
 
 	private final List<String> classNames;
 

@@ -12,7 +12,7 @@ import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.trainable_segmention.Utils;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureGroup;
+import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -41,7 +41,7 @@ public class FeatureStackTest {
 
 	public static RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureSetting feature) {
 		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.defaultSettings(), Arrays.asList(SingleFeatures.identity(), feature));
-		return new FeatureGroup(Utils.ops(), featureSettings).apply(image);
+		return new FeatureCalculator(Utils.ops(), featureSettings).apply(image);
 	}
 
 	@Test
@@ -80,7 +80,7 @@ public class FeatureStackTest {
 
 	public static List<String> getAttributeLabels(FeatureSetting feature) {
 		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.defaultSettings(), Arrays.asList(SingleFeatures.identity(), feature));
-		return new FeatureGroup(Utils.ops(), featureSettings).attributeLabels();
+		return new FeatureCalculator(Utils.ops(), featureSettings).attributeLabels();
 	}
 
 	@Test
