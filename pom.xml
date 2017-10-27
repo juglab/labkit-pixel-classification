@@ -15,7 +15,7 @@
 
 	<name>ImgLib2 Trainable Segmentation</name>
 	<description>Trainable segmentation features implemented with imglib2.</description>
-	<url>http://imagej.net/ImgLib2_Trainable_Segmentation</url>
+	<url>http://github.com/maarzt/imglib2-trainable-segmentation</url>
 	<inceptionYear>2017</inceptionYear>
 	<organization>
 		<name>CSBD</name>
@@ -44,10 +44,9 @@
 	</developers>
 
 	<contributors>
-        <contributor>
+ 		<contributor>
 			<name>Matthias Arzt</name>
 		</contributor>
-
 	</contributors>
 
 	<ciManagement>
