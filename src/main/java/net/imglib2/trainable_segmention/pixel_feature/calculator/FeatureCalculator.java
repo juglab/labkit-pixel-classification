@@ -8,8 +8,8 @@ import net.imglib2.img.Img;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureJoiner;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 
@@ -31,17 +31,17 @@ public class FeatureCalculator {
 		List<FeatureOp> featureOps = settings.features().stream()
 				.map(x -> x.newInstance(ops, settings.globals())).collect(Collectors.toList());
 		this.joiner = new FeatureJoiner(featureOps);
-		this.preprocessor = initPreprocessor(settings.globals().imageType());
+		this.preprocessor = initPreprocessor(settings.globals().channelSetting());
 	}
 
-	private InputPreprocessor initPreprocessor(GlobalSettings.ImageType imageType) {
-		switch (imageType) {
-			case COLOR:
+	private InputPreprocessor initPreprocessor(ChannelSetting channelSetting) {
+		switch (channelSetting) {
+			case RGB:
 				return new ColorInputPreprocessor();
-			case GRAY_SCALE:
+			case SINGLE:
 				return new GrayInputPreprocessor();
 			default:
-				throw new UnsupportedOperationException("Unsupported ImageType: " + settings().globals().imageType());
+				throw new UnsupportedOperationException("Unsupported channel setting: " + settings().globals().channelSetting());
 		}
 	}
 
@@ -66,7 +66,7 @@ public class FeatureCalculator {
 	}
 
 	public List<String> attributeLabels() {
-		return prepend(settings.globals().imageType().channelNames(), joiner.attributeLabels());
+		return prepend(settings.globals().channelSetting().channels(), joiner.attributeLabels());
 	}
 
 	public void apply(RandomAccessible<?> input, List<RandomAccessibleInterval<FloatType>> output) {
@@ -74,7 +74,7 @@ public class FeatureCalculator {
 			throw new IllegalArgumentException();
 		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
 		List<List<RandomAccessibleInterval<FloatType>>> outputs = split(output, channels.size());
-		for (int i = 0; i < settings().globals().imageType().channelCount(); i++)
+		for (int i = 0; i < settings().globals().channelSetting().channels().size(); i++)
 			joiner.apply(channels.get(i), outputs.get(i));
 	}
 
@@ -92,7 +92,7 @@ public class FeatureCalculator {
 	// -- Helper methods --
 
 	private int channelCount() {
-		return settings.globals().imageType().channelCount();
+		return settings.globals().channelSetting().channels().size();
 	}
 
 	private static List<String> prepend(List<String> prepend, List<String> labels) {

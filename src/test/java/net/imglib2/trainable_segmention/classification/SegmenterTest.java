@@ -7,6 +7,7 @@ import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
@@ -67,7 +68,7 @@ public class SegmenterTest {
 	}
 
 	private Segmenter trainClassifier() {
-		GlobalSettings globals = new GlobalSettings(GlobalSettings.ImageType.GRAY_SCALE, Arrays.asList(1.0, 8.0, 16.0), 3.0);
+		GlobalSettings globals = new GlobalSettings(ChannelSetting.SINGLE, img.numDimensions(), Arrays.asList(1.0, 8.0, 16.0), 3.0);
 		FeatureSettings featureSettings = new FeatureSettings(globals, SingleFeatures.identity(), GroupedFeatures.gauss());
 		return Trainer.train(ops, img, labeling, featureSettings);
 	}
@@ -90,7 +91,7 @@ public class SegmenterTest {
 
 	@Test
 	public void testDifferentWekaClassifiers() {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.defaultSettings(), Arrays.asList(SingleFeatures.identity(), GroupedFeatures.gauss()));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(SingleFeatures.identity(), GroupedFeatures.gauss()));
 		Segmenter segmenter = Trainer.train(ops, img, labeling, featureSettings, new RandomCommittee());
 		RandomAccessibleInterval<? extends IntegerType> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());

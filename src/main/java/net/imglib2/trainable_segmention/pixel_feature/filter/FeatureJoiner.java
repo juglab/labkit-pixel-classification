@@ -32,7 +32,7 @@ public class FeatureJoiner {
 
 	private GlobalSettings checkGlobalSettings(List<FeatureOp> features) {
 		if(features.isEmpty())
-			return GlobalSettings.defaultSettings();
+			return null;
 		GlobalSettings settings = features.get(0).globalSettings();
 		boolean allEqual =
 				features.stream().allMatch(f -> settings.equals(f.globalSettings()));

@@ -40,7 +40,7 @@ public class FeatureStackTest {
 	private static Img<FloatType> bridgeImg = ImagePlusAdapter.convertFloat(bridgeImage);
 
 	public static RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.defaultSettings(), Arrays.asList(SingleFeatures.identity(), feature));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(SingleFeatures.identity(), feature));
 		return new FeatureCalculator(Utils.ops(), featureSettings).apply(image);
 	}
 
@@ -79,7 +79,7 @@ public class FeatureStackTest {
 	}
 
 	public static List<String> getAttributeLabels(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.defaultSettings(), Arrays.asList(SingleFeatures.identity(), feature));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(SingleFeatures.identity(), feature));
 		return new FeatureCalculator(Utils.ops(), featureSettings).attributeLabels();
 	}
 

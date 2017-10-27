@@ -8,28 +8,31 @@ import java.util.List;
  */
 public final class GlobalSettings {
 
-	public static GlobalSettings defaultSettings() {
-		return new GlobalSettings(ImageType.GRAY_SCALE, 1.0, 16.0, 1.0);
+	public static GlobalSettings default2dSettings() {
+		return new GlobalSettings(ChannelSetting.SINGLE, 2, 1.0, 16.0, 1.0);
 	}
 
 	public static GlobalSettings default3dSettings() {
-		return new GlobalSettings(ImageType.GRAY_SCALE, 1.0, 8.0, 1.0);
+		return new GlobalSettings(ChannelSetting.SINGLE, 3, 1.0, 8.0, 1.0);
 	}
 
-	private final ImageType imageType;
+	private final ChannelSetting channelSetting;
+
+	private final int numDimensions;
 
 	private final List<Double> sigmas;
 
 	private final double membraneThickness;
 
-	public GlobalSettings(ImageType imageType, List<Double> sigmas, double membraneThickness) {
-		this.imageType = imageType;
+	public GlobalSettings(ChannelSetting channelSetting, int numDimensions, List<Double> sigmas, double membraneThickness) {
+		this.channelSetting = channelSetting;
+		this.numDimensions = numDimensions;
 		this.sigmas = Collections.unmodifiableList(new ArrayList<>(sigmas));
 		this.membraneThickness = membraneThickness;
 	}
 
-	public GlobalSettings(ImageType imageType, double minSigma, double maxSigma, double membraneThickness) {
-		this(imageType, initSigmas(minSigma, maxSigma), membraneThickness);
+	public GlobalSettings(ChannelSetting channelSetting, int numDimensions, double minSigma, double maxSigma, double membraneThickness) {
+		this(channelSetting, numDimensions, initSigmas(minSigma, maxSigma), membraneThickness);
 	}
 
 	private static List<Double> initSigmas(double minSigma, double maxSigma) {
@@ -40,7 +43,15 @@ public final class GlobalSettings {
 	}
 
 	public GlobalSettings(GlobalSettings globalSettings) {
-		this(globalSettings.imageType(), globalSettings.sigmas(), globalSettings.membraneThickness());
+		this(globalSettings.channelSetting(), globalSettings.numDimensions(), globalSettings.sigmas(), globalSettings.membraneThickness());
+	}
+
+	public ChannelSetting channelSetting() {
+		return channelSetting;
+	}
+
+	public int numDimensions() {
+		return numDimensions;
 	}
 
 	public List<Double> sigmas() {
@@ -53,7 +64,7 @@ public final class GlobalSettings {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(sigmas, membraneThickness, imageType);
+		return Objects.hash(sigmas, numDimensions, membraneThickness, channelSetting);
 	}
 
 	@Override
@@ -61,34 +72,8 @@ public final class GlobalSettings {
 		if(!(obj instanceof GlobalSettings))
 			return false;
 		GlobalSettings settings = (GlobalSettings) obj;
-		return imageType.equals(settings.imageType) &&
+		return channelSetting.equals(settings.channelSetting) &&
 				sigmas.equals(settings.sigmas) &&
 				membraneThickness == settings.membraneThickness;
-	}
-
-	public ImageType imageType() {
-		return imageType;
-	}
-
-	public enum ImageType {
-		COLOR("red", "green", "blue"),
-		GRAY_SCALE("");
-
-		private final int channelCount;
-
-		private final List<String> channelNames;
-
-		ImageType(String... names) {
-			channelCount = names.length;
-			channelNames = Arrays.asList(names);
-		}
-
-		public int channelCount() {
-			return channelCount;
-		}
-
-		public List<String> channelNames() {
-			return channelNames;
-		}
 	}
 }

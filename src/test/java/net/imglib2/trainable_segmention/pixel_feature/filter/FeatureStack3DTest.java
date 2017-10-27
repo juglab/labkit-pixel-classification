@@ -92,6 +92,6 @@ public class FeatureStack3DTest {
 	}
 
 	private Img<FloatType> stackToImg(ImageStack stack1, String title) {
-		return ImageJFunctions.wrap(new ImagePlus("title", stack1));
+		return ImageJFunctions.wrap(new ImagePlus(title, stack1));
 	}
 }

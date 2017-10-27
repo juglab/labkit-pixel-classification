@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -79,14 +80,17 @@ public class FeatureSettingsGui {
 
 	private static class GlobalsPanel extends JPanel {
 
-		private final GlobalSettings.ImageType imageType;
+		private final ChannelSetting channelSetting;
+
+		private final int numDimensions;
 
 		private final JFormattedTextField sigmasField;
 
 		private final JFormattedTextField thicknessField;
 
 		public GlobalsPanel(GlobalSettings globalSettings) {
-			this.imageType = globalSettings.imageType();
+			channelSetting = globalSettings.channelSetting();
+			numDimensions = globalSettings.numDimensions();
 			setLayout(new MigLayout("insets 0", "[]20pt[100pt]", "[][]"));
 			add(new JLabel("min sigma"));
 			sigmasField = new JFormattedTextField(new ListOfDoubleFormatter());
@@ -99,8 +103,8 @@ public class FeatureSettingsGui {
 
 		GlobalSettings get() {
 			return new GlobalSettings(
-					imageType,
-					(List<Double>) sigmasField.getValue(),
+					channelSetting,
+					numDimensions, (List<Double>) sigmasField.getValue(),
 					(Double) thicknessField.getValue()
 			);
 		}
@@ -185,7 +189,7 @@ public class FeatureSettingsGui {
 
 	public static void main(String... args) {
 		Context context = new Context();
-		System.out.println(FeatureSettingsGui.show(context, new FeatureSettings(GlobalSettings.defaultSettings())));
+		System.out.println(FeatureSettingsGui.show(context, new FeatureSettings(GlobalSettings.default2dSettings())));
 		System.out.println("finished");
 	}
 
@@ -202,7 +206,7 @@ public class FeatureSettingsGui {
 		}
 
 		void edit() {
-			value = featureSettingsDialog.show(value);
+			value = featureSettingsDialog.show(value, globalsPanel.get());
 		}
 
 		@Override
@@ -263,9 +267,9 @@ public class FeatureSettingsGui {
 			harvester = getHarvester(context);
 		}
 
-		FeatureSetting show(FeatureSetting op) {
+		FeatureSetting show(FeatureSetting op, GlobalSettings globalSetting) {
 			try {
-				Module module = op.asModule(GlobalSettings.defaultSettings());
+				Module module = op.asModule(globalSetting);
 				harvester.harvest(module);
 				return FeatureSetting.fromModule(module);
 			} catch (ModuleException e) {

@@ -8,8 +8,8 @@ public class GlobalSettingsTest {
 
 	@Test
 	public void testHashCode() {
-		GlobalSettings globalsA = new GlobalSettings(GlobalSettings.ImageType.COLOR, 3.0, 16.0, 2.5);
-		GlobalSettings globalsB = new GlobalSettings(GlobalSettings.ImageType.COLOR, 3.0, 16.0, 2.5);
+		GlobalSettings globalsA = new GlobalSettings(ChannelSetting.RGB, 2, 3.0, 16.0, 2.5);
+		GlobalSettings globalsB = new GlobalSettings(ChannelSetting.RGB, 2,3.0, 16.0, 2.5);
 		assertEquals(globalsA.hashCode(), globalsB.hashCode());
 	}
 }

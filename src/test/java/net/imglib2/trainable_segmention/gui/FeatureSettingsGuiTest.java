@@ -15,7 +15,7 @@ public class FeatureSettingsGuiTest {
 
 	public static void main(String... args) throws InterruptedException {
 		Context context = new Context(OpService.class);
-		GlobalSettings settings = GlobalSettings.defaultSettings();
+		GlobalSettings settings = GlobalSettings.default2dSettings();
 		FeatureSettings fs = new FeatureSettings(settings, GroupedFeatures.gauss());
 		FeatureSettingsGui gui = new FeatureSettingsGui(context, fs);
 		showFrame(gui.getComponent());
