@@ -6,8 +6,8 @@ import net.imagej.ops.OpEnvironment;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.img.Img;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
@@ -38,6 +38,10 @@ public class Trainer {
 
 	private final Training training;
 
+	private boolean autoFinish = true;
+
+	private boolean finished = false;
+
 	private Trainer(Segmenter segmenter) {
 		features = segmenter.features();
 		training = segmenter.training();
@@ -48,7 +52,18 @@ public class Trainer {
 		return new Trainer(segmenter);
 	}
 
-	public <L> void trainLabeledImage(Img<?> image, LabelRegions<L> labeling) {
+	public void start() {
+		autoFinish = false;
+	}
+
+	public void finish() {
+		if(finished)
+			throw new IllegalStateException();
+		finished = true;
+		training.train();
+	}
+
+	public void trainLabeledImage(RandomAccessibleInterval<?> image, LabelRegions<?> labeling) {
 		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(features.apply(image));
 		trainLabeledFeatures(featureStack, labeling);
 	}
@@ -68,7 +83,8 @@ public class Trainer {
 				training.add(ra.get(), classIndex);
 			}
 		}
-		training.train();
+		if(autoFinish)
+			finish();
 	}
 
 	private <L> Map<String,L> createKeyMap(LabelRegions<L> regions) {
@@ -77,11 +93,11 @@ public class Trainer {
 		return map;
 	}
 
-	public static Segmenter train(OpEnvironment ops, Img<?> image, LabelRegions<?> labeling, FeatureSettings features) {
+	public static Segmenter train(OpEnvironment ops, RandomAccessibleInterval<?> image, LabelRegions<?> labeling, FeatureSettings features) {
 		return train(ops, image, labeling, features, initRandomForest());
 	}
 
-	public static Segmenter train(OpEnvironment ops, Img<?> image, LabelRegions<?> labeling, FeatureSettings features, Classifier initialWekaClassifier) {
+	public static Segmenter train(OpEnvironment ops, RandomAccessibleInterval<?> image, LabelRegions<?> labeling, FeatureSettings features, Classifier initialWekaClassifier) {
 		List<String> classNames = labeling.getExistingLabels().stream().map(Object::toString).collect(Collectors.toList());
 		Segmenter segmenter = new Segmenter(ops, classNames, features, initialWekaClassifier);
 		Trainer.of(segmenter).trainLabeledImage(image, labeling);
