@@ -54,7 +54,7 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 	private static final int NORMALIZED_EIGENVALUE_DIFFERENCE = 7;
 
 	public RandomAccessibleInterval<FloatType> calculateHessianOnChannel(Img<FloatType> image, double sigma) {
-		Img<FloatType> features = ops().create().img(RevampUtils.extend(image, 0, 7), new FloatType());
+		Img<FloatType> features = ops().create().img(RevampUtils.appendDimensionToInterval(image, 0, 7), new FloatType());
 		calculateHessianOnChannel(Views.extendBorder(image), features, sigma);
 		return features;
 	}

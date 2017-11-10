@@ -71,7 +71,7 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 			RandomAccessibleInterval<FloatType> dy,
 			RandomAccessibleInterval<FloatType> dz)
 	{
-		Img<FloatType> secondDerivatives = ops().create().img(RevampUtils.extend(secondDerivativeInterval, 0, 5), new FloatType());
+		Img<FloatType> secondDerivatives = ops().create().img(RevampUtils.appendDimensionToInterval(secondDerivativeInterval, 0, 5), new FloatType());
 		List<RandomAccessibleInterval<FloatType>> slices = RevampUtils.slices(secondDerivatives);
 		PartialDerivative.gradientCentralDifference(dx, slices.get(0), 0);
 		PartialDerivative.gradientCentralDifference(dx, slices.get(1), 1);

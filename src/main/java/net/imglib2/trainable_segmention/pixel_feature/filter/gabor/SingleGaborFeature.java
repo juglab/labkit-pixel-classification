@@ -128,7 +128,7 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 
 	private void gaborProcessChannel(List<Img<FloatType>> kernels, RandomAccessible<FloatType> channel, RandomAccessibleInterval<FloatType> max, RandomAccessibleInterval<FloatType> min) {
 		Interval interval = min;
-		Img<FloatType> stack = ops().create().img(RevampUtils.extend(interval, 0, kernels.size() - 1), new FloatType());
+		Img<FloatType> stack = ops().create().img(RevampUtils.appendDimensionToInterval(interval, 0, kernels.size() - 1), new FloatType());
 		// Apply kernels
 		FFTConvolution<FloatType> fftConvolution = new FFTConvolution<>(channel, interval, kernels.get(0), (Interval) kernels.get(0), new ArrayImgFactory<>());
 		fftConvolution.setKeepImgFFT(true);

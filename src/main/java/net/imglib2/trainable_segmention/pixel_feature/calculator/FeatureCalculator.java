@@ -77,7 +77,7 @@ public class FeatureCalculator {
 	}
 
 	public RandomAccessibleInterval<FloatType> apply(RandomAccessible<?> extendedImage, Interval interval) {
-		Img<FloatType> result = ops().create().img(RevampUtils.extend(interval, 0, count() - 1), new FloatType());
+		Img<FloatType> result = ops().create().img(RevampUtils.appendDimensionToInterval(interval, 0, count() - 1), new FloatType());
 		apply(extendedImage, RevampUtils.slices(result));
 		return result;
 	}

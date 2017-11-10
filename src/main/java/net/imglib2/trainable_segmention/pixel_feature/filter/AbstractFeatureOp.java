@@ -20,7 +20,7 @@ public abstract class AbstractFeatureOp
 
 	@Override
 	public RandomAccessibleInterval<FloatType> calculate(RandomAccessibleInterval<FloatType> input) {
-		Img<FloatType> output = ops().create().img(RevampUtils.extend(input, 0, count() - 1), new FloatType());
+		Img<FloatType> output = ops().create().img(RevampUtils.appendDimensionToInterval(input, 0, count() - 1), new FloatType());
 		apply(input, RevampUtils.slices(output));
 		return output;
 	}

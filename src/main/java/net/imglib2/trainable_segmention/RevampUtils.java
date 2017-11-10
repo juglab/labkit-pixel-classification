@@ -61,7 +61,8 @@ public class RevampUtils {
 		return result;
 	}
 
-	public static Interval extend(Interval in, long min, long max) {
+	// TODO: move to Intervals?
+	public static Interval appendDimensionToInterval(Interval in, long min, long max) {
 		int n = in.numDimensions();
 		long[] mins = new long[n + 1];
 		long[] maxs = new long[n + 1];

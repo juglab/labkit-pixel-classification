@@ -78,7 +78,7 @@ public class Segmenter {
 	}
 
 	public RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> predict(RandomAccessibleInterval<?> image) {
-		Img<FloatType> img = ops.create().img(RevampUtils.extend(image, 0, classNames.size()), new FloatType());
+		Img<FloatType> img = ops.create().img(RevampUtils.appendDimensionToInterval(image, 0, classNames.size()), new FloatType());
 		RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> collapsed = Views.collapse(img);
 		predict(collapsed, Views.extendBorder(image));
 		return collapsed;
