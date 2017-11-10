@@ -37,7 +37,7 @@ public class FeatureCalculator {
 	private InputPreprocessor initPreprocessor(ChannelSetting channelSetting) {
 		switch (channelSetting) {
 			case RGB:
-				return new ColorInputPreprocessor();
+				return new ColorInputPreprocessor(settings.globals());
 			case SINGLE:
 				return new GrayInputPreprocessor();
 			default:
@@ -57,10 +57,6 @@ public class FeatureCalculator {
 		return joiner.features();
 	}
 
-	public Class<?> getType() {
-		return preprocessor.getType();
-	}
-
 	public int count() {
 		return joiner.count() * channelCount();
 	}
@@ -70,8 +66,6 @@ public class FeatureCalculator {
 	}
 
 	public void apply(RandomAccessible<?> input, List<RandomAccessibleInterval<FloatType>> output) {
-		if(!getType().isInstance(input.randomAccess().get()))
-			throw new IllegalArgumentException();
 		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
 		List<List<RandomAccessibleInterval<FloatType>>> outputs = split(output, channels.size());
 		for (int i = 0; i < settings().globals().channelSetting().channels().size(); i++)
@@ -79,7 +73,7 @@ public class FeatureCalculator {
 	}
 
 	public RandomAccessibleInterval<FloatType> apply(RandomAccessibleInterval<?> image) {
-		return apply(Views.extendBorder(image), image);
+		return apply(Views.extendBorder(image), preprocessor.outputIntervalFromInput(image));
 	}
 
 	public RandomAccessibleInterval<FloatType> apply(RandomAccessible<?> extendedImage, Interval interval) {

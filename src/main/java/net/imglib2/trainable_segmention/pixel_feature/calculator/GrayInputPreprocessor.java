@@ -1,6 +1,8 @@
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
+import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -23,5 +25,10 @@ public class GrayInputPreprocessor implements InputPreprocessor {
 	@Override
 	public Class<?> getType() {
 		return RealType.class;
+	}
+
+	@Override
+	public Interval outputIntervalFromInput(RandomAccessibleInterval<?> image) {
+		return image;
 	}
 }

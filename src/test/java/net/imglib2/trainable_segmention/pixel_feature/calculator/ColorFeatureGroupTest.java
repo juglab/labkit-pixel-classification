@@ -12,6 +12,7 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.Views;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -53,5 +54,13 @@ public class ColorFeatureGroupTest {
 			RandomAccessibleInterval<FloatType> expected = RevampUtils.slices(grayGroup.apply(channels.get(i))).get(0);
 			Utils.assertImagesEqual(35, expected, results.get(i));
 		}
+	}
+
+	@Test
+	public void testSplittedColorImage() {
+		RandomAccessibleInterval<FloatType> asFloat = Views.stack(RevampUtils.splitChannels(image));
+		RandomAccessibleInterval<FloatType> expected = colorGroup.apply(asFloat);
+		RandomAccessibleInterval<FloatType> actual = colorGroup.apply(image);
+		Utils.assertImagesEqual(actual, expected);
 	}
 }
