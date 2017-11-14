@@ -67,17 +67,22 @@ public class Segmenter {
 	}
 
 	public <T extends IntegerType<T> & NativeType<T>> Img<T> segment(RandomAccessibleInterval<?> image, T type) {
+		Objects.requireNonNull(image);
+		Objects.requireNonNull(type);
 		Img<T> result = ops.create().img(image, type);
 		segment(result, Views.extendBorder(image));
 		return result;
 	}
 
 	public void segment(RandomAccessibleInterval<? extends IntegerType<?>> out, RandomAccessible<?> image) {
+		Objects.requireNonNull(out);
+		Objects.requireNonNull(image);
 		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
 		ops.run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelClassificationOp());
 	}
 
 	public RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> predict(RandomAccessibleInterval<?> image) {
+		Objects.requireNonNull(image);
 		Img<FloatType> img = ops.create().img(RevampUtils.appendDimensionToInterval(image, 0, classNames.size()), new FloatType());
 		RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> collapsed = Views.collapse(img);
 		predict(collapsed, Views.extendBorder(image));
@@ -85,6 +90,8 @@ public class Segmenter {
 	}
 
 	public void predict(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> out, RandomAccessible<?> image) {
+		Objects.requireNonNull(out);
+		Objects.requireNonNull(image);
 		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
 		ops.run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelPredictionOp());
 	}
