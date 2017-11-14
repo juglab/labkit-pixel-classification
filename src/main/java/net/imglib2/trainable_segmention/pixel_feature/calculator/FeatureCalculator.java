@@ -39,7 +39,7 @@ public class FeatureCalculator {
 			case RGB:
 				return new ColorInputPreprocessor(settings.globals());
 			case SINGLE:
-				return new GrayInputPreprocessor();
+				return new GrayInputPreprocessor(settings.globals());
 			default:
 				throw new UnsupportedOperationException("Unsupported channel setting: " + settings().globals().channelSetting());
 		}
@@ -68,7 +68,7 @@ public class FeatureCalculator {
 	public void apply(RandomAccessible<?> input, List<RandomAccessibleInterval<FloatType>> output) {
 		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
 		List<List<RandomAccessibleInterval<FloatType>>> outputs = split(output, channels.size());
-		for (int i = 0; i < settings().globals().channelSetting().channels().size(); i++)
+		for (int i = 0; i < channels.size(); i++)
 			joiner.apply(channels.get(i), outputs.get(i));
 	}
 

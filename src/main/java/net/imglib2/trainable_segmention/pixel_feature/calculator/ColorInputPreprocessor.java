@@ -38,6 +38,8 @@ public class ColorInputPreprocessor implements InputPreprocessor {
 	}
 
 	private List<RandomAccessible<FloatType>> processARGBType(RandomAccessible<ARGBType> image) {
+		if(image.numDimensions() != globals.numDimensions())
+			throw new IllegalArgumentException("Input image must have " + globals.numDimensions() + " dimensions.");
 		return RevampUtils.splitChannels(image);
 	}
 
