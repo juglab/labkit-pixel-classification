@@ -6,6 +6,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Pair;
@@ -40,6 +41,11 @@ public class SingleSobelGradientFeature extends AbstractFeatureOp {
 	@Override
 	public List<String> attributeLabels() {
 		return Collections.singletonList("Sobel_filter_" + sigma);
+	}
+
+	@Override
+	public boolean checkGlobalSettings(GlobalSettings globals) {
+		return globals.numDimensions() == 2;
 	}
 
 	private void calculate(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {

@@ -8,6 +8,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.algorithm.gradient.PartialDerivative;
 import net.imglib2.img.Img;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
@@ -45,6 +46,11 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 	@Override
 	public void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output) {
 		calculateHessianOnChannel(input, Views.stack(output), sigma);
+	}
+
+	@Override
+	public boolean checkGlobalSettings(GlobalSettings globals) {
+		return globals.numDimensions() == 3;
 	}
 
 	private void calculateHessianOnChannel(RandomAccessible<FloatType> image, RandomAccessibleInterval<FloatType> out, double sigma) {

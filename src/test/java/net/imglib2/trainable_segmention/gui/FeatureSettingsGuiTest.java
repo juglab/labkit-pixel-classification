@@ -14,7 +14,7 @@ import javax.swing.*;
 public class FeatureSettingsGuiTest {
 
 	public static void main(String... args) throws InterruptedException {
-		Context context = new Context(OpService.class);
+		Context context = new Context();
 		GlobalSettings settings = GlobalSettings.default2dSettings();
 		FeatureSettings fs = new FeatureSettings(settings, GroupedFeatures.gauss());
 		FeatureSettingsGui gui = new FeatureSettingsGui(context, fs);

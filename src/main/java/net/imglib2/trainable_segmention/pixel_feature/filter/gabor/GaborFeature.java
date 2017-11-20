@@ -4,6 +4,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractGroupFeatur
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -40,6 +41,11 @@ public class GaborFeature extends AbstractGroupFeatureOp {
 						features.add(createGaborFeature(sigma, gamma, psi, frequency, nAngles));
 					}
 		return features;
+	}
+
+	@Override
+	public boolean checkGlobalSettings(GlobalSettings globals) {
+		return globals.numDimensions() == 2;
 	}
 
 	private FeatureSetting createGaborFeature(double sigma, double gamma, double psi, int frequency, int nAngles) {

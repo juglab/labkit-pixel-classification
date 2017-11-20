@@ -17,7 +17,6 @@ import net.imglib2.trainable_segmention.RevampUtils;
 import net.miginfocom.swing.MigLayout;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
-import org.scijava.InstantiableException;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleException;
 import org.scijava.module.process.PreprocessorPlugin;
@@ -66,7 +65,7 @@ public class FeatureSettingsGui {
 		globalsPanel = new GlobalsPanel(globals);
 		content.add(globalsPanel, "wrap");
 		content.add(new JScrollPane(list), "split 2, grow");
-		JPopupMenu menu = initMenu();
+		JPopupMenu menu = initMenu(globals);
 		JButton addButton = new JButton("add");
 		addButton.addActionListener(a ->
 			menu.show(addButton, 0, addButton.getHeight()));
@@ -110,25 +109,15 @@ public class FeatureSettingsGui {
 		}
 	}
 
-	private JPopupMenu initMenu() {
+	private JPopupMenu initMenu(GlobalSettings globals) {
 		JPopupMenu menu = new JPopupMenu();
-		List<PluginInfo<FeatureOp>> pi = context.service(PluginService.class).getPluginsOfType(FeatureOp.class);
-		for(PluginInfo<FeatureOp> pluginInfo : pi) {
-			try {
-				Class<? extends FeatureOp> choice = pluginInfo.loadClass();
-				JMenuItem item = new JMenuItem(getLabel(pluginInfo));
-				item.addActionListener(l -> addPressed(choice));
-				menu.add(item);
-			} catch (InstantiableException e) {
-				// ignore
-			}
-		}
+		Map<String, Class<? extends FeatureOp>> features = AvailableFeatures.getMap(context, globals);
+		features.forEach((label, featureClass) -> {
+			JMenuItem item = new JMenuItem(label);
+			item.addActionListener(l -> addPressed(featureClass));
+			menu.add(item);
+		});
 		return menu;
-	}
-
-	private String getLabel(PluginInfo<FeatureOp> pluginInfo) throws InstantiableException {
-		String label = pluginInfo.getLabel();
-		return label.isEmpty() ? pluginInfo.loadClass().getSimpleName() : label;
 	}
 
 	private void removePressed() {

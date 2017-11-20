@@ -5,6 +5,7 @@ import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.img.Img;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
@@ -42,6 +43,11 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 	@Override
 	public List<String> attributeLabels() {
 		return LABELS.stream().map(x -> "Hessian" + x + "_" + sigma).collect(Collectors.toList());
+	}
+
+	@Override
+	public boolean checkGlobalSettings(GlobalSettings globals) {
+		return globals.numDimensions() == 2;
 	}
 
 	private static final int HESSIAN = 0;

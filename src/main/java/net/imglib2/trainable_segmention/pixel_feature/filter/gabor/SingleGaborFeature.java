@@ -8,6 +8,7 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
@@ -69,6 +70,10 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 		return Arrays.asList("Gabor_1" + details, "Gabor_2" + details);
 	}
 
+	@Override
+	public boolean checkGlobalSettings(GlobalSettings globals) {
+		return globals.numDimensions() == 2;
+	}
 
 	private List<Img<FloatType>> initGaborKernels(double sigma, double gamma, double psi, double frequency, int nAngles) {
 		// Apply aspect ratio to the Gaussian curves

@@ -4,6 +4,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractGroupFeatur
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -18,6 +19,11 @@ public class Hessian3DFeature extends AbstractGroupFeatureOp {
 
 	@Parameter
 	private boolean absoluteValues = true;
+
+	@Override
+	public boolean checkGlobalSettings(GlobalSettings globals) {
+		return globals.numDimensions() == 3;
+	}
 
 	@Override
 	protected List<FeatureSetting> initFeatures() {

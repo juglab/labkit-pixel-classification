@@ -2,6 +2,7 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.gradient;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractSigmaGroupFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import org.scijava.plugin.Plugin;
 
 /**
@@ -17,5 +18,10 @@ public class SobelGradientFeature extends AbstractSigmaGroupFeatureOp {
 	@Override
 	protected Class<? extends FeatureOp> getSingleFeatureClass() {
 		return SingleSobelGradientFeature.class;
+	}
+
+	@Override
+	public boolean checkGlobalSettings(GlobalSettings globals) {
+		return globals.numDimensions() == 2;
 	}
 }
