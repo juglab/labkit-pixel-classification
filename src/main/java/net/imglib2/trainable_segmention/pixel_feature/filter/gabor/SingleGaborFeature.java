@@ -24,7 +24,7 @@ import java.util.function.BiConsumer;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class, label = "Single Gabor Feature 2D")
+@Plugin(type = FeatureOp.class, label = "Gabor")
 public class SingleGaborFeature extends AbstractFeatureOp {
 
 	@Parameter

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class, label = "Hessian Feature 3D")
+@Plugin(type = FeatureOp.class, label = "Hessian (Group)")
 public class Hessian3DFeature extends AbstractGroupFeatureOp {
 
 	@Parameter

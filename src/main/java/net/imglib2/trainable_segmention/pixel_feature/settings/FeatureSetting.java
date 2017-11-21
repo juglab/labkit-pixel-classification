@@ -137,7 +137,8 @@ public class FeatureSetting {
 	}
 
 	public String getName() {
-		return commandInfo.getPluginClass().getSimpleName();
+		String label = commandInfo.getLabel();
+		return label.isEmpty() ? commandInfo.getPluginClass().getSimpleName() : label;
 	}
 
 	public static FeatureSetting fromJson(JsonElement element) {

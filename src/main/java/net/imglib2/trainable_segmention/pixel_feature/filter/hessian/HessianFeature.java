@@ -8,7 +8,7 @@ import org.scijava.plugin.Plugin;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class, label = "Hessian Feature 2D")
+@Plugin(type = FeatureOp.class, label = "Hessian (Group)")
 public class HessianFeature extends AbstractSigmaGroupFeatureOp {
 
 	public HessianFeature() {

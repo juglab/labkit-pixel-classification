@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Created by arzt on 19.07.17.
  */
-@Plugin(type = FeatureOp.class)
+@Plugin(type = FeatureOp.class, label = "Gradient")
 public class SingleGradientFeature extends AbstractFeatureOp {
 
 	@Parameter

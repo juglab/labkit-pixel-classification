@@ -25,7 +25,7 @@ import static net.imglib2.trainable_segmention.RevampUtils.nCopies;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class)
+@Plugin(type = FeatureOp.class, label = "Lipschitz")
 public class SingleLipschitzFeature extends AbstractFeatureOp {
 
 	@Parameter

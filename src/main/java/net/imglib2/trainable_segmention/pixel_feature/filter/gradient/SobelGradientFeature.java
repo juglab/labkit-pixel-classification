@@ -8,7 +8,7 @@ import org.scijava.plugin.Plugin;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class, label = "Sobel Gradient Feature 2D")
+@Plugin(type = FeatureOp.class, label = "Sobel Gradient (Group)")
 public class SobelGradientFeature extends AbstractSigmaGroupFeatureOp {
 
 	public SobelGradientFeature() {

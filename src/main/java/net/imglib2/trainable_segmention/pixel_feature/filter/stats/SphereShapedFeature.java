@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class)
+@Plugin(type = FeatureOp.class, label = "Min/Max/Mean/Median/Variance (Group)")
 public class SphereShapedFeature extends AbstractGroupFeatureOp {
 
 	@Parameter(choices = {

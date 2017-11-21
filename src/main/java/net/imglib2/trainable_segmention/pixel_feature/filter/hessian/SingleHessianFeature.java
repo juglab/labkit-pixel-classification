@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class, label = "Single Hessian Feature 2D")
+@Plugin(type = FeatureOp.class, label = "Hessian")
 public class SingleHessianFeature extends AbstractFeatureOp {
 
 	@Parameter

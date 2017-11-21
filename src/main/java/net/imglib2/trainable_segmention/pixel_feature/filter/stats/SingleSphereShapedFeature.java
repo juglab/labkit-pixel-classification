@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class)
+@Plugin(type = FeatureOp.class, label = "Min/Max/Mean/Median/Variance")
 public class SingleSphereShapedFeature extends AbstractFeatureOp {
 
 	public static final String MIN = "Minimum";

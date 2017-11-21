@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class)
+@Plugin(type = FeatureOp.class, label = "Gauss")
 public class SingleGaussFeature extends AbstractFeatureOp {
 
 	@Parameter

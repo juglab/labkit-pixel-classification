@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class, label = "Gabor Feature 2D")
+@Plugin(type = FeatureOp.class, label = "Gabor (Group)")
 public class GaborFeature extends AbstractGroupFeatureOp {
 
 	@Parameter

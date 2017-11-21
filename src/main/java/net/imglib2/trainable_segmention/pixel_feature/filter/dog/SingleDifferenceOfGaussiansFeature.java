@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class)
+@Plugin(type = FeatureOp.class, label = "Difference of Gaussians")
 public class SingleDifferenceOfGaussiansFeature extends AbstractFeatureOp {
 
 	@Parameter

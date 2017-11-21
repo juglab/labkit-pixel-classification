@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class, label = "Single Hessian Feature 3D")
+@Plugin(type = FeatureOp.class, label = "Hessian")
 public class SingleHessian3DFeature extends AbstractFeatureOp {
 
 	@Parameter
