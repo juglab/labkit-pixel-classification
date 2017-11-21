@@ -18,6 +18,7 @@ import net.miginfocom.swing.MigLayout;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.module.Module;
+import org.scijava.module.ModuleCanceledException;
 import org.scijava.module.ModuleException;
 import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.*;
@@ -91,11 +92,11 @@ public class FeatureSettingsGui {
 			channelSetting = globalSettings.channelSetting();
 			numDimensions = globalSettings.numDimensions();
 			setLayout(new MigLayout("insets 0", "[]20pt[100pt]", "[][]"));
-			add(new JLabel("min sigma"));
+			add(new JLabel("Radii:"));
 			sigmasField = new JFormattedTextField(new ListOfDoubleFormatter());
 			sigmasField.setValue(globalSettings.sigmas());
 			add(sigmasField, "grow, wrap");
-			add(new JLabel("membrane thickness"));
+			add(new JLabel("Membrane Thickness:"));
 			thicknessField = new JFormattedTextField(globalSettings.membraneThickness());
 			add(thicknessField, "grow, wrap");
 		}
@@ -261,6 +262,8 @@ public class FeatureSettingsGui {
 				Module module = op.asModule(globalSetting);
 				harvester.harvest(module);
 				return FeatureSetting.fromModule(module);
+			} catch (ModuleCanceledException e) {
+				return op;
 			} catch (ModuleException e) {
 				throw new RuntimeException(e);
 			}
