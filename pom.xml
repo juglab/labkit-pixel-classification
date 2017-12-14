@@ -50,7 +50,8 @@
 	</contributors>
 
 	<ciManagement>
-		<url>example.com</url>
+		<system>Travis CI</system>
+		<url>https://travis-ci.org/maarzt/imglib2-trainable-segmentation</url>
 	</ciManagement>
 
 	<mailingLists>
@@ -73,7 +74,7 @@
 	</issueManagement>
 
 	<properties>
-		<package-name>net.imglib2.algorithm</package-name>
+		<package-name>net.imglib2.trainable_segmention</package-name>
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>Matthias Arzt</license.copyrightOwners>
 		<enforcer.skip>true</enforcer.skip>
