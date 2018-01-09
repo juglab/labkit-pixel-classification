@@ -77,8 +77,6 @@
 		<package-name>net.imglib2.trainable_segmention</package-name>
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>Matthias Arzt</license.copyrightOwners>
-		<enforcer.skip>true</enforcer.skip>
-
 		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
 		<releaseProfiles>deploy-to-imagej</releaseProfiles>
 	</properties>
@@ -134,10 +132,16 @@
 			<artifactId>scijava-ui-swing</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>Trainable_Segmentation</artifactId>
+		</dependency>
+		<!-- TODO: replace dependency to Trainable_Segmentation with fastRandomForest
+		<dependency>
 			<groupId>hr.irb.fastRandomForest</groupId>
 			<artifactId>fastRandomForest</artifactId>
 			<version>r49</version>
 		</dependency>
+		-->
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>net.imglib2</groupId>
@@ -156,11 +160,6 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-vistools</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>sc.fiji</groupId>
-			<artifactId>Trainable_Segmentation</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
