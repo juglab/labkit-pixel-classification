@@ -26,7 +26,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
- * {@linke Trainer} simplifies training a {@link Segmenter}
+ * {@link Trainer} simplifies training a {@link Segmenter}
  *
  * @author Matthias Arzt
  */

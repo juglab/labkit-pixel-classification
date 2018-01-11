@@ -21,7 +21,7 @@ import java.util.function.Function;
  * Stores settings of a feature like class and parameter values. Responsible for
  * serialization, and creating an instance of a feature.
  *
- * @autor Matthias Arzt
+ * @author Matthias Arzt
  */
 public class FeatureSetting {
 
