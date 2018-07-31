@@ -13,15 +13,12 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
-import net.imglib2.trainable_segmention.RevampUtils;
 import net.miginfocom.swing.MigLayout;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleCanceledException;
 import org.scijava.module.ModuleException;
-import org.scijava.module.process.PreprocessorPlugin;
-import org.scijava.plugin.*;
 import org.scijava.ui.swing.widget.SwingInputHarvester;
 import org.scijava.widget.InputHarvester;
 
@@ -254,7 +251,8 @@ public class FeatureSettingsGui {
 		private final InputHarvester harvester;
 
 		FeatureSettingsDialog(Context context) {
-			harvester = getHarvester(context);
+			harvester = new SwingInputHarvester();
+			context.inject(harvester);
 		}
 
 		FeatureSetting show(FeatureSetting op, GlobalSettings globalSetting) {
@@ -268,13 +266,6 @@ public class FeatureSettingsGui {
 				throw new RuntimeException(e);
 			}
 		}
-	}
-
-	private static InputHarvester<JPanel, JPanel> getHarvester(Context context) {
-		List<InputHarvester> harvester1 = RevampUtils.filterForClass(InputHarvester.class,
-				context.service(PluginService.class).createInstancesOfType(PreprocessorPlugin.class));
-		List<SwingInputHarvester> swing = RevampUtils.filterForClass(SwingInputHarvester.class, harvester1);
-		return swing.isEmpty() ? harvester1.get(0) : swing.get(0);
 	}
 
 	private static class ListOfDoubleFormatter extends JFormattedTextField.AbstractFormatter {
