@@ -127,7 +127,7 @@ public class Utils {
 
 	public static <A extends Type<A>>
 	void assertImagesEqual(final RandomAccessibleInterval<? extends A> a, final RandomAccessibleInterval<? extends A> b) {
-		assertTrue(Intervals.equals(a, b));
+		assertIntervalEquals(a, b);
 		System.out.println("check picture content.");
 		IntervalView<? extends Pair<? extends A, ? extends A>> pairs = Views.interval(Views.pair(a, b), b);
 		Cursor<? extends Pair<? extends A, ? extends A>> cursor = pairs.cursor();
@@ -139,6 +139,14 @@ public class Utils {
 						positionString(cursor) + ", expected: "
 						+ p.getA() + " actual: " + p.getB());
 		}
+	}
+
+	public static < A extends Type< A > > void assertIntervalEquals(
+			Interval expected,
+			Interval actual)
+	{
+		if(!Intervals.equals(expected, actual))
+			fail("Intervals differ, expected = " + showInterval(expected) + ", actual = " + showInterval(actual));
 	}
 
 	public static void assertImagesEqual(final ImagePlus expected, final RandomAccessibleInterval<FloatType> actual) {
