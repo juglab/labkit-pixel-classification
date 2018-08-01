@@ -39,6 +39,8 @@ public class FeatureCalculator {
 			return new ColorInputPreprocessor(settings.globals());
 		if(ChannelSetting.SINGLE.equals(channelSetting))
 			return new GrayInputPreprocessor(settings.globals());
+		if(channelSetting.isMultiple())
+			return new MultiChannelInputPreprocessor(settings.globals());
 		throw new UnsupportedOperationException("Unsupported channel setting: " + settings().globals().channelSetting());
 	}
 
