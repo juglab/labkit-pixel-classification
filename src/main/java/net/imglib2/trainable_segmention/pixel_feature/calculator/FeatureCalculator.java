@@ -35,14 +35,11 @@ public class FeatureCalculator {
 	}
 
 	private InputPreprocessor initPreprocessor(ChannelSetting channelSetting) {
-		switch (channelSetting) {
-			case RGB:
-				return new ColorInputPreprocessor(settings.globals());
-			case SINGLE:
-				return new GrayInputPreprocessor(settings.globals());
-			default:
-				throw new UnsupportedOperationException("Unsupported channel setting: " + settings().globals().channelSetting());
-		}
+		if(ChannelSetting.RGB.equals(channelSetting))
+			return new ColorInputPreprocessor(settings.globals());
+		if(ChannelSetting.SINGLE.equals(channelSetting))
+			return new GrayInputPreprocessor(settings.globals());
+		throw new UnsupportedOperationException("Unsupported channel setting: " + settings().globals().channelSetting());
 	}
 
 	public OpEnvironment ops() {
