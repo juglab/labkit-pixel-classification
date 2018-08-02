@@ -111,20 +111,6 @@ public class Utils {
 		IJ.save(image, url.getPath());
 	}
 
-	public static <A extends IntegerType<A>, B extends IntegerType<B>>
-	void assertImagesEqual(final IterableInterval<A> a, final RandomAccessibleInterval<B> b) {
-		assertTrue(Intervals.equals(a, b));
-		System.out.println("check picture content.");
-		Cursor< A > aCursor = a.localizingCursor();
-		RandomAccess< B > bRandomAccess = b.randomAccess();
-		while ( aCursor.hasNext())
-		{
-			aCursor.fwd();
-			bRandomAccess.setPosition(aCursor);
-			assertEquals( bRandomAccess.get().getInteger(), aCursor.get().getInteger());
-		}
-	}
-
 	public static <A extends Type<A>>
 	void assertImagesEqual(final RandomAccessibleInterval<? extends A> a, final RandomAccessibleInterval<? extends A> b) {
 		assertIntervalEquals(a, b);
