@@ -17,7 +17,7 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.ByteType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
@@ -64,8 +64,8 @@ public class Segmenter {
 
 	public FeatureSettings settings() { return features.settings(); }
 
-	public Img<ByteType> segment(RandomAccessibleInterval<?> image) {
-		return segment(image, new ByteType());
+	public Img<UnsignedByteType> segment(RandomAccessibleInterval<?> image) {
+		return segment(image, new UnsignedByteType());
 	}
 
 	public <T extends IntegerType<T> & NativeType<T>> Img<T> segment(RandomAccessibleInterval<?> image, T type) {
@@ -193,7 +193,7 @@ public class Segmenter {
 
 		@Override
 		public IntegerType<?> createOutput(Composite<? extends RealType<?>> input) {
-			return new ByteType();
+			return new UnsignedByteType();
 		}
 
 		@Override
