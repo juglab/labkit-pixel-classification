@@ -81,6 +81,9 @@ public class FeatureCalculator {
 		return result;
 	}
 
+	public Interval outputIntervalFromInput(RandomAccessibleInterval<?> image) {
+		return preprocessor.outputIntervalFromInput(image);
+	}
 
 	// -- Helper methods --
 

@@ -21,7 +21,9 @@ import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
+import net.imglib2.view.composite.CompositeIntervalView;
 import net.imglib2.view.composite.GenericComposite;
+import net.imglib2.view.composite.RealComposite;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -69,7 +71,8 @@ public class Segmenter {
 	public <T extends IntegerType<T> & NativeType<T>> Img<T> segment(RandomAccessibleInterval<?> image, T type) {
 		Objects.requireNonNull(image);
 		Objects.requireNonNull(type);
-		Img<T> result = ops.create().img(image, type);
+		Interval outputInterval = features.outputIntervalFromInput(image);
+		Img<T> result = ops.create().img(outputInterval, type);
 		segment(result, Views.extendBorder(image));
 		return result;
 	}
@@ -83,8 +86,11 @@ public class Segmenter {
 
 	public RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> predict(RandomAccessibleInterval<?> image) {
 		Objects.requireNonNull(image);
-		Img<FloatType> img = ops.create().img(RevampUtils.appendDimensionToInterval(image, 0, classNames.size()), new FloatType());
-		RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> collapsed = Views.collapse(img);
+		Interval outputInterval = features.outputIntervalFromInput(image);
+		Img<FloatType> img = ops.create().img(RevampUtils.appendDimensionToInterval(
+				outputInterval, 0, classNames.size()), new FloatType());
+		CompositeIntervalView< FloatType, RealComposite< FloatType > >
+				collapsed = Views.collapseReal(img);
 		predict(collapsed, Views.extendBorder(image));
 		return collapsed;
 	}
