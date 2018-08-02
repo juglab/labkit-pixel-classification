@@ -76,6 +76,8 @@ public class FeatureCalculator {
 	}
 
 	public RandomAccessibleInterval<FloatType> apply(RandomAccessible<?> extendedImage, Interval interval) {
+		if(interval.numDimensions() != settings().globals().numDimensions())
+			throw new IllegalArgumentException("Wrong dimension of the output interval.");
 		Img<FloatType> result = ops().create().img(RevampUtils.appendDimensionToInterval(interval, 0, count() - 1), new FloatType());
 		apply(extendedImage, RevampUtils.slices(result));
 		return result;
