@@ -1,5 +1,6 @@
 package net.imglib2.trainable_segmention;
 
+import net.imagej.ImgPlus;
 import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.OpService;
 import net.imglib2.*;
@@ -13,6 +14,7 @@ import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.IntegerType;
+import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.IntType;
@@ -294,5 +296,24 @@ public class RevampUtils {
 
 	private interface IntToIntFunction {
 		int apply(int value);
+	}
+
+	public static Interval intervalRemoveDimension(Interval interval) {
+		return intervalRemoveDimension(interval, interval.numDimensions() - 1);
+	}
+
+	public static Interval intervalRemoveDimension( Interval interval,
+			int d)
+	{
+		long[] min = removeElement(Intervals.minAsLongArray(interval), d);
+		long[] max = removeElement(Intervals.maxAsLongArray(interval), d);
+		return new FinalInterval(min, max);
+	}
+
+	private static long[] removeElement(long[] values, int d) {
+		long[] result = new long[values.length - 1];
+		System.arraycopy(values, 0, result, 0, d);
+		System.arraycopy(values, d + 1, result, d, values.length - d - 1);
+		return result;
 	}
 }

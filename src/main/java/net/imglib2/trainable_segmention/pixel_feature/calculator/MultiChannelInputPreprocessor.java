@@ -5,6 +5,7 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converters;
+import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -61,8 +62,6 @@ public class MultiChannelInputPreprocessor implements InputPreprocessor {
 		if(image.numDimensions() != n + 1)
 			throw new UnsupportedOperationException("Input image must have " +
 					n + " plus one color channel.");
-		long[] min = Arrays.copyOf(Intervals.minAsLongArray(image), n);
-		long[] max = Arrays.copyOf(Intervals.maxAsLongArray(image), n);
-		return new FinalInterval(min, max);
+		return RevampUtils.intervalRemoveDimension(image);
 	}
 }

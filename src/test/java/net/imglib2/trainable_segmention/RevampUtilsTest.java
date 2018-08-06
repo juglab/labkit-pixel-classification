@@ -8,11 +8,13 @@ import net.imglib2.img.Img;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Intervals;
 import org.junit.Test;
 
 import java.util.function.BiConsumer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Matthias Arzt
@@ -59,4 +61,10 @@ public class RevampUtilsTest {
 				(in, out) -> { in.setOne(); out.setZero(); }, new FloatType());
 	}
 
+	@Test
+	public void testIntervalRemoveDimension() {
+		Interval input = Intervals.createMinMax(1, 2, 3, 4, 5, 6, 7, 8);
+		Interval result = RevampUtils.intervalRemoveDimension( input, 1 )	;
+		assertTrue(Intervals.equals( Intervals.createMinMax(1,3,4,5,7,8), result ));
+	}
 }
