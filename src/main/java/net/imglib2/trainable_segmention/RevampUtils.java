@@ -10,6 +10,7 @@ import net.imglib2.converter.Converters;
 import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.basictypeaccess.DoubleAccess;
 import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.ComplexType;
@@ -18,6 +19,7 @@ import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.IntType;
+import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
@@ -284,6 +286,21 @@ public class RevampUtils {
 		if(tClass.isInstance(input.randomAccess().get()))
 			return uncheckedCast(input);
 		throw new IllegalArgumentException("RandomAccessible input must be of type " + tClass.getName());
+	}
+
+	public static RandomAccessibleInterval<DoubleType> wrapAsDoubleType(RandomAccessibleInterval<? extends RealType<?>> output) {
+		return Converters.convert(output,
+					sampler -> new DoubleType(new DoubleAccess() {
+						@Override
+						public double getValue(int i) {
+							return sampler.get().getRealDouble();
+						}
+
+						@Override
+						public void setValue(int i, double v) {
+							sampler.get().setReal(v);
+						}
+					}));
 	}
 
 	public interface RunnableWithException {
