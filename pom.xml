@@ -79,6 +79,7 @@
 		<license.copyrightOwners>Matthias Arzt</license.copyrightOwners>
 		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
 		<releaseProfiles>deploy-to-imagej</releaseProfiles>
+		<imglib2-algorithm.version>0.9.1-SNAPSHOT</imglib2-algorithm.version>
 	</properties>
 
 	<repositories>
