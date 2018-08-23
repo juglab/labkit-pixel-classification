@@ -7,6 +7,7 @@ import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.Hessian3DFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
@@ -50,6 +51,11 @@ public class FeatureStack3DTest {
 	@Test
 	public void testHessian() {
 		testFeature(FeatureStack3D.HESSIAN, Hessian3DFeature.class);
+	}
+
+	@Test
+	public void testGaussian() {
+		testFeature(60, FeatureStack3D.GAUSSIAN, new FeatureSetting(GaussFeature.class));
 	}
 
 	@Test
