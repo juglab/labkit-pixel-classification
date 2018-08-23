@@ -9,8 +9,11 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.DerivativesFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.GradientFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.Hessian3DFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.laplacian.LaplacianFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.structure.StructureFeature3D;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -56,6 +59,16 @@ public class FeatureStack3DTest {
 	}
 
 	@Test
+	public void testDerivatives() {
+		testFeature(FeatureStack3D.DERIVATIVES, DerivativesFeature.class);
+	}
+
+	@Test
+	public void testLaplacian() {
+		testFeature(FeatureStack3D.LAPLACIAN, LaplacianFeature.class);
+	}
+
+	@Test
 	public void testGaussian() {
 		testFeature(60, FeatureStack3D.GAUSSIAN, new FeatureSetting(GaussFeature.class, "scaleFactor", 1.0));
 	}
@@ -86,8 +99,18 @@ public class FeatureStack3DTest {
 	}
 
 	@Test
+	public void testEdge() {
+		testFeature( 50, FeatureStack3D.EDGES, FeatureSetting.fromClass(GradientFeature.class) );
+	}
+
+	@Test
 	public void testDOG() {
 		testFeatureIgnoreAttributes( 50, FeatureStack3D.DOG, new FeatureSetting(DifferenceOfGaussiansFeature.class, "scaleFactor", 1.0));
+	}
+
+	@Test
+	public void testStructure() {
+		testFeature( 50, FeatureStack3D.STRUCTURE, FeatureSetting.fromClass(StructureFeature3D.class) );
 	}
 
 	private void testFeature(int featureID, Class<? extends FeatureOp> featureClass) {
