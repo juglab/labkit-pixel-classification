@@ -14,9 +14,12 @@ import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.loops.LoopBuilder;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ComplexType;
-import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -24,8 +27,10 @@ import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Pair;
+import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
+import org.junit.Assert;
 import org.scijava.Context;
 import org.scijava.script.ScriptService;
 
@@ -150,17 +155,9 @@ public class Utils {
 		return "(" + joiner + ")";
 	}
 
-	public static <T extends NumericType<T>> void showDifference(Img<T> expected, Img<T> actual) {
-		showDifference((RandomAccessibleInterval<T>) expected, actual);
-	}
-
 	public static <T extends NumericType<T>> void showDifference(RandomAccessibleInterval<T> expectedImage, RandomAccessibleInterval<T> resultImage) {
 		assertTrue(Intervals.equals(expectedImage, resultImage));
-		showDifference(Views.iterable(expectedImage), Views.iterable(resultImage));
-	}
-
-	public static <T extends NumericType<T>> void showDifference(IterableInterval<T> expectedImage, IterableInterval<T> resultImage) {
-		show(ops().math().subtract(expectedImage, resultImage));
+		ImageJFunctions.show(tile(expectedImage, resultImage, subtract(expectedImage, resultImage)));
 	}
 
 	public static void show(Object... images) {
@@ -272,9 +269,9 @@ public class Utils {
 		return result;
 	}
 
-	public static RandomAccessibleInterval<FloatType> subtract(RandomAccessibleInterval<FloatType> expected, RandomAccessibleInterval<FloatType> result) {
-		RandomAccessibleInterval<Pair<FloatType, FloatType>> interval = Views.interval(Views.pair(expected, result), result);
-		return Converters.convert(interval, (p, out) -> out.setReal(p.getA().get() - p.getB().get()), new FloatType());
+	public static <T extends NumericType<T>> RandomAccessibleInterval<T> subtract(RandomAccessibleInterval<T> expected, RandomAccessibleInterval<T> result) {
+		RandomAccessibleInterval<Pair<T, T>> interval = Views.interval(Views.pair(expected, result), result);
+		return Converters.convert(interval, (p, out) -> { out.set(p.getA()); out.sub(p.getB());}, Util.getTypeFromInterval(expected).createVariable());
 	}
 
 	public static RandomAccessibleInterval<IntType> toInt(RandomAccessibleInterval<FloatType> input) {
@@ -294,6 +291,21 @@ public class Utils {
 				processor.setf(x, y, ra.get().get());
 			}
 		return processor;
+	}
+
+	private static <T extends Type< T > > RandomAccessibleInterval<T> tile(RandomAccessibleInterval<T>... imgs) {
+		long[] size = Intervals.dimensionsAsLongArray(imgs[0]);
+		final T type = Util.getTypeFromInterval(imgs[0]);
+		long[] outputSize = size.clone();
+		outputSize[0] *= imgs.length;
+		Img<T> out = new ArrayImgFactory<>((NativeType) type).create(outputSize);
+		for (int i = 0; i < imgs.length; i++)
+			copy(imgs[i], Views.interval(out, Intervals.translate(new FinalInterval(size), size[0] * i, 0)));
+		return out;
+	}
+
+	private static <T extends Type<T>> void copy(RandomAccessibleInterval<T> src, RandomAccessibleInterval<T> target) {
+		LoopBuilder.setImages(src, target).forEachPixel((i, o) -> o.set(i));
 	}
 
 	static class StopWatch {
