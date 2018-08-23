@@ -55,7 +55,7 @@ public class FeatureStack3DTest {
 
 	@Test
 	public void testGaussian() {
-		testFeature(60, FeatureStack3D.GAUSSIAN, new FeatureSetting(GaussFeature.class));
+		testFeature(60, FeatureStack3D.GAUSSIAN, new FeatureSetting(GaussFeature.class, "scaleFactor", 1.0));
 	}
 
 	@Test
