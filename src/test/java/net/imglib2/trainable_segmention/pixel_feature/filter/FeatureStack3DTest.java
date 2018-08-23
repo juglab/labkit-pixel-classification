@@ -7,7 +7,9 @@ import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
+import net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.GradientFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.Hessian3DFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
@@ -83,6 +85,11 @@ public class FeatureStack3DTest {
 		testFeature(50, FeatureStack3D.VARIANCE, GroupedFeatures.variance());
 	}
 
+	@Test
+	public void testDOG() {
+		testFeatureIgnoreAttributes( 50, FeatureStack3D.DOG, new FeatureSetting(DifferenceOfGaussiansFeature.class, "scaleFactor", 1.0));
+	}
+
 	private void testFeature(int featureID, Class<? extends FeatureOp> featureClass) {
 		final FeatureSetting featureSetting = FeatureSetting.fromClass(featureClass);
 		testFeature(50, featureID, featureSetting);
@@ -92,6 +99,12 @@ public class FeatureStack3DTest {
 		FeatureStackArray fsa = calculateFeatureStack(featureID);
 		FeatureCalculator group = setupFeatureCalculator(featureSetting);
 		testAttributes(fsa, group);
+		testFeatures(expectedPsnr, fsa, group);
+	}
+
+	private void testFeatureIgnoreAttributes(int expectedPsnr, int featureID, FeatureSetting featureSetting) {
+		FeatureStackArray fsa = calculateFeatureStack(featureID);
+		FeatureCalculator group = setupFeatureCalculator(featureSetting);
 		testFeatures(expectedPsnr, fsa, group);
 	}
 
