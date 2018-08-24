@@ -23,7 +23,7 @@ import java.util.stream.IntStream;
 public class SingleLaplacianFeature extends AbstractFeatureOp {
 
 	@Parameter
-	private double sigma;
+	private double sigma = 1.0;
 
 	@Override
 	public int count() {

@@ -43,7 +43,7 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 
 	@Override
 	public List<String> attributeLabels() {
-		return Stream.of("largest", "middle", "smallest").map(x -> "Hessian_" + x + "_" + sigma + "_true")
+		return Stream.of("largest", "middle", "smallest").map(x -> "Hessian_" + x + "_" + sigma + "_" + absoluteValues)
 				.collect(Collectors.toList());
 	}
 

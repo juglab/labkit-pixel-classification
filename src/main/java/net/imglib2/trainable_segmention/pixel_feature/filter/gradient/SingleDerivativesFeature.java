@@ -36,11 +36,6 @@ public class SingleDerivativesFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public boolean checkGlobalSettings(GlobalSettings globals) {
-		return globals.numDimensions() == 3;
-	}
-
-	@Override
 	public void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output) {
 		Kernel1D kernel = DerivedNormalDistribution.derivedGaussKernel( sigma, order );
 		Kernel1D[] kernels = new Kernel1D[ globalSettings().numDimensions() ];

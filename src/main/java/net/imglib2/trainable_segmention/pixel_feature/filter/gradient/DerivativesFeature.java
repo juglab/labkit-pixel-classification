@@ -21,11 +21,6 @@ public class DerivativesFeature extends AbstractGroupFeatureOp {
 	@Parameter
 	private int maxOrder = 5;
 
-	@Override
-	public boolean checkGlobalSettings(GlobalSettings globals) {
-		return globals.numDimensions() == 3;
-	}
-
 	protected List<FeatureSetting> initFeatures() {
 		return globalSettings().sigmas().stream()
 				.flatMap(sigma -> initFeaturesForSigma(sigma))
