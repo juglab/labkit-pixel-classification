@@ -6,6 +6,7 @@ import ij.plugin.filter.RankFilters;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.algorithm.dog.DifferenceOfGaussian;
 import net.imglib2.algorithm.morphology.Dilation;
 import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.img.ImagePlusAdapter;
@@ -13,6 +14,8 @@ import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
+import net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -57,13 +60,21 @@ public class FeatureStackTest {
 
 	@Test
 	public void testGaussStack() {
-		testFeature(40, FeatureStack.GAUSSIAN, GroupedFeatures.gauss());
+		testFeatureIgnoreAttributes(40, FeatureStack.GAUSSIAN, new FeatureSetting(GaussFeature.class, "scaleFactor", 0.4));
 	}
 
 	private void testFeature(float expectedPsnr, int oldFeatureId, FeatureSetting newFeature) {
+		testFeatureIgnoreAttributes(expectedPsnr, oldFeatureId, newFeature);
+		testAttributes(oldFeatureId, newFeature);
+	}
+
+	private void testFeatureIgnoreAttributes(float expectedPsnr, int oldFeatureId, FeatureSetting newFeature) {
 		RandomAccessibleInterval<FloatType> expected = generateSingleFeature(bridgeImage, oldFeatureId);
 		RandomAccessibleInterval<FloatType> result = createStack(bridgeImg, newFeature);
 		Utils.assertImagesEqual(expectedPsnr, expected, result);
+	}
+
+	private void testAttributes(int oldFeatureId, FeatureSetting newFeature) {
 		List<String> expectedLabels = oldAttributes(oldFeatureId);
 		List<String> actualLabels = getAttributeLabels(newFeature);
 		assertEquals(expectedLabels, actualLabels);
@@ -88,9 +99,13 @@ public class FeatureStackTest {
 		testFeature(40, FeatureStack.HESSIAN, GroupedFeatures.hessian());
 	}
 
+	@Ignore
 	@Test
 	public void testDifferenceOfGaussian() {
-		testFeature(40, FeatureStack.DOG, GroupedFeatures.differenceOfGaussians());
+		// NB: DifferenceOfGaussians is implemented such that it is compatible with FeatureStack3D
+		// There can not be a version that fits both, FeatureStack and FeatureStack3D.
+		// This is because they sort and name difference of gaussians differently.
+		testFeature(40, FeatureStack.DOG, new FeatureSetting(DifferenceOfGaussiansFeature.class, "scaleFactor", 0.4));
 	}
 
 	@Test
