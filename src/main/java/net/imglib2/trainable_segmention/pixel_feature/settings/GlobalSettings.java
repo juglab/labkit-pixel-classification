@@ -2,6 +2,7 @@ package net.imglib2.trainable_segmention.pixel_feature.settings;
 
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Matthias Arzt
@@ -14,17 +15,22 @@ public final class GlobalSettings {
 
 	private final List<Double> radii;
 
-	private final double membraneThickness;
+	private final double scaleFactor;
 
-	private GlobalSettings(ChannelSetting channelSetting, int numDimensions, List<Double> radii, double membraneThickness) {
+	private final double membraneThickness;
+	private List<Double> sigmas;
+
+	private GlobalSettings(ChannelSetting channelSetting, int numDimensions, List<Double> radii, double scaleFactor, double membraneThickness) {
 		this.channelSetting = channelSetting;
 		this.numDimensions = numDimensions;
 		this.radii = Collections.unmodifiableList(new ArrayList<>(radii));
 		this.membraneThickness = membraneThickness;
+		this.scaleFactor = scaleFactor;
+		this.sigmas = Collections.unmodifiableList(this.radii.stream().map(x -> x * scaleFactor).collect(Collectors.toList()));
 	}
 
 	public GlobalSettings(GlobalSettings globalSettings) {
-		this(globalSettings.channelSetting(), globalSettings.numDimensions(), globalSettings.radii(), globalSettings.membraneThickness());
+		this(globalSettings.channelSetting(), globalSettings.numDimensions(), globalSettings.radii(), globalSettings.scaleFactor(), globalSettings.membraneThickness());
 	}
 
 	public static Builder default2d() {
@@ -55,6 +61,14 @@ public final class GlobalSettings {
 		return radii;
 	}
 
+	public List<Double> sigmas() {
+		return sigmas;
+	}
+
+	private double scaleFactor() {
+		return scaleFactor;
+	}
+
 	public double membraneThickness() {
 		return membraneThickness;
 	}
@@ -80,6 +94,7 @@ public final class GlobalSettings {
 		private int numDimensions = 3;
 		private List<Double> radii = Arrays.asList(1.0, 2.0, 4.0, 8.0);
 		private double membraneThickness = 1;
+		private double scaleFactor = 1;
 
 		private Builder() {
 
@@ -104,11 +119,6 @@ public final class GlobalSettings {
 			return radii(Arrays.asList(radii));
 		}
 
-		public Builder membraneThickness(double membraneThickness) {
-			this.membraneThickness = membraneThickness;
-			return this;
-		}
-
 		public Builder radiiRange(double minRadius, double maxRadius) {
 			List<Double> radii = new ArrayList<>();
 			for(double radius = minRadius; radius <= maxRadius; radius *= 2.0)
@@ -117,8 +127,18 @@ public final class GlobalSettings {
 			return this;
 		}
 
+		public Builder scaleFactor(double scaleFactor) {
+			this.scaleFactor = scaleFactor;
+			return this;
+		}
+
+		public Builder membraneThickness(double membraneThickness) {
+			this.membraneThickness = membraneThickness;
+			return this;
+		}
+
 		public GlobalSettings build() {
-			return new GlobalSettings(channelSetting, numDimensions, radii, membraneThickness);
+			return new GlobalSettings(channelSetting, numDimensions, radii, scaleFactor, membraneThickness);
 		}
 	}
 }
