@@ -35,7 +35,7 @@ public class FeatureCalculatorTest {
 
 	@Test
 	public void test1() {
-		GlobalSettings globalSettings = GlobalSettings.default2dSettings();
+		GlobalSettings globalSettings = GlobalSettings.default2d().build();
 		FeatureSettings settings = new FeatureSettings(globalSettings, add_42, add_12);
 		FeatureCalculator calculator = new FeatureCalculator(ops, settings);
 		Img< FloatType > input = ArrayImgs.floats(new float[] { 2 }, 1, 1);
@@ -45,8 +45,7 @@ public class FeatureCalculatorTest {
 
 	@Test
 	public void test2() {
-		GlobalSettings globalSettings = new GlobalSettings(ChannelSetting.multiple(2),
-				2, Collections.singletonList(1.0), 1);
+		GlobalSettings globalSettings = GlobalSettings.default2d().channels(ChannelSetting.multiple(2)).sigmas(1.0).build();
 		FeatureSettings settings = new FeatureSettings(globalSettings, add_42, add_12);
 		FeatureCalculator calculator = new FeatureCalculator(ops, settings);
 		Img< FloatType > input = ArrayImgs.floats(new float[] { 2, 3 }, 1, 1, 2);

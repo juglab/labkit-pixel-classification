@@ -6,9 +6,7 @@ import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
-import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -27,11 +25,9 @@ import static org.junit.Assert.assertEquals;
  */
 public class ColorFeatureGroupTest {
 
-	private final GlobalSettings colorSettings = new GlobalSettings(ChannelSetting.RGB,
-			2, Arrays.asList(8.0), 1.0);
+	private final GlobalSettings colorSettings = GlobalSettings.default2d().channels(ChannelSetting.RGB).build();
 
-	private final GlobalSettings graySettings = new GlobalSettings(ChannelSetting.SINGLE,
-			2, colorSettings.sigmas(), colorSettings.membraneThickness());
+	private final GlobalSettings graySettings = GlobalSettings.default2d().channels(ChannelSetting.SINGLE).build();
 
 	private final FeatureCalculator colorGroup = new FeatureCalculator(Utils.ops(),
 			new FeatureSettings(colorSettings, SingleFeatures.gauss(8.0)));

@@ -99,11 +99,12 @@ public class FeatureSettingsGui {
 		}
 
 		GlobalSettings get() {
-			return new GlobalSettings(
-					channelSetting,
-					numDimensions, (List<Double>) sigmasField.getValue(),
-					(Double) thicknessField.getValue()
-			);
+			return GlobalSettings.default2d()
+					.channels(channelSetting)
+					.dimensions(numDimensions)
+					.sigmas((List<Double>) sigmasField.getValue())
+					.membraneThickness((Double) thicknessField.getValue())
+					.build();
 		}
 	}
 
@@ -176,7 +177,7 @@ public class FeatureSettingsGui {
 
 	public static void main(String... args) {
 		Context context = new Context();
-		System.out.println(FeatureSettingsGui.show(context, new FeatureSettings(GlobalSettings.default2dSettings())));
+		System.out.println(FeatureSettingsGui.show(context, new FeatureSettings(GlobalSettings.default2d().build())));
 		System.out.println("finished");
 	}
 

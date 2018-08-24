@@ -23,8 +23,6 @@ import net.imglib2.view.composite.Composite;
 import org.junit.Test;
 import org.scijava.Context;
 
-import java.util.Collections;
-
 public class SegmenterTestMultiChannel {
 
 	private OpEnvironment ops = new Context().service(OpService.class);
@@ -63,8 +61,9 @@ public class SegmenterTestMultiChannel {
 	}
 
 	private Segmenter trainSegmenter() {
-		GlobalSettings globalSetting = new GlobalSettings(ChannelSetting.multiple(2),
-				2, Collections.singletonList(1.0), 1.0);
+		GlobalSettings globalSetting = GlobalSettings.default2d()
+				.channels(ChannelSetting.multiple(2))
+				.build();
 		FeatureSettings features = new FeatureSettings(globalSetting,
 				SingleFeatures.identity());
 		return Trainer.train(ops, trainingImage, labeling, features);

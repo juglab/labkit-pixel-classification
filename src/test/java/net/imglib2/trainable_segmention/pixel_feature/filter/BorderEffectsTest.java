@@ -75,7 +75,7 @@ public class BorderEffectsTest {
 	public void testVariance() { testFeature(GroupedFeatures.variance()); }
 
 	public void testFeature(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(feature));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays.asList(feature));
 		FeatureCalculator group = new FeatureCalculator(Utils.ops(), featureSettings);
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
 		RandomAccessibleInterval<FloatType> result = calculateResult(group);
@@ -83,7 +83,7 @@ public class BorderEffectsTest {
 	}
 
 	public void showDifference(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(feature));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays.asList(feature));
 		FeatureCalculator group = new FeatureCalculator(Utils.ops(), featureSettings);
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
 		RandomAccessibleInterval<FloatType> result = calculateResult(group);
@@ -104,7 +104,7 @@ public class BorderEffectsTest {
 	}
 
 	public void showPsnrs() {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(), GroupedFeatures.differenceOfGaussians(), GroupedFeatures.sobelGradient(), GroupedFeatures.lipschitz(50), GroupedFeatures.min(), GroupedFeatures.max(), GroupedFeatures.mean(), GroupedFeatures.median(), GroupedFeatures.variance()));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays.asList(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(), GroupedFeatures.differenceOfGaussians(), GroupedFeatures.sobelGradient(), GroupedFeatures.lipschitz(50), GroupedFeatures.min(), GroupedFeatures.max(), GroupedFeatures.mean(), GroupedFeatures.median(), GroupedFeatures.variance()));
 		FeatureCalculator feature = new FeatureCalculator(Utils.ops(), featureSettings);
 		RandomAccessibleInterval<FloatType> allResults = calculateResult(feature);
 		RandomAccessibleInterval<FloatType> allExpected = calculateExpected(feature);

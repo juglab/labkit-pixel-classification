@@ -156,7 +156,7 @@ public class FeatureStack3DTest {
 	}
 
 	private FeatureCalculator setupFeatureCalculator(FeatureSetting featureSetting) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3dSettings(), Arrays.asList(SingleFeatures.identity(), featureSetting));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3d().build(), Arrays.asList(SingleFeatures.identity(), featureSetting));
 		return new FeatureCalculator(Utils.ops(), featureSettings);
 	}
 

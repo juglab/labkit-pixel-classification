@@ -6,7 +6,6 @@ import ij.plugin.filter.RankFilters;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.dog.DifferenceOfGaussian;
 import net.imglib2.algorithm.morphology.Dilation;
 import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.img.ImagePlusAdapter;
@@ -43,7 +42,7 @@ public class FeatureStackTest {
 	private static Img<FloatType> bridgeImg = ImagePlusAdapter.convertFloat(bridgeImage);
 
 	public static RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(SingleFeatures.identity(), feature));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays.asList(SingleFeatures.identity(), feature));
 		return new FeatureCalculator(Utils.ops(), featureSettings).apply(image);
 	}
 
@@ -90,7 +89,7 @@ public class FeatureStackTest {
 	}
 
 	public static List<String> getAttributeLabels(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(SingleFeatures.identity(), feature));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays.asList(SingleFeatures.identity(), feature));
 		return new FeatureCalculator(Utils.ops(), featureSettings).attributeLabels();
 	}
 

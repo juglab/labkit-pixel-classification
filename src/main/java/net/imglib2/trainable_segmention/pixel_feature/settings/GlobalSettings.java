@@ -8,14 +8,6 @@ import java.util.List;
  */
 public final class GlobalSettings {
 
-	public static GlobalSettings default2dSettings() {
-		return new GlobalSettings(ChannelSetting.SINGLE, 2, 1.0, 16.0, 1.0);
-	}
-
-	public static GlobalSettings default3dSettings() {
-		return new GlobalSettings(ChannelSetting.SINGLE, 3, 1.0, 8.0, 1.0);
-	}
-
 	private final ChannelSetting channelSetting;
 
 	private final int numDimensions;
@@ -24,26 +16,31 @@ public final class GlobalSettings {
 
 	private final double membraneThickness;
 
-	public GlobalSettings(ChannelSetting channelSetting, int numDimensions, List<Double> sigmas, double membraneThickness) {
+	private GlobalSettings(ChannelSetting channelSetting, int numDimensions, List<Double> sigmas, double membraneThickness) {
 		this.channelSetting = channelSetting;
 		this.numDimensions = numDimensions;
 		this.sigmas = Collections.unmodifiableList(new ArrayList<>(sigmas));
 		this.membraneThickness = membraneThickness;
 	}
 
-	public GlobalSettings(ChannelSetting channelSetting, int numDimensions, double minSigma, double maxSigma, double membraneThickness) {
-		this(channelSetting, numDimensions, initSigmas(minSigma, maxSigma), membraneThickness);
-	}
-
-	private static List<Double> initSigmas(double minSigma, double maxSigma) {
-		List<Double> sigmas = new ArrayList<>();
-		for(double sigma = minSigma; sigma <= maxSigma; sigma *= 2.0)
-			sigmas.add(sigma);
-		return sigmas;
-	}
-
 	public GlobalSettings(GlobalSettings globalSettings) {
 		this(globalSettings.channelSetting(), globalSettings.numDimensions(), globalSettings.sigmas(), globalSettings.membraneThickness());
+	}
+
+	public static Builder default2d() {
+		return new Builder()
+				.channels(ChannelSetting.SINGLE)
+				.dimensions(2)
+				.sigmaRange(1.0, 16.0)
+				.membraneThickness(1.0);
+	}
+
+	public static Builder default3d() {
+		return new Builder()
+				.channels(ChannelSetting.SINGLE)
+				.dimensions(3)
+				.sigmaRange(1.0, 8.0)
+				.membraneThickness(1.0);
 	}
 
 	public ChannelSetting channelSetting() {
@@ -75,5 +72,53 @@ public final class GlobalSettings {
 		return channelSetting.equals(settings.channelSetting) &&
 				sigmas.equals(settings.sigmas) &&
 				membraneThickness == settings.membraneThickness;
+	}
+
+	public static class Builder {
+
+		private ChannelSetting channelSetting = ChannelSetting.SINGLE;
+		private int numDimensions = 3;
+		private List<Double> sigmas = Arrays.asList(1.0, 2.0, 4.0, 8.0);
+		private double membraneThickness = 1;
+
+		private Builder() {
+
+		}
+
+		public Builder channels(ChannelSetting channelSetting) {
+			this.channelSetting = channelSetting;
+			return this;
+		}
+
+		public Builder dimensions(int numDimensions) {
+			this.numDimensions = numDimensions;
+			return this;
+		}
+
+		public Builder sigmas(List<Double> sigmas) {
+			this.sigmas = sigmas;
+			return this;
+		}
+
+		public Builder sigmas(Double... sigmas) {
+			return sigmas(Arrays.asList(sigmas));
+		}
+
+		public Builder membraneThickness(double membraneThickness) {
+			this.membraneThickness = membraneThickness;
+			return this;
+		}
+
+		public Builder sigmaRange(double minSigma, double maxSigma) {
+			List<Double> sigmas = new ArrayList<>();
+			for(double sigma = minSigma; sigma <= maxSigma; sigma *= 2.0)
+				sigmas.add(sigma);
+			sigmas(sigmas);
+			return this;
+		}
+
+		public GlobalSettings build() {
+			return new GlobalSettings(channelSetting, numDimensions, sigmas, membraneThickness);
+		}
 	}
 }

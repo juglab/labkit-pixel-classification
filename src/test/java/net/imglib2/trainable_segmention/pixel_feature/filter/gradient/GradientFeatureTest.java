@@ -31,7 +31,7 @@ public class GradientFeatureTest {
 
 		// process
 		Img<FloatType> result = ops.create().img(interval, new FloatType());
-		SingleFeatures.gradient(0.0).newInstance(Utils.ops(), GlobalSettings.default3dSettings()).apply(in, Collections.singletonList(result));
+		SingleFeatures.gradient(0.0).newInstance(Utils.ops(), GlobalSettings.default3d().build()).apply(in, Collections.singletonList(result));
 
 		// test
 		Img<FloatType> expected = ops.create().img(interval, new FloatType());

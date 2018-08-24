@@ -1,6 +1,5 @@
 package net.imglib2.trainable_segmention.gui;
 
-import net.imagej.ops.OpService;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
@@ -15,7 +14,7 @@ public class FeatureSettingsGuiTest {
 
 	public static void main(String... args) throws InterruptedException {
 		Context context = new Context();
-		GlobalSettings settings = GlobalSettings.default2dSettings();
+		GlobalSettings settings = GlobalSettings.default2d().build();
 		FeatureSettings fs = new FeatureSettings(settings, GroupedFeatures.gauss());
 		FeatureSettingsGui gui = new FeatureSettingsGui(context, fs);
 		showFrame(gui.getComponent());

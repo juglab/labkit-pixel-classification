@@ -50,7 +50,7 @@ public class FeatureSettingTest {
 	@Test
 	public void getModule() {
 		FeatureSetting fs = FeatureSetting.fromClass(TestFeature.class);
-		Module module = fs.asModule(GlobalSettings.default2dSettings());
+		Module module = fs.asModule(GlobalSettings.default2d().build());
 		assertTrue(module.getDelegateObject() instanceof TestFeature);
 	}
 
@@ -59,7 +59,7 @@ public class FeatureSettingTest {
 		FeatureSetting fs = FeatureSetting.fromClass(TestFeature.class);
 		double sigma = 4.2;
 		fs.setParameter("sigma", sigma);
-		TestFeature f = (TestFeature) fs.newInstance(Utils.ops(), GlobalSettings.default2dSettings());
+		TestFeature f = (TestFeature) fs.newInstance(Utils.ops(), GlobalSettings.default2d().build());
 		assertTrue(f.isInitialized());
 		assertEquals(sigma, f.sigma(), 0.001);
 	}

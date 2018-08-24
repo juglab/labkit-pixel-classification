@@ -63,7 +63,7 @@ public class SingleGradientFeatureTest {
 
 	private RandomAccessibleInterval<FloatType> getActual(double sigma, int order) {
 		final FeatureSetting featureSetting = new FeatureSetting(SingleDerivativesFeature.class, "sigma", sigma, "order", order);
-		FeatureCalculator fc = new FeatureCalculator(ops, new FeatureSettings(GlobalSettings.default3dSettings(), featureSetting));
+		FeatureCalculator fc = new FeatureCalculator(ops, new FeatureSettings(GlobalSettings.default3d().build(), featureSetting));
 		return Views.hyperSlice(fc.apply(img), 3, 0);
 	}
 
