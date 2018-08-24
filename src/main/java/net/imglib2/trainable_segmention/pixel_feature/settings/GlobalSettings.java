@@ -12,26 +12,26 @@ public final class GlobalSettings {
 
 	private final int numDimensions;
 
-	private final List<Double> sigmas;
+	private final List<Double> radii;
 
 	private final double membraneThickness;
 
-	private GlobalSettings(ChannelSetting channelSetting, int numDimensions, List<Double> sigmas, double membraneThickness) {
+	private GlobalSettings(ChannelSetting channelSetting, int numDimensions, List<Double> radii, double membraneThickness) {
 		this.channelSetting = channelSetting;
 		this.numDimensions = numDimensions;
-		this.sigmas = Collections.unmodifiableList(new ArrayList<>(sigmas));
+		this.radii = Collections.unmodifiableList(new ArrayList<>(radii));
 		this.membraneThickness = membraneThickness;
 	}
 
 	public GlobalSettings(GlobalSettings globalSettings) {
-		this(globalSettings.channelSetting(), globalSettings.numDimensions(), globalSettings.sigmas(), globalSettings.membraneThickness());
+		this(globalSettings.channelSetting(), globalSettings.numDimensions(), globalSettings.radii(), globalSettings.membraneThickness());
 	}
 
 	public static Builder default2d() {
 		return new Builder()
 				.channels(ChannelSetting.SINGLE)
 				.dimensions(2)
-				.sigmaRange(1.0, 16.0)
+				.radiiRange(1.0, 16.0)
 				.membraneThickness(1.0);
 	}
 
@@ -39,7 +39,7 @@ public final class GlobalSettings {
 		return new Builder()
 				.channels(ChannelSetting.SINGLE)
 				.dimensions(3)
-				.sigmaRange(1.0, 8.0)
+				.radiiRange(1.0, 8.0)
 				.membraneThickness(1.0);
 	}
 
@@ -51,8 +51,8 @@ public final class GlobalSettings {
 		return numDimensions;
 	}
 
-	public List<Double> sigmas() {
-		return sigmas;
+	public List<Double> radii() {
+		return radii;
 	}
 
 	public double membraneThickness() {
@@ -61,7 +61,7 @@ public final class GlobalSettings {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(sigmas, numDimensions, membraneThickness, channelSetting);
+		return Objects.hash(radii, numDimensions, membraneThickness, channelSetting);
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public final class GlobalSettings {
 			return false;
 		GlobalSettings settings = (GlobalSettings) obj;
 		return channelSetting.equals(settings.channelSetting) &&
-				sigmas.equals(settings.sigmas) &&
+				radii.equals(settings.radii) &&
 				membraneThickness == settings.membraneThickness;
 	}
 
@@ -78,7 +78,7 @@ public final class GlobalSettings {
 
 		private ChannelSetting channelSetting = ChannelSetting.SINGLE;
 		private int numDimensions = 3;
-		private List<Double> sigmas = Arrays.asList(1.0, 2.0, 4.0, 8.0);
+		private List<Double> radii = Arrays.asList(1.0, 2.0, 4.0, 8.0);
 		private double membraneThickness = 1;
 
 		private Builder() {
@@ -95,13 +95,13 @@ public final class GlobalSettings {
 			return this;
 		}
 
-		public Builder sigmas(List<Double> sigmas) {
-			this.sigmas = sigmas;
+		public Builder radii(List<Double> radii) {
+			this.radii = radii;
 			return this;
 		}
 
-		public Builder sigmas(Double... sigmas) {
-			return sigmas(Arrays.asList(sigmas));
+		public Builder radii(Double... radii) {
+			return radii(Arrays.asList(radii));
 		}
 
 		public Builder membraneThickness(double membraneThickness) {
@@ -109,16 +109,16 @@ public final class GlobalSettings {
 			return this;
 		}
 
-		public Builder sigmaRange(double minSigma, double maxSigma) {
-			List<Double> sigmas = new ArrayList<>();
-			for(double sigma = minSigma; sigma <= maxSigma; sigma *= 2.0)
-				sigmas.add(sigma);
-			sigmas(sigmas);
+		public Builder radiiRange(double minRadius, double maxRadius) {
+			List<Double> radii = new ArrayList<>();
+			for(double radius = minRadius; radius <= maxRadius; radius *= 2.0)
+				radii.add(radius);
+			radii(radii);
 			return this;
 		}
 
 		public GlobalSettings build() {
-			return new GlobalSettings(channelSetting, numDimensions, sigmas, membraneThickness);
+			return new GlobalSettings(channelSetting, numDimensions, radii, membraneThickness);
 		}
 	}
 }

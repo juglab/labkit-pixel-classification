@@ -1,10 +1,7 @@
 package net.imglib2.trainable_segmention.pixel_feature.filter.structure;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractGroupFeatureOp;
-import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractSigmaGroupFeatureOp;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
-import org.scijava.plugin.Parameter;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,7 +11,7 @@ public class StructureFeature3D extends AbstractGroupFeatureOp {
 
 	@Override
 	protected List<FeatureSetting> initFeatures() {
-		return globalSettings().sigmas().stream().flatMap(
+		return globalSettings().radii().stream().flatMap(
 				this::initFeaturesForSigma
 		).collect(Collectors.toList());
 	}

@@ -91,7 +91,7 @@ public class FeatureSettingsGui {
 			setLayout(new MigLayout("insets 0", "[]20pt[100pt]", "[][]"));
 			add(new JLabel("Radii:"));
 			sigmasField = new JFormattedTextField(new ListOfDoubleFormatter());
-			sigmasField.setValue(globalSettings.sigmas());
+			sigmasField.setValue(globalSettings.radii());
 			add(sigmasField, "grow, wrap");
 			add(new JLabel("Membrane Thickness:"));
 			thicknessField = new JFormattedTextField(globalSettings.membraneThickness());
@@ -102,7 +102,7 @@ public class FeatureSettingsGui {
 			return GlobalSettings.default2d()
 					.channels(channelSetting)
 					.dimensions(numDimensions)
-					.sigmas((List<Double>) sigmasField.getValue())
+					.radii((List<Double>) sigmasField.getValue())
 					.membraneThickness((Double) thicknessField.getValue())
 					.build();
 		}

@@ -21,7 +21,7 @@ public class GaussFeature extends AbstractGroupFeatureOp {
 
 	@Override
 	protected List<FeatureSetting> initFeatures() {
-		return globalSettings().sigmas().stream()
+		return globalSettings().radii().stream()
 				.map( radius -> SingleFeatures.gauss( scaleFactor * radius ))
 				.collect(Collectors.toList() );
 	}

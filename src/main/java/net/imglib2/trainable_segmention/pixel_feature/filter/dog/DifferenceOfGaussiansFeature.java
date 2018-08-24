@@ -45,7 +45,7 @@ public class DifferenceOfGaussiansFeature extends AbstractFeatureOp {
 
 	@Override
 	public void initialize() {
-		sigmas = globalSettings().sigmas().stream()
+		sigmas = globalSettings().radii().stream()
 				.map(radius -> scaleFactor * radius)
 				.collect(Collectors.toList());
 		sigmaPairs = sigmaPairs();

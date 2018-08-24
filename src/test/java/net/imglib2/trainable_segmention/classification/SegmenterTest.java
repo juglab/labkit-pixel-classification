@@ -71,7 +71,7 @@ public class SegmenterTest {
 		GlobalSettings globals = GlobalSettings.default3d()
 				.channels(ChannelSetting.SINGLE)
 				.dimensions(img.numDimensions())
-				.sigmas(Arrays.asList(1.0, 8.0, 16.0))
+				.radii(Arrays.asList(1.0, 8.0, 16.0))
 				.membraneThickness(3.0)
 				.build();
 		FeatureSettings featureSettings = new FeatureSettings(globals, SingleFeatures.identity(), GroupedFeatures.gauss());

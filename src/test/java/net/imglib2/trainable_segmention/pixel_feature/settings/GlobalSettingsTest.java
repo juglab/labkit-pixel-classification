@@ -8,8 +8,8 @@ public class GlobalSettingsTest {
 
 	@Test
 	public void testHashCode() {
-		GlobalSettings globalsA = GlobalSettings.default2d().channels(ChannelSetting.RGB).sigmaRange(3.0, 16.0).membraneThickness(2.5).build();
-		GlobalSettings globalsB = GlobalSettings.default2d().channels(ChannelSetting.RGB).sigmaRange(3.0, 16.0).membraneThickness(2.5).build();
+		GlobalSettings globalsA = GlobalSettings.default2d().channels(ChannelSetting.RGB).radiiRange(3.0, 16.0).membraneThickness(2.5).build();
+		GlobalSettings globalsB = GlobalSettings.default2d().channels(ChannelSetting.RGB).radiiRange(3.0, 16.0).membraneThickness(2.5).build();
 		assertEquals(globalsA.hashCode(), globalsB.hashCode());
 	}
 }
