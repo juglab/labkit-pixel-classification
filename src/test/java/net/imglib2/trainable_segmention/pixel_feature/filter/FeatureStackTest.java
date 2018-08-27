@@ -59,7 +59,7 @@ public class FeatureStackTest {
 
 	@Test
 	public void testGaussStack() {
-		testFeatureIgnoreAttributes(40, FeatureStack.GAUSSIAN, new FeatureSetting(GaussFeature.class, "scaleFactor", 0.4));
+		testFeatureIgnoreAttributes(40, FeatureStack.GAUSSIAN, new FeatureSetting(GaussFeature.class));
 	}
 
 	private void testFeature(float expectedPsnr, int oldFeatureId, FeatureSetting newFeature) {
@@ -104,7 +104,7 @@ public class FeatureStackTest {
 		// NB: DifferenceOfGaussians is implemented such that it is compatible with FeatureStack3D
 		// There can not be a version that fits both, FeatureStack and FeatureStack3D.
 		// This is because they sort and name difference of gaussians differently.
-		testFeature(40, FeatureStack.DOG, new FeatureSetting(DifferenceOfGaussiansFeature.class, "scaleFactor", 0.4));
+		testFeature(40, FeatureStack.DOG, new FeatureSetting(DifferenceOfGaussiansFeature.class));
 	}
 
 	@Test

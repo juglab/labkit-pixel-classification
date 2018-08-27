@@ -11,7 +11,7 @@ public class StructureFeature3D extends AbstractGroupFeatureOp {
 
 	@Override
 	protected List<FeatureSetting> initFeatures() {
-		return globalSettings().radii().stream().flatMap(
+		return globalSettings().sigmas().stream().flatMap(
 				this::initFeaturesForSigma
 		).collect(Collectors.toList());
 	}

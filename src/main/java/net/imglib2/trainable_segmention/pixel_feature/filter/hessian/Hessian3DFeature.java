@@ -27,7 +27,7 @@ public class Hessian3DFeature extends AbstractGroupFeatureOp {
 
 	@Override
 	protected List<FeatureSetting> initFeatures() {
-		return globalSettings().radii().stream()
+		return globalSettings().sigmas().stream()
 				.map(sigma -> SingleFeatures.hessian3d(sigma, absoluteValues))
 				.collect(Collectors.toList());
 	}

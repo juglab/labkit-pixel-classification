@@ -42,7 +42,7 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 
 	@Override
 	public List<String> attributeLabels() {
-		return LABELS.stream().map(x -> "Hessian" + x + "_" + sigma).collect(Collectors.toList());
+		return LABELS.stream().map(x -> "Hessian" + x + "_" + sigma / 0.4).collect(Collectors.toList());
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 	}
 
 	private void calculateHessianOnChannel(RandomAccessible<FloatType> image, RandomAccessibleInterval<FloatType> out, double sigma) {
-		double[] sigmas = {0.4 * sigma, 0.4 * sigma};
+		double[] sigmas = {sigma, sigma};
 
 		Interval secondDerivativeInterval = RevampUtils.removeLastDimension(out);
 		Interval firstDerivativeInterval = Intervals.union(

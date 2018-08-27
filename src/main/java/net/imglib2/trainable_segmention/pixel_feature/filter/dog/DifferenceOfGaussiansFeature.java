@@ -28,9 +28,6 @@ import java.util.stream.Collectors;
 @Plugin(type = FeatureOp.class, label = "Difference of Gaussians (Group)")
 public class DifferenceOfGaussiansFeature extends AbstractFeatureOp {
 
-	@Parameter
-	private double scaleFactor = 0.4;
-
 	private List<Double> sigmas;
 	private List<Pair<Double, Double>> sigmaPairs;
 
@@ -45,9 +42,7 @@ public class DifferenceOfGaussiansFeature extends AbstractFeatureOp {
 
 	@Override
 	public void initialize() {
-		sigmas = globalSettings().radii().stream()
-				.map(radius -> scaleFactor * radius)
-				.collect(Collectors.toList());
+		sigmas = globalSettings().sigmas();
 		sigmaPairs = sigmaPairs();
 	}
 

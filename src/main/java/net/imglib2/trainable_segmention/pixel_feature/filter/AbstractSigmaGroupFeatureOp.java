@@ -21,7 +21,7 @@ public abstract class AbstractSigmaGroupFeatureOp extends AbstractGroupFeatureOp
 		List<Double> sigmas = new ArrayList<>();
 		if(includeZero)
 			sigmas.add(0.0);
-		sigmas.addAll(globalSettings().radii());
+		sigmas.addAll(globalSettings().sigmas());
 		return sigmas;
 	}
 

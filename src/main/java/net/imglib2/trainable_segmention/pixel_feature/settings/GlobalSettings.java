@@ -38,6 +38,7 @@ public final class GlobalSettings {
 				.channels(ChannelSetting.SINGLE)
 				.dimensions(2)
 				.radiiRange(1.0, 16.0)
+				.scaleFactor(0.4)
 				.membraneThickness(1.0);
 	}
 

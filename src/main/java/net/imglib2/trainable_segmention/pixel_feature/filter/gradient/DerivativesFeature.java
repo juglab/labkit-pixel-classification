@@ -21,7 +21,7 @@ public class DerivativesFeature extends AbstractGroupFeatureOp {
 	private int maxOrder = 5;
 
 	protected List<FeatureSetting> initFeatures() {
-		return globalSettings().radii().stream()
+		return globalSettings().sigmas().stream()
 				.flatMap(sigma -> initFeaturesForSigma(sigma))
 				.collect(Collectors.toList());
 	}

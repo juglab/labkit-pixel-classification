@@ -40,6 +40,8 @@ public final class DerivedNormalDistribution {
 	}
 
 	public static Kernel1D derivedGaussKernel(double sigma, int order) {
+		if(sigma <= 0)
+			throw new IllegalArgumentException("Sigma must be greater than zero.");
 		final DoubleUnaryOperator operator = derivedGaussian(sigma, order);
 		int width = (int) (sigma * kernelSizeFactor( order ));
 		return createKernel(operator, width);

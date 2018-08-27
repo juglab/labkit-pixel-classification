@@ -1,6 +1,7 @@
 package net.imglib2.trainable_segmention.pixel_feature.filter.gauss;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractGroupFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractSigmaGroupFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
@@ -14,15 +15,14 @@ import java.util.stream.Collectors;
  * @author Matthias Arzt
  */
 @Plugin(type = FeatureOp.class, label = "Gauss (Group)")
-public class GaussFeature extends AbstractGroupFeatureOp {
+public class GaussFeature extends AbstractSigmaGroupFeatureOp {
 
-	@Parameter(label = "scale factor")
-	private double scaleFactor = 0.4;
+	public GaussFeature() {
+		super(false);
+	}
 
 	@Override
-	protected List<FeatureSetting> initFeatures() {
-		return globalSettings().radii().stream()
-				.map( radius -> SingleFeatures.gauss( scaleFactor * radius ))
-				.collect(Collectors.toList() );
+	protected Class<? extends FeatureOp> getSingleFeatureClass() {
+		return SingleGaussFeature.class;
 	}
 }
