@@ -11,6 +11,7 @@ import net.imglib2.img.Img;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.DerivedNormalDistribution;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.EigenValues;
 import net.imglib2.type.numeric.NumericType;
@@ -56,6 +57,11 @@ public class SingleStructureFeature3D extends AbstractFeatureOp {
 
 		EigenValues.Vector3D v = new EigenValues.Vector3D();
 		LoopBuilder.setImages( Views.collapse(blurredProducts), Views.collapse(Views.stack(output))).forEachPixel( (in, out) -> eigenValuePerPixel(v, in, out));
+	}
+
+	@Override
+	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
+		apply(input.original(), output);
 	}
 
 	private Convolution<NumericType<?>> gaussConvolution() {

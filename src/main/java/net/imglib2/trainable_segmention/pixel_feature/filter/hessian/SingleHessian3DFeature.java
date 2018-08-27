@@ -8,6 +8,7 @@ import net.imglib2.algorithm.convolution.kernel.SeparableKernelConvolution;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.img.Img;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.DerivedNormalDistribution;
@@ -48,7 +49,7 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output) {
+	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
 		calculateHessianOnChannel(input, Views.stack(output));
 	}
 
@@ -57,7 +58,7 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 		return globals.numDimensions() == 3;
 	}
 
-	private void calculateHessianOnChannel(RandomAccessible<FloatType> image, RandomAccessibleInterval<FloatType> out) {
+	private void calculateHessianOnChannel(FeatureInput image, RandomAccessibleInterval<FloatType> out) {
 		Interval secondDerivativeInterval = RevampUtils.removeLastDimension(out);
 		RandomAccessibleInterval<RealComposite<DoubleType>> secondDerivatives =
 				calculateSecondDerivatives(secondDerivativeInterval, image);
@@ -69,17 +70,17 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 
 	private RandomAccessibleInterval<RealComposite<DoubleType>> calculateSecondDerivatives(
 			Interval secondDerivativeInterval,
-			RandomAccessible<FloatType> image)
+			FeatureInput image)
 	{
-		Img<DoubleType> secondDerivatives = ops().create().img(RevampUtils.appendDimensionToInterval(secondDerivativeInterval, 0, 5), new DoubleType());
-		List<RandomAccessibleInterval<DoubleType>> slices = RevampUtils.slices(secondDerivatives);
-		differenciate(image, slices.get(0), 2, 0, 0);
-		differenciate(image, slices.get(1), 1, 1, 0);
-		differenciate(image, slices.get(2), 1, 0, 1);
-		differenciate(image, slices.get(3), 0, 2, 0);
-		differenciate(image, slices.get(4), 0, 1, 1);
-		differenciate(image, slices.get(5), 0, 0, 2);
-		return Views.collapseReal(secondDerivatives);
+		List<RandomAccessibleInterval<DoubleType>> slices = Arrays.asList(
+		image.derivedGauss(sigma, 2, 0, 0),
+		image.derivedGauss(sigma, 1, 1, 0),
+		image.derivedGauss(sigma, 1, 0, 1),
+		image.derivedGauss(sigma, 0, 2, 0),
+		image.derivedGauss(sigma, 0, 1, 1),
+		image.derivedGauss(sigma, 0, 0, 2)
+		);
+		return Views.collapseReal(Views.stack(slices));
 	}
 
 	private void differenciate(RandomAccessible<FloatType> input, RandomAccessibleInterval<DoubleType> output, int... order) {

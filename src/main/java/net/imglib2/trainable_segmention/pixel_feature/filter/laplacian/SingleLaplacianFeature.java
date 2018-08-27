@@ -9,6 +9,7 @@ import net.imglib2.img.Img;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.DerivedNormalDistribution;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -18,6 +19,7 @@ import org.scijava.plugin.Parameter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class SingleLaplacianFeature extends AbstractFeatureOp {
@@ -36,14 +38,15 @@ public class SingleLaplacianFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output) {
-		Interval interval = output.get(0);
-		int n = input.numDimensions();
-		Img<DoubleType> derivatives = ops().create().img(RevampUtils.appendDimensionToInterval(interval, 0, n), new DoubleType());
-		List<RandomAccessibleInterval<DoubleType>> d = RevampUtils.slices(derivatives);
-		for(int i = 0; i < n; i++)
-			differentiate(input, i, d.get(i));
-		LoopBuilder.setImages(Views.collapse(derivatives), output.get(0)).forEachPixel( (x, sum) -> sum.setReal( sum( x, n ) ));
+	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
+		int n = globalSettings().numDimensions();
+		List<RandomAccessibleInterval<DoubleType>> derivatives = IntStream.range(0, n)
+				.mapToObj(d -> input.derivedGauss(sigma, order(n, d))).collect(Collectors.toList());
+		LoopBuilder.setImages(Views.collapse(Views.stack(derivatives)), output.get(0)).forEachPixel( (x, sum) -> sum.setReal( sum( x, n ) ));
+	}
+
+	private int[] order(int n, int d) {
+		return IntStream.range( 0, n ).map( i -> i == d ? 2 : 0).toArray();
 	}
 
 	private double sum(Composite<DoubleType> d, int n) {
@@ -52,13 +55,5 @@ public class SingleLaplacianFeature extends AbstractFeatureOp {
 			sum += d.get(i).getRealDouble();
 		}
 		return sum;
-	}
-
-	private void differentiate(RandomAccessible<FloatType> input, int d, RandomAccessibleInterval<DoubleType> output) {
-		Kernel1D gauss = DerivedNormalDistribution.derivedGaussKernel(sigma, 0);
-		Kernel1D second_derivative = DerivedNormalDistribution.derivedGaussKernel(sigma, 2);
-		Kernel1D[] kernels = IntStream.range( 0, input.numDimensions() )
-				.mapToObj( i -> i == d ? second_derivative : gauss).toArray(Kernel1D[]::new);
-		SeparableKernelConvolution.convolution( kernels ).process( input, output );
 	}
 }

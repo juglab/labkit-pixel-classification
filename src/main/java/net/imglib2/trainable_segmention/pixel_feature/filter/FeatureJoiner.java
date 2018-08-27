@@ -55,7 +55,7 @@ public class FeatureJoiner {
 		return count;
 	}
 
-	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
+	public void apply(FeatureInput in, List<RandomAccessibleInterval<FloatType>> out) {
 		if(out.size() != count)
 			throw new IllegalArgumentException();
 		int startIndex = 0;

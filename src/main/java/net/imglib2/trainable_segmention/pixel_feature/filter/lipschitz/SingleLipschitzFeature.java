@@ -4,6 +4,7 @@ import net.imglib2.*;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.img.Img;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.Type;
@@ -49,6 +50,11 @@ public class SingleLipschitzFeature extends AbstractFeatureOp {
 	@Override
 	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
 		apply(in, out.get(0));
+	}
+
+	@Override
+	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
+		apply(input.original(), output);
 	}
 
 	@Override

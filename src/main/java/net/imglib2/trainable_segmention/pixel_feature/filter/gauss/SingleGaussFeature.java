@@ -4,7 +4,9 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.exception.IncompatibleTypeException;
+import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.real.FloatType;
 import org.scijava.plugin.Parameter;
@@ -32,11 +34,8 @@ public class SingleGaussFeature extends AbstractFeatureOp {
 		}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output) {
-		try {
-			Gauss3.gauss(sigma, input, output.get(0));
-		} catch (IncompatibleTypeException e) {
-			throw new RuntimeException(e);
-		}
+	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
+		LoopBuilder.setImages(input.gauss(sigma), output.get(0))
+				.forEachPixel( (i, o) -> o.setReal(i.getRealFloat()));
 	}
 }

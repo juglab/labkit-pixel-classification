@@ -7,6 +7,7 @@ import net.imglib2.algorithm.fft2.FFTConvolution;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.DoubleType;
@@ -60,8 +61,8 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
-		gaborProcessChannel(kernels, in, out.get(0), out.get(1));
+	public void apply(FeatureInput in, List<RandomAccessibleInterval<FloatType>> out) {
+		gaborProcessChannel(kernels, in.original(), out.get(0), out.get(1));
 	}
 
 	@Override

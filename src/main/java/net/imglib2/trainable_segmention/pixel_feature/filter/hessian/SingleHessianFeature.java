@@ -4,6 +4,7 @@ import net.imglib2.*;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.img.Img;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
@@ -32,9 +33,9 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
+	public void apply(FeatureInput in, List<RandomAccessibleInterval<FloatType>> out) {
 		RandomAccessibleInterval<FloatType> features = Views.stack(out);
-		calculateHessianOnChannel(in, features, sigma);
+		calculateHessianOnChannel(in.original(), features, sigma);
 	}
 
 	List<String> LABELS = Arrays.asList("", "_Trace", "_Determinant", "_Eigenvalue_1", "_Eigenvalue_2",

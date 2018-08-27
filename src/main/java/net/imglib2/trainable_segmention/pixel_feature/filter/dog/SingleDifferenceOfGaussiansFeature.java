@@ -5,7 +5,9 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.Img;
+import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
@@ -33,7 +35,7 @@ public class SingleDifferenceOfGaussiansFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
+	public void apply(FeatureInput in, List<RandomAccessibleInterval<FloatType>> out) {
 		dog(in, out.get(0));
 	}
 
@@ -42,14 +44,8 @@ public class SingleDifferenceOfGaussiansFeature extends AbstractFeatureOp {
 		return Collections.singletonList("Difference_of_gaussians_" + sigma1 + "_" + sigma2);
 	}
 
-	private void dog(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {
-		try {
-			Img<FloatType> tmp = ops().create().img(out);
-			Gauss3.gauss(sigma1, in, tmp);
-			Gauss3.gauss(sigma2, in, out);
-			Views.interval(Views.pair(tmp, out), out).forEach(p -> p.getB().sub(p.getA()));
-		} catch (IncompatibleTypeException e) {
-			throw new RuntimeException(e);
-		}
+	private void dog(FeatureInput in, RandomAccessibleInterval<FloatType> out) {
+		LoopBuilder.setImages(in.gauss(sigma2), in.gauss(sigma1), out)
+				.forEachPixel((a, b, r) -> r.setReal(a.getRealFloat() - b.getRealFloat()));
 	}
 }

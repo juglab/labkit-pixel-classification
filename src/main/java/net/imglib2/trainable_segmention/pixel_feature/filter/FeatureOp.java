@@ -19,7 +19,11 @@ public interface FeatureOp extends SciJavaPlugin, Op, UnaryFunctionOp<RandomAcce
 
 	List<String> attributeLabels();
 
-	void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output);
+	default void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output) {
+		apply(new FeatureInput(input, output.get(0)), output);
+	}
+
+	void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output);
 
 	GlobalSettings globalSettings();
 
