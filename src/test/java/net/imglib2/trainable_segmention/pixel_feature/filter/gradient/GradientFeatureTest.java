@@ -23,7 +23,7 @@ public class GradientFeatureTest {
 		// setup
 		OpEnvironment ops = Utils.ops();
 
-		Interval interval = new FinalInterval(new long[]{0, 0, 0}, new long[]{20, 20, 20});
+		Interval interval = new FinalInterval(new long[]{0, 0, 0}, new long[]{10, 10, 10});
 		Interval biggerInterval = Intervals.expand(interval, new long[]{10, 10, 10});
 
 		Img<FloatType> in = ops.create().img(biggerInterval, new FloatType());
@@ -31,12 +31,12 @@ public class GradientFeatureTest {
 
 		// process
 		Img<FloatType> result = ops.create().img(interval, new FloatType());
-		SingleFeatures.gradient(0.0).newInstance(Utils.ops(), GlobalSettings.default3d().build()).apply(in, Collections.singletonList(result));
+		SingleFeatures.gradient(1.0).newInstance(Utils.ops(), GlobalSettings.default3d().build()).apply(in, Collections.singletonList(result));
 
 		// test
 		Img<FloatType> expected = ops.create().img(interval, new FloatType());
 		ops.image().equation(expected, "Math.sqrt(4 * p[0]*p[0] + 16 * p[1]*p[1] + 36 * p[2]*p[2])");
-		Utils.assertImagesEqual(100.0, expected, result);
+		Utils.assertImagesEqual(60.0, expected, result);
 	}
 
 	public static void main(String... args) {
