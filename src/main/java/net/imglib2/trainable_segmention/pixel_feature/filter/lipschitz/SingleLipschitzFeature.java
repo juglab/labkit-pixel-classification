@@ -48,13 +48,8 @@ public class SingleLipschitzFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
-		apply(in, out.get(0));
-	}
-
-	@Override
 	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
-		apply(input.original(), output);
+		apply(input.original(), output.get(0));
 	}
 
 	@Override

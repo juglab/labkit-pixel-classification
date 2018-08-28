@@ -6,6 +6,7 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.Views;
 import org.scijava.plugin.Parameter;
 
 /**
@@ -20,9 +21,7 @@ public abstract class AbstractFeatureOp
 
 	@Override
 	public RandomAccessibleInterval<FloatType> calculate(RandomAccessibleInterval<FloatType> input) {
-		Img<FloatType> output = ops().create().img(RevampUtils.appendDimensionToInterval(input, 0, count() - 1), new FloatType());
-		apply(input, RevampUtils.slices(output));
-		return output;
+		return Views.stack( apply( new FeatureInput(Views.extendBorder(input), input) ) );
 	}
 
 	@Override

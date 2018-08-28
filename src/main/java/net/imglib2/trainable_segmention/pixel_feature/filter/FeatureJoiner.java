@@ -55,15 +55,10 @@ public class FeatureJoiner {
 		return count;
 	}
 
-	public void apply(FeatureInput in, List<RandomAccessibleInterval<FloatType>> out) {
-		if(out.size() != count)
-			throw new IllegalArgumentException();
-		int startIndex = 0;
-		for(FeatureOp feature : features) {
-			int count = feature.count();
-			feature.apply(in, out.subList(startIndex, startIndex + count));
-			startIndex += count;
-		}
+	public List<RandomAccessibleInterval<FloatType>> apply(FeatureInput in) {
+		List<RandomAccessibleInterval<FloatType>> result = new ArrayList<>();
+		for(FeatureOp feature : features) result.addAll(feature.apply(in));
+		return result;
 	}
 
 	public List<String> attributeLabels() {

@@ -14,6 +14,7 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
@@ -65,13 +66,6 @@ public class FeatureCalculator {
 		return prepend(settings.globals().channelSetting().channels(), joiner.attributeLabels());
 	}
 
-	public void apply(RandomAccessible<?> input, List<RandomAccessibleInterval<FloatType>> output) {
-		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
-		List<List<RandomAccessibleInterval<FloatType>>> outputs = split(output, channels.size());
-		for (int i = 0; i < channels.size(); i++)
-			joiner.apply(new FeatureInput(channels.get(i), outputs.get(i).get(0)), outputs.get(i));
-	}
-
 	public RandomAccessibleInterval<FloatType> apply(RandomAccessibleInterval<?> image) {
 		return apply(Views.extendBorder(image), preprocessor.outputIntervalFromInput(image));
 	}
@@ -79,8 +73,21 @@ public class FeatureCalculator {
 	public RandomAccessibleInterval<FloatType> apply(RandomAccessible<?> extendedImage, Interval interval) {
 		if(interval.numDimensions() != settings().globals().numDimensions())
 			throw new IllegalArgumentException("Wrong dimension of the output interval.");
-		Img<FloatType> result = ops().create().img(RevampUtils.appendDimensionToInterval(interval, 0, count() - 1), new FloatType());
-		apply(extendedImage, RevampUtils.slices(result));
+		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(extendedImage);
+		List<List<RandomAccessibleInterval<FloatType>>> outputs = channels.stream()
+				.map( channel -> joiner.apply( new FeatureInput( channel, interval ) ) )
+				.collect(Collectors.toList());
+		return Views.stack(mixLists(outputs));
+	}
+
+	static <T> List<T> mixLists(List<List<T>> lists) {
+		int size = lists.get(0).size();
+		if( ! lists.stream().allMatch( list -> list.size() == size ) )
+			throw new IllegalArgumentException( "List must have same length");
+		List<T> result = new ArrayList<>();
+		for (int i = 0; i < size; i++)
+			for (List<T> list : lists)
+				result.add(list.get(i));
 		return result;
 	}
 
@@ -98,12 +105,6 @@ public class FeatureCalculator {
 		return labels.stream()
 				.flatMap(label -> prepend.stream().map(pre -> pre.isEmpty() ? label : pre + "_" + label))
 				.collect(Collectors.toList());
-	}
-
-	private static <T> List<List<T>> split(List<T> input, int count) {
-		return IntStream.range(0, count).mapToObj(
-				i -> filterByIndexPredicate(input, index -> index % count == i)
-		).collect(Collectors.toList());
 	}
 
 	private static <T> List<T> filterByIndexPredicate(List<T> in, IntPredicate predicate) {

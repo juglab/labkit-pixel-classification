@@ -3,8 +3,11 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.gradient;
 import net.imagej.ops.OpEnvironment;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.trainable_segmention.Utils;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
@@ -30,8 +33,8 @@ public class GradientFeatureTest {
 		ops.image().equation(in, "p[0]*p[0] + 2*p[1]*p[1] + 3*p[2]*p[2]");
 
 		// process
-		Img<FloatType> result = ops.create().img(interval, new FloatType());
-		SingleFeatures.gradient(1.0).newInstance(Utils.ops(), GlobalSettings.default3d().build()).apply(in, Collections.singletonList(result));
+		final FeatureOp featureOp = SingleFeatures.gradient(1.0).newInstance(Utils.ops(), GlobalSettings.default3d().build());
+		RandomAccessibleInterval<FloatType> result = featureOp.apply(new FeatureInput(in, interval)).get(0);
 
 		// test
 		Img<FloatType> expected = ops.create().img(interval, new FloatType());

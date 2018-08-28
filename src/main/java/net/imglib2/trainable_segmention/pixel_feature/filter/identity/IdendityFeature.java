@@ -25,15 +25,17 @@ public class IdendityFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
-		RandomAccessible<FloatType> a = in;
-		RandomAccessibleInterval<FloatType> b = out.get(0);
-		Views.interval(Views.pair(a, b), b).forEach(p -> p.getB().set(p.getA()));
+	public List<RandomAccessibleInterval<FloatType>> apply(FeatureInput in) {
+		return Collections.singletonList( Views.interval(in.original(), in.targetInterval()) );
 	}
 
 	@Override
 	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
-		apply(input.original(), output);
+		copy(input.original(), output.get(0));
+	}
+
+	private void copy(RandomAccessible<FloatType> a, RandomAccessibleInterval<FloatType> b) {
+		Views.interval(Views.pair(a, b), b).forEach(p -> p.getB().set(p.getA()));
 	}
 
 	@Override

@@ -56,6 +56,21 @@ public class FeatureCalculatorTest {
 		Utils.assertImagesEqual(ArrayImgs.floats(new float[]{44, 45, 14, 15}, 1, 1, 4), out);
 	}
 
+	@Test
+	public void testMix() {
+		// setup
+		List<List<Integer>> x = Arrays.asList(
+				Arrays.asList(1,4,7,10),
+				Arrays.asList(2,5,8,11),
+				Arrays.asList(3,6,9,12)
+		);
+		// process
+		List<Integer> result = FeatureCalculator.mixLists(x);
+		// test
+		List<Integer> expected = Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12);
+		assertEquals(expected, result);
+	}
+
 	public static class AddValue extends AbstractFeatureOp implements FeatureOp {
 
 		@Parameter

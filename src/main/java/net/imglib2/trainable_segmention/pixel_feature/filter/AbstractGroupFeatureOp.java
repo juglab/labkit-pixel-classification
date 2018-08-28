@@ -35,7 +35,12 @@ public abstract class AbstractGroupFeatureOp extends AbstractFeatureOp {
 	}
 
 	@Override
+	public List<RandomAccessibleInterval<FloatType>> apply(FeatureInput in) {
+		return featureGroup.apply(in);
+	}
+
+	@Override
 	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
-		featureGroup.apply(input, output);
+		throw new UnsupportedOperationException();
 	}
 }

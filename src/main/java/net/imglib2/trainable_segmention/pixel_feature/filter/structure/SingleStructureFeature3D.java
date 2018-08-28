@@ -45,7 +45,6 @@ public class SingleStructureFeature3D extends AbstractFeatureOp {
 				"Structure_smallest_" + sigma + "_" + integrationScale);
 	}
 
-	@Override
 	public void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output) {
 		final Interval targetInterval = output.get(0);
 		Convolution<NumericType<?>> convolution = gaussConvolution();
