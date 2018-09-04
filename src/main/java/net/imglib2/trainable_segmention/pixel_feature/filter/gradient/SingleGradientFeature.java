@@ -4,16 +4,19 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Plugin( type = FeatureOp.class, label = "Gradient" )
 public class SingleGradientFeature extends AbstractFeatureOp {
 
 	@Parameter
