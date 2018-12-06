@@ -10,12 +10,16 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.neighborhood.Neighborhood;
 import net.imglib2.algorithm.neighborhood.RectangleShape;
 import net.imglib2.algorithm.neighborhood.Shape;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.ConstantUtils;
+import net.imglib2.util.Intervals;
+import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -68,7 +72,13 @@ public class NeighborhoodFeature extends AbstractFeatureOp {
 	@Override
 	public List<RandomAccessibleInterval<FloatType>> apply(FeatureInput in) {
 		final Interval interval = in.targetInterval();
-		return initOffsets().stream().map(offset -> Views.interval(Views.translate(in.original(), negate(offset)), interval)).collect(Collectors.toList());
+		return initOffsets().stream().map(offset -> copy(Views.interval(Views.translate(in.original(), negate(offset)), interval))).collect(Collectors.toList());
+	}
+
+	private RandomAccessibleInterval<FloatType> copy(IntervalView<FloatType> interval) {
+		RandomAccessibleInterval<FloatType> result = Views.translate(ArrayImgs.floats(Intervals.dimensionsAsLongArray(interval)), Intervals.minAsLongArray(interval));
+		LoopBuilder.setImages(interval, result).forEachPixel( (i,o) -> o.set(i) );
+		return result;
 	}
 
 	private long[] negate(Localizable localizable) {
