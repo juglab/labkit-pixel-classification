@@ -54,7 +54,9 @@ public class FeatureSettingsGui {
 	}
 
 	public FeatureSettings get() {
-		return new FeatureSettings(globalsPanel.get(), model.features());
+		List<FeatureSetting> features = model.features();
+		final GlobalSettings globalSettings = globalsPanel.get();
+		return new FeatureSettings(globalSettings, features);
 	}
 
 	private void initGui(GlobalSettings globals) {
@@ -63,10 +65,8 @@ public class FeatureSettingsGui {
 		globalsPanel = new GlobalsPanel(globals);
 		content.add(globalsPanel, "wrap");
 		content.add(new JScrollPane(list), "split 2, grow");
-		JPopupMenu menu = initMenu(globals);
 		JButton addButton = new JButton("add");
-		addButton.addActionListener(a ->
-			menu.show(addButton, 0, addButton.getHeight()));
+		addButton.addActionListener(a -> addButtonPressed(addButton));
 		JPanel sidePanel = new JPanel();
 		sidePanel.setLayout(new MigLayout("insets 0", "[]","[][][][grow]"));
 		sidePanel.add(addButton, "grow, wrap");
@@ -75,11 +75,17 @@ public class FeatureSettingsGui {
 		content.add(sidePanel, "top, wrap");
 	}
 
-	private static class GlobalsPanel extends JPanel {
+	private void addButtonPressed(JButton addButton) {
+		JPopupMenu menu = initMenu(globalsPanel.get());
+		menu.show(addButton, 0, addButton.getHeight());
+	}
+
+
+	private class GlobalsPanel extends JPanel {
 
 		private final ChannelSetting channelSetting;
 
-		private final int numDimensions;
+		private final JComboBox<String> dimensionsField;
 
 		private final JFormattedTextField sigmasField;
 
@@ -87,8 +93,12 @@ public class FeatureSettingsGui {
 
 		public GlobalsPanel(GlobalSettings globalSettings) {
 			channelSetting = globalSettings.channelSetting();
-			numDimensions = globalSettings.numDimensions();
-			setLayout(new MigLayout("insets 0", "[]20pt[100pt]", "[][]"));
+			setLayout(new MigLayout("insets 0", "[]20pt[100pt]", "[][][]"));
+			add(new JLabel("Dimensions:"));
+			dimensionsField = new JComboBox<>(new String[]{"2D", "3D"});
+			dimensionsField.setSelectedItem(globalSettings.numDimensions() + "D");
+			dimensionsField.addActionListener(ignore -> dimensionsChanged());
+			add(dimensionsField, "wrap");
 			add(new JLabel("Radii:"));
 			sigmasField = new JFormattedTextField(new ListOfDoubleFormatter());
 			sigmasField.setValue(globalSettings.sigmas());
@@ -101,10 +111,15 @@ public class FeatureSettingsGui {
 		GlobalSettings get() {
 			return new GlobalSettings(
 					channelSetting,
-					numDimensions, (List<Double>) sigmasField.getValue(),
+					dimensionsField.getSelectedIndex() + 2,
+					(List<Double>) sigmasField.getValue(),
 					(Double) thicknessField.getValue()
 			);
 		}
+	}
+
+	private void dimensionsChanged() {
+		checkFeatures(globalsPanel.get(), context);
 	}
 
 	private JPopupMenu initMenu(GlobalSettings globals) {
@@ -176,7 +191,8 @@ public class FeatureSettingsGui {
 
 	public static void main(String... args) {
 		Context context = new Context();
-		System.out.println(FeatureSettingsGui.show(context, new FeatureSettings(GlobalSettings.default2dSettings())));
+		final Optional<FeatureSettings> show = FeatureSettingsGui.show(context, new FeatureSettings(GlobalSettings.default2dSettings()));
+		System.out.println(show.map(featureSettings -> featureSettings.toJson().toString()).orElse("Cancelled"));
 		System.out.println("finished");
 	}
 
@@ -244,6 +260,27 @@ public class FeatureSettingsGui {
 		public List<FeatureSetting> features() {
 			return items.stream().map(h -> h.get()).collect(Collectors.toList());
 		}
+
+		public void removeAll(List<Holder> invalid) {
+			items.removeAll(invalid);
+			update();
+		}
+	}
+
+	private void checkFeatures(GlobalSettings globalSettings, Context context) {
+		Collection<Class<? extends FeatureOp>> availableFeatures = AvailableFeatures.getMap(context, globalSettings).values();
+		List<Holder> invalid = model.items.stream()
+				.filter((Holder feature) -> !availableFeatures.contains(feature.get().pluginClass()))
+				.collect(Collectors.toList());
+		if(!invalid.isEmpty())
+			showWarning(invalid);
+		model.removeAll(invalid);
+	}
+
+	private void showWarning(List<Holder> invalid) {
+		final StringBuilder text = new StringBuilder("The following features need to be removed because they don't fit the global settings:");
+		invalid.forEach(holder -> text.append("\n* ").append(holder.toString()));
+		JOptionPane.showMessageDialog(null, text.toString(), "Feature Settings", JOptionPane.WARNING_MESSAGE);
 	}
 
 	static class FeatureSettingsDialog extends AbstractContextual {
