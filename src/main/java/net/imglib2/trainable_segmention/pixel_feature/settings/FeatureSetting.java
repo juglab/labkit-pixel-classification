@@ -7,6 +7,7 @@ import com.google.gson.JsonPrimitive;
 import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.OpInfo;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import org.scijava.command.Command;
 import org.scijava.command.CommandInfo;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleException;
@@ -163,8 +164,12 @@ public class FeatureSetting {
 		if(!(obj instanceof FeatureSetting))
 			return false;
 		FeatureSetting fs = (FeatureSetting) obj;
-		return this.commandInfo.getPluginClass().equals(fs.commandInfo.getPluginClass()) &&
+		return pluginClass().equals(fs.pluginClass()) &&
 				this.parameterValues.equals(fs.parameterValues);
+	}
+
+	public Class<? extends Command> pluginClass() {
+		return this.commandInfo.getPluginClass();
 	}
 
 	@Override
