@@ -78,11 +78,9 @@ public class SegmenterTest {
 		// setup
 		Segmenter segmenter = trainClassifier();
 		// store
-		File temporaryFile = File.createTempFile("classifier", ".tmp");
 		JsonElement json = segmenter.toJsonTree();
 		// load
 		Segmenter segmenter2 = Segmenter.fromJson(ops, json);
-		temporaryFile.delete();
 		// test
 		RandomAccessibleInterval<? extends IntegerType<?>> result = segmenter.segment(img);
 		RandomAccessibleInterval<? extends IntegerType<?>> result2 = segmenter2.segment(img);
