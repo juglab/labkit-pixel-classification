@@ -14,6 +14,7 @@ import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.Img;
+import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.IntegerType;
@@ -68,25 +69,6 @@ public class Utils {
 		return count;
 	}
 
-	public static < T extends Type< T >> boolean equals(final RandomAccessibleInterval< ? > a,
-														final IterableInterval< T > b)
-    {
-    	if(!Intervals.equals(a, b))
-    		return false;
-        // create a cursor that automatically localizes itself on every move
-		System.out.println("check picture content.");
-        Cursor< T > bCursor = b.localizingCursor();
-        RandomAccess< ? > aRandomAccess = a.randomAccess();
-        while ( bCursor.hasNext())
-        {
-            bCursor.fwd();
-            aRandomAccess.setPosition(bCursor);
-            if( ! bCursor.get().equals( aRandomAccess.get() ))
-            	return false;
-        }
-        return true;
-    }
-
 	private static int diff(final ImageProcessor a, final ImageProcessor b) {
 		int count = 0;
 		final int width = a.getWidth(), height = a.getHeight();
@@ -113,18 +95,7 @@ public class Utils {
 
 	public static <A extends Type<A>>
 	void assertImagesEqual(final RandomAccessibleInterval<? extends A> a, final RandomAccessibleInterval<? extends A> b) {
-		assertIntervalEquals(a, b);
-		System.out.println("check picture content.");
-		IntervalView<? extends Pair<? extends A, ? extends A>> pairs = Views.interval(Views.pair(a, b), b);
-		Cursor<? extends Pair<? extends A, ? extends A>> cursor = pairs.cursor();
-		while(cursor.hasNext()) {
-			Pair<? extends A,? extends A> p = cursor.next();
-			boolean equal = p.getA().valueEquals(p.getB());
-			if(!equal)
-				fail("Pixel values not equal on coordinate " +
-						positionString(cursor) + ", expected: "
-						+ p.getA() + " actual: " + p.getB());
-		}
+		ImgLib2Assert.assertImageEquals( a, b );
 	}
 
 	public static < A extends Type< A > > void assertIntervalEquals(
@@ -282,97 +253,4 @@ public class Utils {
 		return Converters.convert(input, floatToInt, new IntType());
 	}
 
-	public static ImageProcessor imageProcessor(RandomAccessibleInterval<FloatType> dy) {
-		int width = (int) dy.dimension(0);
-		int height = (int) dy.dimension(1);
-		FloatProcessor processor = new FloatProcessor(width, height);
-		RandomAccess<FloatType> ra = dy.randomAccess();
-		for (int x=0; x<width; x++)
-			for (int y=0; y<height; y++) {
-				ra.setPosition(x, 0);
-				ra.setPosition(y, 1);
-				processor.setf(x, y, ra.get().get());
-			}
-		return processor;
-	}
-
-	static class StopWatch {
-
-		private final long start = System.nanoTime();
-
-		public Time get() {
-			return Time.fromNanoSeconds(System.nanoTime() - start);
-		}
-
-		public String toString() {
-			return get().toString();
-		}
-	}
-
-	static class Time {
-		private final double seconds;
-		private Time(double seconds) {
-			this.seconds = seconds;
-		}
-		static public Time fromNanoSeconds(double ns) {
-			return fromSeconds(ns * 1e-9);
-		}
-
-		private static Time fromSeconds(double seconds) {
-			return new Time(seconds);
-		}
-
-		public Time divide(int divider) {
-			return fromSeconds(seconds / divider);
-		}
-		public Time add(Time time) {
-			return fromSeconds(seconds + time.seconds);
-		}
-		public String toString() {
-			if(seconds >= 1)
-				return seconds + " s";
-			if(seconds >= 1e-3)
-				return seconds * 1e3 + " ms";
-			if(seconds >= 1e-6)
-				return seconds * 1e6 + " µs";
-			return seconds * 1e9 + " ns";
-		}
-		public static Time zero() {
-			return fromSeconds(0);
-		}
-	}
-
-	public static class TimeMeasurement {
-
-		static private Map<String, Measurement> map = new HashMap<>();
-
-		public static void measure(String id, Runnable run) {
-			StopWatch watch = new StopWatch();
-			run.run();
-			getMeasurement(id).add(watch.get());
-		}
-
-		private static Measurement getMeasurement(String id) {
-			return map.computeIfAbsent(id, key -> new Measurement());
-		}
-
-		static class Measurement {
-			int count = 0;
-			Time time = Time.zero();
-
-			public void add(Time time) {
-				count++;
-				this.time = this.time.add(time);
-			}
-
-			public Time mean() {
-				return time.divide(count);
-			}
-		}
-
-		public static void print() {
-			map.forEach((key, measurement) -> System.out.print(key + ": " + measurement.mean() + "\n"));
-		}
-
-	}
 }
