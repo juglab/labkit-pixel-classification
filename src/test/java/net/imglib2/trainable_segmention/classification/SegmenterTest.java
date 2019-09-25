@@ -41,21 +41,17 @@ public class SegmenterTest {
 
 	private final OpEnvironment ops = Utils.ops();
 
-	static public LabelRegions<String> loadLabeling(String file) {
-		Img<? extends IntegerType<?>> img = ImageJFunctions.wrapByte(Utils.loadImage(file));
-		final ImgLabeling<String, IntType> labeling = new ImgLabeling<>(Utils.ops().create().img(img, new IntType()));
-		Views.interval(Views.pair(img, labeling), labeling).forEach( p -> {
-			int value = p.getA().getInteger();
-			if(value != 0) p.getB().add(Integer.toString(value));
-		} );
-		return new LabelRegions<>(labeling);
-	}
-
 	@Test
 	public void testClassification() {
 		Segmenter segmenter = trainClassifier();
 		RandomAccessibleInterval<? extends IntegerType> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());
+	}
+
+	private Segmenter trainClassifier() {
+		GlobalSettings globals = new GlobalSettings(ChannelSetting.SINGLE, img.numDimensions(), Arrays.asList(1.0, 8.0, 16.0), 3.0);
+		FeatureSettings featureSettings = new FeatureSettings(globals, SingleFeatures.identity(), GroupedFeatures.gauss());
+		return Trainer.train(ops, img, labeling, featureSettings);
 	}
 
 	private void checkExpected(RandomAccessibleInterval<? extends IntegerType> result, List<String> classNames) {
@@ -65,12 +61,6 @@ public class SegmenterTest {
 			int e = p.getB().get();
 			if(e != 0) assertEquals(Integer.toString(e), r);
 		});
-	}
-
-	private Segmenter trainClassifier() {
-		GlobalSettings globals = new GlobalSettings(ChannelSetting.SINGLE, img.numDimensions(), Arrays.asList(1.0, 8.0, 16.0), 3.0);
-		FeatureSettings featureSettings = new FeatureSettings(globals, SingleFeatures.identity(), GroupedFeatures.gauss());
-		return Trainer.train(ops, img, labeling, featureSettings);
 	}
 
 	@Test
@@ -94,4 +84,15 @@ public class SegmenterTest {
 		RandomAccessibleInterval<? extends IntegerType> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());
 	}
+
+	private static LabelRegions<String> loadLabeling(String file) {
+		Img<? extends IntegerType<?>> img = ImageJFunctions.wrapByte(Utils.loadImage(file));
+		final ImgLabeling<String, IntType> labeling = new ImgLabeling<>(Utils.ops().create().img(img, new IntType()));
+		Views.interval(Views.pair(img, labeling), labeling).forEach( p -> {
+			int value = p.getA().getInteger();
+			if(value != 0) p.getB().add(Integer.toString(value));
+		} );
+		return new LabelRegions<>(labeling);
+	}
+
 }
