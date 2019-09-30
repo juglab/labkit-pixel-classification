@@ -37,6 +37,7 @@ import preview.net.imglib2.loops.LoopBuilder;
 
 import java.net.URL;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import static junit.framework.TestCase.assertEquals;
@@ -158,7 +159,7 @@ public class Utils {
 	}
 
 	public static RandomAccessibleInterval<FloatType> loadImageFloatType(String s) {
-		return ImagePlusAdapter.wrapFloat(loadImage(s));
+		return Objects.requireNonNull(ImagePlusAdapter.convertFloat(loadImage(s)));
 	}
 
 	public static ImagePlus loadImage(String s) {
