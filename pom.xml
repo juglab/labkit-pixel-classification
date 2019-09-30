@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>26.0.0</version>
+		<version>28.0.0</version>
 		<relativePath />
 	</parent>
 
@@ -15,7 +15,7 @@
 
 	<name>ImgLib2 Trainable Segmentation</name>
 	<description>Trainable segmentation features implemented with imglib2.</description>
-	<url>http://github.com/maarzt/imglib2-trainable-segmentation</url>
+	<url>https://github.com/maarzt/imglib2-trainable-segmentation</url>
 	<inceptionYear>2017</inceptionYear>
 	<organization>
 		<name>CSBD</name>
@@ -32,6 +32,7 @@
 		<developer>
 			<id>maarzt</id>
 			<name>Matthias Arzt</name>
+			<url>https://imagej.net/User:Maarzt</url>
 			<roles>
 				<role>lead</role>
 				<role>developer</role>
@@ -45,14 +46,9 @@
 
 	<contributors>
  		<contributor>
-			<name>Matthias Arzt</name>
+			<name>None</name>
 		</contributor>
 	</contributors>
-
-	<ciManagement>
-		<system>Travis CI</system>
-		<url>https://travis-ci.org/maarzt/imglib2-trainable-segmentation</url>
-	</ciManagement>
 
 	<mailingLists>
 		<mailingList>
@@ -73,6 +69,11 @@
 		<url>https://github.com/maarzt/imglib2-trainable-segmentation/issues</url>
 	</issueManagement>
 
+	<ciManagement>
+		<system>Travis CI</system>
+		<url>https://travis-ci.org/maarzt/imglib2-trainable-segmentation</url>
+	</ciManagement>
+
 	<properties>
 		<package-name>net.imglib2.trainable_segmention</package-name>
 		<license.licenseName>bsd_2</license.licenseName>
@@ -84,7 +85,7 @@
 	<repositories>
 		<!-- NB: for SciJava dependencies -->
 		<repository>
-			<id>imagej.public</id>
+			<id>scijava.public</id>
 			<url>https://maven.scijava.org/content/groups/public</url>
 		</repository>
 	</repositories>
