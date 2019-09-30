@@ -5,7 +5,6 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.RevampUtils;
-import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.algorithm.gradient.PartialDerivative;
 import net.imglib2.converter.Converters;
 import net.imglib2.exception.IncompatibleTypeException;
@@ -17,6 +16,7 @@ import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import preview.net.imglib2.algorithm.gauss3.Gauss3;
 
 import java.util.Collections;
 import java.util.List;

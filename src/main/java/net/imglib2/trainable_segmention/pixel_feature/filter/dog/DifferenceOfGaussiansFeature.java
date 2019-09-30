@@ -5,9 +5,7 @@ import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.img.Img;
-import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -15,6 +13,8 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Pair;
 import net.imglib2.util.ValuePair;
 import org.scijava.plugin.Plugin;
+import preview.net.imglib2.algorithm.gauss3.Gauss3;
+import preview.net.imglib2.loops.LoopBuilder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,7 +89,7 @@ public class DifferenceOfGaussiansFeature extends AbstractFeatureOp {
 	private static void subtract(RandomAccessibleInterval<FloatType> minuend,
 		RandomAccessibleInterval<FloatType> subtrahend, RandomAccessibleInterval<FloatType> target)
 	{
-		LoopBuilder.setImages(minuend, subtrahend, target).forEachPixel(
+		LoopBuilder.setImages(minuend, subtrahend, target).multiThreaded().forEachPixel(
 			(m, s, t) -> t.setReal(m.getRealFloat() - s.getRealFloat()));
 	}
 

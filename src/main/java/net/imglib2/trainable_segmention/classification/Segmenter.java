@@ -25,6 +25,7 @@ import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.CompositeIntervalView;
 import net.imglib2.view.composite.GenericComposite;
 import net.imglib2.view.composite.RealComposite;
+import preview.net.imglib2.loops.LoopBuilder;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -92,7 +93,11 @@ public class Segmenter {
 		Objects.requireNonNull(out);
 		Objects.requireNonNull(image);
 		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
-		ops.run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelClassificationOp());
+		LoopBuilder.setImages(Views.collapseReal(featureValues), out).multiThreaded().forEachChunk(
+			chunk -> {
+				chunk.forEachPixel(pixelClassificationOp()::compute);
+				return null;
+			});
 	}
 
 	public RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> predict(
@@ -113,7 +118,11 @@ public class Segmenter {
 		Objects.requireNonNull(out);
 		Objects.requireNonNull(image);
 		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
-		ops.run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelPredictionOp());
+		LoopBuilder.setImages(Views.collapseReal(featureValues), out).multiThreaded().forEachChunk(
+			chunk -> {
+				chunk.forEachPixel(pixelPredictionOp()::compute);
+				return null;
+			});
 	}
 
 	public UnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>>

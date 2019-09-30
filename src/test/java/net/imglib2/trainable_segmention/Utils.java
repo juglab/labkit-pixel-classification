@@ -18,7 +18,6 @@ import net.imglib2.img.Img;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.loops.LoopBuilder;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ComplexType;
@@ -34,6 +33,7 @@ import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import org.scijava.Context;
 import org.scijava.script.ScriptService;
+import preview.net.imglib2.loops.LoopBuilder;
 
 import java.net.URL;
 import java.util.NoSuchElementException;
@@ -287,6 +287,6 @@ public class Utils {
 	private static <T extends Type<T>> void copy(RandomAccessibleInterval<T> src,
 		RandomAccessibleInterval<T> target)
 	{
-		LoopBuilder.setImages(src, target).forEachPixel((i, o) -> o.set(i));
+		LoopBuilder.setImages(src, target).multiThreaded().forEachPixel((i, o) -> o.set(i));
 	}
 }
