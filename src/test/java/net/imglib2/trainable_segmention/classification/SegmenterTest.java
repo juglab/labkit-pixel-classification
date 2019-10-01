@@ -22,7 +22,6 @@ import net.imglib2.view.Views;
 import org.junit.Test;
 import weka.classifiers.meta.RandomCommittee;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -50,8 +49,11 @@ public class SegmenterTest {
 	}
 
 	private Segmenter trainClassifier() {
-		GlobalSettings globals = new GlobalSettings(ChannelSetting.SINGLE, img.numDimensions(), Arrays
-			.asList(1.0, 8.0, 16.0), 3.0);
+		GlobalSettings globals = GlobalSettings.default2d()
+			.channels(ChannelSetting.SINGLE)
+			.dimensions(img.numDimensions())
+			.radii(Arrays.asList(1.0, 8.0, 16.0))
+			.build();
 		FeatureSettings featureSettings = new FeatureSettings(globals, SingleFeatures.identity(),
 			GroupedFeatures.gauss());
 		return Trainer.train(ops, img, labeling, featureSettings);
@@ -85,7 +87,7 @@ public class SegmenterTest {
 
 	@Test
 	public void testDifferentWekaClassifiers() {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
 			.asList(SingleFeatures.identity(), GroupedFeatures.gauss()));
 		Segmenter segmenter = Trainer.train(ops, img, labeling, featureSettings, new RandomCommittee());
 		RandomAccessibleInterval<? extends IntegerType> result = segmenter.segment(img);

@@ -89,7 +89,7 @@ public class FeatureSettingsGui {
 
 		private final JFormattedTextField sigmasField;
 
-		private final JFormattedTextField thicknessField;
+		private final JFormattedTextField scaleFactorField;
 
 		public GlobalsPanel(GlobalSettings globalSettings) {
 			channelSetting = globalSettings.channelSetting();
@@ -101,19 +101,20 @@ public class FeatureSettingsGui {
 			add(dimensionsField, "wrap");
 			add(new JLabel("Radii:"));
 			sigmasField = new JFormattedTextField(new ListOfDoubleFormatter());
-			sigmasField.setValue(globalSettings.sigmas());
+			sigmasField.setValue(globalSettings.radii());
 			add(sigmasField, "grow, wrap");
-			add(new JLabel("Membrane Thickness:"));
-			thicknessField = new JFormattedTextField(globalSettings.membraneThickness());
-			add(thicknessField, "grow, wrap");
+			add(new JLabel("Scale Factor:"));
+			scaleFactorField = new JFormattedTextField(globalSettings.scaleFactor());
+			add(scaleFactorField, "grow, wrap");
 		}
 
 		GlobalSettings get() {
-			return new GlobalSettings(
-				channelSetting,
-				dimensionsField.getSelectedIndex() + 2,
-				(List<Double>) sigmasField.getValue(),
-				(Double) thicknessField.getValue());
+			return GlobalSettings.default2d()
+				.channels(channelSetting)
+				.dimensions(dimensionsField.getSelectedIndex() + 2)
+				.radii((List<Double>) sigmasField.getValue())
+				.scaleFactor((Double) scaleFactorField.getValue())
+				.build();
 		}
 	}
 
@@ -194,7 +195,7 @@ public class FeatureSettingsGui {
 	public static void main(String... args) {
 		Context context = new Context();
 		final Optional<FeatureSettings> show = FeatureSettingsGui.show(context, new FeatureSettings(
-			GlobalSettings.default2dSettings()));
+			GlobalSettings.default2d().build()));
 		System.out.println(show.map(featureSettings -> featureSettings.toJson().toString()).orElse(
 			"Cancelled"));
 		System.out.println("finished");

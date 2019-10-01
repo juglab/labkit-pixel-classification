@@ -4,7 +4,6 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.gradient;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractGroupFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 

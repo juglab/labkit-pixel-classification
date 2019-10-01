@@ -9,8 +9,16 @@ public class GlobalSettingsTest {
 
 	@Test
 	public void testHashCode() {
-		GlobalSettings globalsA = new GlobalSettings(ChannelSetting.RGB, 2, 3.0, 16.0, 2.5);
-		GlobalSettings globalsB = new GlobalSettings(ChannelSetting.RGB, 2, 3.0, 16.0, 2.5);
+		GlobalSettings globalsA = GlobalSettings.default2d()
+			.channels(ChannelSetting.RGB)
+			.dimensions(2)
+			.radiiRange(3.0, 16.0)
+			.build();
+		GlobalSettings globalsB = GlobalSettings.default2d()
+			.channels(ChannelSetting.RGB)
+			.dimensions(2)
+			.radiiRange(3.0, 16.0)
+			.build();
 		assertEquals(globalsA.hashCode(), globalsB.hashCode());
 	}
 }

@@ -63,7 +63,8 @@ public class SegmentationBenchmark {
 	private final Segmenter segmenter = trainSegmenter();
 
 	private Segmenter trainSegmenter() {
-		final FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3dSettings(),
+		final FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3d()
+			.scaleFactor(0.4).build(),
 			GroupedFeatures.gauss(),
 			GroupedFeatures.differenceOfGaussians(),
 			GroupedFeatures.hessian3D(false),

@@ -3,23 +3,12 @@ package net.imglib2.trainable_segmention;
 
 import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.roi.labeling.ImgLabeling;
-import net.imglib2.roi.labeling.LabelRegions;
-import net.imglib2.roi.labeling.LabelingType;
-import net.imglib2.trainable_segmention.classification.Segmenter;
-import net.imglib2.trainable_segmention.classification.Trainer;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Intervals;
-import net.imglib2.util.StopWatch;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -34,7 +23,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.scijava.Context;
-import preview.net.imglib2.loops.LoopBuilder;
 import preview.net.imglib2.parallel.Parallelization;
 
 import java.util.concurrent.TimeUnit;
@@ -84,8 +72,8 @@ public class FeatureCalculationBenchmark {
 
 	private Object calculateFeature(FeatureSetting setting) {
 		return Parallelization.runSingleThreaded(() -> {
-			final FeatureSettings featureSettings = new FeatureSettings(GlobalSettings
-				.default3dSettings(), setting);
+			final FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3d()
+				.build(), setting);
 			FeatureCalculator featureCalculator = new FeatureCalculator(ops, featureSettings);
 			return featureCalculator.apply(image);
 		});

@@ -90,7 +90,7 @@ public class BorderEffectsTest {
 	}
 
 	public void testFeature(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
 			.asList(feature));
 		FeatureCalculator group = new FeatureCalculator(Utils.ops(), featureSettings);
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
@@ -99,7 +99,7 @@ public class BorderEffectsTest {
 	}
 
 	public void showDifference(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
 			.asList(feature));
 		FeatureCalculator group = new FeatureCalculator(Utils.ops(), featureSettings);
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
@@ -124,7 +124,7 @@ public class BorderEffectsTest {
 	}
 
 	public void showPsnrs() {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
 			.asList(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(),
 				GroupedFeatures.differenceOfGaussians(), GroupedFeatures.sobelGradient(), GroupedFeatures
 					.lipschitz(50), GroupedFeatures.min(), GroupedFeatures.max(), GroupedFeatures.mean(),

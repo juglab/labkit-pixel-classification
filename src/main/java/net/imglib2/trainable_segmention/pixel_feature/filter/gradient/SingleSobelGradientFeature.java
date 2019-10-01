@@ -42,7 +42,7 @@ public class SingleSobelGradientFeature extends AbstractFeatureOp {
 
 	@Override
 	public List<String> attributeLabels() {
-		return Collections.singletonList("Sobel_filter_" + sigma);
+		return Collections.singletonList("Sobel_filter_" + sigma / 0.4);
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class SingleSobelGradientFeature extends AbstractFeatureOp {
 	}
 
 	private void calculate(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {
-		double[] sigmas = { 0.4 * sigma, 0.4 * sigma };
+		double[] sigmas = { sigma, sigma };
 
 		Interval dxInputInterval = RevampUtils.deriveXRequiredInput(out);
 		Interval dyInputInterval = RevampUtils.deriveYRequiredInput(out);

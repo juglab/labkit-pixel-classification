@@ -49,13 +49,13 @@ public class FeatureFilterTest {
 
 	@Test
 	public void testAvialableFeatures2d() {
-		GlobalSettings globals = GlobalSettings.default2dSettings();
+		GlobalSettings globals = GlobalSettings.default2d().build();
 		testAvailableFeatures(join(general, only2d), globals);
 	}
 
 	@Test
 	public void tests3d() {
-		GlobalSettings globals = GlobalSettings.default3dSettings();
+		GlobalSettings globals = GlobalSettings.default3d().build();
 		testAvailableFeatures(join(general, only3d), globals);
 	}
 
