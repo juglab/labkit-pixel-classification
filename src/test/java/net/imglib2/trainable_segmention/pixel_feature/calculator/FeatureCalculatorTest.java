@@ -2,12 +2,12 @@
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import net.imagej.ops.OpService;
-import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
@@ -77,10 +77,10 @@ public class FeatureCalculatorTest {
 		}
 
 		@Override
-		public void apply(RandomAccessible<FloatType> input,
+		public void apply(FeatureInput input,
 			List<RandomAccessibleInterval<FloatType>> output)
 		{
-			IntervalView<FloatType> inputInterval = Views.interval(input, output.get(0));
+			IntervalView<FloatType> inputInterval = Views.interval(input.original(), output.get(0));
 			LoopBuilder.setImages(inputInterval, output.get(0)).multiThreaded().forEachPixel(
 				(in, out) -> out.set(in.get() + (float) value));
 		}
