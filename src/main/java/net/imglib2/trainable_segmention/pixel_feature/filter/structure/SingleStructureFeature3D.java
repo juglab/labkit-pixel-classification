@@ -4,16 +4,17 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.structure;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.Intervals;
 import preview.net.imglib2.algorithm.convolution.Convolution;
 import preview.net.imglib2.algorithm.convolution.kernel.Kernel1D;
 import preview.net.imglib2.algorithm.convolution.kernel.SeparableKernelConvolution;
-import net.imglib2.algorithm.gauss3.Gauss3;
+import preview.net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.img.Img;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.DerivedNormalDistribution;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.EigenValues;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.real.DoubleType;
@@ -24,7 +25,6 @@ import org.scijava.plugin.Parameter;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class SingleStructureFeature3D extends AbstractFeatureOp {
 
@@ -47,13 +47,12 @@ public class SingleStructureFeature3D extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> input,
-		List<RandomAccessibleInterval<FloatType>> output)
-	{
+	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
 		final Interval targetInterval = output.get(0);
-		Convolution<NumericType<?>> convolution = gaussConvolution();
+		Convolution<NumericType<?>> convolution = gaussConvolution(input.pixelSize());
 		final Interval derivativeInterval = convolution.requiredSourceInterval(targetInterval);
-		Img<DoubleType> products = products(derivatives(input, derivativeInterval));
+		RandomAccessibleInterval<DoubleType> derivatives = derivatives(input, derivativeInterval);
+		RandomAccessibleInterval<DoubleType> products = products(derivatives);
 		RandomAccessibleInterval<DoubleType> blurredProducts = Views.interval(products,
 			RevampUtils.appendDimensionToInterval(targetInterval, 0, 5));
 		convolution.process(products, blurredProducts);
@@ -63,18 +62,18 @@ public class SingleStructureFeature3D extends AbstractFeatureOp {
 			.forEachPixel((in, out) -> eigenValuePerPixel(v, in, out));
 	}
 
-	@Override
-	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
-		apply(input.original(), output);
+	private Convolution<NumericType<?>> gaussConvolution(double[] pixelSizes) {
+		final Kernel1D[] gauss = Arrays.stream(pixelSizes)
+			.mapToObj(pixelSize -> gaussKernel(integrationScale / pixelSize))
+			.toArray(Kernel1D[]::new);
+		return SeparableKernelConvolution.convolution(gauss);
 	}
 
-	private Convolution<NumericType<?>> gaussConvolution() {
-		final Kernel1D gauss = Kernel1D.symmetric(Gauss3.halfkernels(new double[] {
-			integrationScale }))[0];
-		return SeparableKernelConvolution.convolution(new Kernel1D[] { gauss, gauss, gauss });
+	private Kernel1D gaussKernel(double v) {
+		return Kernel1D.symmetric(Gauss3.halfkernels(new double[] { v })[0]);
 	}
 
-	private static void eigenValuePerPixel(EigenValues.Vector3D tmp, Composite<DoubleType> in,
+	static void eigenValuePerPixel(EigenValues.Vector3D tmp, Composite<DoubleType> in,
 		Composite<FloatType> out)
 	{
 		EigenValues.eigenvalues(tmp,
@@ -91,10 +90,12 @@ public class SingleStructureFeature3D extends AbstractFeatureOp {
 		out.get(2).setReal(tmp.z);
 	}
 
-	private Img<DoubleType> products(Img<DoubleType> input) {
+	private RandomAccessibleInterval<DoubleType> products(
+		RandomAccessibleInterval<DoubleType> input)
+	{
 		Interval interval = RevampUtils.removeLastDimension(input);
-		Img<DoubleType> output = ops().create().img(RevampUtils.appendDimensionToInterval(interval, 0,
-			6), new DoubleType());
+		RandomAccessibleInterval<DoubleType> output = ops().create().img(RevampUtils
+			.appendDimensionToInterval(interval, 0, 5), new DoubleType());
 		LoopBuilder.setImages(Views.collapse(input), Views.collapse(output)).forEachPixel(
 			SingleStructureFeature3D::productPerPixel);
 		return output;
@@ -110,24 +111,33 @@ public class SingleStructureFeature3D extends AbstractFeatureOp {
 		o.get(5).setReal(z * z);
 	}
 
-	private Img<DoubleType> derivatives(RandomAccessible<FloatType> input,
+	private RandomAccessibleInterval<DoubleType> derivatives(FeatureInput input,
 		Interval derivativeInterval)
 	{
-		int n = input.numDimensions();
+		RandomAccessibleInterval<DoubleType> gauss = ops().create().img(Intervals.expand(
+			derivativeInterval, 1));
+		double[] pixelSizes = input.pixelSize();
+		double[] sigmas = Arrays.stream(pixelSizes).map(pixelSize -> sigma / pixelSize).toArray();
+		RandomAccessible<FloatType> original = input.original();
+		Gauss3.gauss(sigmas, original, gauss);
+		int n = derivativeInterval.numDimensions();
 		Img<DoubleType> tmp = ops().create().img(RevampUtils.appendDimensionToInterval(
 			derivativeInterval, 0, n - 1), new DoubleType());
 		for (int i = 0; i < n; i++)
-			derive(input, Views.hyperSlice(tmp, n, i), i);
+			derive(gauss, Views.hyperSlice(tmp, n, i), i, pixelSizes[i]);
 		return tmp;
 	}
 
-	private void derive(RandomAccessible<FloatType> input, RandomAccessibleInterval<DoubleType> tmp,
-		int d)
+	private void derive(RandomAccessible<? extends RealType<?>> input,
+		RandomAccessibleInterval<? extends RealType<?>> tmp, int d, double pixelSize)
 	{
-		Kernel1D gauss = DerivedNormalDistribution.derivedGaussKernel(sigma, 0);
-		Kernel1D derived = DerivedNormalDistribution.derivedGaussKernel(sigma, 1);
-		Kernel1D[] kernels = IntStream.range(0, input.numDimensions())
-			.mapToObj(i -> i == d ? derived : gauss).toArray(Kernel1D[]::new);
-		SeparableKernelConvolution.convolution(kernels).process(input, tmp);
+		final RandomAccessibleInterval<? extends RealType<?>> back = Views.interval(input, Intervals
+			.translate(tmp, -1, d));
+		final RandomAccessibleInterval<? extends RealType<?>> front = Views.interval(input, Intervals
+			.translate(tmp, 1, d));
+		final double factor = 0.5 / pixelSize;
+		LoopBuilder.setImages(tmp, back, front).forEachPixel((r, b, f) -> {
+			r.setReal((f.getRealDouble() - b.getRealDouble()) * factor);
+		});
 	}
 }

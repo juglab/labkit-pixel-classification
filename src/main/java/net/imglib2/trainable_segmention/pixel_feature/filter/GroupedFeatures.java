@@ -11,6 +11,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SobelGradi
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.Hessian3DFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.HessianFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.structure.StructureFeature3D;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 
 import static java.lang.Boolean.FALSE;
@@ -79,6 +80,10 @@ public class GroupedFeatures {
 
 	public static FeatureSetting hessian3D(boolean absoluteValues) {
 		return createFeature(Hessian3DFeature.class, "absoluteValues", absoluteValues);
+	}
+
+	public static FeatureSetting structure() {
+		return createFeature(StructureFeature3D.class);
 	}
 
 	private static FeatureSetting createFeature(Class<? extends FeatureOp> aClass, Object... args) {

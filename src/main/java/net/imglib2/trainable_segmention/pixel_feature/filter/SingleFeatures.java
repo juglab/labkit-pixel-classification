@@ -11,6 +11,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessi
 import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.SingleLipschitzFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleSobelGradientFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.structure.SingleStructureFeature3D;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 
 /**
@@ -73,6 +74,11 @@ public class SingleFeatures {
 	public static FeatureSetting hessian3d(double sigma, boolean absoluteValues) {
 		return createFeature(SingleHessian3DFeature.class, "sigma", sigma, "absoluteValues",
 			absoluteValues);
+	}
+
+	public static FeatureSetting structure(double sigma, double integrationScale) {
+		return createFeature(SingleStructureFeature3D.class, "sigma", sigma, "integrationScale",
+			integrationScale);
 	}
 
 	private static FeatureSetting createFeature(Class<? extends FeatureOp> aClass, Object... args) {

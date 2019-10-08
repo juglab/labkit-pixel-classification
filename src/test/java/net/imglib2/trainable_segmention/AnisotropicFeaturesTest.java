@@ -38,7 +38,8 @@ public class AnisotropicFeaturesTest {
 //		testAnisotropy(GroupedFeatures.gauss());
 //		testAnisotropy(GroupedFeatures.laplacian());
 		// testAnisotropy(GroupedFeatures.legacyGabor()); // should be removed
-		testAnisotropy(SingleFeatures.lipschitz(0.01, 20));
+		testAnisotropy(GroupedFeatures.structure());
+//		testAnisotropy(SingleFeatures.lipschitz(0.01, 20));
 //		testAnisotropy(GroupedFeatures.min()); // make them anistropic by implementing, hyper elipsoid spherte
 //		testAnisotropy(GroupedFeatures.max());
 //		testAnisotropy(GroupedFeatures.median());
