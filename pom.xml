@@ -80,6 +80,7 @@
 		<license.copyrightOwners>Matthias Arzt</license.copyrightOwners>
 		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
+		<imglib2.version>5.8.0</imglib2.version>
 	</properties>
 
 	<repositories>
