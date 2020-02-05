@@ -145,12 +145,6 @@ public class FeatureInputTest {
 		assertEquals(expected, result.firstElement().getRealDouble(), 0.01);
 	}
 
-	@Test
-	public void testKernel1D() {
-		Kernel1D kernel = DerivedNormalDistribution.derivedGaussKernel(0.3, 0);
-		System.out.println(DoubleStream.of(kernel.fullKernel()).sum());
-	}
-
 	private double getValue(RandomAccessibleInterval<DoubleType> actual) {
 		RandomAccess<DoubleType> ra = actual.randomAccess();
 		ra.setPosition(new long[] { 0, 0, 0 });

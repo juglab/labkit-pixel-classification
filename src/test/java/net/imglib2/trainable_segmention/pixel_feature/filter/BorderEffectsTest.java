@@ -98,16 +98,6 @@ public class BorderEffectsTest {
 		Utils.assertImagesEqual(50.0, result, expected);
 	}
 
-	public void showDifference(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
-			.asList(feature));
-		FeatureCalculator group = new FeatureCalculator(Utils.ops(), featureSettings);
-		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
-		RandomAccessibleInterval<FloatType> result = calculateResult(group);
-		Utils.showPsnr(expected, result);
-		Utils.show(Utils.subtract(expected, result), expected, result);
-	}
-
 	public RandomAccessibleInterval<FloatType> calculateResult(FeatureCalculator feature) {
 		Interval featureInterval = RevampUtils.appendDimensionToInterval(interval, 0, feature.count() -
 			1);
@@ -121,24 +111,5 @@ public class BorderEffectsTest {
 		Interval featureInterval = RevampUtils.appendDimensionToInterval(interval, 0, feature.count() -
 			1);
 		return Views.interval(feature.apply(image), featureInterval);
-	}
-
-	public void showPsnrs() {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
-			.asList(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(),
-				GroupedFeatures.differenceOfGaussians(), GroupedFeatures.sobelGradient(), GroupedFeatures
-					.lipschitz(50), GroupedFeatures.min(), GroupedFeatures.max(), GroupedFeatures.mean(),
-				GroupedFeatures.median(), GroupedFeatures.variance()));
-		FeatureCalculator feature = new FeatureCalculator(Utils.ops(), featureSettings);
-		RandomAccessibleInterval<FloatType> allResults = calculateResult(feature);
-		RandomAccessibleInterval<FloatType> allExpected = calculateExpected(feature);
-		int axis = image.numDimensions();
-		List<String> attributes = feature.attributeLabels();
-		for (int i = 0; i < feature.count(); i++) {
-			RandomAccessibleInterval<FloatType> result = Views.hyperSlice(allResults, axis, i);
-			RandomAccessibleInterval<FloatType> expected = Views.hyperSlice(allExpected, axis, i);
-			String attribute = attributes.get(i);
-			System.out.println("Attribute: " + attribute + "   PSNR: " + Utils.psnr(expected, result));
-		}
 	}
 }

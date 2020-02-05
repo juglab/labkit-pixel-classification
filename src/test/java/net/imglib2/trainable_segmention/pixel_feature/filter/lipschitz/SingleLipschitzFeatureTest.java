@@ -30,7 +30,6 @@ public class SingleLipschitzFeatureTest {
 		LoopBuilder.setImages(result).forEachPixel(x -> x.sub(new FloatType(255)));
 		Img<FloatType> expected = createImage((x, y) -> (x == 2) && (y == 2) ? 0 : -1 + 0.1 * Math.sqrt(
 			Math.pow(x - 2, 2) + Math.pow(y - 2, 2)));
-		System.out.println(ToString.toString(result));
 		Utils.assertImagesEqual(35, expected, result);
 	}
 

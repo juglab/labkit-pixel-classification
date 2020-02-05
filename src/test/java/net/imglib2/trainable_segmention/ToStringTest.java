@@ -31,7 +31,6 @@ public class ToStringTest {
 		RandomAccessibleInterval<IntType> image = ArrayImgs.ints(new int[] { 1, 2, 3, 4, 5, 6, 7, 8 },
 			2, 2, 2);
 		String string = ToString.toString(image);
-		System.out.println(string);
 		assertEquals("{\n\t{\n\t\t{1, 2},\n\t\t{3, 4}\n\t},\n\t{\n\t\t{5, 6},\n\t\t{7, 8}\n\t}\n}",
 			string);
 	}
