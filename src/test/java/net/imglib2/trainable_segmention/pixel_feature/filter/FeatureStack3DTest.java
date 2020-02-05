@@ -47,19 +47,19 @@ public class FeatureStack3DTest {
 
 	private Img<FloatType> initSample() {
 		Img<FloatType> img = ArrayImgs.floats(new long[] { 50, 50, 50 });
-		String equation = "Math.sin(0.1 * p[0]) + Math.sin(1 * p[1]) + Math.cos(2 * p[2])";
+		String equation = "Math.sin(0.1 * p[0]) + Math.sin(0.2 * p[1]) + Math.cos(0.3 * p[2])";
 		ops.image().equation(img, equation);
 		return img;
 	}
 
 	@Test
 	public void testHessian() {
-		testFeature(FeatureStack3D.HESSIAN, Hessian3DFeature.class);
+		testFeature(50, FeatureStack3D.HESSIAN, GroupedFeatures.hessian3D(true));
 	}
 
 	@Test
 	public void testGaussian() {
-		testFeature(60, FeatureStack3D.GAUSSIAN, new FeatureSetting(GaussFeature.class));
+		testFeature(60, FeatureStack3D.GAUSSIAN, GroupedFeatures.gauss());
 	}
 
 	@Test
@@ -88,24 +88,18 @@ public class FeatureStack3DTest {
 	}
 
 	@Test
-	public void testLaplacian() {
-		testFeature(FeatureStack3D.LAPLACIAN, LaplacianFeature.class);
-	}
-
-	@Test
 	public void testDOG() {
-		testFeatureIgnoreAttributes(50, FeatureStack3D.DOG, new FeatureSetting(
-			DifferenceOfGaussiansFeature.class));
+		testFeatureIgnoreAttributes(50, FeatureStack3D.DOG, GroupedFeatures.differenceOfGaussians());
 	}
 
 	@Test
 	public void testStructure() {
-		testFeature(50, FeatureStack3D.STRUCTURE, GroupedFeatures.structure());
+		testFeature(45, FeatureStack3D.STRUCTURE, GroupedFeatures.structure());
 	}
 
-	private void testFeature(int featureID, Class<? extends FeatureOp> featureClass) {
-		final FeatureSetting featureSetting = FeatureSetting.fromClass(featureClass);
-		testFeature(50, featureID, featureSetting);
+	@Test
+	public void testGradient() {
+		testFeature(45, FeatureStack3D.EDGES, GroupedFeatures.gradient());
 	}
 
 	private void testFeature(int expectedPsnr, int featureID, FeatureSetting featureSetting) {
