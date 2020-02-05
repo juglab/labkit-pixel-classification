@@ -47,7 +47,6 @@ public class Gauss3Test<T extends RealType<T> & NativeType<T>> {
 		Utils.assertImagesEqual(45, secondDerivativeX(expected), secondDerivativeX(result));
 	}
 
-	@Ignore("The FastGauss currently deals poorly with the offset.")
 	@Test
 	public void testFastGauss() {
 		RandomAccessibleInterval<T> result = createEmptyImage();
