@@ -70,6 +70,11 @@ public class FeatureCalculationBenchmark {
 		return calculateFeature(GroupedFeatures.laplacian());
 	}
 
+	@Benchmark
+	public Object statistics() {
+		return calculateFeature(GroupedFeatures.statistics());
+	}
+
 	private Object calculateFeature(FeatureSetting setting) {
 		return Parallelization.runSingleThreaded(() -> {
 			final FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3d()

@@ -11,6 +11,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SobelGradi
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.Hessian3DFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.HessianFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.stats.StatisticsFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.structure.StructureFeature3D;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 
@@ -84,6 +85,17 @@ public class GroupedFeatures {
 
 	public static FeatureSetting structure() {
 		return createFeature(StructureFeature3D.class);
+	}
+
+	public static FeatureSetting statistics() {
+		return statistics(true, true, true, true);
+	}
+
+	public static FeatureSetting statistics(boolean min, boolean max, boolean mean,
+		boolean variance)
+	{
+		return createFeature(StatisticsFeature.class, "min", min, "max", max, "mean", mean, "variance",
+			variance);
 	}
 
 	private static FeatureSetting createFeature(Class<? extends FeatureOp> aClass, Object... args) {

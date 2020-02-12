@@ -11,6 +11,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessi
 import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.SingleLipschitzFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleSobelGradientFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleStatisticsFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.structure.SingleStructureFeature3D;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 
@@ -79,6 +80,13 @@ public class SingleFeatures {
 	public static FeatureSetting structure(double sigma, double integrationScale) {
 		return createFeature(SingleStructureFeature3D.class, "sigma", sigma, "integrationScale",
 			integrationScale);
+	}
+
+	public static FeatureSetting statistics(double radius, boolean min, boolean max, boolean mean,
+		boolean variance)
+	{
+		return createFeature(SingleStatisticsFeature.class, "radius", radius, "min", min, "max", max,
+			"mean", mean, "variance", variance);
 	}
 
 	private static FeatureSetting createFeature(Class<? extends FeatureOp> aClass, Object... args) {

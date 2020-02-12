@@ -89,13 +89,18 @@ public class BorderEffectsTest {
 		testFeature(GroupedFeatures.variance());
 	}
 
+	@Test
+	public void testStatistics() {
+		testFeature(GroupedFeatures.statistics());
+	}
+
 	public void testFeature(FeatureSetting feature) {
 		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
 			.asList(feature));
 		FeatureCalculator group = new FeatureCalculator(Utils.ops(), featureSettings);
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
 		RandomAccessibleInterval<FloatType> result = calculateResult(group);
-		Utils.assertImagesEqual(50.0, result, expected);
+		Utils.assertImagesEqual(120.0, result, expected);
 	}
 
 	public RandomAccessibleInterval<FloatType> calculateResult(FeatureCalculator feature) {

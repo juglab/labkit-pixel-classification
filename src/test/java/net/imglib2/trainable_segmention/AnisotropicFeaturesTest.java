@@ -6,6 +6,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.test.RandomImgs;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
@@ -113,6 +114,11 @@ public class AnisotropicFeaturesTest {
 	@Test
 	public void testMean() {
 		testAnisotropy(GroupedFeatures.mean());
+	}
+
+	@Test
+	public void testStatistics() {
+		testAnisotropy(GroupedFeatures.statistics());
 	}
 
 	private void testAnisotropy(FeatureSetting setting) {

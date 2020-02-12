@@ -1,6 +1,7 @@
 
 package preview.net.imglib2.algorithm.convolution;
 
+import edu.mines.jtk.dsp.Conv;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -26,7 +27,13 @@ class Concatenation<T> implements Convolution<T> {
 	private final List<Convolution<T>> steps;
 
 	Concatenation(final List<? extends Convolution<T>> steps) {
-		this.steps = new ArrayList<>(steps);
+		this.steps = new ArrayList<>(steps.size());
+		for (final Convolution<T> step : steps) {
+			if (step instanceof Concatenation)
+				this.steps.addAll(((Concatenation) step).steps);
+			else
+				this.steps.add(step);
+		}
 	}
 
 	@Override
