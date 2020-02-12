@@ -32,13 +32,13 @@ public class GradientFeatureTest {
 
 		// process
 		Img<FloatType> result = ops.create().img(interval, new FloatType());
-		SingleFeatures.gradient(0.0).newInstance(Utils.ops(), GlobalSettings.default3dSettings()).apply(
+		SingleFeatures.gradient(1.0).newInstance(Utils.ops(), GlobalSettings.default3dSettings()).apply(
 			in, Collections.singletonList(result));
 
 		// test
 		Img<FloatType> expected = ops.create().img(interval, new FloatType());
 		ops.image().equation(expected, "Math.sqrt(4 * p[0]*p[0] + 16 * p[1]*p[1] + 36 * p[2]*p[2])");
-		Utils.assertImagesEqual(100.0, expected, result);
+		Utils.assertImagesEqual(60.0, expected, result);
 	}
 
 	public static void main(String... args) {

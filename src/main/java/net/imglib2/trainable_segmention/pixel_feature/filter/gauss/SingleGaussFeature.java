@@ -38,7 +38,7 @@ public class SingleGaussFeature extends AbstractFeatureOp {
 		List<RandomAccessibleInterval<FloatType>> output)
 	{
 		try {
-			Gauss3.gauss(sigma * 0.4, input, output.get(0));
+			Gauss3.gauss(sigma, input, output.get(0));
 		}
 		catch (IncompatibleTypeException e) {
 			throw new RuntimeException(e);

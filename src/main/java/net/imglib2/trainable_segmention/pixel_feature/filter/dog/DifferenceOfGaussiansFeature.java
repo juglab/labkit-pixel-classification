@@ -12,6 +12,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Pair;
 import net.imglib2.util.ValuePair;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import preview.net.imglib2.algorithm.gauss3.Gauss3;
 import preview.net.imglib2.loops.LoopBuilder;
@@ -28,21 +29,26 @@ import java.util.stream.Collectors;
 @Plugin(type = FeatureOp.class, label = "Difference of Gaussians (Group)")
 public class DifferenceOfGaussiansFeature extends AbstractFeatureOp {
 
+	@Parameter
+	private double scaleFactor = 0.4;
+
 	private List<Double> sigmas;
 	private List<Pair<Double, Double>> sigmaPairs;
 
 	private List<Pair<Double, Double>> sigmaPairs() {
 		List<Pair<Double, Double>> sigmaPairs = new ArrayList<>();
-		for (double sigma1 : sigmas)
-			for (double sigma2 : sigmas)
-				if (sigma2 < sigma1)
+		for (double sigma2 : sigmas)
+			for (double sigma1 : sigmas)
+				if (sigma1 < sigma2)
 					sigmaPairs.add(new ValuePair<>(sigma1, sigma2));
 		return sigmaPairs;
 	}
 
 	@Override
 	public void initialize() {
-		sigmas = globalSettings().sigmas();
+		sigmas = globalSettings().sigmas().stream()
+			.map(radius -> scaleFactor * radius)
+			.collect(Collectors.toList());
 		sigmaPairs = sigmaPairs();
 	}
 
@@ -97,7 +103,7 @@ public class DifferenceOfGaussiansFeature extends AbstractFeatureOp {
 		Interval interval, double sigma)
 	{
 		Img<FloatType> result = ops().create().img(interval, new FloatType());
-		RevampUtils.wrapException(() -> Gauss3.gauss(sigma * 0.4, input, result));
+		RevampUtils.wrapException(() -> Gauss3.gauss(sigma, input, result));
 		return result;
 	}
 }
