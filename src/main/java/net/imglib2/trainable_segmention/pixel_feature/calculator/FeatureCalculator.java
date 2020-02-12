@@ -28,12 +28,16 @@ public class FeatureCalculator {
 
 	private final InputPreprocessor preprocessor;
 
+	private double[] pixelSize;
+
 	public FeatureCalculator(OpEnvironment ops, FeatureSettings settings) {
 		this.settings = settings;
 		List<FeatureOp> featureOps = settings.features().stream()
 			.map(x -> x.newInstance(ops, settings.globals())).collect(Collectors.toList());
 		this.joiner = new FeatureJoiner(featureOps);
 		this.preprocessor = initPreprocessor(settings.globals().channelSetting());
+		this.pixelSize = IntStream.range(0, settings.globals().numDimensions()).mapToDouble(ignore -> 1)
+			.toArray();
 	}
 
 	private InputPreprocessor initPreprocessor(ChannelSetting channelSetting) {
@@ -67,11 +71,17 @@ public class FeatureCalculator {
 		return prepend(settings.globals().channelSetting().channels(), joiner.attributeLabels());
 	}
 
+	/**
+	 * TODO what channel order? XYZC
+	 */
 	public void apply(RandomAccessible<?> input, List<RandomAccessibleInterval<FloatType>> output) {
 		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
 		List<List<RandomAccessibleInterval<FloatType>>> outputs = split(output, channels.size());
-		for (int i = 0; i < channels.size(); i++)
-			joiner.apply(new FeatureInput(channels.get(i), outputs.get(i).get(0)), outputs.get(i));
+		for (int i = 0; i < channels.size(); i++) {
+			FeatureInput in = new FeatureInput(channels.get(i), outputs.get(i).get(0));
+			in.setPixelSize(pixelSize);
+			joiner.apply(in, outputs.get(i));
+		}
 	}
 
 	public RandomAccessibleInterval<FloatType> apply(RandomAccessibleInterval<?> image) {
@@ -113,5 +123,9 @@ public class FeatureCalculator {
 	private static <T> List<T> filterByIndexPredicate(List<T> in, IntPredicate predicate) {
 		return IntStream.range(0, in.size()).filter(predicate).mapToObj(in::get).collect(Collectors
 			.toList());
+	}
+
+	public void setPixelSize(double... pixelSize) {
+		this.pixelSize = pixelSize;
 	}
 }
