@@ -12,12 +12,12 @@ public class GlobalSettingsTest {
 		GlobalSettings globalsA = GlobalSettings.default2d()
 			.channels(ChannelSetting.RGB)
 			.dimensions(2)
-			.radiiRange(3.0, 16.0)
+			.sigmaRange(3.0, 16.0)
 			.build();
 		GlobalSettings globalsB = GlobalSettings.default2d()
 			.channels(ChannelSetting.RGB)
 			.dimensions(2)
-			.radiiRange(3.0, 16.0)
+			.sigmaRange(3.0, 16.0)
 			.build();
 		assertEquals(globalsA.hashCode(), globalsB.hashCode());
 	}

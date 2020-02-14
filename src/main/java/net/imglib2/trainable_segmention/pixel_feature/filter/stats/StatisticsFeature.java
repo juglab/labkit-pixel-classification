@@ -28,7 +28,7 @@ public class StatisticsFeature extends AbstractGroupFeatureOp {
 
 	@Override
 	protected List<FeatureSetting> initFeatures() {
-		return globalSettings().radii().stream()
+		return globalSettings().sigmas().stream()
 			.map(r -> SingleFeatures.statistics(r, min, max, mean, variance))
 			.collect(Collectors.toList());
 	}

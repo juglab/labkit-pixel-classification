@@ -48,8 +48,7 @@ public class FeatureCalculatorTest {
 	public void test2() {
 		GlobalSettings globalSettings = GlobalSettings.default2d()
 			.channels(ChannelSetting.multiple(2))
-			.dimensions(2)
-			.radii(Collections.singletonList(1.0))
+			.dimensions(2).sigmas(Collections.singletonList(1.0))
 			.build();
 		FeatureSettings settings = new FeatureSettings(globalSettings, add_42, add_12);
 		FeatureCalculator calculator = new FeatureCalculator(ops, settings);

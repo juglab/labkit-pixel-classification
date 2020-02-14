@@ -64,8 +64,7 @@ public class SegmenterTestMultiChannel {
 	private Segmenter trainSegmenter() {
 		GlobalSettings globalSetting = GlobalSettings.default2d()
 			.channels(ChannelSetting.multiple(2))
-			.dimensions(2)
-			.radii(Collections.singletonList(1.0))
+			.dimensions(2).sigmas(Collections.singletonList(1.0))
 			.build();
 		FeatureSettings features = new FeatureSettings(globalSetting,
 			SingleFeatures.identity());

@@ -89,8 +89,6 @@ public class FeatureSettingsGui {
 
 		private final JFormattedTextField sigmasField;
 
-		private final JFormattedTextField scaleFactorField;
-
 		public GlobalsPanel(GlobalSettings globalSettings) {
 			channelSetting = globalSettings.channelSetting();
 			setLayout(new MigLayout("insets 0", "[]20pt[100pt]", "[][][]"));
@@ -101,19 +99,15 @@ public class FeatureSettingsGui {
 			add(dimensionsField, "wrap");
 			add(new JLabel("Radii:"));
 			sigmasField = new JFormattedTextField(new ListOfDoubleFormatter());
-			sigmasField.setValue(globalSettings.radii());
+			sigmasField.setValue(globalSettings.sigmas());
 			add(sigmasField, "grow, wrap");
-			add(new JLabel("Scale Factor:"));
-			scaleFactorField = new JFormattedTextField(globalSettings.scaleFactor());
-			add(scaleFactorField, "grow, wrap");
 		}
 
 		GlobalSettings get() {
 			return GlobalSettings.default2d()
 				.channels(channelSetting)
 				.dimensions(dimensionsField.getSelectedIndex() + 2)
-				.radii((List<Double>) sigmasField.getValue())
-				.scaleFactor((Double) scaleFactorField.getValue())
+				.sigmas((List<Double>) sigmasField.getValue())
 				.build();
 		}
 	}

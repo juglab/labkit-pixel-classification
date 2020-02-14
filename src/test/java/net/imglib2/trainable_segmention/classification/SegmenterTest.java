@@ -51,8 +51,7 @@ public class SegmenterTest {
 	private Segmenter trainClassifier() {
 		GlobalSettings globals = GlobalSettings.default2d()
 			.channels(ChannelSetting.SINGLE)
-			.dimensions(img.numDimensions())
-			.radii(Arrays.asList(1.0, 8.0, 16.0))
+			.dimensions(img.numDimensions()).sigmas(Arrays.asList(1.0, 8.0, 16.0))
 			.build();
 		FeatureSettings featureSettings = new FeatureSettings(globals, SingleFeatures.identity(),
 			GroupedFeatures.gauss());

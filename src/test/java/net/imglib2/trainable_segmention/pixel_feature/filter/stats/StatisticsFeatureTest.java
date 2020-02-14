@@ -4,9 +4,7 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.stats;
 import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.OpService;
 import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.ToString;
@@ -26,7 +24,7 @@ public class StatisticsFeatureTest {
 	public void test() {
 		OpEnvironment ops = new Context().service(OpService.class);
 		FeatureSetting featureSetting = GroupedFeatures.statistics();
-		FeatureOp feature = featureSetting.newInstance(ops, GlobalSettings.default2d().radii(1., 2.)
+		FeatureOp feature = featureSetting.newInstance(ops, GlobalSettings.default2d().sigmas(1., 2.)
 			.build());
 		Img<FloatType> input = ArrayImgs.floats(new float[] {
 			0, 0, 0, 0, 0,

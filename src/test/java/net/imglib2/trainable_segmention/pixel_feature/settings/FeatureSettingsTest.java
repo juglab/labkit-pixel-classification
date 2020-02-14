@@ -24,7 +24,7 @@ public class FeatureSettingsTest {
 		GlobalSettings settings = GlobalSettings.default2d()
 			.channels(ChannelSetting.RGB)
 			.dimensions(2)
-			.radiiRange(1.0, 16.0)
+			.sigmaRange(1.0, 16.0)
 			.build();
 		FeatureSettings differentFeatureGroup2 = new FeatureSettings(settings, SingleFeatures.gauss(
 			3.0));
@@ -45,7 +45,7 @@ public class FeatureSettingsTest {
 		GlobalSettings settings = GlobalSettings.default2d()
 			.channels(ChannelSetting.RGB)
 			.dimensions(4)
-			.radiiRange(1.0, 16.0)
+			.sigmaRange(1.0, 16.0)
 			.build();
 		testSerialization(new FeatureSettings(settings, SingleFeatures.hessian(3.0)));
 	}
