@@ -137,7 +137,15 @@ public class Utils {
 		RandomAccessibleInterval<T> expectedImage, RandomAccessibleInterval<T> resultImage)
 	{
 		assertIntervalEquals(expectedImage, resultImage);
-		ImageJFunctions.show(tile(expectedImage, resultImage, subtract(expectedImage, resultImage)));
+		ImagePlus window = ImageJFunctions.show(tile(expectedImage, resultImage, subtract(expectedImage,
+			resultImage)));
+		try {
+			while (window.isVisible())
+				Thread.sleep(100);
+		}
+		catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void show(Object... images) {

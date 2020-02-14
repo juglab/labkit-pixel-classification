@@ -22,6 +22,7 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.scijava.Context;
 import trainableSegmentation.FeatureStack3D;
@@ -52,11 +53,13 @@ public class FeatureStack3DTest {
 		return img;
 	}
 
+	@Ignore("Incompatible with FeatureStack3D.")
 	@Test
 	public void testHessian() {
 		testFeature(50, FeatureStack3D.HESSIAN, GroupedFeatures.hessian3D(true));
 	}
 
+	@Ignore("Compatible with FeatureStack, but incompatible with FeatureStack3D.")
 	@Test
 	public void testGaussian() {
 		testFeature(60, FeatureStack3D.GAUSSIAN, GroupedFeatures.gauss());
@@ -87,6 +90,7 @@ public class FeatureStack3DTest {
 		testFeature(50, FeatureStack3D.VARIANCE, GroupedFeatures.variance());
 	}
 
+	@Ignore("Compatible with FeatureStack, but incompatible with FeatureStack3D.")
 	@Test
 	public void testDOG() {
 		testFeatureIgnoreAttributes(50, FeatureStack3D.DOG, GroupedFeatures.differenceOfGaussians());
@@ -97,6 +101,7 @@ public class FeatureStack3DTest {
 		testFeature(45, FeatureStack3D.STRUCTURE, GroupedFeatures.structure());
 	}
 
+	@Ignore("Compatible with FeatureStack, but incompatible with FeatureStack3D.")
 	@Test
 	public void testGradient() {
 		testFeature(45, FeatureStack3D.EDGES, GroupedFeatures.gradient());

@@ -11,7 +11,6 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.loops.LoopBuilder;
-import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.classification.Segmenter;
 import net.imglib2.trainable_segmention.gson.GsonUtils;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -19,7 +18,6 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.scijava.Context;
 
@@ -37,7 +35,6 @@ public class BackwardCompatibilityTest {
 
 	private final OpService ops = new Context().service(OpService.class);
 
-	@Ignore("Not working yet.")
 	@Test
 	public void testSaved2dClassifier() {
 		Interval interval = new FinalInterval(100, 100);
@@ -82,7 +79,7 @@ public class BackwardCompatibilityTest {
 		segmenter.segment(result, Views.extendBorder(image));
 		Img<UnsignedShortType> expected = ImageJFunctions.wrapShort(Utils.loadImage(folder +
 			"expected-segmentation.tif"));
-		ImgLib2Assert.assertImageEqualsRealType(expected, result, 0.0);
+		Utils.assertImagesEqual(30, expected, result);
 	}
 
 	private Segmenter openSegmenter(String folder) {

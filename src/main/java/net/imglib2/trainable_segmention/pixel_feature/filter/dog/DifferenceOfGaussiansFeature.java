@@ -27,9 +27,9 @@ public class DifferenceOfGaussiansFeature extends AbstractFeatureOp {
 
 	private List<Pair<Double, Double>> sigmaPairs() {
 		List<Pair<Double, Double>> sigmaPairs = new ArrayList<>();
-		for (double sigma2 : sigmas)
-			for (double sigma1 : sigmas)
-				if (sigma1 < sigma2)
+		for (double sigma1 : sigmas)
+			for (double sigma2 : sigmas)
+				if (sigma2 < sigma1)
 					sigmaPairs.add(new ValuePair<>(sigma1, sigma2));
 		return sigmaPairs;
 	}
@@ -57,7 +57,7 @@ public class DifferenceOfGaussiansFeature extends AbstractFeatureOp {
 		for (int i = 0; i < output.size(); i++) {
 			Pair<Double, Double> sigma1and2 = sigmaPairs.get(i);
 			RandomAccessibleInterval<FloatType> target = output.get(i);
-			subtract(input.gauss(sigma1and2.getB()), input.gauss(sigma1and2.getA()), target);
+			subtract(input.gauss(sigma1and2.getB() * 0.4), input.gauss(sigma1and2.getA() * 0.4), target);
 		}
 	}
 

@@ -37,7 +37,7 @@ public class SingleGaussFeature extends AbstractFeatureOp {
 
 	@Override
 	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
-		LoopBuilder.setImages(input.gauss(sigma), output.get(0))
+		LoopBuilder.setImages(input.gauss(sigma * 0.4), output.get(0))
 			.forEachPixel((i, o) -> o.setReal(i.getRealFloat()));
 	}
 }

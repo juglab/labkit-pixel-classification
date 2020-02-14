@@ -46,7 +46,7 @@ public class SingleDifferenceOfGaussiansFeature extends AbstractFeatureOp {
 	}
 
 	private void dog(FeatureInput in, RandomAccessibleInterval<FloatType> out) {
-		LoopBuilder.setImages(in.gauss(sigma2), in.gauss(sigma1), out)
+		LoopBuilder.setImages(in.gauss(sigma2 * 0.4), in.gauss(sigma1 * 0.4), out)
 			.forEachPixel((a, b, r) -> r.setReal(a.getRealFloat() - b.getRealFloat()));
 	}
 }

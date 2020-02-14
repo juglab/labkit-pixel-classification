@@ -12,7 +12,7 @@ import org.scijava.plugin.Plugin;
 public class GradientFeature extends AbstractSigmaGroupFeatureOp {
 
 	public GradientFeature() {
-		super(false);
+		super(true);
 	}
 
 	@Override

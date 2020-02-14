@@ -33,7 +33,7 @@ public class SingleGradientFeature extends AbstractFeatureOp {
 
 	@Override
 	public List<String> attributeLabels() {
-		return Collections.singletonList("Edges_" + sigma);
+		return Collections.singletonList("Gradient_filter_" + sigma);
 	}
 
 	@Override
@@ -56,6 +56,6 @@ public class SingleGradientFeature extends AbstractFeatureOp {
 	private RandomAccessibleInterval<DoubleType> derive(FeatureInput input, int d) {
 		int[] orders = IntStream.range(0, globalSettings().numDimensions())
 			.map(i -> i == d ? 1 : 0).toArray();
-		return input.derivedGauss(sigma, orders);
+		return input.derivedGauss(sigma * 0.4, orders);
 	}
 }
