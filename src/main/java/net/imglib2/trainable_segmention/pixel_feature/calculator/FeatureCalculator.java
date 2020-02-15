@@ -2,6 +2,7 @@
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import net.imagej.ops.OpEnvironment;
+import net.imagej.ops.OpService;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -11,13 +12,19 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureJoiner;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
+import org.scijava.Context;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 public class FeatureCalculator {
@@ -38,6 +45,10 @@ public class FeatureCalculator {
 		this.preprocessor = initPreprocessor(settings.globals().channelSetting());
 		this.pixelSize = IntStream.range(0, settings.globals().numDimensions()).mapToDouble(ignore -> 1)
 			.toArray();
+	}
+
+	public static FeatureCalculator.Builder default2d() {
+		return new Builder();
 	}
 
 	private InputPreprocessor initPreprocessor(ChannelSetting channelSetting) {
@@ -127,5 +138,64 @@ public class FeatureCalculator {
 
 	public void setPixelSize(double... pixelSize) {
 		this.pixelSize = pixelSize;
+	}
+
+	public static class Builder {
+
+		private OpEnvironment ops;
+
+		private final GlobalSettings.Builder globalSettingBuilder = GlobalSettings.default2d();
+
+		private final List<FeatureSetting> features = new ArrayList<>();
+
+		private Builder() {}
+
+		public Builder sigmas(List<Double> sigmas) {
+			globalSettingBuilder.sigmas(sigmas);
+			return this;
+		}
+
+		public Builder sigmas(double... sigmas) {
+			globalSettingBuilder.sigmas(DoubleStream.of(sigmas).boxed().collect(Collectors.toList()));
+			return this;
+		}
+
+		public Builder dimensions(int n) {
+			globalSettingBuilder.dimensions(n);
+			return this;
+		}
+
+		public Builder channels(ChannelSetting value) {
+			globalSettingBuilder.channels(value);
+			return this;
+		}
+
+		public Builder ops(OpEnvironment ops) {
+			this.ops = ops;
+			return this;
+		}
+
+		public Builder addFeatures(FeatureSetting... features) {
+			this.features.addAll(Arrays.asList(features));
+			return this;
+		}
+
+		public Builder addFeature(Class<? extends FeatureOp> clazz, Object... parameters) {
+			this.features.add(new FeatureSetting(clazz, parameters));
+			return this;
+		}
+
+		public Builder addFeature(FeatureSetting featureSetting) {
+			addFeatures(featureSetting);
+			return this;
+		}
+
+		public FeatureCalculator build() {
+			if (ops == null)
+				ops = new Context().service(OpService.class);
+			GlobalSettings globalSettings = globalSettingBuilder.build();
+			FeatureSettings featureSettings = new FeatureSettings(globalSettings, features);
+			return new FeatureCalculator(ops, featureSettings);
+		}
 	}
 }
