@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 /**
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Difference of Gaussians (Group)")
 public class DifferenceOfGaussiansFeature extends AbstractFeatureOp {
 

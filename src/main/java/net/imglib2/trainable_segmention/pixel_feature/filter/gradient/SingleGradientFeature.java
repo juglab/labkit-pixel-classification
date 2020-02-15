@@ -18,8 +18,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * Created by arzt on 19.07.17.
+ * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Gradient")
 public class SingleGradientFeature extends AbstractFeatureOp {
 

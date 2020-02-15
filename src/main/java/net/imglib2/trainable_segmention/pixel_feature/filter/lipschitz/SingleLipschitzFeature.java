@@ -26,6 +26,7 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Lipschitz")
 public class SingleLipschitzFeature extends AbstractFeatureOp {
 

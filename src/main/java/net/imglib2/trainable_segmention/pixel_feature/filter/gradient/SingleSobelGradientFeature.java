@@ -25,6 +25,7 @@ import java.util.function.ToDoubleFunction;
  * 
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Sobel Gradient")
 public class SingleSobelGradientFeature extends AbstractFeatureOp {
 

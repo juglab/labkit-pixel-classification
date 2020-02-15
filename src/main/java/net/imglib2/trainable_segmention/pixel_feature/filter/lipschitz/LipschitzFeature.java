@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 /**
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Lipschitz (Group)")
 public class LipschitzFeature extends AbstractGroupFeatureOp {
 

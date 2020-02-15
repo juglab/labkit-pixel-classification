@@ -26,6 +26,7 @@ import java.util.stream.DoubleStream;
 /**
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Min/Max/Mean/Median/Variance")
 public class SingleSphereShapedFeature extends AbstractFeatureOp {
 

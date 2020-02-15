@@ -9,6 +9,7 @@ import org.scijava.plugin.Plugin;
 /**
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Hessian (Group)")
 public class HessianFeature extends AbstractSigmaGroupFeatureOp {
 

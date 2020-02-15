@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 /**
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Hessian")
 public class SingleHessian3DFeature extends AbstractFeatureOp {
 

@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 /**
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Hessian")
 public class SingleHessianFeature extends AbstractFeatureOp {
 
