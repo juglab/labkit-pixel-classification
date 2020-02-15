@@ -3,14 +3,16 @@ package net.imglib2.trainable_segmention.gui;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.util.ValuePair;
 import org.junit.Test;
 import org.scijava.Context;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.fail;
 
@@ -45,7 +47,9 @@ public class FeatureFilterTest {
 		net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleGradientFeature.class,
 		net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFeature.class,
 		net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature.class,
-		net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature.class);
+		net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleStatisticsFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.stats.StatisticsFeature.class);
 
 	@Test
 	public void testAvialableFeatures2d() {
@@ -54,7 +58,7 @@ public class FeatureFilterTest {
 	}
 
 	@Test
-	public void tests3d() {
+	public void testAvailableFeatures3d() {
 		GlobalSettings globals = GlobalSettings.default3d().build();
 		testAvailableFeatures(join(general, only3d), globals);
 	}
@@ -62,8 +66,10 @@ public class FeatureFilterTest {
 	private void testAvailableFeatures(Collection<Class<? extends FeatureOp>> expected,
 		GlobalSettings globals)
 	{
-		Map<String, Class<? extends FeatureOp>> f = AvailableFeatures.getMap(context, globals);
-		Collection<Class<? extends FeatureOp>> features = f.values();
+		List<ValuePair<Class<? extends FeatureOp>, String>> f = AvailableFeatures.getValidFeatures(
+			context, globals);
+		Collection<Class<? extends FeatureOp>> features = f.stream().map(ValuePair::getA).collect(
+			Collectors.toSet());
 		assertContainsEquals(expected, features);
 	}
 

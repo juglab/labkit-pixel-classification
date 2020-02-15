@@ -3,14 +3,14 @@ package net.imglib2.trainable_segmention.gui;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.util.ValuePair;
 import org.scijava.Context;
 import org.scijava.InstantiableException;
 import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class AvailableFeatures {
 
@@ -20,23 +20,23 @@ public class AvailableFeatures {
 		this.context = context;
 	}
 
-	public static Map<String, Class<? extends FeatureOp>> getMap(Context context,
-		GlobalSettings globals)
+	public static List<ValuePair<Class<? extends FeatureOp>, String>> getValidFeatures(
+		Context context, GlobalSettings globals)
 	{
-		Map<String, Class<? extends FeatureOp>> map = new TreeMap<>();
-		List<PluginInfo<FeatureOp>> pi = context.service(PluginService.class).getPluginsOfType(
+		List<ValuePair<Class<? extends FeatureOp>, String>> list = new ArrayList<>();
+		List<PluginInfo<FeatureOp>> pluginInfos = context.service(PluginService.class).getPluginsOfType(
 			FeatureOp.class);
-		for (PluginInfo<FeatureOp> pluginInfo : pi) {
+		for (PluginInfo<FeatureOp> pluginInfo : pluginInfos) {
 			try {
 				if (!isValid(pluginInfo, globals))
 					continue;
-				map.put(getLabel(pluginInfo), pluginInfo.loadClass());
+				list.add(new ValuePair<>(pluginInfo.loadClass(), getLabel(pluginInfo)));
 			}
 			catch (InstantiableException e) {
 				// ignore
 			}
 		}
-		return map;
+		return list;
 	}
 
 	private static boolean isValid(PluginInfo<FeatureOp> pluginInfo, GlobalSettings globals)

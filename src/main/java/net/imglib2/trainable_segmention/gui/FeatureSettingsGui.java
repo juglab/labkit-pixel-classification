@@ -14,6 +14,7 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.util.ValuePair;
 import net.miginfocom.swing.MigLayout;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
@@ -118,10 +119,12 @@ public class FeatureSettingsGui {
 
 	private JPopupMenu initMenu(GlobalSettings globals) {
 		JPopupMenu menu = new JPopupMenu();
-		Map<String, Class<? extends FeatureOp>> features = AvailableFeatures.getMap(context, globals);
-		features.forEach((label, featureClass) -> {
-			JMenuItem item = new JMenuItem(label);
-			item.addActionListener(l -> addPressed(featureClass));
+		List<ValuePair<Class<? extends FeatureOp>, String>> features = AvailableFeatures
+			.getValidFeatures(context, globals);
+		features.sort(Comparator.comparing(ValuePair::getB));
+		features.forEach(featureClassAndLabel -> {
+			JMenuItem item = new JMenuItem(featureClassAndLabel.getB());
+			item.addActionListener(l -> addPressed(featureClassAndLabel.getA()));
 			menu.add(item);
 		});
 		return menu;
@@ -267,8 +270,9 @@ public class FeatureSettingsGui {
 	}
 
 	private void checkFeatures(GlobalSettings globalSettings, Context context) {
-		Collection<Class<? extends FeatureOp>> availableFeatures = AvailableFeatures.getMap(context,
-			globalSettings).values();
+		Collection<Class<? extends FeatureOp>> availableFeatures = AvailableFeatures.getValidFeatures(
+			context, globalSettings)
+			.stream().map(ValuePair::getA).collect(Collectors.toSet());
 		List<Holder> invalid = model.items.stream()
 			.filter((Holder feature) -> !availableFeatures.contains(feature.get().pluginClass()))
 			.collect(Collectors.toList());
