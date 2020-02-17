@@ -3,12 +3,12 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.gradient;
 
 import net.imglib2.RandomAccessibleInterval;
 import preview.net.imglib2.loops.LoopBuilder;
+import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.view.Views;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -43,7 +43,7 @@ public class SingleGradientFeature extends AbstractFeatureOp {
 		List<RandomAccessibleInterval<DoubleType>> derivatives = IntStream
 			.range(0, n)
 			.mapToObj(d -> derive(input, d)).collect(Collectors.toList());
-		LoopBuilder.setImages(Views.collapse(Views.stack(derivatives)), output.get(0)).forEachPixel((in,
+		LoopBuilder.setImages(RevampUtils.vectorizeStack(derivatives), output.get(0)).forEachPixel((in,
 			out) -> {
 			double sum = 0;
 			for (int i = 0; i < n; i++) {

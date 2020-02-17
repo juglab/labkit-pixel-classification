@@ -1,33 +1,31 @@
 
 package net.imglib2.trainable_segmention;
 
-import net.imagej.ImgPlus;
 import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.OpService;
 import net.imglib2.*;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
-import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.IntegerType;
-import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Cast;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
+import net.imglib2.view.StackView;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import weka.core.DenseInstance;
 import preview.net.imglib2.algorithm.gauss3.Gauss3;
 
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -312,6 +310,19 @@ public class RevampUtils {
 			return uncheckedCast(input);
 		throw new IllegalArgumentException("RandomAccessible input must be of type " + tClass
 			.getName());
+	}
+
+	public static <T> RandomAccessibleInterval<Composite<T>> vectorizeStack(
+		RandomAccessibleInterval<T>... derivatives)
+	{
+		return vectorizeStack(Arrays.asList(derivatives));
+	}
+
+	public static <T> RandomAccessibleInterval<Composite<T>> vectorizeStack(
+		List<RandomAccessibleInterval<T>> derivatives)
+	{
+		return Cast.unchecked(Views.collapse(Views.stack(
+			StackView.StackAccessMode.MOVE_ALL_SLICE_ACCESSES, derivatives)));
 	}
 
 	public interface RunnableWithException {

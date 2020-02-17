@@ -6,10 +6,9 @@ import net.imglib2.algorithm.linalg.eigen.EigenValues;
 import net.imglib2.algorithm.linalg.eigen.EigenValuesSymmetric;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.RandomImgs;
+import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.type.numeric.real.DoubleType;
-import net.imglib2.view.StackView;
-import net.imglib2.view.Views;
-import net.imglib2.view.composite.GenericComposite;
+import net.imglib2.view.composite.Composite;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
@@ -45,8 +44,9 @@ public class EigenValueBenchmark {
 
 	@Benchmark
 	public Object benchmarkImgLib2AlgorithmEigenValuesSymmetric3D() {
-		RandomAccessibleInterval<? extends GenericComposite<DoubleType>> matrix = collapse(slices);
-		RandomAccessibleInterval<? extends GenericComposite<DoubleType>> result = collapse(eigenvalues);
+		RandomAccessibleInterval<Composite<DoubleType>> matrix = RevampUtils.vectorizeStack(slices);
+		RandomAccessibleInterval<Composite<DoubleType>> result = RevampUtils.vectorizeStack(
+			eigenvalues);
 		EigenValuesSymmetric<DoubleType, DoubleType> calculator = EigenValues.symmetric(3);
 		LoopBuilder.setImages(matrix, result).forEachPixel(calculator::compute);
 		return eigenvalues;
@@ -54,17 +54,12 @@ public class EigenValueBenchmark {
 
 	@Benchmark
 	public Object benchmarkEigenValuesSymmetric3D() {
-		RandomAccessibleInterval<? extends GenericComposite<DoubleType>> matrix = collapse(slices);
-		RandomAccessibleInterval<? extends GenericComposite<DoubleType>> result = collapse(eigenvalues);
+		RandomAccessibleInterval<Composite<DoubleType>> matrix = RevampUtils.vectorizeStack(slices);
+		RandomAccessibleInterval<Composite<DoubleType>> result = RevampUtils.vectorizeStack(
+			eigenvalues);
 		EigenValues<DoubleType, DoubleType> calculator = new EigenValuesSymmetric3D<>();
 		LoopBuilder.setImages(matrix, result).forEachPixel(calculator::compute);
 		return eigenvalues;
-	}
-
-	private static RandomAccessibleInterval<? extends GenericComposite<DoubleType>> collapse(
-		List<RandomAccessibleInterval<DoubleType>> slices)
-	{
-		return Views.collapse(Views.stack(StackView.StackAccessMode.MOVE_ALL_SLICE_ACCESSES, slices));
 	}
 
 	public static void main(String... args) throws RunnerException {

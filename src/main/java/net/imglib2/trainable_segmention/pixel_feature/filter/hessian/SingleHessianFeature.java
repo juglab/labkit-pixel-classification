@@ -3,17 +3,16 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.hessian;
 
 import net.imglib2.*;
 import net.imglib2.trainable_segmention.RevampUtils;
-import net.imglib2.img.Img;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
-import net.imglib2.view.Views;
-import net.imglib2.view.composite.RealComposite;
+import net.imglib2.view.composite.Composite;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import preview.net.imglib2.loops.LoopBuilder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,8 +35,7 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 
 	@Override
 	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
-		RandomAccessibleInterval<FloatType> features = Views.stack(output);
-		calculateHessianOnChannel(input.original(), features, sigma);
+		calculateHessianOnChannel(input.original(), output, sigma);
 	}
 
 	List<String> LABELS = Arrays.asList("", "_Trace", "_Determinant", "_Eigenvalue_1",
@@ -63,21 +61,12 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 	private static final int SQUARE_EIGENVALUE_DIFFERENCE = 6;
 	private static final int NORMALIZED_EIGENVALUE_DIFFERENCE = 7;
 
-	public RandomAccessibleInterval<FloatType> calculateHessianOnChannel(Img<FloatType> image,
-		double sigma)
-	{
-		Img<FloatType> features = ops().create().img(RevampUtils.appendDimensionToInterval(image, 0, 7),
-			new FloatType());
-		calculateHessianOnChannel(Views.extendBorder(image), features, sigma);
-		return features;
-	}
-
 	private void calculateHessianOnChannel(RandomAccessible<FloatType> image,
-		RandomAccessibleInterval<FloatType> out, double sigma)
+		List<RandomAccessibleInterval<FloatType>> output, double sigma)
 	{
 		double[] sigmas = { 0.4 * sigma, 0.4 * sigma };
 
-		Interval secondDerivativeInterval = RevampUtils.removeLastDimension(out);
+		Interval secondDerivativeInterval = output.get(0);
 		Interval firstDerivativeInterval = Intervals.union(
 			RevampUtils.deriveXRequiredInput(secondDerivativeInterval), RevampUtils.deriveYRequiredInput(
 				secondDerivativeInterval));
@@ -91,27 +80,19 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 			firstDerivativeInterval);
 		RandomAccessibleInterval<FloatType> dy = RevampUtils.deriveY(ops(), blurred,
 			firstDerivativeInterval);
-		RandomAccess<FloatType> dxx = RevampUtils.deriveX(ops(), dx, secondDerivativeInterval)
-			.randomAccess();
-		RandomAccess<FloatType> dxy = RevampUtils.deriveY(ops(), dx, secondDerivativeInterval)
-			.randomAccess();
-		RandomAccess<FloatType> dyy = RevampUtils.deriveY(ops(), dy, secondDerivativeInterval)
-			.randomAccess();
+		RandomAccessibleInterval<FloatType> dxx = RevampUtils.deriveX(ops(), dx,
+			secondDerivativeInterval);
+		RandomAccessibleInterval<FloatType> dxy = RevampUtils.deriveY(ops(), dx,
+			secondDerivativeInterval);
+		RandomAccessibleInterval<FloatType> dyy = RevampUtils.deriveY(ops(), dy,
+			secondDerivativeInterval);
 
-		Cursor<RealComposite<FloatType>> cursor = Views.iterable(Views.collapseReal(out)).cursor();
-		while (cursor.hasNext()) {
-			cursor.next();
-			dxx.setPosition(cursor);
-			dxy.setPosition(cursor);
-			dyy.setPosition(cursor);
-			float s_xx = dxx.get().get();
-			float s_xy = dxy.get().get();
-			float s_yy = dyy.get().get();
-			calculateHessianPerPixel(cursor.get(), s_xx, s_xy, s_yy);
-		}
+		LoopBuilder.setImages(RevampUtils.vectorizeStack(output), dxx, dxy, dyy).forEachPixel(
+			(o, s_xx, s_xy, s_yy) -> calculateHessianPerPixel(o, s_xx.getRealFloat(), s_xy.getRealFloat(),
+				s_yy.getRealFloat()));
 	}
 
-	private static void calculateHessianPerPixel(RealComposite<FloatType> output,
+	private static void calculateHessianPerPixel(Composite<FloatType> output,
 		float s_xx, float s_xy, float s_yy)
 	{
 		final double t = Math.pow(1, 0.75);

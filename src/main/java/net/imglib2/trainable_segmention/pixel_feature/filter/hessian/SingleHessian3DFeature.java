@@ -11,10 +11,10 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.algorithm.gradient.PartialDerivative;
 import net.imglib2.img.Img;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
-import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
+import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.RealComposite;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -51,7 +51,7 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 
 	@Override
 	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
-		calculateHessianOnChannel(input.original(), Views.stack(output), sigma);
+		calculateHessianOnChannel(input.original(), output, sigma);
 	}
 
 	@Override
@@ -60,11 +60,11 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 	}
 
 	private void calculateHessianOnChannel(RandomAccessible<FloatType> image,
-		RandomAccessibleInterval<FloatType> out, double sigma)
+		List<RandomAccessibleInterval<FloatType>> output, double sigma)
 	{
 		double[] sigmas = { 0.4 * sigma, 0.4 * sigma, 0.4 * sigma };
 
-		Interval secondDerivativeInterval = RevampUtils.removeLastDimension(out);
+		Interval secondDerivativeInterval = output.get(0);
 		Interval firstDerivativeInterval = Intervals.expand(secondDerivativeInterval, 1);
 		Interval blurredInterval = Intervals.expand(firstDerivativeInterval, 1);
 
@@ -76,7 +76,7 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 		RandomAccessibleInterval<RealComposite<FloatType>> secondDerivatives =
 			calculateSecondDerivatives(secondDerivativeInterval, dx, dy, dz);
 
-		RandomAccessibleInterval<RealComposite<FloatType>> eigenValues = Views.collapseReal(out);
+		RandomAccessibleInterval<Composite<FloatType>> eigenValues = RevampUtils.vectorizeStack(output);
 		EigenValuesSymmetric3D<FloatType, FloatType> ev = new EigenValuesSymmetric3D<>();
 		if (absoluteValues)
 			LoopBuilder.setImages(secondDerivatives, eigenValues).forEachPixel(

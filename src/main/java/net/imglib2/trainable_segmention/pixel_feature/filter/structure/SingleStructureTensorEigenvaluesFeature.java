@@ -66,7 +66,7 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 		convolution.process(products, blurredProducts);
 		EigenValues<DoubleType, FloatType> eigenvalueComputer = globalSettings().numDimensions() == 3
 			? new EigenValuesSymmetric3D() : EigenValues.symmetric2D();
-		LoopBuilder.setImages(Views.collapse(blurredProducts), Views.collapse(Views.stack(output)))
+		LoopBuilder.setImages(Views.collapse(blurredProducts), RevampUtils.vectorizeStack(output))
 			.forEachPixel(eigenvalueComputer::compute);
 	}
 

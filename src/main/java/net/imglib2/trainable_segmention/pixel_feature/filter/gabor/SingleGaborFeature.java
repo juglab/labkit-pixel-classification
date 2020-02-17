@@ -133,15 +133,6 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 		}
 	}
 
-	private RandomAccessibleInterval<FloatType> gaborProcessChannel(List<Img<FloatType>> kernels,
-		Img<FloatType> channel, String labelDetails)
-	{
-		RandomAccessibleInterval<FloatType> max = ops().create().img(channel);
-		RandomAccessibleInterval<FloatType> min = ops().create().img(channel);
-		gaborProcessChannel(kernels, Views.extendBorder(channel), max, min);
-		return Views.stack(max, min);
-	}
-
 	private void gaborProcessChannel(List<Img<FloatType>> kernels,
 		RandomAccessible<FloatType> channel, RandomAccessibleInterval<FloatType> max,
 		RandomAccessibleInterval<FloatType> min)

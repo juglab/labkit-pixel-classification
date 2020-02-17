@@ -3,15 +3,13 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.hessian;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.linalg.eigen.EigenValues;
+import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Cast;
-import net.imglib2.view.StackView;
-import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -84,19 +82,11 @@ public class SingleHessianEigenvaluesFeature extends AbstractFeatureOp {
 		RandomAccessibleInterval<DoubleType> dyy = input.derivedGauss(sigma, 0, 2, 0);
 		RandomAccessibleInterval<DoubleType> dyz = input.derivedGauss(sigma, 0, 1, 1);
 		RandomAccessibleInterval<DoubleType> dzz = input.derivedGauss(sigma, 0, 0, 2);
-		RandomAccessibleInterval<Composite<DoubleType>> derivative = collapse(dxx, dxy, dxz, dyy, dyz,
-			dzz);
-		RandomAccessibleInterval<Composite<FloatType>> eigenvalues = collapse(output.get(0), output.get(
-			1), output.get(2));
+		RandomAccessibleInterval<Composite<DoubleType>> derivative = RevampUtils.vectorizeStack(dxx,
+			dxy, dxz, dyy, dyz, dzz);
+		RandomAccessibleInterval<Composite<FloatType>> eigenvalues = RevampUtils.vectorizeStack(output);
 		EigenValues<DoubleType, FloatType> calculator = new EigenValuesSymmetric3D<>();
 		LoopBuilder.setImages(derivative, eigenvalues).forEachPixel(calculator::compute);
-	}
-
-	private static <T> RandomAccessibleInterval<Composite<T>> collapse(
-		RandomAccessibleInterval<T>... slices)
-	{
-		return Cast.unchecked(Views.collapse(Views.stack(
-			StackView.StackAccessMode.MOVE_ALL_SLICE_ACCESSES, slices)));
 	}
 
 }
