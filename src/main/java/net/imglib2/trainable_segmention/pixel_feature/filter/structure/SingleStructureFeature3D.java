@@ -15,7 +15,7 @@ import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
-import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.EigenValues;
+import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.EigenValuesSymmetric3D;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -57,9 +57,9 @@ public class SingleStructureFeature3D extends AbstractFeatureOp {
 			RevampUtils.appendDimensionToInterval(targetInterval, 0, 5));
 		convolution.process(products, blurredProducts);
 
-		EigenValues.Vector3D v = new EigenValues.Vector3D();
+		EigenValuesSymmetric3D eigenvalueComputer = new EigenValuesSymmetric3D();
 		LoopBuilder.setImages(Views.collapse(blurredProducts), Views.collapse(Views.stack(output)))
-			.forEachPixel((in, out) -> eigenValuePerPixel(v, in, out));
+			.forEachPixel(eigenvalueComputer::compute);
 	}
 
 	private Convolution<NumericType<?>> gaussConvolution(double[] pixelSizes) {
@@ -71,23 +71,6 @@ public class SingleStructureFeature3D extends AbstractFeatureOp {
 
 	private Kernel1D gaussKernel(double v) {
 		return Kernel1D.symmetric(Gauss3.halfkernels(new double[] { v })[0]);
-	}
-
-	static void eigenValuePerPixel(EigenValues.Vector3D tmp, Composite<DoubleType> in,
-		Composite<FloatType> out)
-	{
-		EigenValues.eigenvalues(tmp,
-			in.get(0).getRealDouble(),
-			in.get(1).getRealDouble(),
-			in.get(2).getRealDouble(),
-			in.get(3).getRealDouble(),
-			in.get(4).getRealDouble(),
-			in.get(5).getRealDouble());
-		EigenValues.abs(tmp);
-		EigenValues.sort(tmp);
-		out.get(0).setReal(tmp.x);
-		out.get(1).setReal(tmp.y);
-		out.get(2).setReal(tmp.z);
 	}
 
 	private RandomAccessibleInterval<DoubleType> products(

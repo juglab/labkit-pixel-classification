@@ -14,7 +14,7 @@ import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
-import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.EigenValues;
+import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.EigenValuesSymmetric3D;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
@@ -38,18 +38,6 @@ import static org.junit.Assert.assertArrayEquals;
 public class SingleStructureFeature3DTest {
 
 	private final OpService ops = new Context().service(OpService.class);
-
-	@Test
-	public void testEigenValues() {
-		RealComposite<DoubleType> in = new RealComposite<>(ArrayImgs.doubles(new double[] { 1, 2, 3, 4,
-			5, 6 }, 6).randomAccess(), 6);
-		float[] eigenValues = new float[3];
-		RealComposite<FloatType> out = new RealComposite<>(ArrayImgs.floats(eigenValues, 3)
-			.randomAccess(), 3);
-		EigenValues.Vector3D vector3D = new EigenValues.Vector3D();
-		SingleStructureFeature3D.eigenValuePerPixel(vector3D, in, out);
-		assertArrayEquals(new float[] { 11.345f, 0.516f, 0.171f }, eigenValues, 0.001f);
-	}
 
 	@Test
 	public void testCompareToImageScienceLibrary() {

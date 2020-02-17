@@ -2,7 +2,7 @@
 package net.imglib2.trainable_segmention.pixel_feature.filter.hessian;
 
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.linalg.eigen.EigenValuesSymmetric;
+import net.imglib2.algorithm.linalg.eigen.EigenValues;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -88,8 +88,7 @@ public class SingleHessianEigenvaluesFeature extends AbstractFeatureOp {
 			dzz);
 		RandomAccessibleInterval<Composite<FloatType>> eigenvalues = collapse(output.get(0), output.get(
 			1), output.get(2));
-		EigenValuesSymmetric<DoubleType, FloatType> calculator =
-			net.imglib2.algorithm.linalg.eigen.EigenValues.symmetric(3);
+		EigenValues<DoubleType, FloatType> calculator = new EigenValuesSymmetric3D<>();
 		LoopBuilder.setImages(derivative, eigenvalues).forEachPixel(calculator::compute);
 	}
 
