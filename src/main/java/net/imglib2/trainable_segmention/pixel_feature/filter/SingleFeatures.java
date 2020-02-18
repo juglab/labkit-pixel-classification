@@ -7,6 +7,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.dog2.SingleDifferen
 import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.SingleGaborFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussianBlurFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessianEigenvaluesFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.laplacian.SingleLaplacianOfGaussianFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.SingleLipschitzFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleSobelGradientFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
@@ -74,6 +75,10 @@ public class SingleFeatures {
 	public static FeatureSetting structure(double sigma, double integrationScale) {
 		return createFeature(SingleStructureTensorEigenvaluesFeature.class, "sigma", sigma,
 			"integrationScale", integrationScale);
+	}
+
+	public static FeatureSetting laplacian(double sigma) {
+		return createFeature(SingleLaplacianOfGaussianFeature.class, "sigma", sigma);
 	}
 
 	public static FeatureSetting statistics(double radius, boolean min, boolean max, boolean mean,

@@ -79,6 +79,11 @@ public class FeatureStack3DTest {
 	}
 
 	@Test
+	public void testLaplacian() {
+		testFeatureIgnoreAttributes(45, FeatureStack3D.LAPLACIAN, GroupedFeatures.laplacian());
+	}
+
+	@Test
 	public void testStructure() {
 		testFeatureIgnoreAttributes(45, FeatureStack3D.STRUCTURE, GroupedFeatures.structure());
 	}

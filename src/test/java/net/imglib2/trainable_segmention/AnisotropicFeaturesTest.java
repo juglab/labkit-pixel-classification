@@ -72,6 +72,11 @@ public class AnisotropicFeaturesTest {
 	}
 
 	@Test
+	public void testLaplacian() {
+		testAnisotropy(GroupedFeatures.laplacian());
+	}
+
+	@Test
 	public void testStructure() {
 		testAnisotropy3d(GroupedFeatures.structure());
 	}

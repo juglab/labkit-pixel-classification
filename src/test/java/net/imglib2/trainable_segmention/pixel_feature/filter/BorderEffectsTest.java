@@ -55,6 +55,11 @@ public class BorderEffectsTest {
 	}
 
 	@Test
+	public void testLaplacian() {
+		testFeature(GroupedFeatures.laplacian());
+	}
+
+	@Test
 	public void testGradient() {
 		testFeature(GroupedFeatures.sobelGradient());
 	}
