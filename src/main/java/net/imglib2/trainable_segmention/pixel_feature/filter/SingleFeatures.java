@@ -2,7 +2,7 @@
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.dog.SingleDifferenceOfGaussiansFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.dog2.SingleDifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.SingleGaborFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleGradientFeature;

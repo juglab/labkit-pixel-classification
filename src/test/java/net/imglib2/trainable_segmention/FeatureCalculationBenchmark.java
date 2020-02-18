@@ -66,11 +66,6 @@ public class FeatureCalculationBenchmark {
 	}
 
 	@Benchmark
-	public Object laplacian() {
-		return calculateFeature(GroupedFeatures.laplacian());
-	}
-
-	@Benchmark
 	public Object statistics() {
 		return calculateFeature(GroupedFeatures.statistics());
 	}

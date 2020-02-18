@@ -107,13 +107,8 @@ public class FeatureStackTest {
 		testFeature(40, FeatureStack.HESSIAN, GroupedFeatures.hessian());
 	}
 
-	@Ignore
 	@Test
 	public void testDifferenceOfGaussian() {
-		// NB: DifferenceOfGaussians is implemented such that it is compatible with
-		// FeatureStack3D
-		// There can not be a version that fits both, FeatureStack and FeatureStack3D.
-		// This is because they sort and name difference of gaussians differently.
 		testFeature(40, FeatureStack.DOG, new FeatureSetting(DifferenceOfGaussiansFeature.class));
 	}
 

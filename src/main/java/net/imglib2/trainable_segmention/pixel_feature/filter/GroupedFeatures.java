@@ -1,7 +1,7 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
-import net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.dog2.DifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.GradientFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.LipschitzFeature;

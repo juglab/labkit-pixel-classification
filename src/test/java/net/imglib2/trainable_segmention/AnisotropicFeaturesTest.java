@@ -57,11 +57,6 @@ public class AnisotropicFeaturesTest {
 		testAnisotropy(GroupedFeatures.differenceOfGaussians());
 	}
 
-	@Test
-	public void testLaplacian() {
-		testAnisotropy(GroupedFeatures.laplacian());
-	}
-
 	@Ignore("can be removed")
 	@Test
 	public void testSobelGradient() {

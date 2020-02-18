@@ -8,11 +8,6 @@ import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.Hessian3DFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.laplacian.LaplacianFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.structure.StructureFeature3D;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -88,12 +83,6 @@ public class FeatureStack3DTest {
 	@Test
 	public void testVariance() {
 		testFeature(50, FeatureStack3D.VARIANCE, GroupedFeatures.variance());
-	}
-
-	@Ignore("Compatible with FeatureStack, but incompatible with FeatureStack3D.")
-	@Test
-	public void testDOG() {
-		testFeatureIgnoreAttributes(50, FeatureStack3D.DOG, GroupedFeatures.differenceOfGaussians());
 	}
 
 	@Test
