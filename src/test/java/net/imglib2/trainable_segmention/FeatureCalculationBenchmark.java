@@ -57,7 +57,7 @@ public class FeatureCalculationBenchmark {
 
 	@Benchmark
 	public Object hessian3D() {
-		return calculateFeature(GroupedFeatures.hessian3D(false));
+		return calculateFeature(GroupedFeatures.hessian());
 	}
 
 	@Benchmark

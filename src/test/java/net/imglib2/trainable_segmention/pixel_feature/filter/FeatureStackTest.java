@@ -16,6 +16,7 @@ import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.HessianFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -104,7 +105,7 @@ public class FeatureStackTest {
 
 	@Test
 	public void testHessianStack() {
-		testFeature(40, FeatureStack.HESSIAN, GroupedFeatures.hessian());
+		testFeature(40, FeatureStack.HESSIAN, new FeatureSetting(HessianFeature.class));
 	}
 
 	@Test

@@ -66,7 +66,7 @@ public class SegmentationBenchmark {
 		final FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3d().build(),
 			GroupedFeatures.gauss(),
 			GroupedFeatures.differenceOfGaussians(),
-			GroupedFeatures.hessian3D(false),
+			GroupedFeatures.hessian(),
 			GroupedFeatures.gradient());
 		return Parallelization.runSingleThreaded(() -> Trainer.train(ops, image, labelRegions,
 			featureSettings));

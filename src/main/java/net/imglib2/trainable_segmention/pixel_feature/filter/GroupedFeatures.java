@@ -4,13 +4,12 @@ package net.imglib2.trainable_segmention.pixel_feature.filter;
 import net.imglib2.trainable_segmention.pixel_feature.filter.dog2.DifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussianBlurFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.GaussianGradientMagnitudeFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.HessianEigenvaluesFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.LipschitzFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.GaborFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SobelGradientFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.Hessian3DFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.HessianFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.StatisticsFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.structure.StructureFeature3D;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
@@ -72,15 +71,11 @@ public class GroupedFeatures {
 	}
 
 	public static FeatureSetting hessian() {
-		return createFeature(HessianFeature.class);
+		return createFeature(HessianEigenvaluesFeature.class);
 	}
 
 	public static FeatureSetting differenceOfGaussians() {
 		return createFeature(DifferenceOfGaussiansFeature.class);
-	}
-
-	public static FeatureSetting hessian3D(boolean absoluteValues) {
-		return createFeature(Hessian3DFeature.class, "absoluteValues", absoluteValues);
 	}
 
 	public static FeatureSetting structure() {

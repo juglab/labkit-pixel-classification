@@ -6,8 +6,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFe
 import net.imglib2.trainable_segmention.pixel_feature.filter.dog2.SingleDifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.SingleGaborFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussianBlurFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessian3DFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessianFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessianEigenvaluesFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.SingleLipschitzFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleSobelGradientFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
@@ -60,7 +59,7 @@ public class SingleFeatures {
 	}
 
 	public static FeatureSetting hessian(double sigma) {
-		return createFeature(SingleHessianFeature.class, "sigma", sigma);
+		return createFeature(SingleHessianEigenvaluesFeature.class, "sigma", sigma);
 	}
 
 	public static FeatureSetting differenceOfGaussians(double sigma1, double sigma2) {
@@ -70,11 +69,6 @@ public class SingleFeatures {
 
 	public static FeatureSetting sphereOperation(double radius, String operation) {
 		return createFeature(SingleSphereShapedFeature.class, "radius", radius, "operation", operation);
-	}
-
-	public static FeatureSetting hessian3d(double sigma, boolean absoluteValues) {
-		return createFeature(SingleHessian3DFeature.class, "sigma", sigma, "absoluteValues",
-			absoluteValues);
 	}
 
 	public static FeatureSetting structure(double sigma, double integrationScale) {

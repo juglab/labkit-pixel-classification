@@ -48,12 +48,6 @@ public class FeatureStack3DTest {
 		return img;
 	}
 
-	@Ignore("Incompatible with FeatureStack3D.")
-	@Test
-	public void testHessian() {
-		testFeature(50, FeatureStack3D.HESSIAN, GroupedFeatures.hessian3D(true));
-	}
-
 	@Test
 	public void testGaussian() {
 		testFeatureIgnoreAttributes(60, FeatureStack3D.GAUSSIAN, GroupedFeatures.gauss());

@@ -35,16 +35,9 @@ public class AnisotropicFeaturesTest {
 		testAnisotropy(GroupedFeatures.gradient());
 	}
 
-	@Ignore("Doesn't support anisotropic images.")
-	@Test
-	public void testHessian3D() {
-		testAnisotropy3d(GroupedFeatures.hessian3D(false));
-	}
-
-	@Ignore("Doesn't support anisotropic images.")
 	@Test
 	public void testHessian() {
-		testAnisotropy2d(35.0, GroupedFeatures.hessian());
+		testAnisotropy(GroupedFeatures.hessian());
 	}
 
 	@Test
