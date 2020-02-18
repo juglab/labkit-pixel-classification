@@ -4,8 +4,12 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.structure;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.algorithm.linalg.eigen.EigenValues;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
+import net.imglib2.view.composite.RealComposite;
+import org.scijava.plugin.Plugin;
 import preview.net.imglib2.algorithm.convolution.Convolution;
 import preview.net.imglib2.algorithm.convolution.kernel.Kernel1D;
 import preview.net.imglib2.algorithm.convolution.kernel.SeparableKernelConvolution;
@@ -25,8 +29,11 @@ import org.scijava.plugin.Parameter;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
-public class SingleStructureFeature3D extends AbstractFeatureOp {
+@Plugin(type = FeatureOp.class, label = "structure tensor eigenvalues")
+public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 
 	@Parameter
 	double sigma = 1.0;
@@ -36,14 +43,14 @@ public class SingleStructureFeature3D extends AbstractFeatureOp {
 
 	@Override
 	public int count() {
-		return 3;
+		return globalSettings().numDimensions();
 	}
 
 	@Override
 	public List<String> attributeLabels() {
-		return Arrays.asList("Structure_largest_" + sigma + "_" + integrationScale,
-			"Structure_middle_" + sigma + "_" + integrationScale,
-			"Structure_smallest_" + sigma + "_" + integrationScale);
+		List<String> prefix = getPrefix();
+		return prefix.stream().map(s -> "structure tensor - " + s + " eigenvalue sigma=" + sigma +
+			" integrationScale=" + integrationScale).collect(Collectors.toList());
 	}
 
 	@Override
@@ -54,10 +61,11 @@ public class SingleStructureFeature3D extends AbstractFeatureOp {
 		RandomAccessibleInterval<DoubleType> derivatives = derivatives(input, derivativeInterval);
 		RandomAccessibleInterval<DoubleType> products = products(derivatives);
 		RandomAccessibleInterval<DoubleType> blurredProducts = Views.interval(products,
-			RevampUtils.appendDimensionToInterval(targetInterval, 0, 5));
+			Intervals.addDimension(targetInterval, products.min(products.numDimensions() - 1), products
+				.max(products.numDimensions() - 1)));
 		convolution.process(products, blurredProducts);
-
-		EigenValuesSymmetric3D eigenvalueComputer = new EigenValuesSymmetric3D();
+		EigenValues<DoubleType, FloatType> eigenvalueComputer = globalSettings().numDimensions() == 3
+			? new EigenValuesSymmetric3D() : EigenValues.symmetric2D();
 		LoopBuilder.setImages(Views.collapse(blurredProducts), Views.collapse(Views.stack(output)))
 			.forEachPixel(eigenvalueComputer::compute);
 	}
@@ -74,24 +82,15 @@ public class SingleStructureFeature3D extends AbstractFeatureOp {
 	}
 
 	private RandomAccessibleInterval<DoubleType> products(
-		RandomAccessibleInterval<DoubleType> input)
+		RandomAccessibleInterval<DoubleType> derivatives)
 	{
-		Interval interval = RevampUtils.removeLastDimension(input);
-		RandomAccessibleInterval<DoubleType> output = ops().create().img(RevampUtils
-			.appendDimensionToInterval(interval, 0, 5), new DoubleType());
-		LoopBuilder.setImages(Views.collapse(input), Views.collapse(output)).forEachPixel(
-			SingleStructureFeature3D::productPerPixel);
+		Interval interval = RevampUtils.removeLastDimension(derivatives);
+		Interval outputInterval = Intervals.addDimension(interval, 0, getNumberOfProducts() - 1);
+		RandomAccessibleInterval<DoubleType> output = ops().create().img(outputInterval,
+			new DoubleType());
+		LoopBuilder.setImages(Views.collapseReal(derivatives), Views.collapseReal(output)).forEachPixel(
+			getProductPerPixelAction());
 		return output;
-	}
-
-	private static void productPerPixel(Composite<DoubleType> i, Composite<DoubleType> o) {
-		double x = i.get(0).getRealDouble(), y = i.get(1).getRealDouble(), z = i.get(2).getRealDouble();
-		o.get(0).setReal(x * x);
-		o.get(1).setReal(x * y);
-		o.get(2).setReal(x * z);
-		o.get(3).setReal(y * y);
-		o.get(4).setReal(y * z);
-		o.get(5).setReal(z * z);
 	}
 
 	private RandomAccessibleInterval<DoubleType> derivatives(FeatureInput input,
@@ -122,5 +121,41 @@ public class SingleStructureFeature3D extends AbstractFeatureOp {
 		LoopBuilder.setImages(tmp, back, front).forEachPixel((r, b, f) -> {
 			r.setReal((f.getRealDouble() - b.getRealDouble()) * factor);
 		});
+	}
+
+	// -- dimension specific helper methods --
+
+	private List<String> getPrefix() {
+		return globalSettings().numDimensions() == 3 ? Arrays.asList("largest", "middle", "smallest")
+			: Arrays.asList("largest", "smallest");
+	}
+
+	private int getNumberOfProducts() {
+		return globalSettings().numDimensions() == 3 ? 6 : 3;
+	}
+
+	private BiConsumer<RealComposite<DoubleType>, RealComposite<DoubleType>>
+		getProductPerPixelAction()
+	{
+		return globalSettings().numDimensions() == 3
+			? SingleStructureTensorEigenvaluesFeature::productPerPixel3d
+			: SingleStructureTensorEigenvaluesFeature::productPerPixel2d;
+	}
+
+	private static void productPerPixel3d(Composite<DoubleType> i, Composite<DoubleType> o) {
+		double x = i.get(0).getRealDouble(), y = i.get(1).getRealDouble(), z = i.get(2).getRealDouble();
+		o.get(0).setReal(x * x);
+		o.get(1).setReal(x * y);
+		o.get(2).setReal(x * z);
+		o.get(3).setReal(y * y);
+		o.get(4).setReal(y * z);
+		o.get(5).setReal(z * z);
+	}
+
+	private static void productPerPixel2d(Composite<DoubleType> i, Composite<DoubleType> o) {
+		double x = i.get(0).getRealDouble(), y = i.get(1).getRealDouble();
+		o.get(0).setReal(x * x);
+		o.get(1).setReal(x * y);
+		o.get(2).setReal(y * y);
 	}
 }

@@ -80,7 +80,7 @@ public class FeatureStack3DTest {
 
 	@Test
 	public void testStructure() {
-		testFeature(45, FeatureStack3D.STRUCTURE, GroupedFeatures.structure());
+		testFeatureIgnoreAttributes(45, FeatureStack3D.STRUCTURE, GroupedFeatures.structure());
 	}
 
 	@Test

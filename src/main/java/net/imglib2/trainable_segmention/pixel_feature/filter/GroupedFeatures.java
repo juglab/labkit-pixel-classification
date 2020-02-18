@@ -11,7 +11,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.GaborFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SobelGradientFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.StatisticsFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.structure.StructureFeature3D;
+import net.imglib2.trainable_segmention.pixel_feature.filter.structure.StructureTensorEigenvaluesFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 
 import static java.lang.Boolean.FALSE;
@@ -79,7 +79,7 @@ public class GroupedFeatures {
 	}
 
 	public static FeatureSetting structure() {
-		return createFeature(StructureFeature3D.class);
+		return createFeature(StructureTensorEigenvaluesFeature.class);
 	}
 
 	public static FeatureSetting statistics() {

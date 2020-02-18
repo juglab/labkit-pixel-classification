@@ -11,7 +11,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.SingleLip
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleSobelGradientFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleStatisticsFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.structure.SingleStructureFeature3D;
+import net.imglib2.trainable_segmention.pixel_feature.filter.structure.SingleStructureTensorEigenvaluesFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 
 /**
@@ -72,8 +72,8 @@ public class SingleFeatures {
 	}
 
 	public static FeatureSetting structure(double sigma, double integrationScale) {
-		return createFeature(SingleStructureFeature3D.class, "sigma", sigma, "integrationScale",
-			integrationScale);
+		return createFeature(SingleStructureTensorEigenvaluesFeature.class, "sigma", sigma,
+			"integrationScale", integrationScale);
 	}
 
 	public static FeatureSetting statistics(double radius, boolean min, boolean max, boolean mean,

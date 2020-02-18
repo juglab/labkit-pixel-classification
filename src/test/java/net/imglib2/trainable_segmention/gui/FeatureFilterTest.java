@@ -53,7 +53,9 @@ public class FeatureFilterTest {
 		net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature.class,
 		net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleStatisticsFeature.class,
 		net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature.class,
-		net.imglib2.trainable_segmention.pixel_feature.filter.stats.StatisticsFeature.class);
+		net.imglib2.trainable_segmention.pixel_feature.filter.stats.StatisticsFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.structure.SingleStructureTensorEigenvaluesFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.structure.StructureTensorEigenvaluesFeature.class);
 
 	@Test
 	public void testAvialableFeatures2d() {
