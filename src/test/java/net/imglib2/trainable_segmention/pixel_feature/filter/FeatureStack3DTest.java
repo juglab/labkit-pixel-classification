@@ -69,11 +69,6 @@ public class FeatureStack3DTest {
 	}
 
 	@Test
-	public void testMedian() {
-		testFeature(50, FeatureStack3D.MEDIAN, GroupedFeatures.median());
-	}
-
-	@Test
 	public void testVariance() {
 		testFeature(50, FeatureStack3D.VARIANCE, GroupedFeatures.variance());
 	}

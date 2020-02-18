@@ -87,31 +87,6 @@ public class AnisotropicFeaturesTest {
 	}
 
 	@Test
-	public void testMin() {
-		testAnisotropy(GroupedFeatures.min());
-	}
-
-	@Test
-	public void testMax() {
-		testAnisotropy(GroupedFeatures.max());
-	}
-
-	@Test
-	public void testMedian() {
-		testAnisotropy(GroupedFeatures.median());
-	}
-
-	@Test
-	public void testVariance() {
-		testAnisotropy(GroupedFeatures.variance());
-	}
-
-	@Test
-	public void testMean() {
-		testAnisotropy(GroupedFeatures.mean());
-	}
-
-	@Test
 	public void testStatistics() {
 		testAnisotropy(GroupedFeatures.statistics());
 	}

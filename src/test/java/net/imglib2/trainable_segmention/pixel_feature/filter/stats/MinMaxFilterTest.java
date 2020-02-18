@@ -8,6 +8,9 @@ import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.view.Views;
 import org.junit.Test;
 
+/**
+ * Tests {@link MinMaxFilter}.
+ */
 public class MinMaxFilterTest {
 
 	@Test

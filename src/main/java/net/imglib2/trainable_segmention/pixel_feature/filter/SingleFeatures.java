@@ -81,7 +81,27 @@ public class SingleFeatures {
 		return createFeature(SingleLaplacianOfGaussianFeature.class, "sigma", sigma);
 	}
 
-	public static FeatureSetting statistics(double radius, boolean min, boolean max, boolean mean,
+	public static FeatureSetting statistics(double radius) {
+		return statistics(radius, true, true, true, true);
+	}
+
+	public static FeatureSetting min(double radius) {
+		return statistics(radius, true, false, false, false);
+	}
+
+	public static FeatureSetting max(double radius) {
+		return statistics(radius, false, true, false, false);
+	}
+
+	public static FeatureSetting mean(double radius) {
+		return statistics(radius, false, false, true, false);
+	}
+
+	public static FeatureSetting variance(double radius) {
+		return statistics(radius, false, false, false, true);
+	}
+
+	private static FeatureSetting statistics(double radius, boolean min, boolean max, boolean mean,
 		boolean variance)
 	{
 		return createFeature(SingleStatisticsFeature.class, "radius", radius, "min", min, "max", max,

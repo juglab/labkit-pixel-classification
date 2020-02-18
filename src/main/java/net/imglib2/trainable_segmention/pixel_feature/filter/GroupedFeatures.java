@@ -43,26 +43,6 @@ public class GroupedFeatures {
 		return createFeature(GaussianGradientMagnitudeFeature.class);
 	}
 
-	public static FeatureSetting min() {
-		return createSphereShapeFeature(SingleSphereShapedFeature.MIN);
-	}
-
-	public static FeatureSetting max() {
-		return createSphereShapeFeature(SingleSphereShapedFeature.MAX);
-	}
-
-	public static FeatureSetting mean() {
-		return createSphereShapeFeature(SingleSphereShapedFeature.MEAN);
-	}
-
-	public static FeatureSetting median() {
-		return createSphereShapeFeature(SingleSphereShapedFeature.MEDIAN);
-	}
-
-	public static FeatureSetting variance() {
-		return createSphereShapeFeature(SingleSphereShapedFeature.VARIANCE);
-	}
-
 	private static FeatureSetting createSphereShapeFeature(String operation) {
 		return createFeature(SphereShapedFeature.class, "operation", operation);
 	}
@@ -91,7 +71,23 @@ public class GroupedFeatures {
 		return statistics(true, true, true, true);
 	}
 
-	public static FeatureSetting statistics(boolean min, boolean max, boolean mean,
+	public static FeatureSetting min() {
+		return statistics(true, false, false, false);
+	}
+
+	public static FeatureSetting max() {
+		return statistics(false, true, false, false);
+	}
+
+	public static FeatureSetting mean() {
+		return statistics(false, false, true, false);
+	}
+
+	public static FeatureSetting variance() {
+		return statistics(false, false, false, true);
+	}
+
+	private static FeatureSetting statistics(boolean min, boolean max, boolean mean,
 		boolean variance)
 	{
 		return createFeature(StatisticsFeature.class, "min", min, "max", max, "mean", mean, "variance",

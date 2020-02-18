@@ -40,6 +40,10 @@ import preview.net.imglib2.algorithm.convolution.kernel.SeparableKernelConvoluti
 
 import java.util.Arrays;
 
+/**
+ * Benchmarks {@link SumFilter} against {@link SeparableKernelConvolution}.
+ */
+
 @Fork(1)
 @State(Scope.Benchmark)
 @Warmup(iterations = 4)

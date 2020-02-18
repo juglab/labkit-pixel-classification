@@ -8,6 +8,7 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.ToString;
+import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
@@ -18,14 +19,19 @@ import net.imglib2.view.Views;
 import org.junit.Test;
 import org.scijava.Context;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+
 public class SingleStatisticsFeatureTest {
 
+	FeatureCalculator calculator = FeatureCalculator.default2d()
+		.addFeature(SingleFeatures.statistics(1))
+		.build();
+
 	@Test
-	public void test() {
-		OpEnvironment ops = new Context().service(OpService.class);
-		FeatureSetting featureSetting = new FeatureSetting(SingleStatisticsFeature.class, "min", true,
-			"max", true, "mean", true, "variance", true, "radius", 1);
-		FeatureOp feature = featureSetting.newInstance(ops, GlobalSettings.default2d().build());
+	public void testApply() {
 		Img<FloatType> input = ArrayImgs.floats(new float[] {
 			0, 0, 0, 0,
 			0, 1, -1, 0,
@@ -52,16 +58,27 @@ public class SingleStatisticsFeatureTest {
 			1 / 9f, 2 / 8f, 2 / 8f, 1 / 9f,
 			1 / 9f, 2 / 8f, 2 / 8f, 1 / 9f
 		}, 4, 3);
-		feature.apply(new FeatureInput(Views.extendBorder(input), input), RevampUtils.slices(output));
+		calculator.apply(Views.extendBorder(input), RevampUtils.slices(output));
 		ImgLib2Assert.assertImageEquals(Views.stack(expectedMin, expectedMax, expectedMean,
 			expectedVariance),
 			output);
 	}
 
 	@Test
+	public void testAttributeLabels() {
+		List<String> attributeLabels = calculator.attributeLabels();
+		List<String> expected = Arrays.asList(
+			"min filter radius=1.0",
+			"max filter radius=1.0",
+			"mean filter radius=1.0",
+			"variance filter radius=1.0");
+		assertEquals(expected, attributeLabels);
+	}
+
+	@Test
 	public void testRadius0() {
 		OpEnvironment ops = new Context().service(OpService.class);
-		FeatureSetting featureSetting = SingleFeatures.statistics(0, true, true, true, true);
+		FeatureSetting featureSetting = SingleFeatures.statistics(0);
 		FeatureOp feature = featureSetting.newInstance(ops, GlobalSettings.default2d().build());
 		Img<FloatType> input = ArrayImgs.floats(new float[] {
 			0, 0, 0, 0,
@@ -82,7 +99,7 @@ public class SingleStatisticsFeatureTest {
 	@Test
 	public void testAnisotropic() {
 		OpEnvironment ops = new Context().service(OpService.class);
-		FeatureSetting featureSetting = SingleFeatures.statistics(1, false, true, false, false);
+		FeatureSetting featureSetting = SingleFeatures.max(1);
 		FeatureOp feature = featureSetting.newInstance(ops, GlobalSettings.default2d().build());
 		Img<FloatType> input = ArrayImgs.floats(new float[] {
 			0, 0, 0, 0, 0,
@@ -102,7 +119,6 @@ public class SingleStatisticsFeatureTest {
 		FeatureInput featureInput = new FeatureInput(Views.extendBorder(input), input);
 		featureInput.setPixelSize(1.0, 2.0);
 		feature.apply(featureInput, RevampUtils.slices(output));
-		System.out.println(ToString.toString(output));
 		ImgLib2Assert.assertImageEquals(Views.stack(expectedMax), output);
 
 	}

@@ -12,7 +12,6 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
-import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -23,9 +22,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 
-@Plugin(type = FeatureOp.class, label = "Min/Max/Mean/Median")
+@Plugin(type = FeatureOp.class, label = "statistic filters")
 public class SingleStatisticsFeature extends AbstractFeatureOp {
 
 	@Parameter
@@ -55,10 +53,10 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 	@Override
 	public List<String> attributeLabels() {
 		List<String> attributes = new ArrayList<>();
-		if (min) attributes.add("min_" + radius);
-		if (max) attributes.add("max_" + radius);
-		if (mean) attributes.add("mean_" + radius);
-		if (variance) attributes.add("variance_" + radius);
+		if (min) attributes.add("min filter radius=" + radius);
+		if (max) attributes.add("max filter radius=" + radius);
+		if (mean) attributes.add("mean filter radius=" + radius);
+		if (variance) attributes.add("variance filter radius=" + radius);
 		return attributes;
 	}
 
@@ -67,7 +65,7 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 		if (radius <= 0)
 			applyRadiusZero(input, output);
 		else
-			applyRadiusGreateZero(input, output);
+			applyRadiusGreaterThanZero(input, output);
 	}
 
 	private void applyRadiusZero(FeatureInput input,
@@ -80,7 +78,7 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 		if (variance) LoopBuilder.setImages(o.next()).forEachPixel(FloatType::setZero);
 	}
 
-	private void applyRadiusGreateZero(FeatureInput input,
+	private void applyRadiusGreaterThanZero(FeatureInput input,
 		List<RandomAccessibleInterval<FloatType>> output)
 	{
 		Iterator<RandomAccessibleInterval<FloatType>> o = output.iterator();

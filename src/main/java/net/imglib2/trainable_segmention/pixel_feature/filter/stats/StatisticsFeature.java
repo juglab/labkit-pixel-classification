@@ -11,7 +11,7 @@ import org.scijava.plugin.Plugin;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Plugin(type = FeatureOp.class)
+@Plugin(type = FeatureOp.class, label = "statistic filters (group)")
 public class StatisticsFeature extends AbstractGroupFeatureOp {
 
 	@Parameter
@@ -29,7 +29,8 @@ public class StatisticsFeature extends AbstractGroupFeatureOp {
 	@Override
 	protected List<FeatureSetting> initFeatures() {
 		return globalSettings().sigmas().stream()
-			.map(r -> SingleFeatures.statistics(r, min, max, mean, variance))
+			.map(r -> new FeatureSetting(SingleStatisticsFeature.class, "radius", r,
+				"min", min, "max", max, "mean", mean, "variance", variance))
 			.collect(Collectors.toList());
 	}
 }

@@ -17,6 +17,8 @@ import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculat
 import net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.HessianFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -151,27 +153,33 @@ public class FeatureStackTest {
 
 	@Test
 	public void testMaximum() {
-		testFeature(27, FeatureStack.MAXIMUM, GroupedFeatures.max());
+		testFeature(27, FeatureStack.MAXIMUM, new FeatureSetting(SphereShapedFeature.class, "operation",
+			SingleSphereShapedFeature.MAX));
 	}
 
 	@Test
 	public void testMinimum() {
-		testFeature(30, FeatureStack.MINIMUM, GroupedFeatures.min());
+		testFeature(30, FeatureStack.MINIMUM, new FeatureSetting(SphereShapedFeature.class, "operation",
+			SingleSphereShapedFeature.MIN));
 	}
 
 	@Test
 	public void testMean() {
-		testFeature(40, FeatureStack.MEAN, GroupedFeatures.mean());
+		testFeature(40, FeatureStack.MEAN, new FeatureSetting(SphereShapedFeature.class, "operation",
+			SingleSphereShapedFeature.MEAN));
 	}
 
 	@Test
 	public void testVariance() {
-		testFeature(30, FeatureStack.VARIANCE, GroupedFeatures.variance());
+		testFeature(30, FeatureStack.VARIANCE, new FeatureSetting(SphereShapedFeature.class,
+			"operation",
+			SingleSphereShapedFeature.VARIANCE));
 	}
 
 	@Test
 	public void testMedian() {
-		testFeature(30, FeatureStack.MEDIAN, GroupedFeatures.median());
+		testFeature(30, FeatureStack.MEDIAN, new FeatureSetting(SphereShapedFeature.class, "operation",
+			SingleSphereShapedFeature.MEDIAN));
 	}
 
 	@Test

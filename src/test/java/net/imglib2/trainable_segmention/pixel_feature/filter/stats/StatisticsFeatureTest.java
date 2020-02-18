@@ -18,6 +18,9 @@ import net.imglib2.view.Views;
 import org.junit.Test;
 import org.scijava.Context;
 
+/**
+ * Tests {@link StatisticsFeature}.
+ */
 public class StatisticsFeatureTest {
 
 	@Test

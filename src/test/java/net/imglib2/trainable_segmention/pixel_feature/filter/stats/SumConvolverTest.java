@@ -10,6 +10,9 @@ import org.junit.Test;
 import preview.net.imglib2.algorithm.convolution.Convolution;
 import preview.net.imglib2.algorithm.convolution.LineConvolution;
 
+/**
+ * Tests {@link SumConvolver}.
+ */
 public class SumConvolverTest {
 
 	@Test

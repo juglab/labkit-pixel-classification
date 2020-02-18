@@ -37,6 +37,10 @@ import org.scijava.Context;
 
 import java.util.Collections;
 
+/**
+ * Benchmark that compares the performance of max filters in IJ1, ops and
+ * {@link MinMaxFilter}.
+ */
 @Fork(1)
 @State(Scope.Benchmark)
 @Warmup(iterations = 4)
@@ -71,7 +75,7 @@ public class MaxFilterBenchmark {
 	}
 
 	@Benchmark
-	public void testFeature() {
+	public void benchmarkOps() {
 		FeatureOp feature = SingleFeatures.sphereOperation(4, SingleSphereShapedFeature.MAX)
 			.newInstance(ops, GlobalSettings.default3d().build());
 		feature.apply(Views.extendBorder(input), Collections.singletonList(output));

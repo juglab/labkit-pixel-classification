@@ -9,6 +9,9 @@ import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.view.Views;
 import org.junit.Test;
 
+/**
+ * Tests {@link SumFilter}.
+ */
 public class SumFilterTest {
 
 	@Test
