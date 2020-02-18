@@ -44,7 +44,6 @@ public class FeatureFilterTest {
 		net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleDerivativesFeature.class,
 		net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleGradientFeature.class,
 		net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFeature.class,
-		net.imglib2.trainable_segmention.pixel_feature.filter.laplacian.LaplacianFeature.class,
 		net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature.class,
 		net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature.class);
 

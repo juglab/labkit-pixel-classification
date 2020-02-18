@@ -4,7 +4,6 @@ package net.imglib2.trainable_segmention.pixel_feature.filter;
 import net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.GradientFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.laplacian.LaplacianFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.LipschitzFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.GaborFeature;
@@ -64,10 +63,6 @@ public class GroupedFeatures {
 
 	private static FeatureSetting createSphereShapeFeature(String operation) {
 		return createFeature(SphereShapedFeature.class, "operation", operation);
-	}
-
-	public static FeatureSetting laplacian() {
-		return createFeature(LaplacianFeature.class);
 	}
 
 	public static FeatureSetting lipschitz(long border) {
