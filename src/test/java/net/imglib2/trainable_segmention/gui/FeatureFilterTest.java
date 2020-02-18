@@ -2,6 +2,8 @@
 package net.imglib2.trainable_segmention.gui;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussianBlurFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussianBlurFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.util.ValuePair;
 import org.junit.Test;
@@ -41,6 +43,8 @@ public class FeatureFilterTest {
 		net.imglib2.trainable_segmention.pixel_feature.filter.dog2.SingleDifferenceOfGaussiansFeature.class,
 		net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature.class,
 		net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussFeature.class,
+		GaussianBlurFeature.class,
+		SingleGaussianBlurFeature.class,
 		net.imglib2.trainable_segmention.pixel_feature.filter.gradient.GradientFeature.class,
 		net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleGradientFeature.class,
 		net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFeature.class,

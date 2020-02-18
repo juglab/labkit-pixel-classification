@@ -54,10 +54,9 @@ public class FeatureStack3DTest {
 		testFeature(50, FeatureStack3D.HESSIAN, GroupedFeatures.hessian3D(true));
 	}
 
-	@Ignore("Compatible with FeatureStack, but incompatible with FeatureStack3D.")
 	@Test
 	public void testGaussian() {
-		testFeature(60, FeatureStack3D.GAUSSIAN, GroupedFeatures.gauss());
+		testFeatureIgnoreAttributes(60, FeatureStack3D.GAUSSIAN, GroupedFeatures.gauss());
 	}
 
 	@Test

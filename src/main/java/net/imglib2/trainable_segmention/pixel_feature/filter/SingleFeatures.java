@@ -4,7 +4,7 @@ package net.imglib2.trainable_segmention.pixel_feature.filter;
 import net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.dog2.SingleDifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.SingleGaborFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussianBlurFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleGradientFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessian3DFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessianFeature;
@@ -44,7 +44,7 @@ public class SingleFeatures {
 	}
 
 	public static FeatureSetting gauss(double sigma) {
-		return createFeature(SingleGaussFeature.class, "sigma", sigma);
+		return createFeature(SingleGaussianBlurFeature.class, "sigma", sigma);
 	}
 
 	public static FeatureSetting sobelGradient(double sigma) {

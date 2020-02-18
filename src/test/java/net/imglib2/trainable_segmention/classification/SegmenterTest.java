@@ -8,7 +8,9 @@ import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
@@ -86,8 +88,8 @@ public class SegmenterTest {
 
 	@Test
 	public void testDifferentWekaClassifiers() {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
-			.asList(SingleFeatures.identity(), GroupedFeatures.gauss()));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(),
+			SingleFeatures.identity(), new FeatureSetting(GaussFeature.class));
 		Segmenter segmenter = Trainer.train(ops, img, labeling, featureSettings, new RandomCommittee());
 		RandomAccessibleInterval<? extends IntegerType> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());

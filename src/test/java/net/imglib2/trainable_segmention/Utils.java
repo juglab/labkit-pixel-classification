@@ -26,7 +26,9 @@ import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.ConstantUtils;
 import net.imglib2.util.Intervals;
+import net.imglib2.util.Localizables;
 import net.imglib2.util.Pair;
 import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
@@ -39,6 +41,7 @@ import java.net.URL;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.function.DoubleBinaryOperator;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -297,5 +300,30 @@ public class Utils {
 		RandomAccessibleInterval<T> target)
 	{
 		LoopBuilder.setImages(src, target).multiThreaded().forEachPixel((i, o) -> o.set(i));
+	}
+
+	public static double gauss(double sigma, double x, double y) {
+		return 1 / (2 * Math.PI * square(sigma)) * Math.exp(-0.5 / square(sigma) * (square(x) + square(
+			y)));
+	}
+
+	public static double square(double x) {
+		return x * x;
+	}
+
+	public static RandomAccessibleInterval<FloatType> create2dImage(Interval interval,
+		DoubleBinaryOperator function)
+	{
+		RandomAccessibleInterval<Localizable> positions = Views.interval(Localizables.randomAccessible(
+			2), interval);
+		Converter<Localizable, FloatType> converter = (i, o) -> o.setReal(function.applyAsDouble(i
+			.getDoublePosition(0), i.getDoublePosition(1)));
+		return Converters.convert(positions, converter, new FloatType());
+	}
+
+	public static RandomAccessible<FloatType> dirac2d() {
+		RandomAccessibleInterval<FloatType> floats = ConstantUtils.constantRandomAccessibleInterval(
+			new FloatType(1), new FinalInterval(1, 1));
+		return Views.extendZero(floats);
 	}
 }

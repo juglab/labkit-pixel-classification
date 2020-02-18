@@ -45,8 +45,11 @@ public class ColorFeatureGroupTest {
 
 	@Test
 	public void testAttributes() {
-		assertEquals(Arrays.asList("red_Gaussian_blur_8.0", "green_Gaussian_blur_8.0",
-			"blue_Gaussian_blur_8.0"), colorGroup.attributeLabels());
+		List<String> expected = Arrays.asList(
+			"red_gaussian blur sigma=8.0",
+			"green_gaussian blur sigma=8.0",
+			"blue_gaussian blur sigma=8.0");
+		assertEquals(expected, colorGroup.attributeLabels());
 	}
 
 	@Test
