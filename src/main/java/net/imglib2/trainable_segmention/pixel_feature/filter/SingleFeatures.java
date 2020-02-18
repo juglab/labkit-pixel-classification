@@ -1,11 +1,11 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
+import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleGaussianGradientMagnitudeFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.dog2.SingleDifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.SingleGaborFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussianBlurFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleGradientFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessian3DFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessianFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.SingleLipschitzFeature;
@@ -52,7 +52,7 @@ public class SingleFeatures {
 	}
 
 	public static FeatureSetting gradient(double sigma) {
-		return createFeature(SingleGradientFeature.class, "sigma", sigma);
+		return createFeature(SingleGaussianGradientMagnitudeFeature.class, "sigma", sigma);
 	}
 
 	public static FeatureSetting lipschitz(double slope, long border) {

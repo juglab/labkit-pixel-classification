@@ -3,7 +3,7 @@ package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.dog2.DifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussianBlurFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.GradientFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.GaussianGradientMagnitudeFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.LipschitzFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.GaborFeature;
@@ -40,7 +40,7 @@ public class GroupedFeatures {
 	}
 
 	public static FeatureSetting gradient() {
-		return createFeature(GradientFeature.class);
+		return createFeature(GaussianGradientMagnitudeFeature.class);
 	}
 
 	public static FeatureSetting min() {

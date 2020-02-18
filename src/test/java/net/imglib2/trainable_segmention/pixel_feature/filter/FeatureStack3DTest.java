@@ -89,10 +89,9 @@ public class FeatureStack3DTest {
 		testFeature(45, FeatureStack3D.STRUCTURE, GroupedFeatures.structure());
 	}
 
-	@Ignore("Compatible with FeatureStack, but incompatible with FeatureStack3D.")
 	@Test
 	public void testGradient() {
-		testFeature(45, FeatureStack3D.EDGES, GroupedFeatures.gradient());
+		testFeatureIgnoreAttributes(45, FeatureStack3D.EDGES, GroupedFeatures.gradient());
 	}
 
 	private void testFeature(int expectedPsnr, int featureID, FeatureSetting featureSetting) {
