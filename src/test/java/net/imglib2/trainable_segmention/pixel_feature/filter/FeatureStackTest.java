@@ -16,6 +16,7 @@ import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SobelGradientFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.HessianFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature;
@@ -105,19 +106,22 @@ public class FeatureStackTest {
 		return new FeatureCalculator(Utils.ops(), featureSettings).attributeLabels();
 	}
 
+	@Deprecated
 	@Test
 	public void testHessianStack() {
 		testFeature(40, FeatureStack.HESSIAN, new FeatureSetting(HessianFeature.class));
 	}
 
+	@Deprecated
 	@Test
 	public void testDifferenceOfGaussian() {
 		testFeature(40, FeatureStack.DOG, new FeatureSetting(DifferenceOfGaussiansFeature.class));
 	}
 
+	@Deprecated
 	@Test
 	public void testSobel() {
-		testFeature(40, FeatureStack.SOBEL, GroupedFeatures.sobelGradient());
+		testFeature(40, FeatureStack.SOBEL, new FeatureSetting(SobelGradientFeature.class));
 	}
 
 	@Test

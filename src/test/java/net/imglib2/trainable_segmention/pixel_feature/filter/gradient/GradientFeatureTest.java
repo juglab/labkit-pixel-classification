@@ -17,6 +17,7 @@ import java.util.Collections;
 /**
  * Created by arzt on 18.07.17.
  */
+@Deprecated
 public class GradientFeatureTest {
 
 	@Test

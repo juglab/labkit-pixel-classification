@@ -9,8 +9,6 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussia
 import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessianEigenvaluesFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.laplacian.SingleLaplacianOfGaussianFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.SingleLipschitzFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleSobelGradientFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleStatisticsFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.structure.SingleStructureTensorEigenvaluesFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
@@ -24,18 +22,21 @@ public class SingleFeatures {
 		return createFeature(IdendityFeature.class);
 	}
 
+	@Deprecated
 	public static FeatureSetting gabor(double sigma, double gamma, double psi, double frequency,
 		int nAngles)
 	{
 		return gabor(sigma, gamma, psi, frequency, nAngles, false);
 	}
 
+	@Deprecated
 	public static FeatureSetting legacyGabor(double sigma, double gamma, double psi, double frequency,
 		int nAngles)
 	{
 		return gabor(sigma, gamma, psi, frequency, nAngles, true);
 	}
 
+	@Deprecated
 	private static FeatureSetting gabor(double sigma, double gamma, double psi, double frequency,
 		int nAngles, boolean legacyNormalize)
 	{
@@ -47,14 +48,11 @@ public class SingleFeatures {
 		return createFeature(SingleGaussianBlurFeature.class, "sigma", sigma);
 	}
 
-	public static FeatureSetting sobelGradient(double sigma) {
-		return createFeature(SingleSobelGradientFeature.class, "sigma", sigma);
-	}
-
 	public static FeatureSetting gradient(double sigma) {
 		return createFeature(SingleGaussianGradientMagnitudeFeature.class, "sigma", sigma);
 	}
 
+	@Deprecated
 	public static FeatureSetting lipschitz(double slope, long border) {
 		return createFeature(SingleLipschitzFeature.class, "slope", slope, "border", border);
 	}
@@ -68,11 +66,7 @@ public class SingleFeatures {
 			sigma2);
 	}
 
-	public static FeatureSetting sphereOperation(double radius, String operation) {
-		return createFeature(SingleSphereShapedFeature.class, "radius", radius, "operation", operation);
-	}
-
-	public static FeatureSetting structure(double sigma, double integrationScale) {
+	public static FeatureSetting structureTensor(double sigma, double integrationScale) {
 		return createFeature(SingleStructureTensorEigenvaluesFeature.class, "sigma", sigma,
 			"integrationScale", integrationScale);
 	}

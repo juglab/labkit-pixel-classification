@@ -72,7 +72,7 @@ public class FeatureCalculationBenchmark {
 
 	@Benchmark
 	public Object structureTensor() {
-		return calculateFeature(GroupedFeatures.structure());
+		return calculateFeature(GroupedFeatures.structureTensor());
 	}
 
 	private Object calculateFeature(FeatureSetting setting) {

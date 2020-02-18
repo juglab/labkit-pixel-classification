@@ -18,6 +18,7 @@ import preview.net.imglib2.loops.LoopBuilder;
 import java.util.Collections;
 import java.util.function.DoubleBinaryOperator;
 
+@Deprecated
 public class SingleLipschitzFeatureTest {
 
 	@Test

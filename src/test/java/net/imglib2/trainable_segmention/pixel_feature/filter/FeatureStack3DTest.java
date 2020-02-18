@@ -5,6 +5,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import net.imagej.ops.OpService;
 import net.imglib2.FinalInterval;
+import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
@@ -17,7 +18,6 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.scijava.Context;
 import trainableSegmentation.FeatureStack3D;
@@ -54,33 +54,13 @@ public class FeatureStack3DTest {
 	}
 
 	@Test
-	public void testMinimum() {
-		testFeature(50, FeatureStack3D.MINIMUM, GroupedFeatures.min());
-	}
-
-	@Test
-	public void testMaximum() {
-		testFeature(50, FeatureStack3D.MAXIMUM, GroupedFeatures.max());
-	}
-
-	@Test
-	public void testMean() {
-		testFeature(50, FeatureStack3D.MEAN, GroupedFeatures.mean());
-	}
-
-	@Test
-	public void testVariance() {
-		testFeature(50, FeatureStack3D.VARIANCE, GroupedFeatures.variance());
-	}
-
-	@Test
 	public void testLaplacian() {
 		testFeatureIgnoreAttributes(45, FeatureStack3D.LAPLACIAN, GroupedFeatures.laplacian());
 	}
 
 	@Test
 	public void testStructure() {
-		testFeatureIgnoreAttributes(45, FeatureStack3D.STRUCTURE, GroupedFeatures.structure());
+		testFeatureIgnoreAttributes(45, FeatureStack3D.STRUCTURE, GroupedFeatures.structureTensor());
 	}
 
 	@Test

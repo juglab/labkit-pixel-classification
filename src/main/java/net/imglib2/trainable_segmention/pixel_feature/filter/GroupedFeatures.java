@@ -23,10 +23,12 @@ import static java.lang.Boolean.TRUE;
  */
 public class GroupedFeatures {
 
+	@Deprecated
 	public static FeatureSetting gabor() {
 		return createFeature(GaborFeature.class, "legacyNormalize", FALSE);
 	}
 
+	@Deprecated
 	public static FeatureSetting legacyGabor() {
 		return createFeature(GaborFeature.class, "legacyNormalize", TRUE);
 	}
@@ -35,22 +37,15 @@ public class GroupedFeatures {
 		return createFeature(GaussianBlurFeature.class);
 	}
 
-	public static FeatureSetting sobelGradient() {
-		return createFeature(SobelGradientFeature.class);
-	}
-
 	public static FeatureSetting gradient() {
 		return createFeature(GaussianGradientMagnitudeFeature.class);
-	}
-
-	private static FeatureSetting createSphereShapeFeature(String operation) {
-		return createFeature(SphereShapedFeature.class, "operation", operation);
 	}
 
 	public static FeatureSetting laplacian() {
 		return createFeature(LaplacianOfGaussianFeature.class);
 	}
 
+	@Deprecated
 	public static FeatureSetting lipschitz(long border) {
 		return createFeature(LipschitzFeature.class, "border", border);
 	}
@@ -63,7 +58,7 @@ public class GroupedFeatures {
 		return createFeature(DifferenceOfGaussiansFeature.class);
 	}
 
-	public static FeatureSetting structure() {
+	public static FeatureSetting structureTensor() {
 		return createFeature(StructureTensorEigenvaluesFeature.class);
 	}
 

@@ -43,10 +43,10 @@ public class SingleStructureTensorEigenvaluesFeatureTest {
 	private final double integrationScale = 5.0;
 
 	private final FeatureCalculator calculator3d = FeatureCalculator.default2d().dimensions(3)
-		.addFeature(SingleFeatures.structure(sigma, integrationScale)).build();
+		.addFeature(SingleFeatures.structureTensor(sigma, integrationScale)).build();
 
 	private final FeatureCalculator calculator2d = FeatureCalculator.default2d().dimensions(2)
-		.addFeature(SingleFeatures.structure(sigma, integrationScale)).build();
+		.addFeature(SingleFeatures.structureTensor(sigma, integrationScale)).build();
 
 	@Test
 	public void testApply3d() {

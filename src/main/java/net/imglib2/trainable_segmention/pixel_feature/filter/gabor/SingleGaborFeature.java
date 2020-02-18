@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 /**
+ * @deprecated
  * @author Matthias Arzt
  */
 @Deprecated

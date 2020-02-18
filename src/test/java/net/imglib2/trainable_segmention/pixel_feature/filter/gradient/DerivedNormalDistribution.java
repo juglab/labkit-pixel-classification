@@ -6,6 +6,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 
 import java.util.function.DoubleUnaryOperator;
 
+@Deprecated
 public final class DerivedNormalDistribution {
 
 	private static final double ONE_DIVIDED_SQRT_TWO_PI = 1 / Math.sqrt(2 * Math.PI);

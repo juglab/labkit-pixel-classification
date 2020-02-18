@@ -59,11 +59,7 @@ public class BorderEffectsTest {
 		testFeature(GroupedFeatures.laplacian());
 	}
 
-	@Test
-	public void testGradient() {
-		testFeature(GroupedFeatures.sobelGradient());
-	}
-
+	@Deprecated
 	@Test
 	public void testLipschitz() {
 		testFeature(GroupedFeatures.lipschitz(50));

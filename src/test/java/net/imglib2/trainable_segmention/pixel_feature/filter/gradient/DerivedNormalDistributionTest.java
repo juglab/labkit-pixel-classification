@@ -13,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Matthias Arzt
  */
+@Deprecated
 public class DerivedNormalDistributionTest {
 
 	@Test

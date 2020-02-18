@@ -6,7 +6,6 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.test.RandomImgs;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
@@ -50,27 +49,6 @@ public class AnisotropicFeaturesTest {
 		testAnisotropy(GroupedFeatures.differenceOfGaussians());
 	}
 
-	@Ignore("can be removed")
-	@Test
-	public void testSobelGradient() {
-		testAnisotropy(GroupedFeatures.sobelGradient()); // can be removed
-	}
-
-	@Ignore("can be easily fixed")
-	@Test
-	public void testGabor() {
-		testAnisotropy2d(GroupedFeatures.gabor()); // It's only 2D. Performance could be improved. Good
-																								// gabor filter would require steerable filters.
-		// To make gabor anisotropic it's required to introduce scaling in the
-		// calculation of the kernel
-	}
-
-	@Ignore("can be easily fixed")
-	@Test
-	public void testLegacyGabor() {
-		testAnisotropy2d(GroupedFeatures.legacyGabor()); // should be removed
-	}
-
 	@Test
 	public void testLaplacian() {
 		testAnisotropy(GroupedFeatures.laplacian());
@@ -78,7 +56,7 @@ public class AnisotropicFeaturesTest {
 
 	@Test
 	public void testStructure() {
-		testAnisotropy3d(GroupedFeatures.structure());
+		testAnisotropy3d(GroupedFeatures.structureTensor());
 	}
 
 	@Test
