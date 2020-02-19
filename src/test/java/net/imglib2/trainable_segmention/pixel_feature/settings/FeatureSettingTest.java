@@ -5,6 +5,7 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
 import org.scijava.module.Module;
@@ -52,7 +53,7 @@ public class FeatureSettingTest {
 	@Test
 	public void getModule() {
 		FeatureSetting fs = FeatureSetting.fromClass(TestFeature.class);
-		Module module = fs.asModule(GlobalSettings.default2dSettings());
+		Module module = fs.asModule(GlobalSettings.default2d().build());
 		assertTrue(module.getDelegateObject() instanceof TestFeature);
 	}
 
@@ -61,7 +62,7 @@ public class FeatureSettingTest {
 		FeatureSetting fs = FeatureSetting.fromClass(TestFeature.class);
 		double sigma = 4.2;
 		fs.setParameter("sigma", sigma);
-		TestFeature f = (TestFeature) fs.newInstance(Utils.ops(), GlobalSettings.default2dSettings());
+		TestFeature f = (TestFeature) fs.newInstance(Utils.ops(), GlobalSettings.default2d().build());
 		assertTrue(f.isInitialized());
 		assertEquals(sigma, f.sigma(), 0.001);
 	}
@@ -115,9 +116,7 @@ public class FeatureSettingTest {
 		}
 
 		@Override
-		public void apply(RandomAccessible<FloatType> input,
-			List<RandomAccessibleInterval<FloatType>> output)
-		{
+		public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
 			throw new UnsupportedOperationException();
 		}
 	}

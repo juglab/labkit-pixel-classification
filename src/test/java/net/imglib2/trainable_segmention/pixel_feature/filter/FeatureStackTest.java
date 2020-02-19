@@ -14,6 +14,12 @@ import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
+import net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SobelGradientFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.HessianFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -43,7 +49,7 @@ public class FeatureStackTest {
 	public static RandomAccessibleInterval<FloatType> createStack(
 		RandomAccessibleInterval<FloatType> image, FeatureSetting feature)
 	{
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
 			.asList(SingleFeatures.identity(), feature));
 		return new FeatureCalculator(Utils.ops(), featureSettings).apply(image);
 	}
@@ -62,13 +68,23 @@ public class FeatureStackTest {
 
 	@Test
 	public void testGaussStack() {
-		testFeature(40, FeatureStack.GAUSSIAN, GroupedFeatures.gauss());
+		testFeatureIgnoreAttributes(40, FeatureStack.GAUSSIAN, new FeatureSetting(GaussFeature.class));
 	}
 
 	private void testFeature(float expectedPsnr, int oldFeatureId, FeatureSetting newFeature) {
+		testFeatureIgnoreAttributes(expectedPsnr, oldFeatureId, newFeature);
+		testAttributes(oldFeatureId, newFeature);
+	}
+
+	private void testFeatureIgnoreAttributes(float expectedPsnr, int oldFeatureId,
+		FeatureSetting newFeature)
+	{
 		RandomAccessibleInterval<FloatType> expected = generateSingleFeature(bridgeImage, oldFeatureId);
 		RandomAccessibleInterval<FloatType> result = createStack(bridgeImg, newFeature);
 		Utils.assertImagesEqual(expectedPsnr, expected, result);
+	}
+
+	private void testAttributes(int oldFeatureId, FeatureSetting newFeature) {
 		List<String> expectedLabels = oldAttributes(oldFeatureId);
 		List<String> actualLabels = getAttributeLabels(newFeature);
 		assertEquals(expectedLabels, actualLabels);
@@ -85,24 +101,27 @@ public class FeatureStackTest {
 	}
 
 	public static List<String> getAttributeLabels(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
 			.asList(SingleFeatures.identity(), feature));
 		return new FeatureCalculator(Utils.ops(), featureSettings).attributeLabels();
 	}
 
+	@Deprecated
 	@Test
 	public void testHessianStack() {
-		testFeature(40, FeatureStack.HESSIAN, GroupedFeatures.hessian());
+		testFeature(40, FeatureStack.HESSIAN, new FeatureSetting(HessianFeature.class));
 	}
 
+	@Deprecated
 	@Test
 	public void testDifferenceOfGaussian() {
-		testFeature(40, FeatureStack.DOG, GroupedFeatures.differenceOfGaussians());
+		testFeature(40, FeatureStack.DOG, new FeatureSetting(DifferenceOfGaussiansFeature.class));
 	}
 
+	@Deprecated
 	@Test
 	public void testSobel() {
-		testFeature(40, FeatureStack.SOBEL, GroupedFeatures.sobelGradient());
+		testFeature(40, FeatureStack.SOBEL, new FeatureSetting(SobelGradientFeature.class));
 	}
 
 	@Test
@@ -138,27 +157,33 @@ public class FeatureStackTest {
 
 	@Test
 	public void testMaximum() {
-		testFeature(27, FeatureStack.MAXIMUM, GroupedFeatures.max());
+		testFeature(27, FeatureStack.MAXIMUM, new FeatureSetting(SphereShapedFeature.class, "operation",
+			SingleSphereShapedFeature.MAX));
 	}
 
 	@Test
 	public void testMinimum() {
-		testFeature(30, FeatureStack.MINIMUM, GroupedFeatures.min());
+		testFeature(30, FeatureStack.MINIMUM, new FeatureSetting(SphereShapedFeature.class, "operation",
+			SingleSphereShapedFeature.MIN));
 	}
 
 	@Test
 	public void testMean() {
-		testFeature(40, FeatureStack.MEAN, GroupedFeatures.mean());
+		testFeature(40, FeatureStack.MEAN, new FeatureSetting(SphereShapedFeature.class, "operation",
+			SingleSphereShapedFeature.MEAN));
 	}
 
 	@Test
 	public void testVariance() {
-		testFeature(30, FeatureStack.VARIANCE, GroupedFeatures.variance());
+		testFeature(30, FeatureStack.VARIANCE, new FeatureSetting(SphereShapedFeature.class,
+			"operation",
+			SingleSphereShapedFeature.VARIANCE));
 	}
 
 	@Test
 	public void testMedian() {
-		testFeature(30, FeatureStack.MEDIAN, GroupedFeatures.median());
+		testFeature(30, FeatureStack.MEDIAN, new FeatureSetting(SphereShapedFeature.class, "operation",
+			SingleSphereShapedFeature.MEDIAN));
 	}
 
 	@Test

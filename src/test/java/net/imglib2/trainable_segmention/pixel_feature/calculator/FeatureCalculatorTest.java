@@ -2,13 +2,12 @@
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import net.imagej.ops.OpService;
-import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
@@ -20,6 +19,7 @@ import net.imglib2.view.Views;
 import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
+import preview.net.imglib2.loops.LoopBuilder;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,7 +36,7 @@ public class FeatureCalculatorTest {
 
 	@Test
 	public void test1() {
-		GlobalSettings globalSettings = GlobalSettings.default2dSettings();
+		GlobalSettings globalSettings = GlobalSettings.default2d().build();
 		FeatureSettings settings = new FeatureSettings(globalSettings, add_42, add_12);
 		FeatureCalculator calculator = new FeatureCalculator(ops, settings);
 		Img<FloatType> input = ArrayImgs.floats(new float[] { 2 }, 1, 1);
@@ -46,8 +46,10 @@ public class FeatureCalculatorTest {
 
 	@Test
 	public void test2() {
-		GlobalSettings globalSettings = new GlobalSettings(ChannelSetting.multiple(2),
-			2, Collections.singletonList(1.0), 1);
+		GlobalSettings globalSettings = GlobalSettings.default2d()
+			.channels(ChannelSetting.multiple(2))
+			.dimensions(2).sigmas(Collections.singletonList(1.0))
+			.build();
 		FeatureSettings settings = new FeatureSettings(globalSettings, add_42, add_12);
 		FeatureCalculator calculator = new FeatureCalculator(ops, settings);
 		Img<FloatType> input = ArrayImgs.floats(new float[] { 2, 3 }, 1, 1, 2);
@@ -74,11 +76,11 @@ public class FeatureCalculatorTest {
 		}
 
 		@Override
-		public void apply(RandomAccessible<FloatType> input,
+		public void apply(FeatureInput input,
 			List<RandomAccessibleInterval<FloatType>> output)
 		{
-			IntervalView<FloatType> inputInterval = Views.interval(input, output.get(0));
-			LoopBuilder.setImages(inputInterval, output.get(0)).forEachPixel(
+			IntervalView<FloatType> inputInterval = Views.interval(input.original(), output.get(0));
+			LoopBuilder.setImages(inputInterval, output.get(0)).multiThreaded().forEachPixel(
 				(in, out) -> out.set(in.get() + (float) value));
 		}
 	}

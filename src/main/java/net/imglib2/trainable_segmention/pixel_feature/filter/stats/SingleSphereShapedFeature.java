@@ -7,22 +7,26 @@ import net.imagej.ops.special.computer.Computers;
 import net.imagej.ops.special.computer.UnaryComputerOp;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.algorithm.neighborhood.Neighborhood;
+import net.imglib2.algorithm.neighborhood.Shape;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import preview.net.imglib2.algorithm.neighborhood.HyperEllipsoidShape;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.DoubleStream;
 
 /**
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Min/Max/Mean/Median/Variance")
 public class SingleSphereShapedFeature extends AbstractFeatureOp {
 
@@ -61,7 +65,7 @@ public class SingleSphereShapedFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
+	public void apply(FeatureInput in, List<RandomAccessibleInterval<FloatType>> out) {
 		applySingle(in, out.get(0));
 	}
 
@@ -70,12 +74,11 @@ public class SingleSphereShapedFeature extends AbstractFeatureOp {
 		return Collections.singletonList(operation + "_" + radius);
 	}
 
-	private void applySingle(RandomAccessible<FloatType> in,
-		RandomAccessibleInterval<FloatType> out)
-	{
+	private void applySingle(FeatureInput in, RandomAccessibleInterval<FloatType> out) {
 		UnaryComputerOp<Iterable, DoubleType> computer = getComputer();
-		RandomAccessible<Neighborhood<FloatType>> neighborhoods = new HyperSphereShape((long) radius)
-			.neighborhoodsRandomAccessible(in);
+		Shape ellipsoid = new HyperEllipsoidShape(scaledRaduis(in.pixelSize()));
+		RandomAccessible<Neighborhood<FloatType>> neighborhoods = ellipsoid
+			.neighborhoodsRandomAccessible(in.original());
 		DoubleType tmp = new DoubleType();
 		Views.interval(Views.pair(neighborhoods, out), out).forEach(p -> {
 			computer.compute(p.getA(), tmp);
@@ -83,4 +86,7 @@ public class SingleSphereShapedFeature extends AbstractFeatureOp {
 		});
 	}
 
+	private double[] scaledRaduis(double[] pixelSizes) {
+		return DoubleStream.of(pixelSizes).map(pixelSize -> radius / pixelSize).toArray();
+	}
 }

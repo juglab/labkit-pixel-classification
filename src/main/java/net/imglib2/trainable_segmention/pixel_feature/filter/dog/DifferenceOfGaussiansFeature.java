@@ -1,30 +1,25 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.dog;
 
-import net.imglib2.FinalInterval;
-import net.imglib2.Interval;
-import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.gauss3.Gauss3;
-import net.imglib2.img.Img;
-import net.imglib2.loops.LoopBuilder;
-import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Pair;
 import net.imglib2.util.ValuePair;
 import org.scijava.plugin.Plugin;
+import preview.net.imglib2.loops.LoopBuilder;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Difference of Gaussians (Group)")
 public class DifferenceOfGaussiansFeature extends AbstractFeatureOp {
 
@@ -59,45 +54,19 @@ public class DifferenceOfGaussiansFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> input,
-		List<RandomAccessibleInterval<FloatType>> output)
-	{
-		Interval interval = new FinalInterval(output.get(0));
-		Map<Double, RandomAccessibleInterval<FloatType>> gausses = calculateGausses(input, interval);
-		calculateDifferences(gausses, output);
-	}
-
-	private void calculateDifferences(Map<Double, RandomAccessibleInterval<FloatType>> gausses,
-		List<RandomAccessibleInterval<FloatType>> output)
-	{
+	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
 		for (int i = 0; i < output.size(); i++) {
 			Pair<Double, Double> sigma1and2 = sigmaPairs.get(i);
 			RandomAccessibleInterval<FloatType> target = output.get(i);
-			subtract(gausses.get(sigma1and2.getB()), gausses.get(sigma1and2.getA()), target);
+			subtract(input.gauss(sigma1and2.getB() * 0.4), input.gauss(sigma1and2.getA() * 0.4), target);
 		}
 	}
 
-	private Map<Double, RandomAccessibleInterval<FloatType>> calculateGausses(
-		RandomAccessible<FloatType> input, Interval interval)
+	private static void subtract(RandomAccessibleInterval<? extends RealType<?>> minuend,
+		RandomAccessibleInterval<? extends RealType<?>> subtrahend,
+		RandomAccessibleInterval<FloatType> target)
 	{
-		Map<Double, RandomAccessibleInterval<FloatType>> gausses = new HashMap<>();
-		for (double sigma : sigmas)
-			gausses.put(sigma, gauss(input, interval, sigma));
-		return gausses;
-	}
-
-	private static void subtract(RandomAccessibleInterval<FloatType> minuend,
-		RandomAccessibleInterval<FloatType> subtrahend, RandomAccessibleInterval<FloatType> target)
-	{
-		LoopBuilder.setImages(minuend, subtrahend, target).forEachPixel(
+		LoopBuilder.setImages(minuend, subtrahend, target).multiThreaded().forEachPixel(
 			(m, s, t) -> t.setReal(m.getRealFloat() - s.getRealFloat()));
-	}
-
-	private RandomAccessibleInterval<FloatType> gauss(RandomAccessible<FloatType> input,
-		Interval interval, double sigma)
-	{
-		Img<FloatType> result = ops().create().img(interval, new FloatType());
-		RevampUtils.wrapException(() -> Gauss3.gauss(sigma * 0.4, input, result));
-		return result;
 	}
 }

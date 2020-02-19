@@ -1,16 +1,16 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
+import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleGaussianGradientMagnitudeFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.dog.SingleDifferenceOfGaussiansFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.dog2.SingleDifferenceOfGaussiansFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.SingleGaborFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleGradientFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessian3DFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessianFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussianBlurFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessianEigenvaluesFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.laplacian.SingleLaplacianOfGaussianFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.SingleLipschitzFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleSobelGradientFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleStatisticsFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.structure.SingleStructureTensorEigenvaluesFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 
 /**
@@ -22,18 +22,21 @@ public class SingleFeatures {
 		return createFeature(IdendityFeature.class);
 	}
 
+	@Deprecated
 	public static FeatureSetting gabor(double sigma, double gamma, double psi, double frequency,
 		int nAngles)
 	{
 		return gabor(sigma, gamma, psi, frequency, nAngles, false);
 	}
 
+	@Deprecated
 	public static FeatureSetting legacyGabor(double sigma, double gamma, double psi, double frequency,
 		int nAngles)
 	{
 		return gabor(sigma, gamma, psi, frequency, nAngles, true);
 	}
 
+	@Deprecated
 	private static FeatureSetting gabor(double sigma, double gamma, double psi, double frequency,
 		int nAngles, boolean legacyNormalize)
 	{
@@ -42,23 +45,20 @@ public class SingleFeatures {
 	}
 
 	public static FeatureSetting gauss(double sigma) {
-		return createFeature(SingleGaussFeature.class, "sigma", sigma);
-	}
-
-	public static FeatureSetting sobelGradient(double sigma) {
-		return createFeature(SingleSobelGradientFeature.class, "sigma", sigma);
+		return createFeature(SingleGaussianBlurFeature.class, "sigma", sigma);
 	}
 
 	public static FeatureSetting gradient(double sigma) {
-		return createFeature(SingleGradientFeature.class, "sigma", sigma);
+		return createFeature(SingleGaussianGradientMagnitudeFeature.class, "sigma", sigma);
 	}
 
+	@Deprecated
 	public static FeatureSetting lipschitz(double slope, long border) {
 		return createFeature(SingleLipschitzFeature.class, "slope", slope, "border", border);
 	}
 
 	public static FeatureSetting hessian(double sigma) {
-		return createFeature(SingleHessianFeature.class, "sigma", sigma);
+		return createFeature(SingleHessianEigenvaluesFeature.class, "sigma", sigma);
 	}
 
 	public static FeatureSetting differenceOfGaussians(double sigma1, double sigma2) {
@@ -66,13 +66,40 @@ public class SingleFeatures {
 			sigma2);
 	}
 
-	public static FeatureSetting sphereOperation(double radius, String operation) {
-		return createFeature(SingleSphereShapedFeature.class, "radius", radius, "operation", operation);
+	public static FeatureSetting structureTensor(double sigma, double integrationScale) {
+		return createFeature(SingleStructureTensorEigenvaluesFeature.class, "sigma", sigma,
+			"integrationScale", integrationScale);
 	}
 
-	public static FeatureSetting hessian3d(double sigma, boolean absoluteValues) {
-		return createFeature(SingleHessian3DFeature.class, "sigma", sigma, "absoluteValues",
-			absoluteValues);
+	public static FeatureSetting laplacian(double sigma) {
+		return createFeature(SingleLaplacianOfGaussianFeature.class, "sigma", sigma);
+	}
+
+	public static FeatureSetting statistics(double radius) {
+		return statistics(radius, true, true, true, true);
+	}
+
+	public static FeatureSetting min(double radius) {
+		return statistics(radius, true, false, false, false);
+	}
+
+	public static FeatureSetting max(double radius) {
+		return statistics(radius, false, true, false, false);
+	}
+
+	public static FeatureSetting mean(double radius) {
+		return statistics(radius, false, false, true, false);
+	}
+
+	public static FeatureSetting variance(double radius) {
+		return statistics(radius, false, false, false, true);
+	}
+
+	private static FeatureSetting statistics(double radius, boolean min, boolean max, boolean mean,
+		boolean variance)
+	{
+		return createFeature(SingleStatisticsFeature.class, "radius", radius, "min", min, "max", max,
+			"mean", mean, "variance", variance);
 	}
 
 	private static FeatureSetting createFeature(Class<? extends FeatureOp> aClass, Object... args) {

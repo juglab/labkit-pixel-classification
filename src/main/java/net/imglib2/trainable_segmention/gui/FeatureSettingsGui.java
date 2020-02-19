@@ -14,6 +14,7 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.util.ValuePair;
 import net.miginfocom.swing.MigLayout;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
@@ -89,8 +90,6 @@ public class FeatureSettingsGui {
 
 		private final JFormattedTextField sigmasField;
 
-		private final JFormattedTextField thicknessField;
-
 		public GlobalsPanel(GlobalSettings globalSettings) {
 			channelSetting = globalSettings.channelSetting();
 			setLayout(new MigLayout("insets 0", "[]20pt[100pt]", "[][][]"));
@@ -103,17 +102,14 @@ public class FeatureSettingsGui {
 			sigmasField = new JFormattedTextField(new ListOfDoubleFormatter());
 			sigmasField.setValue(globalSettings.sigmas());
 			add(sigmasField, "grow, wrap");
-			add(new JLabel("Membrane Thickness:"));
-			thicknessField = new JFormattedTextField(globalSettings.membraneThickness());
-			add(thicknessField, "grow, wrap");
 		}
 
 		GlobalSettings get() {
-			return new GlobalSettings(
-				channelSetting,
-				dimensionsField.getSelectedIndex() + 2,
-				(List<Double>) sigmasField.getValue(),
-				(Double) thicknessField.getValue());
+			return GlobalSettings.default2d()
+				.channels(channelSetting)
+				.dimensions(dimensionsField.getSelectedIndex() + 2)
+				.sigmas((List<Double>) sigmasField.getValue())
+				.build();
 		}
 	}
 
@@ -123,10 +119,12 @@ public class FeatureSettingsGui {
 
 	private JPopupMenu initMenu(GlobalSettings globals) {
 		JPopupMenu menu = new JPopupMenu();
-		Map<String, Class<? extends FeatureOp>> features = AvailableFeatures.getMap(context, globals);
-		features.forEach((label, featureClass) -> {
-			JMenuItem item = new JMenuItem(label);
-			item.addActionListener(l -> addPressed(featureClass));
+		List<ValuePair<Class<? extends FeatureOp>, String>> features = AvailableFeatures
+			.getValidFeatures(context, globals);
+		features.sort(Comparator.comparing(ValuePair::getB));
+		features.forEach(featureClassAndLabel -> {
+			JMenuItem item = new JMenuItem(featureClassAndLabel.getB());
+			item.addActionListener(l -> addPressed(featureClassAndLabel.getA()));
 			menu.add(item);
 		});
 		return menu;
@@ -194,7 +192,7 @@ public class FeatureSettingsGui {
 	public static void main(String... args) {
 		Context context = new Context();
 		final Optional<FeatureSettings> show = FeatureSettingsGui.show(context, new FeatureSettings(
-			GlobalSettings.default2dSettings()));
+			GlobalSettings.default2d().build()));
 		System.out.println(show.map(featureSettings -> featureSettings.toJson().toString()).orElse(
 			"Cancelled"));
 		System.out.println("finished");
@@ -272,8 +270,9 @@ public class FeatureSettingsGui {
 	}
 
 	private void checkFeatures(GlobalSettings globalSettings, Context context) {
-		Collection<Class<? extends FeatureOp>> availableFeatures = AvailableFeatures.getMap(context,
-			globalSettings).values();
+		Collection<Class<? extends FeatureOp>> availableFeatures = AvailableFeatures.getValidFeatures(
+			context, globalSettings)
+			.stream().map(ValuePair::getA).collect(Collectors.toSet());
 		List<Holder> invalid = model.items.stream()
 			.filter((Holder feature) -> !availableFeatures.contains(feature.get().pluginClass()))
 			.collect(Collectors.toList());

@@ -6,6 +6,7 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.algorithm.gradient.PartialDerivative;
 import net.imglib2.img.Img;
@@ -13,9 +14,11 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
+import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.RealComposite;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import preview.net.imglib2.loops.LoopBuilder;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +27,7 @@ import java.util.stream.Stream;
 /**
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Hessian")
 public class SingleHessian3DFeature extends AbstractFeatureOp {
 
@@ -40,16 +44,14 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 
 	@Override
 	public List<String> attributeLabels() {
-		return Stream.of("largest", "middle", "smallest").map(x -> "Hessian_" + x + "_" + sigma +
-			"_true")
+		return Stream.of("largest", "middle", "smallest").map(x -> "Hessian_" + x + "_" + sigma + "_" +
+			absoluteValues)
 			.collect(Collectors.toList());
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> input,
-		List<RandomAccessibleInterval<FloatType>> output)
-	{
-		calculateHessianOnChannel(input, Views.stack(output), sigma);
+	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
+		calculateHessianOnChannel(input.original(), output, sigma);
 	}
 
 	@Override
@@ -58,11 +60,11 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 	}
 
 	private void calculateHessianOnChannel(RandomAccessible<FloatType> image,
-		RandomAccessibleInterval<FloatType> out, double sigma)
+		List<RandomAccessibleInterval<FloatType>> output, double sigma)
 	{
 		double[] sigmas = { 0.4 * sigma, 0.4 * sigma, 0.4 * sigma };
 
-		Interval secondDerivativeInterval = RevampUtils.removeLastDimension(out);
+		Interval secondDerivativeInterval = output.get(0);
 		Interval firstDerivativeInterval = Intervals.expand(secondDerivativeInterval, 1);
 		Interval blurredInterval = Intervals.expand(firstDerivativeInterval, 1);
 
@@ -74,9 +76,13 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 		RandomAccessibleInterval<RealComposite<FloatType>> secondDerivatives =
 			calculateSecondDerivatives(secondDerivativeInterval, dx, dy, dz);
 
-		RandomAccessibleInterval<RealComposite<FloatType>> eigenValues = Views.collapseReal(out);
-		Views.interval(Views.pair(secondDerivatives, eigenValues), eigenValues).forEach(
-			p -> calculateEigenValues(p.getA(), p.getB()));
+		RandomAccessibleInterval<Composite<FloatType>> eigenValues = RevampUtils.vectorizeStack(output);
+		EigenValuesSymmetric3D<FloatType, FloatType> ev = new EigenValuesSymmetric3D<>();
+		if (absoluteValues)
+			LoopBuilder.setImages(secondDerivatives, eigenValues).forEachPixel(
+				ev::computeMagnitudeOfEigenvalues);
+		else
+			LoopBuilder.setImages(secondDerivatives, eigenValues).forEachPixel(ev::compute);
 	}
 
 	private RandomAccessibleInterval<RealComposite<FloatType>> calculateSecondDerivatives(
@@ -95,25 +101,6 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 		PartialDerivative.gradientCentralDifference(dy, slices.get(4), 2);
 		PartialDerivative.gradientCentralDifference(dz, slices.get(5), 2);
 		return Views.collapseReal(secondDerivatives);
-	}
-
-	private void calculateEigenValues(RealComposite<FloatType> derivatives,
-		RealComposite<FloatType> eigenValues)
-	{
-		EigenValues.Vector3D v = new EigenValues.Vector3D();
-		EigenValues.eigenvalues(v,
-			derivatives.get(0).getRealDouble(),
-			derivatives.get(1).getRealDouble(),
-			derivatives.get(2).getRealDouble(),
-			derivatives.get(3).getRealDouble(),
-			derivatives.get(4).getRealDouble(),
-			derivatives.get(5).getRealDouble());
-		if (absoluteValues)
-			EigenValues.abs(v);
-		EigenValues.sort(v);
-		eigenValues.get(0).setReal(v.x);
-		eigenValues.get(1).setReal(v.y);
-		eigenValues.get(2).setReal(v.z);
 	}
 
 	// -- Helper methods --

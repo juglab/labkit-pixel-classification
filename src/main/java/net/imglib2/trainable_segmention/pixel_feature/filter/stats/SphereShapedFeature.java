@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 /**
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Min/Max/Mean/Median/Variance (Group)")
 public class SphereShapedFeature extends AbstractGroupFeatureOp {
 
@@ -28,7 +29,8 @@ public class SphereShapedFeature extends AbstractGroupFeatureOp {
 
 	protected List<FeatureSetting> initFeatures() {
 		return globalSettings().sigmas().stream()
-			.map(r -> SingleFeatures.sphereOperation(r, operation))
+			.map(r -> new FeatureSetting(SingleSphereShapedFeature.class, "radius", r, "operation",
+				operation))
 			.collect(Collectors.toList());
 	}
 }

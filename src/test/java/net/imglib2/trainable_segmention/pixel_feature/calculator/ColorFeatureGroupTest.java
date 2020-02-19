@@ -7,7 +7,7 @@ import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
-import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
+import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -26,25 +26,30 @@ import static org.junit.Assert.assertEquals;
  */
 public class ColorFeatureGroupTest {
 
-	private final GlobalSettings colorSettings = new GlobalSettings(ChannelSetting.RGB,
-		2, Arrays.asList(8.0), 1.0);
+	private final GlobalSettings colorSettings = GlobalSettings.default2d()
+		.channels(ChannelSetting.RGB)
+		.build();
 
-	private final GlobalSettings graySettings = new GlobalSettings(ChannelSetting.SINGLE,
-		2, colorSettings.sigmas(), colorSettings.membraneThickness());
+	private final GlobalSettings graySettings = GlobalSettings.default2d()
+		.channels(ChannelSetting.SINGLE)
+		.build();
 
 	private final FeatureCalculator colorGroup = new FeatureCalculator(Utils.ops(),
-		new FeatureSettings(colorSettings, GroupedFeatures.gauss()));
+		new FeatureSettings(colorSettings, SingleFeatures.gauss(8.0)));
 
 	private final FeatureCalculator grayGroup = new FeatureCalculator(Utils.ops(),
-		new FeatureSettings(graySettings, GroupedFeatures.gauss()));
+		new FeatureSettings(graySettings, SingleFeatures.gauss(8.0)));
 
 	private final Img<ARGBType> image = ImageJFunctions.wrapRGBA(new ImagePlus(
 		"https://imagej.nih.gov/ij/images/clown.png"));
 
 	@Test
 	public void testAttributes() {
-		assertEquals(Arrays.asList("red_Gaussian_blur_8.0", "green_Gaussian_blur_8.0",
-			"blue_Gaussian_blur_8.0"), colorGroup.attributeLabels());
+		List<String> expected = Arrays.asList(
+			"red_gaussian blur sigma=8.0",
+			"green_gaussian blur sigma=8.0",
+			"blue_gaussian blur sigma=8.0");
+		assertEquals(expected, colorGroup.attributeLabels());
 	}
 
 	@Test

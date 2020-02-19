@@ -8,7 +8,9 @@ import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
@@ -22,7 +24,6 @@ import net.imglib2.view.Views;
 import org.junit.Test;
 import weka.classifiers.meta.RandomCommittee;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -50,8 +51,10 @@ public class SegmenterTest {
 	}
 
 	private Segmenter trainClassifier() {
-		GlobalSettings globals = new GlobalSettings(ChannelSetting.SINGLE, img.numDimensions(), Arrays
-			.asList(1.0, 8.0, 16.0), 3.0);
+		GlobalSettings globals = GlobalSettings.default2d()
+			.channels(ChannelSetting.SINGLE)
+			.dimensions(img.numDimensions()).sigmas(Arrays.asList(1.0, 8.0, 16.0))
+			.build();
 		FeatureSettings featureSettings = new FeatureSettings(globals, SingleFeatures.identity(),
 			GroupedFeatures.gauss());
 		return Trainer.train(ops, img, labeling, featureSettings);
@@ -85,8 +88,8 @@ public class SegmenterTest {
 
 	@Test
 	public void testDifferentWekaClassifiers() {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays
-			.asList(SingleFeatures.identity(), GroupedFeatures.gauss()));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(),
+			SingleFeatures.identity(), new FeatureSetting(GaussFeature.class));
 		Segmenter segmenter = Trainer.train(ops, img, labeling, featureSettings, new RandomCommittee());
 		RandomAccessibleInterval<? extends IntegerType> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());

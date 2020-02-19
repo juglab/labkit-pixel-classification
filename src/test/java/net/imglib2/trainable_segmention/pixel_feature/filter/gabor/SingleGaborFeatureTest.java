@@ -10,8 +10,9 @@ import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
 
 /**
- * @author Matthias Arzt
+ * Test {@link SingleGaborFeature}
  */
+@Deprecated
 public class SingleGaborFeatureTest {
 
 	@Test

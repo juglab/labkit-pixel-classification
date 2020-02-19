@@ -1,34 +1,31 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.gradient;
 
-import net.imglib2.Interval;
-import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
+import preview.net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.RevampUtils;
-import net.imglib2.algorithm.gauss3.Gauss3;
-import net.imglib2.algorithm.gradient.PartialDerivative;
-import net.imglib2.converter.Converters;
-import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
+import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.type.operators.SetZero;
-import net.imglib2.util.Intervals;
-import net.imglib2.view.Views;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
- * Created by arzt on 19.07.17.
+ * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Gradient")
 public class SingleGradientFeature extends AbstractFeatureOp {
 
 	@Parameter
-	private double sigma;
+	private double sigma = 1.0;
 
 	@Override
 	public int count() {
@@ -36,58 +33,30 @@ public class SingleGradientFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
-		calculate(in, out.get(0));
-	}
-
-	@Override
 	public List<String> attributeLabels() {
 		return Collections.singletonList("Gradient_filter_" + sigma);
 	}
 
-	private void calculate(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {
-		int numDimensions = out.numDimensions();
-
-		Interval expand = Intervals.expand(out, RevampUtils.nCopies(numDimensions, 1));
-		RandomAccessibleInterval<FloatType> blurred = gauss(in, expand, 0.4 * sigma);
-		RandomAccessibleInterval<FloatType> derivative = ops().create().img(out);
-
-		setZero(out);
-		for (int d = 0; d < numDimensions; d++) {
-			PartialDerivative.gradientCentralDifference2(blurred, derivative, d);
-			add(out, squared(derivative));
-		}
-		Views.iterable(out).forEach(x -> x.set((float) Math.sqrt(x.get())));
+	@Override
+	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
+		final int n = globalSettings().numDimensions();
+		List<RandomAccessibleInterval<DoubleType>> derivatives = IntStream
+			.range(0, n)
+			.mapToObj(d -> derive(input, d)).collect(Collectors.toList());
+		LoopBuilder.setImages(RevampUtils.vectorizeStack(derivatives), output.get(0)).forEachPixel((in,
+			out) -> {
+			double sum = 0;
+			for (int i = 0; i < n; i++) {
+				double x = in.get(i).getRealDouble();
+				sum += x * x;
+			}
+			out.setReal(Math.sqrt(sum));
+		});
 	}
 
-	private RandomAccessibleInterval<FloatType> gauss(RandomAccessible<FloatType> in,
-		Interval outputInterval, double sigma)
-	{
-		RandomAccessibleInterval<FloatType> blurred = ops().create().img(outputInterval,
-			new FloatType());
-		try {
-			Gauss3.gauss(sigma, in, blurred);
-		}
-		catch (IncompatibleTypeException e) {
-			throw new RuntimeException(e);
-		}
-		return blurred;
-	}
-
-	private void setZero(RandomAccessibleInterval<? extends SetZero> out) {
-		Views.iterable(out).forEach(SetZero::setZero);
-	}
-
-	private RandomAccessibleInterval<FloatType> squared(
-		RandomAccessibleInterval<FloatType> derivate)
-	{
-		return Converters.convert(derivate, (i, o) -> {
-			o.set(i);
-			o.mul(i);
-		}, new FloatType());
-	}
-
-	private void add(RandomAccessibleInterval<FloatType> out, RandomAccessible<FloatType> in) {
-		Views.interval(Views.pair(out, in), out).forEach(p -> p.getA().add(p.getB()));
+	private RandomAccessibleInterval<DoubleType> derive(FeatureInput input, int d) {
+		int[] orders = IntStream.range(0, globalSettings().numDimensions())
+			.map(i -> i == d ? 1 : 0).toArray();
+		return input.derivedGauss(sigma * 0.4, orders);
 	}
 }

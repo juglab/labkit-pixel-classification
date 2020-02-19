@@ -6,6 +6,7 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
@@ -24,6 +25,7 @@ import java.util.function.ToDoubleFunction;
  * 
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Sobel Gradient")
 public class SingleSobelGradientFeature extends AbstractFeatureOp {
 
@@ -36,8 +38,8 @@ public class SingleSobelGradientFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
-		calculate(in, out.get(0));
+	public void apply(FeatureInput in, List<RandomAccessibleInterval<FloatType>> out) {
+		calculate(in.original(), out.get(0));
 	}
 
 	@Override
@@ -51,7 +53,7 @@ public class SingleSobelGradientFeature extends AbstractFeatureOp {
 	}
 
 	private void calculate(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {
-		double[] sigmas = { 0.4 * sigma, 0.4 * sigma };
+		double[] sigmas = { sigma * 0.4, sigma * 0.4 };
 
 		Interval dxInputInterval = RevampUtils.deriveXRequiredInput(out);
 		Interval dyInputInterval = RevampUtils.deriveYRequiredInput(out);

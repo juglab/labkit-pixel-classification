@@ -8,6 +8,7 @@ import net.imglib2.algorithm.fft2.FFTConvolution;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.DoubleType;
@@ -23,8 +24,10 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 /**
+ * @deprecated
  * @author Matthias Arzt
  */
+@Deprecated
 @Plugin(type = FeatureOp.class, label = "Gabor")
 public class SingleGaborFeature extends AbstractFeatureOp {
 
@@ -61,8 +64,8 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
-		gaborProcessChannel(kernels, in, out.get(0), out.get(1));
+	public void apply(FeatureInput in, List<RandomAccessibleInterval<FloatType>> out) {
+		gaborProcessChannel(kernels, in.original(), out.get(0), out.get(1));
 	}
 
 	@Override
@@ -129,15 +132,6 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 			final double c = Math.cos(2 * Math.PI * (frequency * xPrime) / filterSizeX + psi);
 			cursor.get().set((float) (a * c));
 		}
-	}
-
-	private RandomAccessibleInterval<FloatType> gaborProcessChannel(List<Img<FloatType>> kernels,
-		Img<FloatType> channel, String labelDetails)
-	{
-		RandomAccessibleInterval<FloatType> max = ops().create().img(channel);
-		RandomAccessibleInterval<FloatType> min = ops().create().img(channel);
-		gaborProcessChannel(kernels, Views.extendBorder(channel), max, min);
-		return Views.stack(max, min);
 	}
 
 	private void gaborProcessChannel(List<Img<FloatType>> kernels,
