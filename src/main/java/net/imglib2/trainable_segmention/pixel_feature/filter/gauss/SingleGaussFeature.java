@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter.gauss;
 
 import net.imglib2.RandomAccessible;
@@ -12,6 +13,7 @@ import org.scijava.plugin.Plugin;
 
 import java.util.Collections;
 import java.util.List;
+
 /**
  * @author Matthias Arzt
  */
@@ -23,19 +25,22 @@ public class SingleGaussFeature extends AbstractFeatureOp {
 
 	@Override
 	public int count() {
-			return 1;
-		}
+		return 1;
+	}
 
 	@Override
 	public List<String> attributeLabels() {
-			return Collections.singletonList("Gaussian_blur_" + sigma);
-		}
+		return Collections.singletonList("Gaussian_blur_" + sigma);
+	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output) {
+	public void apply(RandomAccessible<FloatType> input,
+		List<RandomAccessibleInterval<FloatType>> output)
+	{
 		try {
 			Gauss3.gauss(sigma * 0.4, input, output.get(0));
-		} catch (IncompatibleTypeException e) {
+		}
+		catch (IncompatibleTypeException e) {
 			throw new RuntimeException(e);
 		}
 	}

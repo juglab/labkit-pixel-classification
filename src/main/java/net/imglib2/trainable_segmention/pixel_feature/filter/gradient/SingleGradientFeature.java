@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter.gradient;
 
 import net.imglib2.Interval;
@@ -59,11 +60,15 @@ public class SingleGradientFeature extends AbstractFeatureOp {
 		Views.iterable(out).forEach(x -> x.set((float) Math.sqrt(x.get())));
 	}
 
-	private RandomAccessibleInterval<FloatType> gauss(RandomAccessible<FloatType> in, Interval outputInterval, double sigma) {
-		RandomAccessibleInterval<FloatType> blurred = ops().create().img(outputInterval, new FloatType());
+	private RandomAccessibleInterval<FloatType> gauss(RandomAccessible<FloatType> in,
+		Interval outputInterval, double sigma)
+	{
+		RandomAccessibleInterval<FloatType> blurred = ops().create().img(outputInterval,
+			new FloatType());
 		try {
 			Gauss3.gauss(sigma, in, blurred);
-		} catch (IncompatibleTypeException e) {
+		}
+		catch (IncompatibleTypeException e) {
 			throw new RuntimeException(e);
 		}
 		return blurred;
@@ -73,7 +78,9 @@ public class SingleGradientFeature extends AbstractFeatureOp {
 		Views.iterable(out).forEach(SetZero::setZero);
 	}
 
-	private RandomAccessibleInterval<FloatType> squared(RandomAccessibleInterval<FloatType> derivate) {
+	private RandomAccessibleInterval<FloatType> squared(
+		RandomAccessibleInterval<FloatType> derivate)
+	{
 		return Converters.convert(derivate, (i, o) -> {
 			o.set(i);
 			o.mul(i);

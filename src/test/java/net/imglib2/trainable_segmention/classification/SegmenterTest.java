@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.classification;
 
 import com.google.gson.JsonElement;
@@ -49,17 +50,22 @@ public class SegmenterTest {
 	}
 
 	private Segmenter trainClassifier() {
-		GlobalSettings globals = new GlobalSettings(ChannelSetting.SINGLE, img.numDimensions(), Arrays.asList(1.0, 8.0, 16.0), 3.0);
-		FeatureSettings featureSettings = new FeatureSettings(globals, SingleFeatures.identity(), GroupedFeatures.gauss());
+		GlobalSettings globals = new GlobalSettings(ChannelSetting.SINGLE, img.numDimensions(), Arrays
+			.asList(1.0, 8.0, 16.0), 3.0);
+		FeatureSettings featureSettings = new FeatureSettings(globals, SingleFeatures.identity(),
+			GroupedFeatures.gauss());
 		return Trainer.train(ops, img, labeling, featureSettings);
 	}
 
-	private void checkExpected(RandomAccessibleInterval<? extends IntegerType> result, List<String> classNames) {
-		Img<UnsignedByteType> expected = ImageJFunctions.wrapByte(Utils.loadImage("nucleiExpected.tif"));
+	private void checkExpected(RandomAccessibleInterval<? extends IntegerType> result,
+		List<String> classNames)
+	{
+		Img<UnsignedByteType> expected = ImageJFunctions.wrapByte(Utils.loadImage(
+			"nucleiExpected.tif"));
 		Views.interval(Views.pair(result, expected), expected).forEach(p -> {
 			String r = classNames.get(p.getA().getInteger());
 			int e = p.getB().get();
-			if(e != 0) assertEquals(Integer.toString(e), r);
+			if (e != 0) assertEquals(Integer.toString(e), r);
 		});
 	}
 
@@ -74,12 +80,13 @@ public class SegmenterTest {
 		// test
 		RandomAccessibleInterval<? extends IntegerType<?>> result = segmenter.segment(img);
 		RandomAccessibleInterval<? extends IntegerType<?>> result2 = segmenter2.segment(img);
-		Utils.<IntegerType>assertImagesEqual(result, result2);
+		Utils.<IntegerType> assertImagesEqual(result, result2);
 	}
 
 	@Test
 	public void testDifferentWekaClassifiers() {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(SingleFeatures.identity(), GroupedFeatures.gauss()));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays
+			.asList(SingleFeatures.identity(), GroupedFeatures.gauss()));
 		Segmenter segmenter = Trainer.train(ops, img, labeling, featureSettings, new RandomCommittee());
 		RandomAccessibleInterval<? extends IntegerType> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());
@@ -87,11 +94,12 @@ public class SegmenterTest {
 
 	private static LabelRegions<String> loadLabeling(String file) {
 		Img<? extends IntegerType<?>> img = ImageJFunctions.wrapByte(Utils.loadImage(file));
-		final ImgLabeling<String, IntType> labeling = new ImgLabeling<>(Utils.ops().create().img(img, new IntType()));
-		Views.interval(Views.pair(img, labeling), labeling).forEach( p -> {
+		final ImgLabeling<String, IntType> labeling = new ImgLabeling<>(Utils.ops().create().img(img,
+			new IntType()));
+		Views.interval(Views.pair(img, labeling), labeling).forEach(p -> {
 			int value = p.getA().getInteger();
-			if(value != 0) p.getB().add(Integer.toString(value));
-		} );
+			if (value != 0) p.getB().add(Integer.toString(value));
+		});
 		return new LabelRegions<>(labeling);
 	}
 

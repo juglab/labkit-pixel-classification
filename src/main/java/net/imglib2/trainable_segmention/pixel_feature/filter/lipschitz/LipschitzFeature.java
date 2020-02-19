@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractGroupFeatureOp;
@@ -27,8 +28,8 @@ public class LipschitzFeature extends AbstractGroupFeatureOp {
 	}
 
 	protected List<FeatureSetting> initFeatures() {
-		return Arrays.stream(new double[]{5, 10, 15, 20, 25})
-				.mapToObj(slope -> SingleFeatures.lipschitz(slope, border))
-				.collect(Collectors.toList());
+		return Arrays.stream(new double[] { 5, 10, 15, 20, 25 })
+			.mapToObj(slope -> SingleFeatures.lipschitz(slope, border))
+			.collect(Collectors.toList());
 	}
 }

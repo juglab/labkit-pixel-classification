@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.settings;
 
 import java.util.*;
@@ -24,26 +25,31 @@ public final class GlobalSettings {
 
 	private final double membraneThickness;
 
-	public GlobalSettings(ChannelSetting channelSetting, int numDimensions, List<Double> sigmas, double membraneThickness) {
+	public GlobalSettings(ChannelSetting channelSetting, int numDimensions, List<Double> sigmas,
+		double membraneThickness)
+	{
 		this.channelSetting = channelSetting;
 		this.numDimensions = numDimensions;
 		this.sigmas = Collections.unmodifiableList(new ArrayList<>(sigmas));
 		this.membraneThickness = membraneThickness;
 	}
 
-	public GlobalSettings(ChannelSetting channelSetting, int numDimensions, double minSigma, double maxSigma, double membraneThickness) {
+	public GlobalSettings(ChannelSetting channelSetting, int numDimensions, double minSigma,
+		double maxSigma, double membraneThickness)
+	{
 		this(channelSetting, numDimensions, initSigmas(minSigma, maxSigma), membraneThickness);
 	}
 
 	private static List<Double> initSigmas(double minSigma, double maxSigma) {
 		List<Double> sigmas = new ArrayList<>();
-		for(double sigma = minSigma; sigma <= maxSigma; sigma *= 2.0)
+		for (double sigma = minSigma; sigma <= maxSigma; sigma *= 2.0)
 			sigmas.add(sigma);
 		return sigmas;
 	}
 
 	public GlobalSettings(GlobalSettings globalSettings) {
-		this(globalSettings.channelSetting(), globalSettings.numDimensions(), globalSettings.sigmas(), globalSettings.membraneThickness());
+		this(globalSettings.channelSetting(), globalSettings.numDimensions(), globalSettings.sigmas(),
+			globalSettings.membraneThickness());
 	}
 
 	public ChannelSetting channelSetting() {
@@ -69,11 +75,11 @@ public final class GlobalSettings {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(!(obj instanceof GlobalSettings))
+		if (!(obj instanceof GlobalSettings))
 			return false;
 		GlobalSettings settings = (GlobalSettings) obj;
 		return channelSetting.equals(settings.channelSetting) &&
-				sigmas.equals(settings.sigmas) &&
-				membraneThickness == settings.membraneThickness;
+			sigmas.equals(settings.sigmas) &&
+			membraneThickness == settings.membraneThickness;
 	}
 }

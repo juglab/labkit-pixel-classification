@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFeature;
@@ -21,17 +22,23 @@ public class SingleFeatures {
 		return createFeature(IdendityFeature.class);
 	}
 
-	public static FeatureSetting gabor(double sigma, double gamma, double psi, double frequency, int nAngles) {
+	public static FeatureSetting gabor(double sigma, double gamma, double psi, double frequency,
+		int nAngles)
+	{
 		return gabor(sigma, gamma, psi, frequency, nAngles, false);
 	}
 
-	public static FeatureSetting legacyGabor(double sigma, double gamma, double psi, double frequency, int nAngles) {
+	public static FeatureSetting legacyGabor(double sigma, double gamma, double psi, double frequency,
+		int nAngles)
+	{
 		return gabor(sigma, gamma, psi, frequency, nAngles, true);
 	}
 
-	private static FeatureSetting gabor(double sigma, double gamma, double psi, double frequency, int nAngles, boolean legacyNormalize) {
+	private static FeatureSetting gabor(double sigma, double gamma, double psi, double frequency,
+		int nAngles, boolean legacyNormalize)
+	{
 		return createFeature(SingleGaborFeature.class, "sigma", sigma, "gamma", gamma, "psi", psi,
-				"frequency", frequency, "nAngles", nAngles, "legacyNormalize", legacyNormalize);
+			"frequency", frequency, "nAngles", nAngles, "legacyNormalize", legacyNormalize);
 	}
 
 	public static FeatureSetting gauss(double sigma) {
@@ -55,7 +62,8 @@ public class SingleFeatures {
 	}
 
 	public static FeatureSetting differenceOfGaussians(double sigma1, double sigma2) {
-		return createFeature(SingleDifferenceOfGaussiansFeature.class, "sigma1", sigma1, "sigma2", sigma2);
+		return createFeature(SingleDifferenceOfGaussiansFeature.class, "sigma1", sigma1, "sigma2",
+			sigma2);
 	}
 
 	public static FeatureSetting sphereOperation(double radius, String operation) {
@@ -63,7 +71,8 @@ public class SingleFeatures {
 	}
 
 	public static FeatureSetting hessian3d(double sigma, boolean absoluteValues) {
-		return createFeature(SingleHessian3DFeature.class, "sigma", sigma, "absoluteValues", absoluteValues);
+		return createFeature(SingleHessian3DFeature.class, "sigma", sigma, "absoluteValues",
+			absoluteValues);
 	}
 
 	private static FeatureSetting createFeature(Class<? extends FeatureOp> aClass, Object... args) {

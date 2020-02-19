@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import net.imglib2.FinalInterval;
@@ -30,30 +31,31 @@ public class ColorInputPreprocessor implements InputPreprocessor {
 	@Override
 	public List<RandomAccessible<FloatType>> getChannels(RandomAccessible<?> input) {
 		Object element = input.randomAccess().get();
-		if(element instanceof ARGBType)
+		if (element instanceof ARGBType)
 			return processARGBType(RevampUtils.uncheckedCast(input));
-		else if(element instanceof RealType)
+		else if (element instanceof RealType)
 			return processRealType(RevampUtils.randomAccessibleToFloat(RevampUtils.uncheckedCast(input)));
 		throw new IllegalArgumentException("Input image must be RealType or ARGBType.");
 	}
 
 	private List<RandomAccessible<FloatType>> processARGBType(RandomAccessible<ARGBType> image) {
-		if(image.numDimensions() != globals.numDimensions())
-			throw new IllegalArgumentException("Input image must have " + globals.numDimensions() + " dimensions.");
+		if (image.numDimensions() != globals.numDimensions())
+			throw new IllegalArgumentException("Input image must have " + globals.numDimensions() +
+				" dimensions.");
 		return RevampUtils.splitChannels(image);
 	}
 
 	private List<RandomAccessible<FloatType>> processRealType(RandomAccessible<FloatType> image) {
 		// TODO check number of channels
 		int colorAxis = globals.numDimensions();
-		if(image.numDimensions() != colorAxis + 1)
-			throw new IllegalArgumentException("Input image must have " + globals.numDimensions() + " dimensions plus one color channel.");
+		if (image.numDimensions() != colorAxis + 1)
+			throw new IllegalArgumentException("Input image must have " + globals.numDimensions() +
+				" dimensions plus one color channel.");
 		MixedTransformView<FloatType> red = Views.hyperSlice(image, colorAxis, 0);
 		MixedTransformView<FloatType> green = Views.hyperSlice(image, colorAxis, 1);
 		MixedTransformView<FloatType> blue = Views.hyperSlice(image, colorAxis, 2);
 		return Arrays.asList(red, green, blue);
 	}
-
 
 	@Override
 	public Class<?> getType() {
@@ -63,20 +65,21 @@ public class ColorInputPreprocessor implements InputPreprocessor {
 	@Override
 	public Interval outputIntervalFromInput(RandomAccessibleInterval<?> image) {
 		Object element = image.randomAccess().get();
-		if(element instanceof ARGBType)
+		if (element instanceof ARGBType)
 			return image;
-		else if(element instanceof RealType)
+		else if (element instanceof RealType)
 			return outputIntervalFromInputRealType(image);
 		return null;
 	}
 
 	private Interval outputIntervalFromInputRealType(RandomAccessibleInterval<?> image) {
 		int colorAxis = globals.numDimensions();
-		if(image.numDimensions() != colorAxis + 1)
-			throw new IllegalArgumentException("Input image must have " + globals.numDimensions() + " dimensions plus one color channel.");
-		if(image.dimension(colorAxis) != 3)
+		if (image.numDimensions() != colorAxis + 1)
+			throw new IllegalArgumentException("Input image must have " + globals.numDimensions() +
+				" dimensions plus one color channel.");
+		if (image.dimension(colorAxis) != 3)
 			throw new IllegalArgumentException("Input image must contain three color channels.");
 		return new FinalInterval(Arrays.copyOf(Intervals.minAsLongArray(image), colorAxis),
-				Arrays.copyOf(Intervals.maxAsLongArray(image), colorAxis));
+			Arrays.copyOf(Intervals.maxAsLongArray(image), colorAxis));
 	}
 }

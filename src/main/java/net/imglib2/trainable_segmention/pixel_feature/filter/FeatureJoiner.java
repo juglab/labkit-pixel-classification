@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imagej.ops.OpEnvironment;
@@ -31,18 +32,19 @@ public class FeatureJoiner {
 	}
 
 	private GlobalSettings checkGlobalSettings(List<FeatureOp> features) {
-		if(features.isEmpty())
+		if (features.isEmpty())
 			return null;
 		GlobalSettings settings = features.get(0).globalSettings();
 		boolean allEqual =
-				features.stream().allMatch(f -> settings.equals(f.globalSettings()));
-		if(!allEqual)
-			throw new IllegalArgumentException("All features in a feature group must use the same global settings");
+			features.stream().allMatch(f -> settings.equals(f.globalSettings()));
+		if (!allEqual)
+			throw new IllegalArgumentException(
+				"All features in a feature group must use the same global settings");
 		return settings;
 	}
 
 	private OpEnvironment checkOps(List<FeatureOp> features) {
-		if(features.isEmpty())
+		if (features.isEmpty())
 			return null;
 		return features.get(0).ops();
 	}
@@ -56,10 +58,10 @@ public class FeatureJoiner {
 	}
 
 	public void apply(RandomAccessible<FloatType> in, List<RandomAccessibleInterval<FloatType>> out) {
-		if(out.size() != count)
+		if (out.size() != count)
 			throw new IllegalArgumentException();
 		int startIndex = 0;
-		for(FeatureOp feature : features) {
+		for (FeatureOp feature : features) {
 			int count = feature.count();
 			feature.apply(in, out.subList(startIndex, startIndex + count));
 			startIndex += count;

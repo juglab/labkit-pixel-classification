@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.gson;
 
 import com.google.gson.Gson;
@@ -29,7 +30,7 @@ final public class GsonUtils {
 	}
 
 	public static void write(JsonElement json, String filename) {
-		try(Writer writer = new FileWriter(filename)) {
+		try (Writer writer = new FileWriter(filename)) {
 			gson().toJson(json, writer);
 		}
 		catch (IOException e) {
@@ -38,7 +39,7 @@ final public class GsonUtils {
 	}
 
 	public static JsonElement read(String filename) {
-		try(Reader reader = new FileReader(filename)) {
+		try (Reader reader = new FileReader(filename)) {
 			return gson().fromJson(reader, JsonElement.class);
 		}
 		catch (IOException e) {
@@ -47,7 +48,7 @@ final public class GsonUtils {
 	}
 
 	public static void write(JsonElement json, OutputStream out) {
-		try(Writer writer = new OutputStreamWriter(out)) {
+		try (Writer writer = new OutputStreamWriter(out)) {
 			gson().toJson(json, writer);
 		}
 		catch (IOException e) {
@@ -56,7 +57,7 @@ final public class GsonUtils {
 	}
 
 	public static JsonElement read(InputStream in) {
-		try(Reader reader = new InputStreamReader(in)) {
+		try (Reader reader = new InputStreamReader(in)) {
 			return gson().fromJson(reader, JsonElement.class);
 		}
 		catch (IOException e) {
@@ -65,16 +66,17 @@ final public class GsonUtils {
 	}
 
 	public static String toString(JsonElement json) {
-		try(Writer writer = new StringWriter()) {
+		try (Writer writer = new StringWriter()) {
 			gson().toJson(json, writer);
 			return writer.toString();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	public static JsonElement fromString(String text) {
-		try(Reader reader = new StringReader(text)) {
+		try (Reader reader = new StringReader(text)) {
 			return gson().fromJson(reader, JsonElement.class);
 		}
 		catch (IOException e) {

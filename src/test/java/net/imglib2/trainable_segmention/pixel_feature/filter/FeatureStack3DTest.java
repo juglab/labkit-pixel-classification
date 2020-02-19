@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import ij.ImagePlus;
@@ -38,9 +39,9 @@ public class FeatureStack3DTest {
 	private ImagePlus image = ImageJFunctions.wrap(img, "input");
 
 	private Img<DoubleType> initSample() {
-		Img<DoubleType> img = ops.create().img(new long[]{20, 20, 20});
+		Img<DoubleType> img = ops.create().img(new long[] { 20, 20, 20 });
 		String equation = "Math.sin(0.2 * p[0]) + Math.sin(0.1 * p[1]) + Math.cos(0.1 * p[2])";
-		//String equation = "p[0] * p[0] + p[1] * p[1] + p[2] * p[2]";
+		// String equation = "p[0] * p[0] + p[1] * p[1] + p[2] * p[2]";
 		ops.image().equation(img, equation);
 		return img;
 	}
@@ -63,14 +64,15 @@ public class FeatureStack3DTest {
 	}
 
 	private FeatureCalculator setupFeatureGroup(FeatureSetting featureSetting) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3dSettings(), Arrays.asList(SingleFeatures.identity(), featureSetting));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3dSettings(), Arrays
+			.asList(SingleFeatures.identity(), featureSetting));
 		return new FeatureCalculator(Utils.ops(), featureSettings);
 	}
 
 	private RandomAccessibleInterval<FloatType> getImage(FeatureStackArray fsa) {
 		List<Img<FloatType>> slices = IntStream.range(0, fsa.getSize())
-				.mapToObj(index -> stackToImg(fsa.get(index).getStack(), Integer.toString(index)))
-				.collect(Collectors.toList());
+			.mapToObj(index -> stackToImg(fsa.get(index).getStack(), Integer.toString(index)))
+			.collect(Collectors.toList());
 		return Views.permute(Views.stack(slices), 2, 3);
 	}
 

@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.gui;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -18,32 +19,29 @@ public class FeatureFilterTest {
 	private static final Context context = new Context();
 
 	private static final Collection<Class<? extends FeatureOp>> only3d = Arrays.asList(
-			net.imglib2.trainable_segmention.pixel_feature.filter.hessian.Hessian3DFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessian3DFeature.class
-	);
+		net.imglib2.trainable_segmention.pixel_feature.filter.hessian.Hessian3DFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessian3DFeature.class);
 
 	private static final Collection<Class<? extends FeatureOp>> only2d = Arrays.asList(
-			net.imglib2.trainable_segmention.pixel_feature.filter.gabor.SingleGaborFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.gabor.GaborFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.hessian.HessianFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SobelGradientFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleSobelGradientFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessianFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.LipschitzFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.SingleLipschitzFeature.class
-	);
+		net.imglib2.trainable_segmention.pixel_feature.filter.gabor.SingleGaborFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.gabor.GaborFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.hessian.HessianFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SobelGradientFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleSobelGradientFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.hessian.SingleHessianFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.LipschitzFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.SingleLipschitzFeature.class);
 
 	private static final Collection<Class<? extends FeatureOp>> general = Arrays.asList(
-			net.imglib2.trainable_segmention.pixel_feature.filter.gradient.GradientFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleGradientFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature.class,
-			net.imglib2.trainable_segmention.pixel_feature.filter.dog.SingleDifferenceOfGaussiansFeature.class
-	);
+		net.imglib2.trainable_segmention.pixel_feature.filter.gradient.GradientFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SingleGradientFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.gauss.SingleGaussFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature.class,
+		net.imglib2.trainable_segmention.pixel_feature.filter.dog.SingleDifferenceOfGaussiansFeature.class);
 
 	@Test
 	public void testAvialableFeatures2d() {
@@ -57,7 +55,9 @@ public class FeatureFilterTest {
 		testAvailableFeatures(join(general, only3d), globals);
 	}
 
-	private void testAvailableFeatures(Collection<Class<? extends FeatureOp>> expected, GlobalSettings globals) {
+	private void testAvailableFeatures(Collection<Class<? extends FeatureOp>> expected,
+		GlobalSettings globals)
+	{
 		Map<String, Class<? extends FeatureOp>> f = AvailableFeatures.getMap(context, globals);
 		Collection<Class<? extends FeatureOp>> features = f.values();
 		assertContainsEquals(expected, features);
@@ -74,9 +74,9 @@ public class FeatureFilterTest {
 		toMany.removeAll(expected);
 		Set<T> missing = new HashSet<>(expected);
 		missing.removeAll(actual);
-		if(!toMany.isEmpty())
+		if (!toMany.isEmpty())
 			fail("To many items: " + toMany);
-		if(!missing.isEmpty())
+		if (!missing.isEmpty())
 			fail("Missing items: " + missing);
 	}
 }

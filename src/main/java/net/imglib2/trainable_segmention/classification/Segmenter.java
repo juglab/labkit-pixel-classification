@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.classification;
 
 import com.google.gson.Gson;
@@ -47,14 +48,18 @@ public class Segmenter {
 
 	private final OpEnvironment ops;
 
-	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureCalculator features, Classifier classifier) {
+	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureCalculator features,
+		Classifier classifier)
+	{
 		this.ops = Objects.requireNonNull(ops);
 		this.classNames = Collections.unmodifiableList(classNames);
 		this.features = Objects.requireNonNull(features);
 		this.classifier = Objects.requireNonNull(classifier);
 	}
 
-	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureSettings features, Classifier classifier) {
+	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureSettings features,
+		Classifier classifier)
+	{
 		this(ops, classNames, new FeatureCalculator(ops, features), classifier);
 	}
 
@@ -62,13 +67,17 @@ public class Segmenter {
 		return features;
 	}
 
-	public FeatureSettings settings() { return features.settings(); }
+	public FeatureSettings settings() {
+		return features.settings();
+	}
 
 	public Img<UnsignedByteType> segment(RandomAccessibleInterval<?> image) {
 		return segment(image, new UnsignedByteType());
 	}
 
-	public <T extends IntegerType<T> & NativeType<T>> Img<T> segment(RandomAccessibleInterval<?> image, T type) {
+	public <T extends IntegerType<T> & NativeType<T>> Img<T> segment(
+		RandomAccessibleInterval<?> image, T type)
+	{
 		Objects.requireNonNull(image);
 		Objects.requireNonNull(type);
 		Interval outputInterval = features.outputIntervalFromInput(image);
@@ -77,32 +86,39 @@ public class Segmenter {
 		return result;
 	}
 
-	public void segment(RandomAccessibleInterval<? extends IntegerType<?>> out, RandomAccessible<?> image) {
+	public void segment(RandomAccessibleInterval<? extends IntegerType<?>> out,
+		RandomAccessible<?> image)
+	{
 		Objects.requireNonNull(out);
 		Objects.requireNonNull(image);
 		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
 		ops.run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelClassificationOp());
 	}
 
-	public RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> predict(RandomAccessibleInterval<?> image) {
+	public RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> predict(
+		RandomAccessibleInterval<?> image)
+	{
 		Objects.requireNonNull(image);
 		Interval outputInterval = features.outputIntervalFromInput(image);
 		Img<FloatType> img = ops.create().img(RevampUtils.appendDimensionToInterval(
-				outputInterval, 0, classNames.size()), new FloatType());
-		CompositeIntervalView< FloatType, RealComposite< FloatType > >
-				collapsed = Views.collapseReal(img);
+			outputInterval, 0, classNames.size()), new FloatType());
+		CompositeIntervalView<FloatType, RealComposite<FloatType>> collapsed = Views.collapseReal(img);
 		predict(collapsed, Views.extendBorder(image));
 		return collapsed;
 	}
 
-	public void predict(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> out, RandomAccessible<?> image) {
+	public void predict(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> out,
+		RandomAccessible<?> image)
+	{
 		Objects.requireNonNull(out);
 		Objects.requireNonNull(image);
 		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
 		ops.run(Ops.Map.class, out, Views.collapseReal(featureValues), pixelPredictionOp());
 	}
 
-	public UnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>> pixelPredictionOp() {
+	public UnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>>
+		pixelPredictionOp()
+	{
 		return new PixelPredictionOp();
 	}
 
@@ -133,11 +149,11 @@ public class Segmenter {
 	public static Segmenter fromJson(OpEnvironment ops, JsonElement json) {
 		JsonObject object = json.getAsJsonObject();
 		return new Segmenter(
-				ops,
-				new Gson().fromJson(object.get("classNames"), new TypeToken<List<String>>() {}.getType()),
-				FeatureSettings.fromJson(object.get("features")),
-				ClassifierSerialization.jsonToWeka(object.get("classifier"))
-		);
+			ops,
+			new Gson().fromJson(object.get("classNames"), new TypeToken<List<String>>()
+			{}.getType()),
+			FeatureSettings.fromJson(object.get("features")),
+			ClassifierSerialization.jsonToWeka(object.get("classifier")));
 	}
 
 	private class MyTrainingData implements Training {
@@ -159,9 +175,7 @@ public class Segmenter {
 
 		@Override
 		public void train() {
-			RevampUtils.wrapException( () ->
- 				classifier.buildClassifier(instances)
-			);
+			RevampUtils.wrapException(() -> classifier.buildClassifier(instances));
 
 		}
 	}
@@ -179,15 +193,18 @@ public class Segmenter {
 		return Stream.concat(featureAttributes, classAttribute).collect(Collectors.toList());
 	}
 
-
 	// -- Helper classes --
 
-	private class PixelClassifierOp extends AbstractUnaryHybridCF<Composite<? extends RealType<?>>, IntegerType<?>> {
+	private class PixelClassifierOp extends
+		AbstractUnaryHybridCF<Composite<? extends RealType<?>>, IntegerType<?>>
+	{
 
 		CompositeInstance compositeInstance = new CompositeInstance(null, attributesAsArray());
 
 		@Override
-		public UnaryHybridCF<Composite<? extends RealType<?>>, IntegerType<?>> getIndependentInstance() {
+		public UnaryHybridCF<Composite<? extends RealType<?>>, IntegerType<?>>
+			getIndependentInstance()
+		{
 			return new PixelClassifierOp();
 		}
 
@@ -199,31 +216,40 @@ public class Segmenter {
 		@Override
 		public void compute(Composite<? extends RealType<?>> input, IntegerType<?> output) {
 			compositeInstance.setSource(input);
-			RevampUtils.wrapException(() -> output.setInteger((int) classifier.classifyInstance(compositeInstance)));
+			RevampUtils.wrapException(() -> output.setInteger((int) classifier.classifyInstance(
+				compositeInstance)));
 		}
 
 	}
 
-	private class PixelPredictionOp extends AbstractUnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>> {
+	private class PixelPredictionOp extends
+		AbstractUnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>>
+	{
 
 		CompositeInstance compositeInstance = new CompositeInstance(null, attributesAsArray());
 
 		@Override
-		public UnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>> getIndependentInstance() {
+		public UnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>>
+			getIndependentInstance()
+		{
 			return new PixelPredictionOp();
 		}
 
 		@Override
-		public void compute(Composite<? extends RealType<?>> input, Composite<? extends RealType<?>> output) {
+		public void compute(Composite<? extends RealType<?>> input,
+			Composite<? extends RealType<?>> output)
+		{
 			compositeInstance.setSource(input);
-			double[] result = RevampUtils.wrapException(() -> classifier.distributionForInstance(compositeInstance));
+			double[] result = RevampUtils.wrapException(() -> classifier.distributionForInstance(
+				compositeInstance));
 			for (int i = 0, n = result.length; i < n; i++)
 				output.get(i).setReal(result[i]);
 		}
 
 		@Override
 		public Composite<? extends RealType<?>> createOutput(Composite<? extends RealType<?>> input) {
-			return new GenericComposite<>(ArrayImgs.doubles(compositeInstance.numClasses()).randomAccess());
+			return new GenericComposite<>(ArrayImgs.doubles(compositeInstance.numClasses())
+				.randomAccess());
 		}
 	}
 }

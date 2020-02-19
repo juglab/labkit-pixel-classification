@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.gui;
 
 import net.imagej.ops.OpService;
@@ -28,7 +29,7 @@ public class FeatureSettingsGuiTest {
 		frame.setSize(300, 300);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setVisible(true);
-		while(frame.isVisible()) {
+		while (frame.isVisible()) {
 			Thread.sleep(100);
 		}
 	}

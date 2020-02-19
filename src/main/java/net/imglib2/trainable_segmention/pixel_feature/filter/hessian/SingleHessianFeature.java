@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter.hessian;
 
 import net.imglib2.*;
@@ -37,8 +38,9 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 		calculateHessianOnChannel(in, features, sigma);
 	}
 
-	List<String> LABELS = Arrays.asList("", "_Trace", "_Determinant", "_Eigenvalue_1", "_Eigenvalue_2",
-			"_Orientation", "_Square_Eigenvalue_Difference", "_Normalized_Eigenvalue_Difference");
+	List<String> LABELS = Arrays.asList("", "_Trace", "_Determinant", "_Eigenvalue_1",
+		"_Eigenvalue_2",
+		"_Orientation", "_Square_Eigenvalue_Difference", "_Normalized_Eigenvalue_Difference");
 
 	@Override
 	public List<String> attributeLabels() {
@@ -59,27 +61,40 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 	private static final int SQUARE_EIGENVALUE_DIFFERENCE = 6;
 	private static final int NORMALIZED_EIGENVALUE_DIFFERENCE = 7;
 
-	public RandomAccessibleInterval<FloatType> calculateHessianOnChannel(Img<FloatType> image, double sigma) {
-		Img<FloatType> features = ops().create().img(RevampUtils.appendDimensionToInterval(image, 0, 7), new FloatType());
+	public RandomAccessibleInterval<FloatType> calculateHessianOnChannel(Img<FloatType> image,
+		double sigma)
+	{
+		Img<FloatType> features = ops().create().img(RevampUtils.appendDimensionToInterval(image, 0, 7),
+			new FloatType());
 		calculateHessianOnChannel(Views.extendBorder(image), features, sigma);
 		return features;
 	}
 
-	private void calculateHessianOnChannel(RandomAccessible<FloatType> image, RandomAccessibleInterval<FloatType> out, double sigma) {
-		double[] sigmas = {0.4 * sigma, 0.4 * sigma};
+	private void calculateHessianOnChannel(RandomAccessible<FloatType> image,
+		RandomAccessibleInterval<FloatType> out, double sigma)
+	{
+		double[] sigmas = { 0.4 * sigma, 0.4 * sigma };
 
 		Interval secondDerivativeInterval = RevampUtils.removeLastDimension(out);
 		Interval firstDerivativeInterval = Intervals.union(
-				RevampUtils.deriveXRequiredInput(secondDerivativeInterval), RevampUtils.deriveYRequiredInput(secondDerivativeInterval));
+			RevampUtils.deriveXRequiredInput(secondDerivativeInterval), RevampUtils.deriveYRequiredInput(
+				secondDerivativeInterval));
 		Interval blurredInterval = Intervals.union(
-				RevampUtils.deriveXRequiredInput(firstDerivativeInterval), RevampUtils.deriveYRequiredInput(firstDerivativeInterval));
+			RevampUtils.deriveXRequiredInput(firstDerivativeInterval), RevampUtils.deriveYRequiredInput(
+				firstDerivativeInterval));
 
-		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(ops(), image, blurredInterval, sigmas);
-		RandomAccessibleInterval<FloatType> dx = RevampUtils.deriveX(ops(), blurred, firstDerivativeInterval);
-		RandomAccessibleInterval<FloatType> dy = RevampUtils.deriveY(ops(), blurred, firstDerivativeInterval);
-		RandomAccess<FloatType> dxx = RevampUtils.deriveX(ops(), dx, secondDerivativeInterval).randomAccess();
-		RandomAccess<FloatType> dxy = RevampUtils.deriveY(ops(), dx, secondDerivativeInterval).randomAccess();
-		RandomAccess<FloatType> dyy = RevampUtils.deriveY(ops(), dy, secondDerivativeInterval).randomAccess();
+		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(ops(), image, blurredInterval,
+			sigmas);
+		RandomAccessibleInterval<FloatType> dx = RevampUtils.deriveX(ops(), blurred,
+			firstDerivativeInterval);
+		RandomAccessibleInterval<FloatType> dy = RevampUtils.deriveY(ops(), blurred,
+			firstDerivativeInterval);
+		RandomAccess<FloatType> dxx = RevampUtils.deriveX(ops(), dx, secondDerivativeInterval)
+			.randomAccess();
+		RandomAccess<FloatType> dxy = RevampUtils.deriveY(ops(), dx, secondDerivativeInterval)
+			.randomAccess();
+		RandomAccess<FloatType> dyy = RevampUtils.deriveY(ops(), dy, secondDerivativeInterval)
+			.randomAccess();
 
 		Cursor<RealComposite<FloatType>> cursor = Views.iterable(Views.collapseReal(out)).cursor();
 		while (cursor.hasNext()) {
@@ -95,45 +110,49 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 	}
 
 	private static void calculateHessianPerPixel(RealComposite<FloatType> output,
-												float s_xx, float s_xy, float s_yy)
+		float s_xx, float s_xy, float s_yy)
 	{
 		final double t = Math.pow(1, 0.75);
 
 		// Hessian module: sqrt (a^2 + b*c + d^2)
-		output.get(HESSIAN).set((float) Math.sqrt(s_xx*s_xx + s_xy*s_xy+ s_yy*s_yy));
+		output.get(HESSIAN).set((float) Math.sqrt(s_xx * s_xx + s_xy * s_xy + s_yy * s_yy));
 		// Trace: a + d
 		final float trace = s_xx + s_yy;
 		output.get(TRACE).set(trace);
 		// Determinant: a*d - c*b
-		final float determinant = s_xx*s_yy-s_xy*s_xy;
+		final float determinant = s_xx * s_yy - s_xy * s_xy;
 		output.get(DETERMINANT).set(determinant);
 
 		// Ratio
-		//ipRatio.set((float)(trace*trace) / determinant);
+		// ipRatio.set((float)(trace*trace) / determinant);
 		// First eigenvalue: (a + d) / 2 + sqrt( ( 4*b^2 + (a - d)^2) / 2 )
-		output.get(EIGENVALUE_1).set((float) ( trace/2.0 + Math.sqrt((4*s_xy*s_xy + (s_xx - s_yy)*(s_xx - s_yy)) / 2.0 ) ) );
+		output.get(EIGENVALUE_1).set((float) (trace / 2.0 + Math.sqrt((4 * s_xy * s_xy + (s_xx - s_yy) *
+			(s_xx - s_yy)) / 2.0)));
 		// Second eigenvalue: (a + d) / 2 - sqrt( ( 4*b^2 + (a - d)^2) / 2 )
-		output.get(EIGENVALUE_2).set((float) ( trace/2.0 - Math.sqrt((4*s_xy*s_xy + (s_xx - s_yy)*(s_xx - s_yy)) / 2.0 ) ) );
+		output.get(EIGENVALUE_2).set((float) (trace / 2.0 - Math.sqrt((4 * s_xy * s_xy + (s_xx - s_yy) *
+			(s_xx - s_yy)) / 2.0)));
 		// Orientation
 		if (s_xy < 0.0) // -0.5 * acos( (a-d) / sqrt( 4*b^2 + (a - d)^2)) )
 		{
-			float orientation =(float)( -0.5 * Math.acos((s_xx	- s_yy)
-					/ Math.sqrt(4.0 * s_xy * s_xy + (s_xx - s_yy) * (s_xx - s_yy)) ));
+			float orientation = (float) (-0.5 * Math.acos((s_xx - s_yy) / Math.sqrt(4.0 * s_xy * s_xy +
+				(s_xx - s_yy) * (s_xx - s_yy))));
 			if (Float.isNaN(orientation))
 				orientation = 0;
 			output.get(ORIENTATION).set(orientation);
 		}
-		else 	// 0.5 * acos( (a-d) / sqrt( 4*b^2 + (a - d)^2)) )
+		else // 0.5 * acos( (a-d) / sqrt( 4*b^2 + (a - d)^2)) )
 		{
-			float orientation =(float)( 0.5 * Math.acos((s_xx	- s_yy)
-					/ Math.sqrt(4.0 * s_xy * s_xy + (s_xx - s_yy) * (s_xx - s_yy)) ));
+			float orientation = (float) (0.5 * Math.acos((s_xx - s_yy) / Math.sqrt(4.0 * s_xy * s_xy +
+				(s_xx - s_yy) * (s_xx - s_yy))));
 			if (Float.isNaN(orientation))
 				orientation = 0;
 			output.get(ORIENTATION).set(orientation);
 		}
 		// Gamma-normalized square eigenvalue difference
-		output.get(SQUARE_EIGENVALUE_DIFFERENCE).set((float) ( Math.pow(t,4) * trace*trace * ( (s_xx - s_yy)*(s_xx - s_yy) + 4*s_xy*s_xy ) ) );
+		output.get(SQUARE_EIGENVALUE_DIFFERENCE).set((float) (Math.pow(t, 4) * trace * trace * ((s_xx -
+			s_yy) * (s_xx - s_yy) + 4 * s_xy * s_xy)));
 		// Square of Gamma-normalized eigenvalue difference
-		output.get(NORMALIZED_EIGENVALUE_DIFFERENCE).set((float) ( Math.pow(t,2) * ( (s_xx - s_yy)*(s_xx - s_yy) + 4*s_xy*s_xy ) ) );
+		output.get(NORMALIZED_EIGENVALUE_DIFFERENCE).set((float) (Math.pow(t, 2) * ((s_xx - s_yy) *
+			(s_xx - s_yy) + 4 * s_xy * s_xy)));
 	}
 }

@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.settings;
 
 import net.imglib2.RandomAccessible;
@@ -22,6 +23,7 @@ import static org.junit.Assert.assertTrue;
  * @author Matthias Arzt
  */
 public class FeatureSettingTest {
+
 	@Test
 	public void testCreation() {
 		FeatureSetting fs = FeatureSetting.fromClass(TestFeature.class);
@@ -113,7 +115,9 @@ public class FeatureSettingTest {
 		}
 
 		@Override
-		public void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output) {
+		public void apply(RandomAccessible<FloatType> input,
+			List<RandomAccessibleInterval<FloatType>> output)
+		{
 			throw new UnsupportedOperationException();
 		}
 	}

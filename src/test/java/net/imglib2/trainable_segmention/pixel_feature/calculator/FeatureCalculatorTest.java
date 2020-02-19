@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import net.imagej.ops.OpService;
@@ -38,22 +39,23 @@ public class FeatureCalculatorTest {
 		GlobalSettings globalSettings = GlobalSettings.default2dSettings();
 		FeatureSettings settings = new FeatureSettings(globalSettings, add_42, add_12);
 		FeatureCalculator calculator = new FeatureCalculator(ops, settings);
-		Img< FloatType > input = ArrayImgs.floats(new float[] { 2 }, 1, 1);
-		RandomAccessibleInterval< FloatType > out = calculator.apply(input);
-		Utils.assertImagesEqual(ArrayImgs.floats(new float[]{44, 14}, 1, 1, 2), out);
+		Img<FloatType> input = ArrayImgs.floats(new float[] { 2 }, 1, 1);
+		RandomAccessibleInterval<FloatType> out = calculator.apply(input);
+		Utils.assertImagesEqual(ArrayImgs.floats(new float[] { 44, 14 }, 1, 1, 2), out);
 	}
 
 	@Test
 	public void test2() {
 		GlobalSettings globalSettings = new GlobalSettings(ChannelSetting.multiple(2),
-				2, Collections.singletonList(1.0), 1);
+			2, Collections.singletonList(1.0), 1);
 		FeatureSettings settings = new FeatureSettings(globalSettings, add_42, add_12);
 		FeatureCalculator calculator = new FeatureCalculator(ops, settings);
-		Img< FloatType > input = ArrayImgs.floats(new float[] { 2, 3 }, 1, 1, 2);
-		RandomAccessibleInterval< FloatType > out = calculator.apply(input);
-		assertEquals(Arrays.asList("channel1_add_value_42.0", "channel2_add_value_42.0", "channel1_add_value_12.0", "channel2_add_value_12.0"),
-				calculator.attributeLabels());
-		Utils.assertImagesEqual(ArrayImgs.floats(new float[]{44, 45, 14, 15}, 1, 1, 4), out);
+		Img<FloatType> input = ArrayImgs.floats(new float[] { 2, 3 }, 1, 1, 2);
+		RandomAccessibleInterval<FloatType> out = calculator.apply(input);
+		assertEquals(Arrays.asList("channel1_add_value_42.0", "channel2_add_value_42.0",
+			"channel1_add_value_12.0", "channel2_add_value_12.0"),
+			calculator.attributeLabels());
+		Utils.assertImagesEqual(ArrayImgs.floats(new float[] { 44, 45, 14, 15 }, 1, 1, 4), out);
 	}
 
 	public static class AddValue extends AbstractFeatureOp implements FeatureOp {
@@ -61,20 +63,23 @@ public class FeatureCalculatorTest {
 		@Parameter
 		double value;
 
-		@Override public int count() {
+		@Override
+		public int count() {
 			return 1;
 		}
 
-		@Override public List< String > attributeLabels() {
+		@Override
+		public List<String> attributeLabels() {
 			return Collections.singletonList("add_value_" + value);
 		}
 
-		@Override public void apply(RandomAccessible< FloatType > input,
-				List< RandomAccessibleInterval< FloatType > > output)
+		@Override
+		public void apply(RandomAccessible<FloatType> input,
+			List<RandomAccessibleInterval<FloatType>> output)
 		{
-			IntervalView< FloatType > inputInterval = Views.interval(input, output.get(0));
-			LoopBuilder.setImages(inputInterval, output.get(0) ).forEachPixel(
-					(in, out) -> out.set( in.get() + (float) value ));
+			IntervalView<FloatType> inputInterval = Views.interval(input, output.get(0));
+			LoopBuilder.setImages(inputInterval, output.get(0)).forEachPixel(
+				(in, out) -> out.set(in.get() + (float) value));
 		}
 	}
 }

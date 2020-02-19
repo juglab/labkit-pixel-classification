@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.gui;
 
 import javax.swing.*;
@@ -61,14 +62,14 @@ public class FeatureSettingsGui {
 
 	private void initGui(GlobalSettings globals) {
 		list.setModel(model);
-		content.setLayout(new MigLayout("insets 0", "[grow]","[][grow][]"));
+		content.setLayout(new MigLayout("insets 0", "[grow]", "[][grow][]"));
 		globalsPanel = new GlobalsPanel(globals);
 		content.add(globalsPanel, "wrap");
 		content.add(new JScrollPane(list), "split 2, grow");
 		JButton addButton = new JButton("add");
 		addButton.addActionListener(a -> addButtonPressed(addButton));
 		JPanel sidePanel = new JPanel();
-		sidePanel.setLayout(new MigLayout("insets 0", "[]","[][][][grow]"));
+		sidePanel.setLayout(new MigLayout("insets 0", "[]", "[][][][grow]"));
 		sidePanel.add(addButton, "grow, wrap");
 		sidePanel.add(addButton("remove", this::removePressed), "grow, wrap");
 		sidePanel.add(addButton("edit", this::editPressed), "grow, wrap");
@@ -79,7 +80,6 @@ public class FeatureSettingsGui {
 		JPopupMenu menu = initMenu(globalsPanel.get());
 		menu.show(addButton, 0, addButton.getHeight());
 	}
-
 
 	private class GlobalsPanel extends JPanel {
 
@@ -95,7 +95,7 @@ public class FeatureSettingsGui {
 			channelSetting = globalSettings.channelSetting();
 			setLayout(new MigLayout("insets 0", "[]20pt[100pt]", "[][][]"));
 			add(new JLabel("Dimensions:"));
-			dimensionsField = new JComboBox<>(new String[]{"2D", "3D"});
+			dimensionsField = new JComboBox<>(new String[] { "2D", "3D" });
 			dimensionsField.setSelectedItem(globalSettings.numDimensions() + "D");
 			dimensionsField.addActionListener(ignore -> dimensionsChanged());
 			add(dimensionsField, "wrap");
@@ -110,11 +110,10 @@ public class FeatureSettingsGui {
 
 		GlobalSettings get() {
 			return new GlobalSettings(
-					channelSetting,
-					dimensionsField.getSelectedIndex() + 2,
-					(List<Double>) sigmasField.getValue(),
-					(Double) thicknessField.getValue()
-			);
+				channelSetting,
+				dimensionsField.getSelectedIndex() + 2,
+				(List<Double>) sigmasField.getValue(),
+				(Double) thicknessField.getValue());
 		}
 	}
 
@@ -135,7 +134,7 @@ public class FeatureSettingsGui {
 
 	private void removePressed() {
 		int index = list.getSelectedIndex();
-		if(index < 0)
+		if (index < 0)
 			return;
 		model.remove(index);
 		model.update();
@@ -143,7 +142,7 @@ public class FeatureSettingsGui {
 
 	private void editPressed() {
 		int index = list.getSelectedIndex();
-		if(index < 0)
+		if (index < 0)
 			return;
 		model.getElementAt(index).edit();
 		model.update();
@@ -166,23 +165,26 @@ public class FeatureSettingsGui {
 
 	private Optional<FeatureSettings> showInternal() {
 		boolean ok = showResizeableOkCancelDialog("Select Pixel Features", content);
-		if(ok) {
+		if (ok) {
 			FeatureSettings features = get();
 			return Optional.of(features);
-		} else
+		}
+		else
 			return Optional.empty();
 	}
 
 	private static boolean showResizeableOkCancelDialog(String title, JPanel content) {
 		JDialog dialog = new JDialog((Frame) null, title, true);
-		JOptionPane optionPane = new JOptionPane(content, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+		JOptionPane optionPane = new JOptionPane(content, JOptionPane.PLAIN_MESSAGE,
+			JOptionPane.OK_CANCEL_OPTION);
 		dialog.setContentPane(optionPane);
 		dialog.setResizable(true);
 		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		optionPane.addPropertyChangeListener( e -> {
-				String prop = e.getPropertyName();
-				if (dialog.isVisible() && (e.getSource() == optionPane) && (JOptionPane.VALUE_PROPERTY.equals(prop)))
-					dialog.dispose();
+		optionPane.addPropertyChangeListener(e -> {
+			String prop = e.getPropertyName();
+			if (dialog.isVisible() && (e.getSource() == optionPane) && (JOptionPane.VALUE_PROPERTY.equals(
+				prop)))
+				dialog.dispose();
 		});
 		dialog.pack();
 		dialog.setVisible(true);
@@ -191,8 +193,10 @@ public class FeatureSettingsGui {
 
 	public static void main(String... args) {
 		Context context = new Context();
-		final Optional<FeatureSettings> show = FeatureSettingsGui.show(context, new FeatureSettings(GlobalSettings.default2dSettings()));
-		System.out.println(show.map(featureSettings -> featureSettings.toJson().toString()).orElse("Cancelled"));
+		final Optional<FeatureSettings> show = FeatureSettingsGui.show(context, new FeatureSettings(
+			GlobalSettings.default2dSettings()));
+		System.out.println(show.map(featureSettings -> featureSettings.toJson().toString()).orElse(
+			"Cancelled"));
 		System.out.println("finished");
 	}
 
@@ -215,7 +219,7 @@ public class FeatureSettingsGui {
 		@Override
 		public String toString() {
 			StringJoiner joiner = new StringJoiner(", ");
-			for(String parameter : value.parameters())
+			for (String parameter : value.parameters())
 				joiner.add(parameter + " = " + value.getParameter(parameter));
 			return value.getName() + " " + joiner;
 		}
@@ -268,19 +272,22 @@ public class FeatureSettingsGui {
 	}
 
 	private void checkFeatures(GlobalSettings globalSettings, Context context) {
-		Collection<Class<? extends FeatureOp>> availableFeatures = AvailableFeatures.getMap(context, globalSettings).values();
+		Collection<Class<? extends FeatureOp>> availableFeatures = AvailableFeatures.getMap(context,
+			globalSettings).values();
 		List<Holder> invalid = model.items.stream()
-				.filter((Holder feature) -> !availableFeatures.contains(feature.get().pluginClass()))
-				.collect(Collectors.toList());
-		if(!invalid.isEmpty())
+			.filter((Holder feature) -> !availableFeatures.contains(feature.get().pluginClass()))
+			.collect(Collectors.toList());
+		if (!invalid.isEmpty())
 			showWarning(invalid);
 		model.removeAll(invalid);
 	}
 
 	private void showWarning(List<Holder> invalid) {
-		final StringBuilder text = new StringBuilder("The following features need to be removed because they don't fit the global settings:");
+		final StringBuilder text = new StringBuilder(
+			"The following features need to be removed because they don't fit the global settings:");
 		invalid.forEach(holder -> text.append("\n* ").append(holder.toString()));
-		JOptionPane.showMessageDialog(null, text.toString(), "Feature Settings", JOptionPane.WARNING_MESSAGE);
+		JOptionPane.showMessageDialog(null, text.toString(), "Feature Settings",
+			JOptionPane.WARNING_MESSAGE);
 	}
 
 	static class FeatureSettingsDialog extends AbstractContextual {
@@ -297,9 +304,11 @@ public class FeatureSettingsGui {
 				Module module = op.asModule(globalSetting);
 				harvester.harvest(module);
 				return FeatureSetting.fromModule(module);
-			} catch (ModuleCanceledException e) {
+			}
+			catch (ModuleCanceledException e) {
 				return op;
-			} catch (ModuleException e) {
+			}
+			catch (ModuleException e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -314,7 +323,7 @@ public class FeatureSettingsGui {
 
 		@Override
 		public String valueToString(Object value) throws ParseException {
-			if(value == null)
+			if (value == null)
 				return "";
 			@SuppressWarnings("unchecked")
 			List<Double> list = (List<Double>) value;

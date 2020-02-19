@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz;
 
 import net.imglib2.*;
@@ -34,7 +35,7 @@ public class SingleLipschitzFeature extends AbstractFeatureOp {
 	@Parameter
 	private long border;
 
-	public SingleLipschitzFeature() { }
+	public SingleLipschitzFeature() {}
 
 	public SingleLipschitzFeature(double slope, long border) {
 		this.slope = slope;
@@ -57,7 +58,8 @@ public class SingleLipschitzFeature extends AbstractFeatureOp {
 	}
 
 	private void apply(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {
-		Interval expandedInterval = Intervals.expand(out, RevampUtils.nCopies(out.numDimensions(), border));
+		Interval expandedInterval = Intervals.expand(out, RevampUtils.nCopies(out.numDimensions(),
+			border));
 		Img<FloatType> tmp = ops().create().img(expandedInterval, new FloatType());
 		copy(tmp, in);
 		lipschitz(tmp);
@@ -67,20 +69,22 @@ public class SingleLipschitzFeature extends AbstractFeatureOp {
 	private <T extends Type<T>> void copy(IterableInterval<T> out, RandomAccessible<T> in) {
 		Cursor<T> o = out.cursor();
 		RandomAccess<T> a = in.randomAccess();
-		while(o.hasNext()) {
+		while (o.hasNext()) {
 			o.fwd();
 			a.setPosition(o);
 			o.get().set(a.get());
 		}
 	}
 
-	private <T extends RealType<T>> void outEquals255PlusAMinusB(IterableInterval<T> out, RandomAccessible<T> A, RandomAccessible<T> B) {
+	private <T extends RealType<T>> void outEquals255PlusAMinusB(IterableInterval<T> out,
+		RandomAccessible<T> A, RandomAccessible<T> B)
+	{
 		Cursor<T> o = out.cursor();
 		RandomAccess<T> a = A.randomAccess();
 		RandomAccess<T> b = B.randomAccess();
 		T offset = a.get().createVariable();
 		offset.setReal(255);
-		while(o.hasNext()) {
+		while (o.hasNext()) {
 			o.fwd();
 			a.setPosition(o);
 			b.setPosition(o);
@@ -98,18 +102,21 @@ public class SingleLipschitzFeature extends AbstractFeatureOp {
 
 	<T extends RealType<T>> void lipschitz(RandomAccessibleInterval<T> inOut) {
 		int n = inOut.numDimensions();
-		for(Localizable location : RevampUtils.neigborsLocations(n)) {
-			if(!isZero(location))
+		for (Localizable location : RevampUtils.neigborsLocations(n)) {
+			if (!isZero(location))
 				forward(Views.extendBorder(inOut), inOut, locationToArray(location));
 		}
 	}
 
-	<T extends RealType<T>> void forward(final RandomAccessible<T> in, final RandomAccessibleInterval<T> out, final long[] translation) {
-		final double slope = RevampUtils.distance(new Point(out.numDimensions()), Point.wrap(translation)) * this.slope;
-		final RandomAccessibleInterval<Pair<T, T>> pair = invert(Views.interval(Views.pair(Views.translate(in, translation), out), out), translation);
+	<T extends RealType<T>> void forward(final RandomAccessible<T> in,
+		final RandomAccessibleInterval<T> out, final long[] translation)
+	{
+		final double slope = RevampUtils.distance(new Point(out.numDimensions()), Point.wrap(
+			translation)) * this.slope;
+		final RandomAccessibleInterval<Pair<T, T>> pair = invert(Views.interval(Views.pair(Views
+			.translate(in, translation), out), out), translation);
 		Views.flatIterable(pair).forEach(p -> p.getB().setReal(
-				Math.max(p.getB().getRealDouble(), p.getA().getRealDouble() - slope)
-		));
+			Math.max(p.getB().getRealDouble(), p.getA().getRealDouble() - slope)));
 	}
 
 	private boolean isZero(Localizable location) {
@@ -124,9 +131,11 @@ public class SingleLipschitzFeature extends AbstractFeatureOp {
 		return IntStream.range(0, cursor.numDimensions()).mapToLong(cursor::getLongPosition);
 	}
 
-	private <T> RandomAccessibleInterval<T> invert(RandomAccessibleInterval<T> pair, long[] translation) {
-		for(int i = pair.numDimensions() - 1; i >= 0; i--)
-			if(translation[i] < 0)
+	private <T> RandomAccessibleInterval<T> invert(RandomAccessibleInterval<T> pair,
+		long[] translation)
+	{
+		for (int i = pair.numDimensions() - 1; i >= 0; i--)
+			if (translation[i] < 0)
 				return Views.invertAxis(pair, i);
 		return pair;
 	}

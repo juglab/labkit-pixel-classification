@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter.stats;
 
 import net.imagej.ops.Op;
@@ -38,15 +39,15 @@ public class SingleSphereShapedFeature extends AbstractFeatureOp {
 	@Parameter
 	private double radius;
 
-	@Parameter(choices = {MAX, MIN, MEAN, MEDIAN, VARIANCE})
+	@Parameter(choices = { MAX, MIN, MEAN, MEDIAN, VARIANCE })
 	private String operation;
 
 	private static Class<? extends Op> getOpClass(String operation) {
-		if(operation.equals(MIN)) return Ops.Stats.Min.class;
-		if(operation.equals(MAX)) return Ops.Stats.Max.class;
-		if(operation.equals(MEAN)) return Ops.Stats.Mean.class;
-		if(operation.equals(MEDIAN)) return Ops.Stats.Median.class;
-		if(operation.equals(VARIANCE)) return Ops.Stats.Variance.class;
+		if (operation.equals(MIN)) return Ops.Stats.Min.class;
+		if (operation.equals(MAX)) return Ops.Stats.Max.class;
+		if (operation.equals(MEAN)) return Ops.Stats.Mean.class;
+		if (operation.equals(MEDIAN)) return Ops.Stats.Median.class;
+		if (operation.equals(VARIANCE)) return Ops.Stats.Variance.class;
 		throw new IllegalArgumentException();
 	}
 
@@ -69,11 +70,17 @@ public class SingleSphereShapedFeature extends AbstractFeatureOp {
 		return Collections.singletonList(operation + "_" + radius);
 	}
 
-	private void applySingle(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {
+	private void applySingle(RandomAccessible<FloatType> in,
+		RandomAccessibleInterval<FloatType> out)
+	{
 		UnaryComputerOp<Iterable, DoubleType> computer = getComputer();
-		RandomAccessible<Neighborhood<FloatType>> neighborhoods = new HyperSphereShape((long) radius).neighborhoodsRandomAccessible(in);
+		RandomAccessible<Neighborhood<FloatType>> neighborhoods = new HyperSphereShape((long) radius)
+			.neighborhoodsRandomAccessible(in);
 		DoubleType tmp = new DoubleType();
-		Views.interval(Views.pair(neighborhoods, out), out).forEach(p -> { computer.compute(p.getA(), tmp); p.getB().set(tmp.getRealFloat()); });
+		Views.interval(Views.pair(neighborhoods, out), out).forEach(p -> {
+			computer.compute(p.getA(), tmp);
+			p.getB().set(tmp.getRealFloat());
+		});
 	}
 
 }

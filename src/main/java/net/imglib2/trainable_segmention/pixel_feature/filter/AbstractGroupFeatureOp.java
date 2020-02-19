@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imglib2.RandomAccessible;
@@ -18,8 +19,9 @@ public abstract class AbstractGroupFeatureOp extends AbstractFeatureOp {
 
 	@Override
 	public void initialize() {
-		featureGroup = new FeatureJoiner(initFeatures().stream().map(x -> x.newInstance(ops(), globalSettings()))
-				.collect(Collectors.toList()));
+		featureGroup = new FeatureJoiner(initFeatures().stream().map(x -> x.newInstance(ops(),
+			globalSettings()))
+			.collect(Collectors.toList()));
 	}
 
 	protected abstract List<FeatureSetting> initFeatures();
@@ -35,7 +37,9 @@ public abstract class AbstractGroupFeatureOp extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output) {
+	public void apply(RandomAccessible<FloatType> input,
+		List<RandomAccessibleInterval<FloatType>> output)
+	{
 		featureGroup.apply(input, output);
 	}
 }

@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention;
 
 import ij.IJ;
@@ -45,7 +46,8 @@ import static org.junit.Assert.fail;
  */
 public class Utils {
 
-	private static final OpEnvironment ops = new Context(OpService.class, ScriptService.class).service(OpService.class);
+	private static final OpEnvironment ops = new Context(OpService.class, ScriptService.class)
+		.service(OpService.class);
 
 	public static OpEnvironment ops() {
 		return ops;
@@ -64,7 +66,7 @@ public class Utils {
 		int count = 0;
 		final ImageStack stackA = a.getStack(), stackB = b.getStack();
 		for (int slice = 1; slice <= stackA.getSize(); slice++) {
-			count += diff( stackA.getProcessor( slice ), stackB.getProcessor( slice ) );
+			count += diff(stackA.getProcessor(slice), stackB.getProcessor(slice));
 		}
 		return count;
 	}
@@ -82,7 +84,7 @@ public class Utils {
 
 	public static ImagePlus loadImagePlusFromResource(final String path) {
 		final URL url = Utils.class.getResource("/" + path);
-		if(url == null)
+		if (url == null)
 			throw new NoSuchElementException("file: " + path);
 		if ("file".equals(url.getProtocol())) return new ImagePlus(url.getPath());
 		return new ImagePlus(url.toString());
@@ -94,23 +96,30 @@ public class Utils {
 	}
 
 	public static <A extends Type<A>>
-	void assertImagesEqual(final RandomAccessibleInterval<? extends A> a, final RandomAccessibleInterval<? extends A> b) {
-		ImgLib2Assert.assertImageEquals( a, b );
-	}
-
-	public static < A extends Type< A > > void assertIntervalEquals(
-			Interval expected,
-			Interval actual)
+		void assertImagesEqual(final RandomAccessibleInterval<? extends A> a,
+			final RandomAccessibleInterval<? extends A> b)
 	{
-		if(!Intervals.equals(expected, actual))
-			fail("Intervals differ, expected = " + showInterval(expected) + ", actual = " + showInterval(actual));
+		ImgLib2Assert.assertImageEquals(a, b);
 	}
 
-	public static void assertImagesEqual(final ImagePlus expected, final RandomAccessibleInterval<FloatType> actual) {
+	public static <A extends Type<A>> void assertIntervalEquals(
+		Interval expected,
+		Interval actual)
+	{
+		if (!Intervals.equals(expected, actual))
+			fail("Intervals differ, expected = " + showInterval(expected) + ", actual = " + showInterval(
+				actual));
+	}
+
+	public static void assertImagesEqual(final ImagePlus expected,
+		final RandomAccessibleInterval<FloatType> actual)
+	{
 		assertImagesEqual(ImagePlusAdapter.convertFloat(expected), actual);
 	}
 
-	public static void assertImagesEqual(final ImageProcessor expected, final RandomAccessibleInterval<FloatType> actual) {
+	public static void assertImagesEqual(final ImageProcessor expected,
+		final RandomAccessibleInterval<FloatType> actual)
+	{
 		assertImagesEqual(new ImagePlus("expected", expected), actual);
 	}
 
@@ -125,24 +134,28 @@ public class Utils {
 		showDifference((RandomAccessibleInterval<T>) expected, actual);
 	}
 
-	public static <T extends NumericType<T>> void showDifference(RandomAccessibleInterval<T> expectedImage, RandomAccessibleInterval<T> resultImage) {
+	public static <T extends NumericType<T>> void showDifference(
+		RandomAccessibleInterval<T> expectedImage, RandomAccessibleInterval<T> resultImage)
+	{
 		assertTrue(Intervals.equals(expectedImage, resultImage));
 		showDifference(Views.iterable(expectedImage), Views.iterable(resultImage));
 	}
 
-	public static <T extends NumericType<T>> void showDifference(IterableInterval<T> expectedImage, IterableInterval<T> resultImage) {
+	public static <T extends NumericType<T>> void showDifference(IterableInterval<T> expectedImage,
+		IterableInterval<T> resultImage)
+	{
 		show(ops().math().subtract(expectedImage, resultImage));
 	}
 
 	public static void show(Object... images) {
 		ImageJ imageJ = new ImageJ();
 		imageJ.ui().showUI();
-		for(Object o: images)
+		for (Object o : images)
 			imageJ.ui().show(translateToOrigin(o));
 	}
 
 	private static Object translateToOrigin(Object o) {
-		if(o instanceof RandomAccessibleInterval)
+		if (o instanceof RandomAccessibleInterval)
 			return Views.zeroMin((RandomAccessibleInterval<?>) o);
 		return o;
 	}
@@ -161,29 +174,31 @@ public class Utils {
 	}
 
 	public static <S extends ComplexType<S>, T extends ComplexType<T>> double psnr(
-			RandomAccessibleInterval<S> expected, RandomAccessibleInterval<T> actual)
+		RandomAccessibleInterval<S> expected, RandomAccessibleInterval<T> actual)
 	{
 		double meanSquareError = meanSquareError(expected, actual);
-		if(meanSquareError == 0.0)
+		if (meanSquareError == 0.0)
 			return Float.POSITIVE_INFINITY;
 		return (20 * Math.log10(max(expected)) - 10 * Math.log10(meanSquareError));
 	}
 
 	private static <S extends ComplexType<S>, T extends ComplexType<T>> double meanSquareError(
-			RandomAccessibleInterval<S> a, RandomAccessibleInterval<T> b)
+		RandomAccessibleInterval<S> a, RandomAccessibleInterval<T> b)
 	{
-		if(!Intervals.equals(a, b))
+		if (!Intervals.equals(a, b))
 			throw new IllegalArgumentException("both arguments must be the same interval" +
-					"given: " + showInterval(a) + " and: " + showInterval(b));
+				"given: " + showInterval(a) + " and: " + showInterval(b));
 		DoubleType sum = new DoubleType(0.0f);
-		Views.interval(Views.pair(a, b), a).forEach(x -> sum.set(sum.get() + sqr(x.getA().getRealDouble() - x.getB().getRealDouble())));
+		Views.interval(Views.pair(a, b), a).forEach(x -> sum.set(sum.get() + sqr(x.getA()
+			.getRealDouble() - x.getB().getRealDouble())));
 		return sum.get() / Intervals.numElements(a);
 	}
 
 	private static String showInterval(Interval b) {
 		StringJoiner j = new StringJoiner(", ");
 		int n = b.numDimensions();
-		for (int i = 0; i < n; i++) j.add(b.min(i) + " - " + b.max(i));
+		for (int i = 0; i < n; i++)
+			j.add(b.min(i) + " - " + b.max(i));
 		return "[" + j + "]";
 	}
 
@@ -198,42 +213,46 @@ public class Utils {
 		return result.getRealDouble();
 	}
 
-	public static void showPsnr(RandomAccessibleInterval<FloatType> expected, RandomAccessibleInterval<FloatType> actual) {
+	public static void showPsnr(RandomAccessibleInterval<FloatType> expected,
+		RandomAccessibleInterval<FloatType> actual)
+	{
 		System.out.println("psnr: " + psnr(expected, actual));
 	}
 
-	public static ImagePlus createImage(final String title, final int width, final int height, final int... pixels)
+	public static ImagePlus createImage(final String title, final int width, final int height,
+		final int... pixels)
 	{
-		assertEquals( pixels.length, width * height );
+		assertEquals(pixels.length, width * height);
 		final byte[] bytes = new byte[pixels.length];
-		for (int i = 0; i < bytes.length; i++) bytes[i] = (byte)pixels[i];
-		final ByteProcessor bp = new ByteProcessor( width, height, bytes, null );
-		return new ImagePlus( title, bp );
+		for (int i = 0; i < bytes.length; i++)
+			bytes[i] = (byte) pixels[i];
+		final ByteProcessor bp = new ByteProcessor(width, height, bytes, null);
+		return new ImagePlus(title, bp);
 	}
 
-
 	public static ImagePlus createImage(String title, int width, int height, final float... pixels) {
-		assertEquals( pixels.length, width * height);
+		assertEquals(pixels.length, width * height);
 		final FloatProcessor processor = new FloatProcessor(width, height, pixels.clone());
-		return new ImagePlus( title, processor);
+		return new ImagePlus(title, processor);
 	}
 
 	public static <T> String pixelsAsString(RandomAccessibleInterval<T> image) {
 		StringJoiner joiner = new StringJoiner(", ");
-		for(T pixel : Views.iterable(image))
+		for (T pixel : Views.iterable(image))
 			joiner.add(pixel.toString());
 		return "[" + joiner.toString() + "]";
 	}
 
-	public static <S extends ComplexType<S>, T extends ComplexType<T>> void assertImagesEqual(double expectedPsnr,
-																							  RandomAccessibleInterval<S> expected, RandomAccessibleInterval<T> actual)
+	public static <S extends ComplexType<S>, T extends ComplexType<T>> void assertImagesEqual(
+		double expectedPsnr,
+		RandomAccessibleInterval<S> expected, RandomAccessibleInterval<T> actual)
 	{
 		double psnr = Utils.psnr(expected, actual);
-		if(RevampUtils.containsNaN(expected))
+		if (RevampUtils.containsNaN(expected))
 			fail("Cannot calculate PSNR because expected picture contains NaN value.");
-		if(RevampUtils.containsNaN(actual))
+		if (RevampUtils.containsNaN(actual))
 			fail("Cannot calculate PSNR because actual picture contains NaN value.");
-		if(psnr < expectedPsnr)
+		if (psnr < expectedPsnr)
 			fail("Actual PSNR is lower than expected. Actual: " + psnr + " Expected: " + expectedPsnr);
 	}
 
@@ -243,9 +262,13 @@ public class Utils {
 		return result;
 	}
 
-	public static RandomAccessibleInterval<FloatType> subtract(RandomAccessibleInterval<FloatType> expected, RandomAccessibleInterval<FloatType> result) {
-		RandomAccessibleInterval<Pair<FloatType, FloatType>> interval = Views.interval(Views.pair(expected, result), result);
-		return Converters.convert(interval, (p, out) -> out.setReal(p.getA().get() - p.getB().get()), new FloatType());
+	public static RandomAccessibleInterval<FloatType> subtract(
+		RandomAccessibleInterval<FloatType> expected, RandomAccessibleInterval<FloatType> result)
+	{
+		RandomAccessibleInterval<Pair<FloatType, FloatType>> interval = Views.interval(Views.pair(
+			expected, result), result);
+		return Converters.convert(interval, (p, out) -> out.setReal(p.getA().get() - p.getB().get()),
+			new FloatType());
 	}
 
 	public static RandomAccessibleInterval<IntType> toInt(RandomAccessibleInterval<FloatType> input) {

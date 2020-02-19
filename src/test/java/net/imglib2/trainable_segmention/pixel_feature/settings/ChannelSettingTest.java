@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.settings;
 
 import com.google.gson.Gson;
@@ -14,13 +15,13 @@ public class ChannelSettingTest {
 
 	@Test
 	public void testIsMultiple() {
-		assertFalse( ChannelSetting.SINGLE.isMultiple() );
-		assertTrue( ChannelSetting.multiple(42).isMultiple() );
+		assertFalse(ChannelSetting.SINGLE.isMultiple());
+		assertTrue(ChannelSetting.multiple(42).isMultiple());
 	}
 
 	@Test
 	public void testChannels() {
-		assertEquals(Arrays.asList("channel1", "channel2"), ChannelSetting.multiple(2).channels() );
+		assertEquals(Arrays.asList("channel1", "channel2"), ChannelSetting.multiple(2).channels());
 	}
 
 	@Test
@@ -36,16 +37,16 @@ public class ChannelSettingTest {
 
 	@Test
 	public void testEquals() {
-		assertEquals( ChannelSetting.SINGLE, ChannelSetting.SINGLE );
-		assertEquals( ChannelSetting.RGB, ChannelSetting.RGB );
-		assertEquals( ChannelSetting.multiple(42), ChannelSetting.multiple(42) );
+		assertEquals(ChannelSetting.SINGLE, ChannelSetting.SINGLE);
+		assertEquals(ChannelSetting.RGB, ChannelSetting.RGB);
+		assertEquals(ChannelSetting.multiple(42), ChannelSetting.multiple(42));
 	}
 
 	@Test
 	public void testNoEquals() {
-		assertNotEquals( ChannelSetting.SINGLE, ChannelSetting.RGB );
-		assertNotEquals( ChannelSetting.SINGLE, ChannelSetting.multiple(32) );
-		assertNotEquals( ChannelSetting.multiple(32), ChannelSetting.multiple(42) );
+		assertNotEquals(ChannelSetting.SINGLE, ChannelSetting.RGB);
+		assertNotEquals(ChannelSetting.SINGLE, ChannelSetting.multiple(32));
+		assertNotEquals(ChannelSetting.multiple(32), ChannelSetting.multiple(42));
 	}
 
 	@Test

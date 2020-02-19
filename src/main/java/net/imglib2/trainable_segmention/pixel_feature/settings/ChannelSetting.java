@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.settings;
 
 import com.google.gson.TypeAdapter;
@@ -19,7 +20,7 @@ public class ChannelSetting {
 
 	public static ChannelSetting multiple(int n) {
 		return new ChannelSetting("MULTIPLE_" + n, true,
-				IntStream.range(0, n).mapToObj(i -> "channel" + (i + 1)).toArray(String[]::new));
+			IntStream.range(0, n).mapToObj(i -> "channel" + (i + 1)).toArray(String[]::new));
 	}
 
 	private final List<String> channels;
@@ -36,21 +37,21 @@ public class ChannelSetting {
 		return channels;
 	}
 
-	public boolean isMultiple()
-	{
+	public boolean isMultiple() {
 		return isMultiple;
 	}
 
 	public static ChannelSetting valueOf(String value) {
-		if(value.equals(RGB.toString()))
+		if (value.equals(RGB.toString()))
 			return RGB;
-		if(value.equals(SINGLE.toString()))
+		if (value.equals(SINGLE.toString()))
 			return SINGLE;
-		if(value.startsWith("MULTIPLE_")) {
+		if (value.startsWith("MULTIPLE_")) {
 			String number = value.substring("MULTIPLE_".length());
 			try {
 				return multiple(Integer.valueOf(number));
-			} catch (NumberFormatException ignore) {
+			}
+			catch (NumberFormatException ignore) {
 				throw new IllegalArgumentException();
 			}
 		}
@@ -67,15 +68,18 @@ public class ChannelSetting {
 		return o instanceof ChannelSetting && toString.equals(o.toString());
 	}
 }
+
 class ChannelSettingJsonAdapter extends TypeAdapter<ChannelSetting> {
 
-	@Override public void write(JsonWriter out, ChannelSetting value)
-			throws IOException
+	@Override
+	public void write(JsonWriter out, ChannelSetting value)
+		throws IOException
 	{
 		out.value(value.toString());
 	}
 
-	@Override public ChannelSetting read(JsonReader in) throws IOException {
+	@Override
+	public ChannelSetting read(JsonReader in) throws IOException {
 		return ChannelSetting.valueOf(in.nextString());
 	}
 }

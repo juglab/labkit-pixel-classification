@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imagej.ops.special.function.AbstractUnaryFunctionOp;
@@ -12,15 +13,18 @@ import org.scijava.plugin.Parameter;
  * @author Matthias Arzt
  */
 public abstract class AbstractFeatureOp
-		extends AbstractUnaryFunctionOp<RandomAccessibleInterval<FloatType>, RandomAccessibleInterval<FloatType>>
-		implements FeatureOp
+	extends
+	AbstractUnaryFunctionOp<RandomAccessibleInterval<FloatType>, RandomAccessibleInterval<FloatType>>
+	implements FeatureOp
 {
+
 	@Parameter
 	private GlobalSettings globalSettings;
 
 	@Override
 	public RandomAccessibleInterval<FloatType> calculate(RandomAccessibleInterval<FloatType> input) {
-		Img<FloatType> output = ops().create().img(RevampUtils.appendDimensionToInterval(input, 0, count() - 1), new FloatType());
+		Img<FloatType> output = ops().create().img(RevampUtils.appendDimensionToInterval(input, 0,
+			count() - 1), new FloatType());
 		apply(input, RevampUtils.slices(output));
 		return output;
 	}

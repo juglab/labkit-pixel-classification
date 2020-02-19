@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imglib2.FinalInterval;
@@ -23,13 +24,15 @@ import java.util.List;
  */
 public class BorderEffectsTest {
 
-	private Interval bigInterval = new FinalInterval(new long[]{0, 0}, new long[]{150, 150});
+	private Interval bigInterval = new FinalInterval(new long[] { 0, 0 }, new long[] { 150, 150 });
 
-	private Interval interval = new FinalInterval(new long[]{50, 50}, new long[]{100, 100});
+	private Interval interval = new FinalInterval(new long[] { 50, 50 }, new long[] { 100, 100 });
 
-	private final Img<FloatType> fullImage = ImageJFunctions.convertFloat(Utils.loadImage("bridge.png"));
+	private final Img<FloatType> fullImage = ImageJFunctions.convertFloat(Utils.loadImage(
+		"bridge.png"));
 
-	private RandomAccessibleInterval<FloatType> image = RevampUtils.copy(Utils.ops(), Views.interval(fullImage, bigInterval));
+	private RandomAccessibleInterval<FloatType> image = RevampUtils.copy(Utils.ops(), Views.interval(
+		fullImage, bigInterval));
 
 	@Test
 	public void testGauss() {
@@ -52,7 +55,9 @@ public class BorderEffectsTest {
 	}
 
 	@Test
-	public void testGradient() { testFeature(GroupedFeatures.sobelGradient()); }
+	public void testGradient() {
+		testFeature(GroupedFeatures.sobelGradient());
+	}
 
 	@Test
 	public void testLipschitz() {
@@ -60,22 +65,33 @@ public class BorderEffectsTest {
 	}
 
 	@Test
-	public void testMin() { testFeature(GroupedFeatures.min()); }
+	public void testMin() {
+		testFeature(GroupedFeatures.min());
+	}
 
 	@Test
-	public void testMax() { testFeature(GroupedFeatures.max()); }
+	public void testMax() {
+		testFeature(GroupedFeatures.max());
+	}
 
 	@Test
-	public void testMean() { testFeature(GroupedFeatures.mean()); }
+	public void testMean() {
+		testFeature(GroupedFeatures.mean());
+	}
 
 	@Test
-	public void testMedian() { testFeature(GroupedFeatures.median()); }
+	public void testMedian() {
+		testFeature(GroupedFeatures.median());
+	}
 
 	@Test
-	public void testVariance() { testFeature(GroupedFeatures.variance()); }
+	public void testVariance() {
+		testFeature(GroupedFeatures.variance());
+	}
 
 	public void testFeature(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(feature));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays
+			.asList(feature));
 		FeatureCalculator group = new FeatureCalculator(Utils.ops(), featureSettings);
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
 		RandomAccessibleInterval<FloatType> result = calculateResult(group);
@@ -83,7 +99,8 @@ public class BorderEffectsTest {
 	}
 
 	public void showDifference(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(feature));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays
+			.asList(feature));
 		FeatureCalculator group = new FeatureCalculator(Utils.ops(), featureSettings);
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
 		RandomAccessibleInterval<FloatType> result = calculateResult(group);
@@ -92,25 +109,32 @@ public class BorderEffectsTest {
 	}
 
 	public RandomAccessibleInterval<FloatType> calculateResult(FeatureCalculator feature) {
-		Interval featureInterval = RevampUtils.appendDimensionToInterval(interval, 0, feature.count() - 1);
-		RandomAccessibleInterval<FloatType> result = Utils.ops().create().img(featureInterval, new FloatType());
+		Interval featureInterval = RevampUtils.appendDimensionToInterval(interval, 0, feature.count() -
+			1);
+		RandomAccessibleInterval<FloatType> result = Utils.ops().create().img(featureInterval,
+			new FloatType());
 		feature.apply(image, RevampUtils.slices(result));
 		return result;
 	}
 
 	public RandomAccessibleInterval<FloatType> calculateExpected(FeatureCalculator feature) {
-		Interval featureInterval = RevampUtils.appendDimensionToInterval(interval, 0, feature.count() - 1);
+		Interval featureInterval = RevampUtils.appendDimensionToInterval(interval, 0, feature.count() -
+			1);
 		return Views.interval(feature.apply(image), featureInterval);
 	}
 
 	public void showPsnrs() {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(), GroupedFeatures.differenceOfGaussians(), GroupedFeatures.sobelGradient(), GroupedFeatures.lipschitz(50), GroupedFeatures.min(), GroupedFeatures.max(), GroupedFeatures.mean(), GroupedFeatures.median(), GroupedFeatures.variance()));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays
+			.asList(GroupedFeatures.gauss(), GroupedFeatures.hessian(), GroupedFeatures.gauss(),
+				GroupedFeatures.differenceOfGaussians(), GroupedFeatures.sobelGradient(), GroupedFeatures
+					.lipschitz(50), GroupedFeatures.min(), GroupedFeatures.max(), GroupedFeatures.mean(),
+				GroupedFeatures.median(), GroupedFeatures.variance()));
 		FeatureCalculator feature = new FeatureCalculator(Utils.ops(), featureSettings);
 		RandomAccessibleInterval<FloatType> allResults = calculateResult(feature);
 		RandomAccessibleInterval<FloatType> allExpected = calculateExpected(feature);
 		int axis = image.numDimensions();
 		List<String> attributes = feature.attributeLabels();
-		for(int i = 0; i < feature.count(); i++) {
+		for (int i = 0; i < feature.count(); i++) {
 			RandomAccessibleInterval<FloatType> result = Views.hyperSlice(allResults, axis, i);
 			RandomAccessibleInterval<FloatType> expected = Views.hyperSlice(allExpected, axis, i);
 			String attribute = attributes.get(i);

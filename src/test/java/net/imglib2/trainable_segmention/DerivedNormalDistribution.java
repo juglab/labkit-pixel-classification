@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -13,22 +14,22 @@ import static org.junit.Assert.assertEquals;
 public class DerivedNormalDistribution {
 
 	private static final double ONE_DEVIDED_SQRT_TWO_PI = 1 / Math.sqrt(2 * Math.PI);
-	private PolynomialFunction MINUS_X = new PolynomialFunction(new double[]{0, -1});
+	private PolynomialFunction MINUS_X = new PolynomialFunction(new double[] { 0, -1 });
 
 	public double normalDistribution(double x) {
-		return ONE_DEVIDED_SQRT_TWO_PI * Math.exp(- 0.5 * x * x);
+		return ONE_DEVIDED_SQRT_TWO_PI * Math.exp(-0.5 * x * x);
 	}
 
 	public DoubleUnaryOperator derivedNormalDistribution(int derivative) {
-		if(derivative == 0)
+		if (derivative == 0)
 			return this::normalDistribution;
 		else
 			return x -> prefix(derivative).value(x) * normalDistribution(x);
 	}
 
 	public PolynomialFunction prefix(int derivative) {
-		if(derivative <= 0)
-			return new PolynomialFunction(new double[]{1});
+		if (derivative <= 0)
+			return new PolynomialFunction(new double[] { 1 });
 		else {
 			PolynomialFunction p = prefix(derivative - 1);
 			return p.polynomialDerivative().add(MINUS_X.multiply(p));

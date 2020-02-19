@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter.gradient;
 
 import net.imglib2.Interval;
@@ -20,6 +21,7 @@ import java.util.function.ToDoubleFunction;
 
 /**
  * ImgLib2 version of trainable segmentation's Sobel feature.
+ * 
  * @author Matthias Arzt
  */
 @Plugin(type = FeatureOp.class, label = "Sobel Gradient")
@@ -49,22 +51,25 @@ public class SingleSobelGradientFeature extends AbstractFeatureOp {
 	}
 
 	private void calculate(RandomAccessible<FloatType> in, RandomAccessibleInterval<FloatType> out) {
-		double[] sigmas = {0.4 * sigma, 0.4 * sigma};
+		double[] sigmas = { 0.4 * sigma, 0.4 * sigma };
 
 		Interval dxInputInterval = RevampUtils.deriveXRequiredInput(out);
 		Interval dyInputInterval = RevampUtils.deriveYRequiredInput(out);
 		Interval blurredInterval = Intervals.union(dxInputInterval, dyInputInterval);
 
-		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(ops(), in, blurredInterval, sigmas);
+		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(ops(), in, blurredInterval,
+			sigmas);
 		RandomAccessibleInterval<FloatType> dx = RevampUtils.deriveX(ops(), blurred, out);
 		RandomAccessibleInterval<FloatType> dy = RevampUtils.deriveY(ops(), blurred, out);
 		RandomAccessible<Pair<FloatType, FloatType>> derivatives = Views.pair(dx, dy);
 		mapToFloat(derivatives, out, input -> norm2(input.getA().get(), input.getB().get()));
 	}
 
-	private <I> void mapToFloat(RandomAccessible<I> in, RandomAccessibleInterval<FloatType> out, ToDoubleFunction<I> operation) {
+	private <I> void mapToFloat(RandomAccessible<I> in, RandomAccessibleInterval<FloatType> out,
+		ToDoubleFunction<I> operation)
+	{
 		Views.interval(Views.pair(in, out), out)
-				.forEach(p -> p.getB().set((float) operation.applyAsDouble(p.getA())));
+			.forEach(p -> p.getB().set((float) operation.applyAsDouble(p.getA())));
 	}
 
 	private static double norm2(float x, float y) {

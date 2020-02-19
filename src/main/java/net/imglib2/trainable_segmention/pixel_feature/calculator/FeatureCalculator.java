@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import net.imagej.ops.OpEnvironment;
@@ -29,19 +30,20 @@ public class FeatureCalculator {
 	public FeatureCalculator(OpEnvironment ops, FeatureSettings settings) {
 		this.settings = settings;
 		List<FeatureOp> featureOps = settings.features().stream()
-				.map(x -> x.newInstance(ops, settings.globals())).collect(Collectors.toList());
+			.map(x -> x.newInstance(ops, settings.globals())).collect(Collectors.toList());
 		this.joiner = new FeatureJoiner(featureOps);
 		this.preprocessor = initPreprocessor(settings.globals().channelSetting());
 	}
 
 	private InputPreprocessor initPreprocessor(ChannelSetting channelSetting) {
-		if(ChannelSetting.RGB.equals(channelSetting))
+		if (ChannelSetting.RGB.equals(channelSetting))
 			return new ColorInputPreprocessor(settings.globals());
-		if(ChannelSetting.SINGLE.equals(channelSetting))
+		if (ChannelSetting.SINGLE.equals(channelSetting))
 			return new GrayInputPreprocessor(settings.globals());
-		if(channelSetting.isMultiple())
+		if (channelSetting.isMultiple())
 			return new MultiChannelInputPreprocessor(settings.globals());
-		throw new UnsupportedOperationException("Unsupported channel setting: " + settings().globals().channelSetting());
+		throw new UnsupportedOperationException("Unsupported channel setting: " + settings().globals()
+			.channelSetting());
 	}
 
 	public OpEnvironment ops() {
@@ -75,10 +77,13 @@ public class FeatureCalculator {
 		return apply(Views.extendBorder(image), preprocessor.outputIntervalFromInput(image));
 	}
 
-	public RandomAccessibleInterval<FloatType> apply(RandomAccessible<?> extendedImage, Interval interval) {
-		if(interval.numDimensions() != settings().globals().numDimensions())
+	public RandomAccessibleInterval<FloatType> apply(RandomAccessible<?> extendedImage,
+		Interval interval)
+	{
+		if (interval.numDimensions() != settings().globals().numDimensions())
 			throw new IllegalArgumentException("Wrong dimension of the output interval.");
-		Img<FloatType> result = ops().create().img(RevampUtils.appendDimensionToInterval(interval, 0, count() - 1), new FloatType());
+		Img<FloatType> result = ops().create().img(RevampUtils.appendDimensionToInterval(interval, 0,
+			count() - 1), new FloatType());
 		apply(extendedImage, RevampUtils.slices(result));
 		return result;
 	}
@@ -95,17 +100,17 @@ public class FeatureCalculator {
 
 	private static List<String> prepend(List<String> prepend, List<String> labels) {
 		return labels.stream()
-				.flatMap(label -> prepend.stream().map(pre -> pre.isEmpty() ? label : pre + "_" + label))
-				.collect(Collectors.toList());
+			.flatMap(label -> prepend.stream().map(pre -> pre.isEmpty() ? label : pre + "_" + label))
+			.collect(Collectors.toList());
 	}
 
 	private static <T> List<List<T>> split(List<T> input, int count) {
 		return IntStream.range(0, count).mapToObj(
-				i -> filterByIndexPredicate(input, index -> index % count == i)
-		).collect(Collectors.toList());
+			i -> filterByIndexPredicate(input, index -> index % count == i)).collect(Collectors.toList());
 	}
 
 	private static <T> List<T> filterByIndexPredicate(List<T> in, IntPredicate predicate) {
-		return IntStream.range(0, in.size()).filter(predicate).mapToObj(in::get).collect(Collectors.toList());
+		return IntStream.range(0, in.size()).filter(predicate).mapToObj(in::get).collect(Collectors
+			.toList());
 	}
 }

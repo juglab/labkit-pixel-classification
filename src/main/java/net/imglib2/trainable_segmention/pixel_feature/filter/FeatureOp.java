@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imagej.ops.Op;
@@ -13,7 +14,9 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
-public interface FeatureOp extends SciJavaPlugin, Op, UnaryFunctionOp<RandomAccessibleInterval<FloatType>, RandomAccessibleInterval<FloatType>> {
+public interface FeatureOp extends SciJavaPlugin, Op,
+	UnaryFunctionOp<RandomAccessibleInterval<FloatType>, RandomAccessibleInterval<FloatType>>
+{
 
 	int count();
 

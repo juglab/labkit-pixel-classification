@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import ij.ImagePlus;
@@ -26,22 +27,24 @@ import static org.junit.Assert.assertEquals;
 public class ColorFeatureGroupTest {
 
 	private final GlobalSettings colorSettings = new GlobalSettings(ChannelSetting.RGB,
-			2, Arrays.asList(8.0), 1.0);
+		2, Arrays.asList(8.0), 1.0);
 
 	private final GlobalSettings graySettings = new GlobalSettings(ChannelSetting.SINGLE,
-			2, colorSettings.sigmas(), colorSettings.membraneThickness());
+		2, colorSettings.sigmas(), colorSettings.membraneThickness());
 
 	private final FeatureCalculator colorGroup = new FeatureCalculator(Utils.ops(),
-			new FeatureSettings(colorSettings, GroupedFeatures.gauss()));
+		new FeatureSettings(colorSettings, GroupedFeatures.gauss()));
 
 	private final FeatureCalculator grayGroup = new FeatureCalculator(Utils.ops(),
-			new FeatureSettings(graySettings, GroupedFeatures.gauss()));
+		new FeatureSettings(graySettings, GroupedFeatures.gauss()));
 
-	private final Img<ARGBType> image = ImageJFunctions.wrapRGBA(new ImagePlus("https://imagej.nih.gov/ij/images/clown.png"));
+	private final Img<ARGBType> image = ImageJFunctions.wrapRGBA(new ImagePlus(
+		"https://imagej.nih.gov/ij/images/clown.png"));
 
 	@Test
 	public void testAttributes() {
-		assertEquals(Arrays.asList("red_Gaussian_blur_8.0", "green_Gaussian_blur_8.0", "blue_Gaussian_blur_8.0"), colorGroup.attributeLabels());
+		assertEquals(Arrays.asList("red_Gaussian_blur_8.0", "green_Gaussian_blur_8.0",
+			"blue_Gaussian_blur_8.0"), colorGroup.attributeLabels());
 	}
 
 	@Test
@@ -51,7 +54,8 @@ public class ColorFeatureGroupTest {
 		List<RandomAccessibleInterval<FloatType>> results = RevampUtils.slices(result);
 		List<RandomAccessibleInterval<FloatType>> channels = RevampUtils.splitChannels(image);
 		for (int i = 0; i < 3; i++) {
-			RandomAccessibleInterval<FloatType> expected = RevampUtils.slices(grayGroup.apply(channels.get(i))).get(0);
+			RandomAccessibleInterval<FloatType> expected = RevampUtils.slices(grayGroup.apply(channels
+				.get(i))).get(0);
 			Utils.assertImagesEqual(35, expected, results.get(i));
 		}
 	}

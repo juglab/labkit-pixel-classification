@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.gui;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -19,22 +20,28 @@ public class AvailableFeatures {
 		this.context = context;
 	}
 
-	public static Map<String,Class<? extends FeatureOp>> getMap(Context context, GlobalSettings globals) {
+	public static Map<String, Class<? extends FeatureOp>> getMap(Context context,
+		GlobalSettings globals)
+	{
 		Map<String, Class<? extends FeatureOp>> map = new TreeMap<>();
-		List<PluginInfo<FeatureOp>> pi = context.service(PluginService.class).getPluginsOfType(FeatureOp.class);
-		for(PluginInfo<FeatureOp> pluginInfo : pi) {
+		List<PluginInfo<FeatureOp>> pi = context.service(PluginService.class).getPluginsOfType(
+			FeatureOp.class);
+		for (PluginInfo<FeatureOp> pluginInfo : pi) {
 			try {
-				if(!isValid(pluginInfo, globals))
+				if (!isValid(pluginInfo, globals))
 					continue;
 				map.put(getLabel(pluginInfo), pluginInfo.loadClass());
-			} catch (InstantiableException e) {
+			}
+			catch (InstantiableException e) {
 				// ignore
 			}
 		}
 		return map;
 	}
 
-	private static boolean isValid(PluginInfo<FeatureOp> pluginInfo, GlobalSettings globals) throws InstantiableException {
+	private static boolean isValid(PluginInfo<FeatureOp> pluginInfo, GlobalSettings globals)
+		throws InstantiableException
+	{
 		FeatureOp op = pluginInfo.createInstance();
 		return op.checkGlobalSettings(globals);
 	}

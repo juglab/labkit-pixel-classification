@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter.dog;
 
 import net.imglib2.RandomAccessible;
@@ -48,7 +49,8 @@ public class SingleDifferenceOfGaussiansFeature extends AbstractFeatureOp {
 			Gauss3.gauss(sigma1 * 0.4, in, tmp);
 			Gauss3.gauss(sigma2 * 0.4, in, out);
 			Views.interval(Views.pair(tmp, out), out).forEach(p -> p.getB().sub(p.getA()));
-		} catch (IncompatibleTypeException e) {
+		}
+		catch (IncompatibleTypeException e) {
 			throw new RuntimeException(e);
 		}
 	}

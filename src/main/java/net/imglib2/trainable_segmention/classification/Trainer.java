@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.classification;
 
 import hr.irb.fastRandomForest.FastRandomForest;
@@ -57,48 +58,56 @@ public class Trainer {
 	}
 
 	public void finish() {
-		if(finished)
+		if (finished)
 			throw new IllegalStateException();
 		finished = true;
 		training.train();
 	}
 
 	public void trainLabeledImage(RandomAccessibleInterval<?> image, LabelRegions<?> labeling) {
-		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(features.apply(image));
+		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(features
+			.apply(image));
 		trainLabeledFeatures(featureStack, labeling);
 	}
 
-	public <L> void trainLabeledFeatures(RandomAccessible<? extends Composite<? extends RealType<?>>> features, LabelRegions<L> regions) {
+	public <L> void trainLabeledFeatures(
+		RandomAccessible<? extends Composite<? extends RealType<?>>> features, LabelRegions<L> regions)
+	{
 		RandomAccess<? extends Composite<? extends RealType<?>>> ra = features.randomAccess();
 		Map<String, L> kayMap = createKeyMap(regions);
-		for(int classIndex = 0; classIndex < classNames.size(); classIndex++) {
+		for (int classIndex = 0; classIndex < classNames.size(); classIndex++) {
 			L label = kayMap.get(classNames.get(classIndex));
-			if(label == null)
+			if (label == null)
 				continue;
 			LabelRegion<L> region = regions.getLabelRegion(label);
 			Cursor<Void> cursor = region.cursor();
-			while(cursor.hasNext()) {
+			while (cursor.hasNext()) {
 				cursor.next();
 				ra.setPosition(cursor);
 				training.add(ra.get(), classIndex);
 			}
 		}
-		if(autoFinish)
+		if (autoFinish)
 			finish();
 	}
 
-	private <L> Map<String,L> createKeyMap(LabelRegions<L> regions) {
+	private <L> Map<String, L> createKeyMap(LabelRegions<L> regions) {
 		Map<String, L> map = new HashMap<>();
 		regions.getExistingLabels().forEach(label -> map.put(label.toString(), label));
 		return map;
 	}
 
-	public static Segmenter train(OpEnvironment ops, RandomAccessibleInterval<?> image, LabelRegions<?> labeling, FeatureSettings features) {
+	public static Segmenter train(OpEnvironment ops, RandomAccessibleInterval<?> image,
+		LabelRegions<?> labeling, FeatureSettings features)
+	{
 		return train(ops, image, labeling, features, initRandomForest());
 	}
 
-	public static Segmenter train(OpEnvironment ops, RandomAccessibleInterval<?> image, LabelRegions<?> labeling, FeatureSettings features, Classifier initialWekaClassifier) {
-		List<String> classNames = labeling.getExistingLabels().stream().map(Object::toString).collect(Collectors.toList());
+	public static Segmenter train(OpEnvironment ops, RandomAccessibleInterval<?> image,
+		LabelRegions<?> labeling, FeatureSettings features, Classifier initialWekaClassifier)
+	{
+		List<String> classNames = labeling.getExistingLabels().stream().map(Object::toString).collect(
+			Collectors.toList());
 		Segmenter segmenter = new Segmenter(ops, classNames, features, initialWekaClassifier);
 		Trainer.of(segmenter).trainLabeledImage(image, labeling);
 		return segmenter;
@@ -108,15 +117,15 @@ public class Trainer {
 		FastRandomForest rf = new FastRandomForest();
 		int numOfTrees = 200;
 		rf.setNumTrees(numOfTrees);
-		//this is the default that Breiman suggests
-		//rf.setNumFeatures((int) Math.round(Math.sqrt(featureStack.getSize())));
-		//but this seems to work better
+		// this is the default that Breiman suggests
+		// rf.setNumFeatures((int) Math.round(Math.sqrt(featureStack.getSize())));
+		// but this seems to work better
 		int randomFeatures = 2;
 		rf.setNumFeatures(randomFeatures);
 		// Random seed
-		rf.setSeed( (new Random()).nextInt() );
+		rf.setSeed((new Random()).nextInt());
 		// Set number of threads
-		rf.setNumThreads( Prefs.getThreads() );
+		rf.setNumThreads(Prefs.getThreads());
 		return rf;
 	}
 }

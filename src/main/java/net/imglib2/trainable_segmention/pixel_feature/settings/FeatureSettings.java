@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.settings;
 
 import com.google.gson.Gson;
@@ -26,7 +27,8 @@ public class FeatureSettings {
 
 	public FeatureSettings(GlobalSettings globalSettings, List<FeatureSetting> featureSettingList) {
 		this.globalSettings = new GlobalSettings(globalSettings);
-		this.featureSettingList = featureSettingList.stream().map(FeatureSetting::new).collect(Collectors.toList());
+		this.featureSettingList = featureSettingList.stream().map(FeatureSetting::new).collect(
+			Collectors.toList());
 	}
 
 	public GlobalSettings globals() {
@@ -46,8 +48,10 @@ public class FeatureSettings {
 
 	public static FeatureSettings fromJson(JsonElement json) {
 		JsonObject object = json.getAsJsonObject();
-		GlobalSettings globalSettings = new Gson().fromJson(object.get("globals"), GlobalSettings.class);
-		List<FeatureSetting> features = deserializeFeatureSettingsList(object.get("ops").getAsJsonArray());
+		GlobalSettings globalSettings = new Gson().fromJson(object.get("globals"),
+			GlobalSettings.class);
+		List<FeatureSetting> features = deserializeFeatureSettingsList(object.get("ops")
+			.getAsJsonArray());
 		return new FeatureSettings(globalSettings, features);
 	}
 
@@ -65,11 +69,11 @@ public class FeatureSettings {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(!(obj instanceof FeatureSettings))
+		if (!(obj instanceof FeatureSettings))
 			return false;
 		FeatureSettings fs = (FeatureSettings) obj;
 		return this.globals().equals(fs.globals()) &&
-				this.features().equals(fs.features());
+			this.features().equals(fs.features());
 	}
 
 	@Override

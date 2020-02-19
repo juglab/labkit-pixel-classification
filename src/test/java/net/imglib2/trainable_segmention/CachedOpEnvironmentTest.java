@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention;
 
 import net.imagej.ops.OpService;
@@ -19,7 +20,8 @@ import java.util.Objects;
 import static org.junit.Assert.assertSame;
 
 /**
- * Test if {@link CachedOpEnvironment} is suitable to cache once calculated features like gaussian etc.
+ * Test if {@link CachedOpEnvironment} is suitable to cache once calculated
+ * features like gaussian etc.
  *
  * @author Matthias
  */
@@ -35,7 +37,7 @@ public class CachedOpEnvironmentTest {
 
 		UnaryFunctionOp<RandomAccessibleInterval, RandomAccessibleInterval> func =
 			Functions.unary(cachedOps, Ops.Filter.Gauss.class, RandomAccessibleInterval.class,
-			RandomAccessibleInterval.class, new double[]{8, 8});
+				RandomAccessibleInterval.class, new double[] { 8, 8 });
 
 		RandomAccessibleInterval<FloatType> result1 = func.calculate(img);
 

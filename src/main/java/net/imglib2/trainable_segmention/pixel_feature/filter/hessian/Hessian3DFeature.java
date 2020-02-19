@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter.hessian;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractGroupFeatureOp;
@@ -28,7 +29,7 @@ public class Hessian3DFeature extends AbstractGroupFeatureOp {
 	@Override
 	protected List<FeatureSetting> initFeatures() {
 		return globalSettings().sigmas().stream()
-				.map(sigma -> SingleFeatures.hessian3d(sigma, absoluteValues))
-				.collect(Collectors.toList());
+			.map(sigma -> SingleFeatures.hessian3d(sigma, absoluteValues))
+			.collect(Collectors.toList());
 	}
 }

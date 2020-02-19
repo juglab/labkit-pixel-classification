@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import ij.ImagePlus;
@@ -39,14 +40,18 @@ public class FeatureStackTest {
 
 	private static Img<FloatType> bridgeImg = ImagePlusAdapter.convertFloat(bridgeImage);
 
-	public static RandomAccessibleInterval<FloatType> createStack(RandomAccessibleInterval<FloatType> image, FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(SingleFeatures.identity(), feature));
+	public static RandomAccessibleInterval<FloatType> createStack(
+		RandomAccessibleInterval<FloatType> image, FeatureSetting feature)
+	{
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays
+			.asList(SingleFeatures.identity(), feature));
 		return new FeatureCalculator(Utils.ops(), featureSettings).apply(image);
 	}
 
 	@Test
 	public void testEmptyStack() {
-		RandomAccessibleInterval<FloatType> expected = generateFeatures(bridgeImage, nCopiesAsArray(20, false));
+		RandomAccessibleInterval<FloatType> expected = generateFeatures(bridgeImage, nCopiesAsArray(20,
+			false));
 		RandomAccessibleInterval<FloatType> result = createEmptyStack(bridgeImg);
 		Utils.assertImagesEqual(expected, result);
 	}
@@ -75,11 +80,13 @@ public class FeatureStackTest {
 
 	public static List<String> oldAttributes(FeatureStack stack) {
 		Instances instances = stack.createInstances(new ArrayList<>(Arrays.asList("class1", "class2")));
-		return IntStream.range(0, instances.classIndex()).mapToObj(i -> instances.attribute(i).name()).collect(Collectors.toList());
+		return IntStream.range(0, instances.classIndex()).mapToObj(i -> instances.attribute(i).name())
+			.collect(Collectors.toList());
 	}
 
 	public static List<String> getAttributeLabels(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays.asList(SingleFeatures.identity(), feature));
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2dSettings(), Arrays
+			.asList(SingleFeatures.identity(), feature));
 		return new FeatureCalculator(Utils.ops(), featureSettings).attributeLabels();
 	}
 
@@ -103,7 +110,10 @@ public class FeatureStackTest {
 		testFeature(40, FeatureStack.LIPSCHITZ, GroupedFeatures.lipschitz(0));
 	}
 
-	/** Show that there is a difference between HyperSphereShape and shape used by FilterRank. */
+	/**
+	 * Show that there is a difference between HyperSphereShape and shape used by
+	 * FilterRank.
+	 */
 	@Ignore
 	@Test
 	public void sphereFilterRankHyperSphereEqual() {
@@ -113,13 +123,14 @@ public class FeatureStackTest {
 		final RankFilters filter = new RankFilters();
 		filter.rank(ip, radius, RankFilters.MAX);
 		Img<FloatType> sphereIj1 = ImageJFunctions.convertFloat(new ImagePlus("ij1_shape", ip));
-		Img<FloatType> sphereImgLib = Dilation.dilate(ImageJFunctions.convertFloat(image), new HyperSphereShape(radius), 10);
+		Img<FloatType> sphereImgLib = Dilation.dilate(ImageJFunctions.convertFloat(image),
+			new HyperSphereShape(radius), 10);
 		Utils.assertImagesEqual(40, sphereIj1, sphereImgLib);
 	}
 
 	private static ImagePlus squarePictureWithCenteredDot() {
-	    int length = 127;
-	    int center = length / 2;
+		int length = 127;
+		int center = length / 2;
 		ByteProcessor processor = new ByteProcessor(length, length);
 		processor.set(center, center, 255);
 		return new ImagePlus("Square with centered dot", processor);
@@ -155,7 +166,9 @@ public class FeatureStackTest {
 		testFeature(30, FeatureStack.GABOR, GroupedFeatures.legacyGabor());
 	}
 
-	private static RandomAccessibleInterval<FloatType> generateSingleFeature(ImagePlus image, int feature) {
+	private static RandomAccessibleInterval<FloatType> generateSingleFeature(ImagePlus image,
+		int feature)
+	{
 		return generateFeatures(image, getEnabledFeatures(feature));
 	}
 
@@ -165,7 +178,9 @@ public class FeatureStackTest {
 		return enabledFeatures;
 	}
 
-	private static RandomAccessibleInterval<FloatType> generateFeatures(ImagePlus image, boolean[] enabledFeatures) {
+	private static RandomAccessibleInterval<FloatType> generateFeatures(ImagePlus image,
+		boolean[] enabledFeatures)
+	{
 		final FeatureStack sliceFeatures = getFeatureStack(image, enabledFeatures);
 		ImageStack stack = sliceFeatures.getStack();
 		return ImageJFunctions.wrapFloat(new ImagePlus("stack", stack));

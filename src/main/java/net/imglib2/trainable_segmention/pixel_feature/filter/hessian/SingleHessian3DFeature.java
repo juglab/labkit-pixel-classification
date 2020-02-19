@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter.hessian;
 
 import net.imglib2.Interval;
@@ -39,12 +40,15 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 
 	@Override
 	public List<String> attributeLabels() {
-		return Stream.of("largest", "middle", "smallest").map(x -> "Hessian_" + x + "_" + sigma + "_true")
-				.collect(Collectors.toList());
+		return Stream.of("largest", "middle", "smallest").map(x -> "Hessian_" + x + "_" + sigma +
+			"_true")
+			.collect(Collectors.toList());
 	}
 
 	@Override
-	public void apply(RandomAccessible<FloatType> input, List<RandomAccessibleInterval<FloatType>> output) {
+	public void apply(RandomAccessible<FloatType> input,
+		List<RandomAccessibleInterval<FloatType>> output)
+	{
 		calculateHessianOnChannel(input, Views.stack(output), sigma);
 	}
 
@@ -53,31 +57,36 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 		return globals.numDimensions() == 3;
 	}
 
-	private void calculateHessianOnChannel(RandomAccessible<FloatType> image, RandomAccessibleInterval<FloatType> out, double sigma) {
-		double[] sigmas = {0.4 * sigma, 0.4 * sigma, 0.4 * sigma};
+	private void calculateHessianOnChannel(RandomAccessible<FloatType> image,
+		RandomAccessibleInterval<FloatType> out, double sigma)
+	{
+		double[] sigmas = { 0.4 * sigma, 0.4 * sigma, 0.4 * sigma };
 
 		Interval secondDerivativeInterval = RevampUtils.removeLastDimension(out);
 		Interval firstDerivativeInterval = Intervals.expand(secondDerivativeInterval, 1);
 		Interval blurredInterval = Intervals.expand(firstDerivativeInterval, 1);
 
-		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(ops(), image, blurredInterval, sigmas);
+		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(ops(), image, blurredInterval,
+			sigmas);
 		RandomAccessibleInterval<FloatType> dx = derive(blurred, firstDerivativeInterval, 0);
 		RandomAccessibleInterval<FloatType> dy = derive(blurred, firstDerivativeInterval, 1);
 		RandomAccessibleInterval<FloatType> dz = derive(blurred, firstDerivativeInterval, 2);
 		RandomAccessibleInterval<RealComposite<FloatType>> secondDerivatives =
-				calculateSecondDerivatives(secondDerivativeInterval, dx, dy, dz);
+			calculateSecondDerivatives(secondDerivativeInterval, dx, dy, dz);
 
 		RandomAccessibleInterval<RealComposite<FloatType>> eigenValues = Views.collapseReal(out);
-		Views.interval(Views.pair(secondDerivatives, eigenValues), eigenValues).forEach(p -> calculateEigenValues(p.getA(), p.getB()));
+		Views.interval(Views.pair(secondDerivatives, eigenValues), eigenValues).forEach(
+			p -> calculateEigenValues(p.getA(), p.getB()));
 	}
 
 	private RandomAccessibleInterval<RealComposite<FloatType>> calculateSecondDerivatives(
-			Interval secondDerivativeInterval,
-			RandomAccessibleInterval<FloatType> dx,
-			RandomAccessibleInterval<FloatType> dy,
-			RandomAccessibleInterval<FloatType> dz)
+		Interval secondDerivativeInterval,
+		RandomAccessibleInterval<FloatType> dx,
+		RandomAccessibleInterval<FloatType> dy,
+		RandomAccessibleInterval<FloatType> dz)
 	{
-		Img<FloatType> secondDerivatives = ops().create().img(RevampUtils.appendDimensionToInterval(secondDerivativeInterval, 0, 5), new FloatType());
+		Img<FloatType> secondDerivatives = ops().create().img(RevampUtils.appendDimensionToInterval(
+			secondDerivativeInterval, 0, 5), new FloatType());
 		List<RandomAccessibleInterval<FloatType>> slices = RevampUtils.slices(secondDerivatives);
 		PartialDerivative.gradientCentralDifference(dx, slices.get(0), 0);
 		PartialDerivative.gradientCentralDifference(dx, slices.get(1), 1);
@@ -88,16 +97,18 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 		return Views.collapseReal(secondDerivatives);
 	}
 
-	private void calculateEigenValues(RealComposite<FloatType> derivatives, RealComposite<FloatType> eigenValues) {
+	private void calculateEigenValues(RealComposite<FloatType> derivatives,
+		RealComposite<FloatType> eigenValues)
+	{
 		EigenValues.Vector3D v = new EigenValues.Vector3D();
 		EigenValues.eigenvalues(v,
-				derivatives.get(0).getRealDouble(),
-				derivatives.get(1).getRealDouble(),
-				derivatives.get(2).getRealDouble(),
-				derivatives.get(3).getRealDouble(),
-				derivatives.get(4).getRealDouble(),
-				derivatives.get(5).getRealDouble());
-		if(absoluteValues)
+			derivatives.get(0).getRealDouble(),
+			derivatives.get(1).getRealDouble(),
+			derivatives.get(2).getRealDouble(),
+			derivatives.get(3).getRealDouble(),
+			derivatives.get(4).getRealDouble(),
+			derivatives.get(5).getRealDouble());
+		if (absoluteValues)
 			EigenValues.abs(v);
 		EigenValues.sort(v);
 		eigenValues.get(0).setReal(v.x);
@@ -105,10 +116,11 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 		eigenValues.get(2).setReal(v.z);
 	}
 
-
 	// -- Helper methods --
 
-	private RandomAccessibleInterval<FloatType> derive(RandomAccessible<FloatType> source, Interval interval, int dimension) {
+	private RandomAccessibleInterval<FloatType> derive(RandomAccessible<FloatType> source,
+		Interval interval, int dimension)
+	{
 		Img<FloatType> target = ops().create().img(interval, new FloatType());
 		PartialDerivative.gradientCentralDifference(source, target, dimension);
 		return target;

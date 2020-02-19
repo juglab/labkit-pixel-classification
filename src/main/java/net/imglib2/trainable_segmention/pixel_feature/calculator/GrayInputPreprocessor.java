@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import net.imglib2.Interval;
@@ -24,11 +25,13 @@ public class GrayInputPreprocessor implements InputPreprocessor {
 
 	@Override
 	public List<RandomAccessible<FloatType>> getChannels(RandomAccessible<?> input) {
-		if(input.numDimensions() != globals.numDimensions())
-			throw new IllegalArgumentException("Input image must have " + globals.numDimensions() + " dimensions.");
-		if(!(input.randomAccess().get() instanceof RealType))
+		if (input.numDimensions() != globals.numDimensions())
+			throw new IllegalArgumentException("Input image must have " + globals.numDimensions() +
+				" dimensions.");
+		if (!(input.randomAccess().get() instanceof RealType))
 			throw new IllegalArgumentException();
-		return Collections.singletonList(RevampUtils.randomAccessibleToFloat(RevampUtils.uncheckedCast(input)));
+		return Collections.singletonList(RevampUtils.randomAccessibleToFloat(RevampUtils.uncheckedCast(
+			input)));
 	}
 
 	@Override

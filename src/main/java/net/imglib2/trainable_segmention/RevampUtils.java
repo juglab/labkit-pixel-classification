@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention;
 
 import net.imagej.ImgPlus;
@@ -37,16 +38,18 @@ import java.util.stream.Stream;
  */
 public class RevampUtils {
 
-	private static final float[] SOBEL_FILTER_X_VALUES = {1f,2f,1f,0f,0f,0f,-1f,-2f,-1f};
-	private static final RandomAccessibleInterval<FloatType> SOBEL_FILTER_X = ArrayImgs.floats(SOBEL_FILTER_X_VALUES, 3, 3);
-	private static final float[] SOBEL_FILTER_Y_VALUES = {1f,0f,-1f,2f,0f,-2f,1f,0f,-1f};
-	private static final RandomAccessibleInterval<FloatType> SOBEL_FILTER_Y = ArrayImgs.floats(SOBEL_FILTER_Y_VALUES, 3, 3);
+	private static final float[] SOBEL_FILTER_X_VALUES = { 1f, 2f, 1f, 0f, 0f, 0f, -1f, -2f, -1f };
+	private static final RandomAccessibleInterval<FloatType> SOBEL_FILTER_X = ArrayImgs.floats(
+		SOBEL_FILTER_X_VALUES, 3, 3);
+	private static final float[] SOBEL_FILTER_Y_VALUES = { 1f, 0f, -1f, 2f, 0f, -2f, 1f, 0f, -1f };
+	private static final RandomAccessibleInterval<FloatType> SOBEL_FILTER_Y = ArrayImgs.floats(
+		SOBEL_FILTER_Y_VALUES, 3, 3);
 
 	public static <T> List<RandomAccessibleInterval<T>> slices(RandomAccessibleInterval<T> output) {
 		int axis = output.numDimensions() - 1;
 		return LongStream.range(output.min(axis), output.max(axis) + 1)
-				.mapToObj(pos -> Views.hyperSlice(output, axis, pos))
-				.collect(Collectors.toList());
+			.mapToObj(pos -> Views.hyperSlice(output, axis, pos))
+			.collect(Collectors.toList());
 	}
 
 	public static long[] extend(long[] in, long elem) {
@@ -87,17 +90,22 @@ public class RevampUtils {
 		return Arrays.copyOf(longs, longs.length - 1);
 	}
 
-	public static RandomAccessibleInterval<FloatType> gauss(OpService ops, RandomAccessibleInterval<FloatType> image, double[] sigmas) {
+	public static RandomAccessibleInterval<FloatType> gauss(OpService ops,
+		RandomAccessibleInterval<FloatType> image, double[] sigmas)
+	{
 		RandomAccessibleInterval<FloatType> blurred = ops.create().img(image);
 		ops.filter().gauss(blurred, image, sigmas, new OutOfBoundsBorderFactory<>());
 		return blurred;
 	}
 
-	public static RandomAccessibleInterval<FloatType> gauss(OpEnvironment ops, RandomAccessible<FloatType> input, Interval outputInterval, double[] sigmas) {
+	public static RandomAccessibleInterval<FloatType> gauss(OpEnvironment ops,
+		RandomAccessible<FloatType> input, Interval outputInterval, double[] sigmas)
+	{
 		RandomAccessibleInterval<FloatType> blurred = ops.create().img(outputInterval, new FloatType());
 		try {
 			Gauss3.gauss(sigmas, input, blurred, Executors.newSingleThreadExecutor());
-		} catch (IncompatibleTypeException e) {
+		}
+		catch (IncompatibleTypeException e) {
 			throw new RuntimeException(e);
 		}
 		return blurred;
@@ -105,13 +113,15 @@ public class RevampUtils {
 
 	public static Interval gaussRequiredInput(Interval outputInterval, double[] sigmas) {
 		long[] border = IntStream.of(Gauss3.halfkernelsizes(sigmas))
-				.mapToLong(x -> x - 1)
-				.toArray();
+			.mapToLong(x -> x - 1)
+			.toArray();
 		return Intervals.expand(outputInterval, border);
 	}
 
-	public static RandomAccessibleInterval<FloatType> deriveX(OpEnvironment ops, RandomAccessible<FloatType> input, Interval outputInterval) {
-		if(outputInterval.numDimensions() != 2)
+	public static RandomAccessibleInterval<FloatType> deriveX(OpEnvironment ops,
+		RandomAccessible<FloatType> input, Interval outputInterval)
+	{
+		if (outputInterval.numDimensions() != 2)
 			throw new IllegalArgumentException("Only two dimensional images supported.");
 		RandomAccessibleInterval<FloatType> output = ops.create().img(outputInterval, new FloatType());
 		ops.filter().convolve(output, input, SOBEL_FILTER_X);
@@ -119,13 +129,15 @@ public class RevampUtils {
 	}
 
 	public static Interval deriveXRequiredInput(Interval output) {
-		if(output.numDimensions() != 2)
+		if (output.numDimensions() != 2)
 			throw new IllegalArgumentException("Only two dimensional images supported.");
-		return Intervals.expand(output, new long[]{1,1});
+		return Intervals.expand(output, new long[] { 1, 1 });
 	}
 
-	public static RandomAccessibleInterval<FloatType> deriveY(OpEnvironment ops, RandomAccessible<FloatType> input, Interval outputInterval) {
-		if(outputInterval.numDimensions() != 2)
+	public static RandomAccessibleInterval<FloatType> deriveY(OpEnvironment ops,
+		RandomAccessible<FloatType> input, Interval outputInterval)
+	{
+		if (outputInterval.numDimensions() != 2)
 			throw new IllegalArgumentException("Only two dimensional images supported.");
 		RandomAccessibleInterval<FloatType> output = ops.create().img(outputInterval, new FloatType());
 		ops.filter().convolve(output, input, SOBEL_FILTER_Y);
@@ -133,12 +145,14 @@ public class RevampUtils {
 	}
 
 	public static Interval deriveYRequiredInput(Interval output) {
-		if(output.numDimensions() != 2)
+		if (output.numDimensions() != 2)
 			throw new IllegalArgumentException("Only two dimensional images supported.");
-		return Intervals.expand(output, new long[]{1,1});
+		return Intervals.expand(output, new long[] { 1, 1 });
 	}
 
-	public static RandomAccessibleInterval<FloatType> convolve(OpService ops, RandomAccessibleInterval<FloatType> blurred, RandomAccessibleInterval<FloatType> kernel) {
+	public static RandomAccessibleInterval<FloatType> convolve(OpService ops,
+		RandomAccessibleInterval<FloatType> blurred, RandomAccessibleInterval<FloatType> kernel)
+	{
 		return ops.filter().convolve(blurred, kernel, new OutOfBoundsBorderFactory<>());
 	}
 
@@ -147,15 +161,19 @@ public class RevampUtils {
 		return Converters.convert(input, floatToInt, new IntType());
 	}
 
-	public static RandomAccessibleInterval<FloatType> toFloat(RandomAccessibleInterval<? extends RealType<?>> input) {
-		if(input.randomAccess().get() instanceof FloatType)
+	public static RandomAccessibleInterval<FloatType> toFloat(
+		RandomAccessibleInterval<? extends RealType<?>> input)
+	{
+		if (input.randomAccess().get() instanceof FloatType)
 			return uncheckedCast(input);
 		Converter<RealType<?>, FloatType> intToFloat = (in, out) -> out.set(in.getRealFloat());
 		return Converters.convert(input, intToFloat, new FloatType());
 	}
 
-	public static RandomAccessible<FloatType> randomAccessibleToFloat(RandomAccessible<? extends RealType<?>> input) {
-		if(input.randomAccess().get() instanceof FloatType)
+	public static RandomAccessible<FloatType> randomAccessibleToFloat(
+		RandomAccessible<? extends RealType<?>> input)
+	{
+		if (input.randomAccess().get() instanceof FloatType)
 			return uncheckedCast(input);
 		Converter<RealType<?>, FloatType> intToFloat = (in, out) -> out.set(in.getRealFloat());
 		return Converters.convert(input, intToFloat, new FloatType());
@@ -172,8 +190,8 @@ public class RevampUtils {
 	}
 
 	public static <T extends ComplexType<T>> boolean containsNaN(RandomAccessibleInterval<T> result) {
-		for(T value : Views.iterable(result))
-			if(Double.isNaN(value.getRealDouble()))
+		for (T value : Views.iterable(result))
+			if (Double.isNaN(value.getRealDouble()))
 				return true;
 		return false;
 	}
@@ -196,6 +214,7 @@ public class RevampUtils {
 		Cursor<ByteType> cursor = translate.localizingCursor();
 
 		return () -> new java.util.Iterator<Localizable>() {
+
 			@Override
 			public boolean hasNext() {
 				return cursor.hasNext();
@@ -230,8 +249,9 @@ public class RevampUtils {
 	public static void wrapException(RunnableWithException r) {
 		try {
 			r.run();
-		} catch(Exception e) {
-			if(e instanceof RuntimeException)
+		}
+		catch (Exception e) {
+			if (e instanceof RuntimeException)
 				throw (RuntimeException) e;
 			throw new RuntimeException(e);
 		}
@@ -240,14 +260,17 @@ public class RevampUtils {
 	public static <R> R wrapException(SupplierWithException<R> r) {
 		try {
 			return r.get();
-		} catch(Exception e) {
-			if(e instanceof RuntimeException)
+		}
+		catch (Exception e) {
+			if (e instanceof RuntimeException)
 				throw (RuntimeException) e;
 			throw new RuntimeException(e);
 		}
 	}
 
-	public static DenseInstance getInstance(int featureCount, int classIndex, Composite<? extends RealType<?>> featureValues) {
+	public static DenseInstance getInstance(int featureCount, int classIndex,
+		Composite<? extends RealType<?>> featureValues)
+	{
 		double[] values = new double[featureCount + 1];
 		for (int i = 0; i < featureCount; i++)
 			values[i] = featureValues.get(i).getRealDouble();
@@ -255,20 +278,28 @@ public class RevampUtils {
 		return new DenseInstance(1.0, values);
 	}
 
-	public static void copyInteger(RandomAccessibleInterval<? extends IntegerType<?>> in, RandomAccessibleInterval<? extends IntegerType<?>> result) {
-		Views.interval(Views.pair(in, result), in).forEach(p -> p.getB().setInteger(p.getA().getInteger()));
+	public static void copyInteger(RandomAccessibleInterval<? extends IntegerType<?>> in,
+		RandomAccessibleInterval<? extends IntegerType<?>> result)
+	{
+		Views.interval(Views.pair(in, result), in).forEach(p -> p.getB().setInteger(p.getA()
+			.getInteger()));
 	}
 
 	public static List<RandomAccessible<FloatType>> splitChannels(RandomAccessible<ARGBType> image) {
-		return convertersStream().map(x -> Converters.convert(image, x, new FloatType())).collect(Collectors.toList());
+		return convertersStream().map(x -> Converters.convert(image, x, new FloatType())).collect(
+			Collectors.toList());
 	}
 
-	public static List<RandomAccessibleInterval<FloatType>> splitChannels(RandomAccessibleInterval<ARGBType> image) {
-		return convertersStream().map(x -> Converters.convert(image, x, new FloatType())).collect(Collectors.toList());
+	public static List<RandomAccessibleInterval<FloatType>> splitChannels(
+		RandomAccessibleInterval<ARGBType> image)
+	{
+		return convertersStream().map(x -> Converters.convert(image, x, new FloatType())).collect(
+			Collectors.toList());
 	}
 
 	private static Stream<Converter<ARGBType, FloatType>> convertersStream() {
-		return Stream.<IntToIntFunction>of(ARGBType::red, ARGBType::green, ARGBType::blue) .map(RevampUtils::converter);
+		return Stream.<IntToIntFunction> of(ARGBType::red, ARGBType::green, ARGBType::blue).map(
+			RevampUtils::converter);
 	}
 
 	private static Converter<ARGBType, FloatType> converter(IntToIntFunction f) {
@@ -276,25 +307,32 @@ public class RevampUtils {
 	}
 
 	public static <T> T uncheckedCast(Object input) {
-		@SuppressWarnings("unchecked") T result = (T) input;
+		@SuppressWarnings("unchecked")
+		T result = (T) input;
 		return result;
 	}
 
-	public static <T> RandomAccessible<T> castRandomAccessible(RandomAccessible<?> input, Class<T> tClass) {
-		if(tClass.isInstance(input.randomAccess().get()))
+	public static <T> RandomAccessible<T> castRandomAccessible(RandomAccessible<?> input,
+		Class<T> tClass)
+	{
+		if (tClass.isInstance(input.randomAccess().get()))
 			return uncheckedCast(input);
-		throw new IllegalArgumentException("RandomAccessible input must be of type " + tClass.getName());
+		throw new IllegalArgumentException("RandomAccessible input must be of type " + tClass
+			.getName());
 	}
 
 	public interface RunnableWithException {
+
 		void run() throws Exception;
 	}
 
 	public interface SupplierWithException<R> {
+
 		R get() throws Exception;
 	}
 
 	private interface IntToIntFunction {
+
 		int apply(int value);
 	}
 
@@ -302,8 +340,8 @@ public class RevampUtils {
 		return intervalRemoveDimension(interval, interval.numDimensions() - 1);
 	}
 
-	public static Interval intervalRemoveDimension( Interval interval,
-			int d)
+	public static Interval intervalRemoveDimension(Interval interval,
+		int d)
 	{
 		long[] min = removeElement(Intervals.minAsLongArray(interval), d);
 		long[] max = removeElement(Intervals.maxAsLongArray(interval), d);

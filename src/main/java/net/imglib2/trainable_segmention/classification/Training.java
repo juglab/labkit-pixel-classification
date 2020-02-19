@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.classification;
 
 import net.imglib2.type.numeric.RealType;

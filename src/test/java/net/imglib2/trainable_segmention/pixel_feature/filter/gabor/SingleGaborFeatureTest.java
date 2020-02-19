@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.pixel_feature.filter.gabor;
 
 import ij.ImagePlus;
@@ -16,7 +17,8 @@ public class SingleGaborFeatureTest {
 	@Test
 	public void testNormalize() {
 		ImagePlus image = Utils.loadImage("nuclei.tif");
-		Img<FloatType> expected = ImageJFunctions.wrapFloat(new ImagePlus("", trainableSegmentation.utils.Utils.normalize(image.getStack())));
+		Img<FloatType> expected = ImageJFunctions.wrapFloat(new ImagePlus("",
+			trainableSegmentation.utils.Utils.normalize(image.getStack())));
 		Img<FloatType> result = Utils.copy(ImageJFunctions.convertFloat(image));
 		SingleGaborFeature.normalize(Utils.ops(), result);
 		Utils.assertImagesEqual(expected, result);

@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.classification;
 
 import com.google.gson.*;
@@ -6,7 +7,8 @@ import java.io.*;
 import java.util.Base64;
 
 /**
- * Helper for conversions between {@link weka.classifiers.Classifier} and {@link JsonElement}.
+ * Helper for conversions between {@link weka.classifiers.Classifier} and
+ * {@link JsonElement}.
  *
  * @author Matthias Arzt
  */
@@ -18,7 +20,8 @@ class ClassifierSerialization {
 			oos.writeObject(object);
 			oos.flush();
 			return baos.toByteArray();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -27,7 +30,8 @@ class ClassifierSerialization {
 		InputStream stream = new ByteArrayInputStream(bytes);
 		try {
 			return new ObjectInputStream(stream).readObject();
-		} catch (IOException | ClassNotFoundException e) {
+		}
+		catch (IOException | ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -37,6 +41,7 @@ class ClassifierSerialization {
 	}
 
 	public static weka.classifiers.Classifier jsonToWeka(JsonElement jsonElement) {
-		return (weka.classifiers.Classifier) bytesToObject(Base64.getDecoder().decode(jsonElement.getAsString()));
+		return (weka.classifiers.Classifier) bytesToObject(Base64.getDecoder().decode(jsonElement
+			.getAsString()));
 	}
 }
