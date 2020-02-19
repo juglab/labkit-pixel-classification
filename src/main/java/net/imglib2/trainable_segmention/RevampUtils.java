@@ -189,8 +189,8 @@ public class RevampUtils {
 		return copy(ops, Views.iterable(input));
 	}
 
-	public static <T extends ComplexType<T>> boolean containsNaN(RandomAccessibleInterval<T> result) {
-		for (T value : Views.iterable(result))
+	public static boolean containsNaN(RandomAccessibleInterval<? extends ComplexType<?>> result) {
+		for (ComplexType<?> value : Views.iterable(result))
 			if (Double.isNaN(value.getRealDouble()))
 				return true;
 		return false;
