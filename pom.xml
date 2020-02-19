@@ -90,6 +90,21 @@
 		</repository>
 	</repositories>
 
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>net.revelc.code.formatter</groupId>
+					<artifactId>formatter-maven-plugin</artifactId>
+					<version>${formatter-maven-plugin.version}</version>
+					<configuration>
+						<configFile>coding-style.xml</configFile>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>net.imagej</groupId>
