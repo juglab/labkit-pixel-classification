@@ -4,6 +4,7 @@ package net.imglib2.trainable_segmention.classification;
 import com.google.gson.JsonElement;
 import net.imagej.ops.OpEnvironment;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
@@ -46,21 +47,21 @@ public class SegmenterTest {
 	@Test
 	public void testClassification() {
 		Segmenter segmenter = trainClassifier();
-		RandomAccessibleInterval<? extends IntegerType> result = segmenter.segment(img);
+		RandomAccessibleInterval<? extends IntegerType<?>> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());
 	}
 
 	private Segmenter trainClassifier() {
 		GlobalSettings globals = GlobalSettings.default2d()
 			.channels(ChannelSetting.SINGLE)
-			.dimensions(img.numDimensions()).sigmas(Arrays.asList(1.0, 8.0, 16.0))
+			.dimensions(img.numDimensions()).sigmas(Arrays.asList(1.0, 4.0, 8.0))
 			.build();
 		FeatureSettings featureSettings = new FeatureSettings(globals, SingleFeatures.identity(),
 			GroupedFeatures.gauss());
 		return Trainer.train(ops, img, labeling, featureSettings);
 	}
 
-	private void checkExpected(RandomAccessibleInterval<? extends IntegerType> result,
+	private void checkExpected(RandomAccessibleInterval<? extends IntegerType<?>> result,
 		List<String> classNames)
 	{
 		Img<UnsignedByteType> expected = ImageJFunctions.wrapByte(Utils.loadImage(
@@ -91,7 +92,7 @@ public class SegmenterTest {
 		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(),
 			SingleFeatures.identity(), new FeatureSetting(GaussFeature.class));
 		Segmenter segmenter = Trainer.train(ops, img, labeling, featureSettings, new RandomCommittee());
-		RandomAccessibleInterval<? extends IntegerType> result = segmenter.segment(img);
+		RandomAccessibleInterval<? extends IntegerType<?>> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());
 	}
 

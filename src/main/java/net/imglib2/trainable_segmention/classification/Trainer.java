@@ -123,7 +123,7 @@ public class Trainer {
 		int randomFeatures = 2;
 		rf.setNumFeatures(randomFeatures);
 		// Random seed
-		rf.setSeed((new Random()).nextInt());
+		rf.setSeed(1);
 		// Set number of threads
 		rf.setNumThreads(Prefs.getThreads());
 		return rf;
