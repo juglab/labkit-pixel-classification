@@ -27,7 +27,10 @@ import preview.net.imglib2.algorithm.convolution.kernel.Kernel1D;
 import preview.net.imglib2.algorithm.convolution.kernel.SeparableKernelConvolution;
 import preview.net.imglib2.loops.LoopBuilder;
 
+import java.awt.GraphicsEnvironment;
 import java.util.function.BiFunction;
+
+import static org.junit.Assume.assumeFalse;
 
 public class Gauss3Test<T extends RealType<T> & NativeType<T>> {
 
@@ -63,6 +66,7 @@ public class Gauss3Test<T extends RealType<T> & NativeType<T>> {
 
 	@Test
 	public void testIJ1Gauss() throws InterruptedException {
+		assumeFalse(GraphicsEnvironment.isHeadless());
 		ImagePlus imp = ImageJFunctions.wrap(input, "").duplicate();
 		IJ.run(imp, "Gaussian Blur...", "sigma=" + sigma);
 		Img<FloatType> result = ImageJFunctions.convertFloat(imp);
