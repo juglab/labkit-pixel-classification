@@ -76,7 +76,7 @@ public class SingleSphereShapedFeature extends AbstractFeatureOp {
 
 	private void applySingle(FeatureInput in, RandomAccessibleInterval<FloatType> out) {
 		UnaryComputerOp<Iterable, DoubleType> computer = getComputer();
-		Shape ellipsoid = new HyperEllipsoidShape(scaledRaduis(in.pixelSize()));
+		Shape ellipsoid = new HyperEllipsoidShape(scaledRaduis(globalSettings().pixelSize()));
 		RandomAccessible<Neighborhood<FloatType>> neighborhoods = ellipsoid
 			.neighborhoodsRandomAccessible(in.original());
 		DoubleType tmp = new DoubleType();
@@ -86,7 +86,7 @@ public class SingleSphereShapedFeature extends AbstractFeatureOp {
 		});
 	}
 
-	private double[] scaledRaduis(double[] pixelSizes) {
-		return DoubleStream.of(pixelSizes).map(pixelSize -> radius / pixelSize).toArray();
+	private double[] scaledRaduis(List<Double> pixelSizes) {
+		return pixelSizes.stream().mapToDouble(pixelSize -> radius / pixelSize).toArray();
 	}
 }

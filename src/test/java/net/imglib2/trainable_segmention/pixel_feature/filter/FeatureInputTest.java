@@ -26,7 +26,6 @@ import net.imglib2.view.Views;
 import org.junit.Test;
 
 import java.util.function.DoubleUnaryOperator;
-import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
@@ -39,19 +38,13 @@ public class FeatureInputTest {
 
 	private Interval target = Intervals.createMinSize(10, 10, 10, 10, 10, 10);
 
-	private FeatureInput cache = initFeatureInput();
+	private FeatureInput cache = new FeatureInput(image, target, new double[] { 1, 1, 2 });
 
 	private RandomAccessibleInterval<FloatType> initImage() {
 		RandomAccessibleInterval<FloatType> result = ArrayImgs.floats(30, 30, 30);
 		Views.interval(result, Intervals.createMinSize(15, 15, 15, 15, 15, 15)).forEach(
 			RealType::setOne);
 		return result;
-	}
-
-	private FeatureInput initFeatureInput() {
-		FeatureInput featureInput = new FeatureInput(image, target);
-		featureInput.setPixelSize(1.0, 1.0, 2.0);
-		return featureInput;
 	}
 
 	@Test
@@ -113,8 +106,8 @@ public class FeatureInputTest {
 			double z = pos.getDoublePosition(2) * 3;
 			pixel.setReal(1 * x + 2 * y + 3 * z);
 		}, new FloatType());
-		FeatureInput input = new FeatureInput(image, new FinalInterval(1, 1, 1));
-		input.setPixelSize(1.0, 1.0, 3.0);
+		double[] pixelSize = { 1, 1, 3 };
+		FeatureInput input = new FeatureInput(image, new FinalInterval(1, 1, 1), pixelSize);
 		assertEquals(1.0, getValue(input.derivedGauss(1, 1, 0, 0)), 0.001);
 		assertEquals(2.0, getValue(input.derivedGauss(1, 0, 1, 0)), 0.002);
 		assertEquals(3.0, getValue(input.derivedGauss(8, 0, 0, 1)), 0.001);

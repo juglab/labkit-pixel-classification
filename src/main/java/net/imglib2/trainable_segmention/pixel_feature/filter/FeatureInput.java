@@ -12,7 +12,6 @@ import preview.net.imglib2.algorithm.convolution.kernel.Kernel1D;
 import preview.net.imglib2.algorithm.convolution.kernel.SeparableKernelConvolution;
 import preview.net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -39,10 +38,11 @@ public class FeatureInput {
 	/**
 	 * Expected channel order XY and optional Z.
 	 */
-	public FeatureInput(RandomAccessible<FloatType> original, Interval targetInterval) {
+	public FeatureInput(RandomAccessible<FloatType> original, Interval targetInterval,
+		double[] pixelSize)
+	{
 		this.original = original;
-		this.pixelSize = IntStream.range(0, original.numDimensions()).mapToDouble(ignore -> 1.0)
-			.toArray();
+		this.pixelSize = pixelSize;
 		this.target = new FinalInterval(targetInterval);
 	}
 
@@ -60,10 +60,6 @@ public class FeatureInput {
 
 	public Interval targetInterval() {
 		return target;
-	}
-
-	public double[] pixelSize() {
-		return pixelSize;
 	}
 
 	public RandomAccessibleInterval<DoubleType> gauss(double sigma) {

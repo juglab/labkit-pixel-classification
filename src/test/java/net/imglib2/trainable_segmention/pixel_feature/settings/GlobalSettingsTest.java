@@ -13,11 +13,13 @@ public class GlobalSettingsTest {
 			.channels(ChannelSetting.RGB)
 			.dimensions(2)
 			.sigmaRange(3.0, 16.0)
+			.pixelSize(2.0, 3.0)
 			.build();
 		GlobalSettings globalsB = GlobalSettings.default2d()
 			.channels(ChannelSetting.RGB)
 			.dimensions(2)
 			.sigmaRange(3.0, 16.0)
+			.pixelSize(2.0, 3.0)
 			.build();
 		assertEquals(globalsA.hashCode(), globalsB.hashCode());
 	}

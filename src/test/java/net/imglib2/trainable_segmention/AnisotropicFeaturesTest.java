@@ -18,7 +18,6 @@ import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.scijava.Context;
 import preview.net.imglib2.algorithm.gauss3.Gauss3;
@@ -79,13 +78,21 @@ public class AnisotropicFeaturesTest {
 		RandomAccessibleInterval<DoubleType> image = testImage(100, 100, 100);
 		RandomAccessibleInterval<DoubleType> scaleImage = Views.subsample(image, 1, 1, 2);
 
-		FeatureCalculator calculator = new FeatureCalculator(ops, settings);
+		FeatureCalculator calculator = FeatureCalculator.default2d()
+			.ops(ops)
+			.dimensions(3)
+			.addFeature(setting)
+			.build();
 		RandomAccessibleInterval<FloatType> result = calculator.apply(Views.extendBorder(image),
 			Intervals.createMinSize(24, 24, 24, 50, 50, 50));
 		RandomAccessibleInterval<FloatType> scaledFeatures = Views.subsample(result, 1, 1, 2, 1);
 
-		FeatureCalculator calculator2 = new FeatureCalculator(ops, settings);
-		calculator2.setPixelSize(1, 1, 2);
+		FeatureCalculator calculator2 = FeatureCalculator.default2d()
+			.ops(ops)
+			.dimensions(3)
+			.addFeature(setting)
+			.pixelSize(1, 1, 2)
+			.build();
 		RandomAccessibleInterval<FloatType> scaledImagesFeatures = calculator2.apply(Views.extendBorder(
 			scaleImage), Intervals.createMinSize(24, 24, 12, 50, 50, 25));
 		Utils.assertImagesEqual(40, scaledFeatures, Views.zeroMin(scaledImagesFeatures));
@@ -96,17 +103,22 @@ public class AnisotropicFeaturesTest {
 	}
 
 	private void testAnisotropy2d(double expectedPsnr, FeatureSetting setting) {
-		FeatureSettings settings = new FeatureSettings(GlobalSettings.default2d().build(), setting);
 		RandomAccessibleInterval<DoubleType> image = testImage(100, 100);
 		RandomAccessibleInterval<DoubleType> scaleImage = Views.subsample(image, 1, 2);
 
-		FeatureCalculator calculator = new FeatureCalculator(ops, settings);
+		FeatureCalculator calculator = FeatureCalculator.default2d()
+			.ops(ops)
+			.addFeature(setting)
+			.build();
 		RandomAccessibleInterval<FloatType> result = calculator.apply(Views.extendBorder(image),
 			Intervals.createMinSize(24, 24, 50, 50));
 		RandomAccessibleInterval<FloatType> scaledFeatures = Views.subsample(result, 1, 2, 1);
 
-		FeatureCalculator calculator2 = new FeatureCalculator(ops, settings);
-		calculator2.setPixelSize(1, 2);
+		FeatureCalculator calculator2 = FeatureCalculator.default2d()
+			.ops(ops)
+			.addFeature(setting)
+			.pixelSize(1, 2)
+			.build();
 		RandomAccessibleInterval<FloatType> scaledImagesFeatures = calculator2.apply(Views.extendBorder(
 			scaleImage), Intervals.createMinSize(24, 12, 50, 25));
 		Utils.assertImagesEqual(expectedPsnr, scaledFeatures, Views.zeroMin(scaledImagesFeatures));
@@ -127,10 +139,11 @@ public class AnisotropicFeaturesTest {
 			RandomAccessibleInterval<DoubleType> anisotropicImage = Views.subsample(image, 1, 2);
 			RandomAccessibleInterval<FloatType> copy = copy(RealTypeConverters.convert(image,
 				new FloatType()));
-			FeatureInput featureInput = new FeatureInput(copy, Intervals.createMinSize(24, 24, 50, 50));
+			FeatureInput featureInput = new FeatureInput(copy, Intervals.createMinSize(24, 24, 50, 50),
+				new double[] { 1, 1 });
 			FeatureInput anisotropicFeatureInput = new FeatureInput(RealTypeConverters.convert(
-				anisotropicImage, new FloatType()), Intervals.createMinSize(24, 12, 50, 25));
-			anisotropicFeatureInput.setPixelSize(1, 2);
+				anisotropicImage, new FloatType()), Intervals.createMinSize(24, 12, 50, 25), new double[] {
+					1, 2 });
 			RandomAccessibleInterval<DoubleType> derivativeInY = Views.zeroMin(Views.subsample(
 				featureInput.derivedGauss(1.0, 0, 2), 1, 2));
 			RandomAccessibleInterval<DoubleType> anisotropicDerivativeInY = Views.zeroMin(

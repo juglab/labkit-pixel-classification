@@ -7,7 +7,6 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.RevampUtils;
-import net.imglib2.trainable_segmention.ToString;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
@@ -38,7 +37,7 @@ public class StatisticsFeatureTest {
 		}, 5, 5);
 		Img<FloatType> output = ArrayImgs.floats(5, 5, 8);
 		// process
-		feature.apply(new FeatureInput(Views.extendBorder(input), input), RevampUtils.slices(output));
+		feature.apply(input, RevampUtils.slices(output));
 		// test
 		Img<FloatType> expectedMin1 = filled5x5Image(0);
 		Img<FloatType> expectedMax1 = ArrayImgs.floats(new float[] {

@@ -1,8 +1,13 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.settings;
 
+import net.imglib2.util.Cast;
+
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 /**
  * @author Matthias Arzt
@@ -15,14 +20,21 @@ public final class GlobalSettings {
 
 	private final List<Double> sigmas;
 
-	private GlobalSettings(ChannelSetting channelSetting, int numDimensions, List<Double> sigmas) {
+	private final List<Double> pixelSize;
+
+	private GlobalSettings(ChannelSetting channelSetting, int numDimensions, List<Double> sigmas,
+		List<Double> pixelSize)
+	{
 		this.channelSetting = channelSetting;
 		this.numDimensions = numDimensions;
 		this.sigmas = Collections.unmodifiableList(new ArrayList<>(sigmas));
+		this.pixelSize = Collections.unmodifiableList(pixelSize == null ? ones(numDimensions)
+			: new ArrayList<>(pixelSize));
 	}
 
 	public GlobalSettings(GlobalSettings globalSettings) {
-		this(globalSettings.channelSetting(), globalSettings.numDimensions(), globalSettings.sigmas());
+		this(globalSettings.channelSetting, globalSettings.numDimensions, globalSettings.sigmas,
+			globalSettings.pixelSize);
 	}
 
 	public static Builder default2d() {
@@ -51,9 +63,21 @@ public final class GlobalSettings {
 		return sigmas;
 	}
 
+	public List<Double> pixelSize() {
+		return pixelSize;
+	}
+
+	public double[] pixelSizeAsDoubleArray() {
+		return pixelSize.stream().mapToDouble(x -> x).toArray();
+	}
+
+	private List<Double> ones(int numDimensions) {
+		return IntStream.range(0, numDimensions).mapToObj(ignore -> 1.0).collect(Collectors.toList());
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(channelSetting, numDimensions, sigmas);
+		return Objects.hash(channelSetting, numDimensions, sigmas, pixelSize());
 	}
 
 	@Override
@@ -63,48 +87,70 @@ public final class GlobalSettings {
 		GlobalSettings settings = (GlobalSettings) obj;
 		return channelSetting.equals(settings.channelSetting) &&
 			numDimensions == settings.numDimensions &&
-			sigmas.equals(settings.sigmas);
+			sigmas.equals(settings.sigmas) &&
+			pixelSize().equals(settings.pixelSize());
 	}
 
-	public static class Builder {
+	public static class AbstractBuilder<T> {
 
 		private ChannelSetting channelSetting = ChannelSetting.SINGLE;
 		private int numDimensions = 3;
 		private List<Double> sigmas = Arrays.asList(1.0, 2.0, 4.0, 8.0);
+		private List<Double> pixelSize = null;
+
+		protected AbstractBuilder() {
+
+		}
+
+		public T channels(ChannelSetting channelSetting) {
+			this.channelSetting = channelSetting;
+			return Cast.unchecked(this);
+		}
+
+		public T dimensions(int numDimensions) {
+			this.numDimensions = numDimensions;
+			return Cast.unchecked(this);
+		}
+
+		public T sigmas(List<Double> sigmas) {
+			this.sigmas = sigmas;
+			return Cast.unchecked(this);
+		}
+
+		public T sigmas(double... sigmas) {
+			return sigmas(DoubleStream.of(sigmas).boxed().collect(Collectors.toList()));
+		}
+
+		public T pixelSize(List<Double> pixelSize) {
+			this.pixelSize = pixelSize;
+			return Cast.unchecked(this);
+		}
+
+		public T pixelSize(double... pixelSize) {
+			return pixelSize(DoubleStream.of(pixelSize).boxed().collect(Collectors.toList()));
+		}
+
+		public T sigmaRange(double minSigma, double maxSigma) {
+			List<Double> sigmas = new ArrayList<>();
+			for (double sigma = minSigma; sigma <= maxSigma; sigma *= 2.0)
+				sigmas.add(sigma);
+			sigmas(sigmas);
+			return Cast.unchecked(this);
+		}
+
+		protected GlobalSettings buildGlobalSettings() {
+			return new GlobalSettings(channelSetting, numDimensions, sigmas, pixelSize);
+		}
+	}
+
+	public static class Builder extends AbstractBuilder<Builder> {
 
 		private Builder() {
 
 		}
 
-		public Builder channels(ChannelSetting channelSetting) {
-			this.channelSetting = channelSetting;
-			return this;
-		}
-
-		public Builder dimensions(int numDimensions) {
-			this.numDimensions = numDimensions;
-			return this;
-		}
-
-		public Builder sigmas(List<Double> radii) {
-			this.sigmas = radii;
-			return this;
-		}
-
-		public Builder sigmas(Double... radii) {
-			return sigmas(Arrays.asList(radii));
-		}
-
-		public Builder sigmaRange(double minSigma, double maxSigma) {
-			List<Double> sigmas = new ArrayList<>();
-			for (double sigma = minSigma; sigma <= maxSigma; sigma *= 2.0)
-				sigmas.add(sigma);
-			sigmas(sigmas);
-			return this;
-		}
-
 		public GlobalSettings build() {
-			return new GlobalSettings(channelSetting, numDimensions, sigmas);
+			return buildGlobalSettings();
 		}
 
 	}

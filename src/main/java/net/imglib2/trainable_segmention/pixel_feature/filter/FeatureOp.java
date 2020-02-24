@@ -25,7 +25,8 @@ public interface FeatureOp extends SciJavaPlugin, Op,
 	default void apply(RandomAccessible<FloatType> input,
 		List<RandomAccessibleInterval<FloatType>> output)
 	{
-		apply(new FeatureInput(input, output.get(0)), output);
+		apply(new FeatureInput(input, output.get(0), globalSettings().pixelSizeAsDoubleArray()),
+			output);
 	}
 
 	void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output);

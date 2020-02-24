@@ -7,7 +7,6 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.RevampUtils;
-import net.imglib2.trainable_segmention.ToString;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -90,7 +89,7 @@ public class SingleStatisticsFeatureTest {
 		Img<FloatType> expectedMax = input;
 		Img<FloatType> expectedMean = input;
 		Img<FloatType> expectedVariance = ArrayImgs.floats(4, 3);
-		feature.apply(new FeatureInput(Views.extendBorder(input), input), RevampUtils.slices(output));
+		feature.apply(input, RevampUtils.slices(output));
 		ImgLib2Assert.assertImageEquals(Views.stack(expectedMin, expectedMax, expectedMean,
 			expectedVariance),
 			output);
@@ -99,8 +98,10 @@ public class SingleStatisticsFeatureTest {
 	@Test
 	public void testAnisotropic() {
 		OpEnvironment ops = new Context().service(OpService.class);
-		FeatureSetting featureSetting = SingleFeatures.max(1);
-		FeatureOp feature = featureSetting.newInstance(ops, GlobalSettings.default2d().build());
+		FeatureCalculator calculator = FeatureCalculator.default2d()
+			.pixelSize(1, 2)
+			.addFeature(SingleFeatures.max(1))
+			.build();
 		Img<FloatType> input = ArrayImgs.floats(new float[] {
 			0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0,
@@ -116,9 +117,7 @@ public class SingleStatisticsFeatureTest {
 			0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0
 		}, 5, 5);
-		FeatureInput featureInput = new FeatureInput(Views.extendBorder(input), input);
-		featureInput.setPixelSize(1.0, 2.0);
-		feature.apply(featureInput, RevampUtils.slices(output));
+		calculator.apply(input, RevampUtils.slices(output));
 		ImgLib2Assert.assertImageEquals(Views.stack(expectedMax), output);
 
 	}

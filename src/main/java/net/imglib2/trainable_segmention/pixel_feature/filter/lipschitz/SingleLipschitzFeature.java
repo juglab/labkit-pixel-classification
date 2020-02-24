@@ -60,11 +60,12 @@ public class SingleLipschitzFeature extends AbstractFeatureOp {
 
 	private void apply(FeatureInput in, RandomAccessibleInterval<FloatType> out) {
 		RandomAccessible<FloatType> original = in.original();
-		Interval expandedInterval = Intervals.expand(out, scaledBorder(in.pixelSize(), out));
+		double[] pixelSize = globalSettings().pixelSizeAsDoubleArray();
+		Interval expandedInterval = Intervals.expand(out, scaledBorder(pixelSize, out));
 		Img<FloatType> tmp = ops().create().img(expandedInterval, new FloatType());
 		copy(original, tmp);
-		ConeMorphology.performConeOperation(ConeMorphology.Operation.DILATION, tmp, scaledSlope(in
-			.pixelSize()));
+		ConeMorphology.performConeOperation(ConeMorphology.Operation.DILATION, tmp, scaledSlope(
+			pixelSize));
 		outEquals255PlusAMinusB(out, original, tmp); // out = 255 + in - tmp
 	}
 

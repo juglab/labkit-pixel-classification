@@ -34,8 +34,8 @@ import java.util.stream.IntStream;
 @Fork(1)
 public class SlicingBenchmark {
 
-	List<RandomAccessibleInterval<FloatType>> slices = IntStream.range(0, 10).mapToObj(i ->
-			RandomImgs.seed(i).nextImage(new FloatType(), 100, 100, 100)).collect(Collectors.toList());
+	List<RandomAccessibleInterval<FloatType>> slices = IntStream.range(0, 10).mapToObj(i -> RandomImgs
+		.seed(i).nextImage(new FloatType(), 100, 100, 100)).collect(Collectors.toList());
 
 	RandomAccessibleInterval<FloatType> output = ArrayImgs.floats(100, 100, 100);
 
@@ -57,7 +57,7 @@ public class SlicingBenchmark {
 
 	public static void main(String... args) throws RunnerException {
 		Options options = new OptionsBuilder().include(SlicingBenchmark.class.getSimpleName())
-				.build();
+			.build();
 		new Runner(options).run();
 	}
 }

@@ -82,7 +82,7 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 		List<RandomAccessibleInterval<FloatType>> output)
 	{
 		Iterator<RandomAccessibleInterval<FloatType>> o = output.iterator();
-		int[] windowSize = DoubleStream.of(input.pixelSize()).mapToInt(pixelSize -> 1 + 2 *
+		int[] windowSize = globalSettings().pixelSize().stream().mapToInt(pixelSize -> 1 + 2 *
 			(int) (radius / pixelSize)).toArray();
 		if (min) MinMaxFilter.minFilter(windowSize).process(input.original(), o.next());
 		if (max) MinMaxFilter.maxFilter(windowSize).process(input.original(), o.next());

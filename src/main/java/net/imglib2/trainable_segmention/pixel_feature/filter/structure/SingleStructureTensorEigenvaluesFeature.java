@@ -56,7 +56,7 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 	@Override
 	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
 		final Interval targetInterval = output.get(0);
-		Convolution<NumericType<?>> convolution = gaussConvolution(input.pixelSize());
+		Convolution<NumericType<?>> convolution = gaussConvolution();
 		final Interval derivativeInterval = convolution.requiredSourceInterval(targetInterval);
 		RandomAccessibleInterval<DoubleType> derivatives = derivatives(input, derivativeInterval);
 		RandomAccessibleInterval<DoubleType> products = products(derivatives);
@@ -70,9 +70,9 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 			.forEachPixel(eigenvalueComputer::compute);
 	}
 
-	private Convolution<NumericType<?>> gaussConvolution(double[] pixelSizes) {
-		final Kernel1D[] gauss = Arrays.stream(pixelSizes)
-			.mapToObj(pixelSize -> gaussKernel(integrationScale / pixelSize))
+	private Convolution<NumericType<?>> gaussConvolution() {
+		final Kernel1D[] gauss = globalSettings().pixelSize().stream()
+			.map(pixelSize -> gaussKernel(integrationScale / pixelSize))
 			.toArray(Kernel1D[]::new);
 		return SeparableKernelConvolution.convolution(gauss);
 	}
@@ -98,15 +98,15 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 	{
 		RandomAccessibleInterval<DoubleType> gauss = ops().create().img(Intervals.expand(
 			derivativeInterval, 1));
-		double[] pixelSizes = input.pixelSize();
-		double[] sigmas = Arrays.stream(pixelSizes).map(pixelSize -> sigma / pixelSize).toArray();
+		List<Double> pixelSize = globalSettings().pixelSize();
+		double[] sigmas = pixelSize.stream().mapToDouble(p -> sigma / p).toArray();
 		RandomAccessible<FloatType> original = input.original();
 		Gauss3.gauss(sigmas, original, gauss);
 		int n = derivativeInterval.numDimensions();
 		Img<DoubleType> tmp = ops().create().img(RevampUtils.appendDimensionToInterval(
 			derivativeInterval, 0, n - 1), new DoubleType());
 		for (int i = 0; i < n; i++)
-			derive(gauss, Views.hyperSlice(tmp, n, i), i, pixelSizes[i]);
+			derive(gauss, Views.hyperSlice(tmp, n, i), i, pixelSize.get(i));
 		return tmp;
 	}
 
