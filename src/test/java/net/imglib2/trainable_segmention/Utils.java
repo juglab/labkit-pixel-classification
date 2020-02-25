@@ -282,7 +282,7 @@ public class Utils {
 		final T type = Util.getTypeFromInterval(imgs[0]);
 		long[] outputSize = size.clone();
 		outputSize[0] *= imgs.length;
-		Img<T> out = new ArrayImgFactory<>((NativeType) type).create(outputSize);
+		Img<T> out = ( Img< T > ) new ArrayImgFactory<>((NativeType) type).create(outputSize);
 		for (int i = 0; i < imgs.length; i++)
 			copy(imgs[i], Views.interval(out, Intervals.translate(new FinalInterval(size), size[0] * i,
 				0)));
