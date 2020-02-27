@@ -44,8 +44,8 @@ public class RandomForestPrediction implements SimpleClassifier {
 			RandomTreePrediction tree = trees.get(j);
 			for (int i = 0; i < tree.numberOfNodes; i++) {
 				nodeIndices[(j * numberOfNodes + i) * 3] = tree.attributeIndicies[i];
-				nodeIndices[(j * numberOfNodes + i) * 3 + 1] = tree.smallerChild[i];
-				nodeIndices[(j * numberOfNodes + i) * 3 + 2] = tree.biggerChild[i];
+				nodeIndices[(j * numberOfNodes + i) * 3 + 1] = encodeLeaf(tree.smallerChild[i]);
+				nodeIndices[(j * numberOfNodes + i) * 3 + 2] = encodeLeaf(tree.biggerChild[i]);
 				nodeThresholds[j * numberOfNodes + i] = tree.threshold[i];
 			}
 			for (int i = 0; i < tree.leafCount; i++)
@@ -53,6 +53,10 @@ public class RandomForestPrediction implements SimpleClassifier {
 					leafProbabilities[(j * numberOfLeafs + i) * numberOfClasses + k] =
 						tree.classProbabilities[i][k];
 		}
+	}
+
+	private int encodeLeaf(int index) {
+		return index >= 0 ? index : numberOfNodes - 1 - index;
 	}
 
 	@Override
@@ -66,13 +70,13 @@ public class RandomForestPrediction implements SimpleClassifier {
 
 	private void addDistributionForTree(Instance instance, int tree, double[] distribution) {
 		int node = 0;
-		while (node >= 0) {
+		while (node >= numberOfNodes) {
 			int attributeIndex = nodeIndices[(tree * numberOfNodes + node) * 3];
 			double attributeValue = instance.value(attributeIndex);
 			int b = attributeValue < nodeThresholds[(tree * numberOfNodes) + node] ? 1 : 2;
 			node = nodeIndices[(tree * numberOfNodes + node) * 3 + b];
 		}
-		int leaf = -1 - node;
+		int leaf = node - numberOfNodes;
 		for (int k = 0; k < numberOfClasses; k++)
 			distribution[k] += leafProbabilities[(tree * numberOfLeafs + leaf) * numberOfClasses + k];
 	}
@@ -91,9 +95,8 @@ public class RandomForestPrediction implements SimpleClassifier {
 			clij.push(thresholds),
 			clij.push(probabilities),
 			clij.push(indices),
-			numberOfTrees,
-			numberOfClasses,
-			numberOfFeatures);
+				numberOfFeatures
+		);
 	}
 
 	private Img<FloatType> asFloats(Img<? extends RealType<?>> ints) {

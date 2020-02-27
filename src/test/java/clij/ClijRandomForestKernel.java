@@ -9,14 +9,12 @@ import java.util.HashMap;
 public class ClijRandomForestKernel {
 
 	public static void randomForest(CLIJ2 clij,
-		ClearCLBuffer distributions,
-		ClearCLBuffer src,
-		ClearCLBuffer thresholds,
-		ClearCLBuffer probabilities,
-		ClearCLBuffer indices,
-		int numberOfTrees,
-		int numberOfClasses,
-		int numberOfFeatures)
+			ClearCLBuffer distributions,
+			ClearCLBuffer src,
+			ClearCLBuffer thresholds,
+			ClearCLBuffer probabilities,
+			ClearCLBuffer indices,
+			int numberOfFeatures)
 	{
 		long[] globalSizes = { src.getWidth(), src.getHeight(), src.getDepth() / numberOfFeatures };
 		HashMap<String, Object> parameters = new HashMap<>();
@@ -25,8 +23,6 @@ public class ClijRandomForestKernel {
 		parameters.put("thresholds", thresholds);
 		parameters.put("probabilities", probabilities);
 		parameters.put("indices", indices);
-		parameters.put("num_trees", numberOfTrees);
-		parameters.put("num_classes", numberOfClasses);
 		parameters.put("num_features", numberOfFeatures);
 		clij.execute(ClijDemo.class, "random_forest.cl", "random_forest", globalSizes, globalSizes,
 			parameters);

@@ -11,14 +11,15 @@ __kernel void random_forest
   IMAGE_thresholds_TYPE thresholds,
   IMAGE_probabilities_TYPE probabilities,
   IMAGE_indices_TYPE indices,
-  const int num_trees,
-  const int num_classes,
   const int num_features
 )
 {
   const int x = get_global_id(0), y = get_global_id(1), z = get_global_id(2);
   const int offsetInput = z * num_features;
+  const int num_classes = GET_IMAGE_WIDTH(probabilities);
   const int offsetOutput = z * num_classes;
+  const int num_trees = GET_IMAGE_DEPTH(thresholds);
+  const int num_nodes = GET_IMAGE_HEIGHT(thresholds);
 
   // zero probabilities
   for(int i = 0; i < num_classes; i++) {
@@ -29,14 +30,14 @@ __kernel void random_forest
   // run random forest
   for(int tree = 0; tree < num_trees; tree++) {
     int nodeIndex = 0;
-    while(nodeIndex >= 0) {
+    while(nodeIndex < num_nodes) {
       int attributeIndex = (int) READ_IMAGE(indices, sampler, (int4)(0,nodeIndex,tree,0)).x;
       float attributeValue = READ_IMAGE(src, sampler, (int4)(x,y,attributeIndex + offsetInput,0)).x;
       float threshold = READ_IMAGE(thresholds, sampler, (int4)(0,nodeIndex,tree,0)).x;
       int smaller = attributeValue < threshold ? 1 : 2;
       nodeIndex = (int) READ_IMAGE(indices, sampler, (int4)(smaller,nodeIndex,tree,0)).x;
     }
-    int leafIndex = - 1 - nodeIndex;
+    const int leafIndex = nodeIndex - num_nodes;
     for(int i = 0; i < num_classes; i++) {
       int4 pos = (int4)(x,y,i + offsetOutput,0);
       float probability = READ_IMAGE(dst, sampler, pos).x;
