@@ -4,6 +4,7 @@ package clij;
 import net.haesleinhuepf.clij.CLIJ;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
+import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
@@ -17,11 +18,11 @@ import org.junit.Test;
 
 public class ClijRandomForestKernelTest {
 
-	private static CLIJ clij;
+	private static CLIJ2 clij;
 
 	@Before
 	public void before() {
-		clij = CLIJ.getInstance();
+		clij = CLIJ2.getInstance();
 	}
 
 	@After
@@ -100,7 +101,7 @@ public class ClijRandomForestKernelTest {
 			-2, -1, -1, -1,
 			-3, -3, -2, -1
 		}, 2, 2, 6);
-		ClearCLBuffer outputBuffer = clij.createCLBuffer(new long[] { 2, 2, 2 }, NativeTypeEnum.Float);
+		ClearCLBuffer outputBuffer = clij.create(new long[] { 2, 2, 2 }, NativeTypeEnum.Float);
 		ClijRandomForestKernel.findMax(clij, clij.push(input), outputBuffer, 3);
 		RandomAccessibleInterval<? extends RealType<?>> result = clij.pullRAI(outputBuffer);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] {

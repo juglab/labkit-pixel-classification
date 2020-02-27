@@ -4,11 +4,11 @@ package clij;
 import com.google.gson.JsonElement;
 import hr.irb.fastRandomForest.FastRandomForest;
 import ij.ImagePlus;
-import net.haesleinhuepf.clij.CLIJ;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.clearcl.util.ElapsedTime;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij.kernels.Kernels;
+import net.haesleinhuepf.clij2.CLIJ2;
 import net.imagej.ops.OpService;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
@@ -43,7 +43,7 @@ public class ClijDemo {
 
 	public static void main(String... args) {
 
-		CLIJ clij = CLIJ.getInstance();
+		CLIJ2 clij = CLIJ2.getInstance();
 		OpService ops = new Context().service(OpService.class);
 		JsonElement read = GsonUtils.read(ClijDemo.class.getResource("/clij/test.classifier").getFile());
 		Segmenter segmenter = Segmenter.fromJson(ops, read);
@@ -56,10 +56,10 @@ public class ClijDemo {
 			RandomAccessibleInterval<? extends RealType<?>> image;
 			StopWatch stopWatch = StopWatch.createAndStart();
 			try (
-				ClearCLBuffer inputCl = clij.push(input);
-				ClearCLBuffer featuresCl = calculateFeatures(clij, inputCl);
-				ClearCLBuffer distributionCl = calculateDistribution(clij, classifier, featuresCl);
-				ClearCLBuffer segmentationCl = calculateSegmentation(clij, distributionCl))
+					ClearCLBuffer inputCl = clij.push(input);
+					ClearCLBuffer featuresCl = calculateFeatures(clij, inputCl);
+					ClearCLBuffer distributionCl = calculateDistribution(clij, classifier, featuresCl);
+					ClearCLBuffer segmentationCl = calculateSegmentation(clij, distributionCl))
 			{
 				image = clij.pullRAI(segmentationCl);
 			}
@@ -74,21 +74,21 @@ public class ClijDemo {
 		}
 	}
 
-	private static ClearCLBuffer calculateSegmentation(CLIJ clij, ClearCLBuffer distribution) {
+	private static ClearCLBuffer calculateSegmentation(CLIJ2 clij, ClearCLBuffer distribution) {
 		long slices = distribution.getDepth() / numberOfClasses;
-		ClearCLBuffer result = clij.createCLBuffer(new long[] { distribution.getWidth(), distribution
+		ClearCLBuffer result = clij.create(new long[] { distribution.getWidth(), distribution
 			.getHeight(), slices }, NativeTypeEnum.Float);
 		ClijRandomForestKernel.findMax(clij, distribution, result, numberOfClasses);
 		return result;
 	}
 
-	private static ClearCLBuffer calculateDistribution(CLIJ clij, Classifier classifier,
+	private static ClearCLBuffer calculateDistribution(CLIJ2 clij, Classifier classifier,
 		ClearCLBuffer featuresCl)
 	{
 		RandomForestPrediction prediction = new RandomForestPrediction(new MyRandomForest(Cast
 			.unchecked(classifier)), 2);
 		long slices = featuresCl.getDepth() / numberOfFeatures;
-		ClearCLBuffer distribution = clij.createCLBuffer(new long[] { featuresCl.getWidth(), featuresCl
+		ClearCLBuffer distribution = clij.create(new long[] { featuresCl.getWidth(), featuresCl
 			.getHeight(), slices * numberOfClasses }, NativeTypeEnum.Float);
 		prediction.distribution(clij, featuresCl, distribution);
 		return distribution;
@@ -116,37 +116,37 @@ public class ClijDemo {
 		return segmentation;
 	}
 
-	private static ClearCLBuffer calculateFeatures(CLIJ clij, ClearCLBuffer inputCl) {
-		try (ClearCLBuffer tmpCl = clij.createCLBuffer(inputCl)) {
-			ClearCLBuffer outputCl = clij.createCLBuffer(new long[] { inputCl.getWidth(), inputCl
+	private static ClearCLBuffer calculateFeatures(CLIJ2 clij, ClearCLBuffer inputCl) {
+		try (ClearCLBuffer tmpCl = clij.create(inputCl)) {
+			ClearCLBuffer outputCl = clij.create(new long[] { inputCl.getWidth(), inputCl
 				.getHeight(), inputCl.getDepth() * numberOfFeatures }, NativeTypeEnum.Float);
 			for (int i = 0; i < numberOfFeatures; i++) {
 				float sigma = i * 2;
-				clij.op().blur(inputCl, tmpCl, sigma, sigma, sigma);
+				clij.gaussianBlur(inputCl, tmpCl, sigma, sigma, sigma);
 				copy3dStack(clij, tmpCl, outputCl, i, numberOfFeatures);
 			}
 			return outputCl;
 		}
 	}
 
-	private static void copy3dStack(CLIJ clij, ClearCLBuffer input, ClearCLBuffer output, int offset,
+	private static void copy3dStack(CLIJ2 clij, ClearCLBuffer input, ClearCLBuffer output, int offset,
 		int step)
 	{
 		long[] globalSizes = input.getDimensions();
-		Map<String, Object> parameters = new HashMap<>();
+		HashMap<String, Object> parameters = new HashMap<>();
 		parameters.put("src", input);
 		parameters.put("dst", output);
 		parameters.put("offset", offset);
 		parameters.put("step", step);
-		clij.execute(ClijDemo.class, "copy_3d_stack.cl", "copy_3d_stack", globalSizes,
+		clij.execute(ClijDemo.class, "copy_3d_stack.cl", "copy_3d_stack", globalSizes, globalSizes,
 			parameters);
 	}
 
-	private static void copy(CLIJ clij, ClearCLBuffer inputCl, Interval sourceInterval,
+	private static void copy(CLIJ2 clij, ClearCLBuffer inputCl, Interval sourceInterval,
 		ClearCLBuffer outputCl, Interval destinationInterval)
 	{
 		long[] globalSizes = Intervals.dimensionsAsLongArray(sourceInterval);
-		Map<String, Object> parameters = new HashMap<>();
+		HashMap<String, Object> parameters = new HashMap<>();
 		parameters.put("src", inputCl);
 		parameters.put("dst", outputCl);
 		parameters.put("src_offset_x", (int) sourceInterval.min(0));
@@ -155,7 +155,7 @@ public class ClijDemo {
 		parameters.put("dst_offset_x", (int) destinationInterval.min(0));
 		parameters.put("dst_offset_y", (int) destinationInterval.min(1));
 		parameters.put("dst_offset_z", (int) destinationInterval.min(2));
-		clij.execute(ClijDemo.class, "copy_with_offset.cl", "copy_with_offset", globalSizes,
+		clij.execute(ClijDemo.class, "copy_with_offset.cl", "copy_with_offset", globalSizes, globalSizes,
 			parameters);
 	}
 
@@ -163,13 +163,14 @@ public class ClijDemo {
 		return new FinalInterval(inputCl.getDimensions());
 	}
 
-	private static void crop(CLIJ clij, ClearCLBuffer inputCl, ClearCLBuffer outputCl) {
+	private static void crop(CLIJ2 clij, ClearCLBuffer inputCl, ClearCLBuffer outputCl) {
 		HashMap<String, Object> parameters = new HashMap<>();
 		parameters.put("src", inputCl);
 		parameters.put("dst", outputCl);
 		parameters.put("start_x", 0);
 		parameters.put("start_y", 0);
 		parameters.put("start_z", 0);
-		clij.execute(Kernels.class, "duplication.cl", "crop_3d", parameters);
+		long[] globalSizes = outputCl.getDimensions();
+		clij.execute(Kernels.class, "duplication.cl", "crop_3d", globalSizes, globalSizes, parameters);
 	}
 }

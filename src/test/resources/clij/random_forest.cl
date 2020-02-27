@@ -1,12 +1,16 @@
 __constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
 
+#define READ_IMAGE(a,b,c) READ_ ## a ## _IMAGE(a,b,c)
+#define WRITE_IMAGE(a,b,c) WRITE_ ## a ## _IMAGE(a,b,c)
+#define IMAGE_TYPE(a) IMAGE_ ## a ## _TYPE a
+
 __kernel void random_forest
 (
-  __global float* dst,
-  __global float* src,
-  __global float* thresholds,
-  __global float* probabilities,
-  __global float* indices,
+  IMAGE_dst_TYPE dst,
+  IMAGE_src_TYPE src,
+  IMAGE_thresholds_TYPE thresholds,
+  IMAGE_probabilities_TYPE probabilities,
+  IMAGE_indices_TYPE indices,
   const int num_trees,
   const int num_classes,
   const int num_features
@@ -19,39 +23,39 @@ __kernel void random_forest
   // zero probabilities
   for(int i = 0; i < num_classes; i++) {
     int4 pos = (int4)(x,y,i + offsetOutput,0);
-    WRITE_IMAGE_3D(dst, pos, 0);
+    WRITE_dst_IMAGE(dst, pos, 0);
   }
 
   // run random forest
   for(int tree = 0; tree < num_trees; tree++) {
     int nodeIndex = 0;
     while(nodeIndex >= 0) {
-      int attributeIndex = (int) READ_IMAGE_3D(indices, sampler, (int4)(0,nodeIndex,tree,0)).x;
-      float attributeValue = READ_IMAGE_3D(src, sampler, (int4)(x,y,attributeIndex + offsetInput,0)).x;
-      float threshold = READ_IMAGE_3D(thresholds, sampler, (int4)(0,nodeIndex,tree,0)).x;
+      int attributeIndex = (int) READ_IMAGE(indices, sampler, (int4)(0,nodeIndex,tree,0)).x;
+      float attributeValue = READ_IMAGE(src, sampler, (int4)(x,y,attributeIndex + offsetInput,0)).x;
+      float threshold = READ_IMAGE(thresholds, sampler, (int4)(0,nodeIndex,tree,0)).x;
       int smaller = attributeValue < threshold ? 1 : 2;
-      nodeIndex = (int) READ_IMAGE_3D(indices, sampler, (int4)(smaller,nodeIndex,tree,0)).x;
+      nodeIndex = (int) READ_IMAGE(indices, sampler, (int4)(smaller,nodeIndex,tree,0)).x;
     }
     int leafIndex = - 1 - nodeIndex;
     for(int i = 0; i < num_classes; i++) {
       int4 pos = (int4)(x,y,i + offsetOutput,0);
-      float probability = READ_IMAGE_3D(dst, sampler, pos).x;
-      probability += READ_IMAGE_3D(probabilities, sampler, (int4)(i,leafIndex,tree,0)).x;
-      WRITE_IMAGE_3D(dst, pos, probability);
+      float probability = READ_IMAGE(dst, sampler, pos).x;
+      probability += READ_IMAGE(probabilities, sampler, (int4)(i,leafIndex,tree,0)).x;
+      WRITE_IMAGE(dst, pos, probability);
     }
   }
 
   // calculate sum of the distribution
   float sum = 0;
   for(int i = 0; i < num_classes; i++) {
-    sum += READ_IMAGE_3D(dst, sampler, (int4)(x,y,i + offsetOutput,0)).x;
+    sum += READ_IMAGE(dst, sampler, (int4)(x,y,i + offsetOutput,0)).x;
   }
 
   // normalize distribution
   for(int i = 0; i < num_classes; i++) {
     int4 pos = (int4)(x,y,i + offsetOutput,0);
-    float probability = READ_IMAGE_3D(dst, sampler, pos).x;
+    float probability = READ_IMAGE(dst, sampler, pos).x;
     probability /= sum;
-    WRITE_IMAGE_3D(dst, pos, probability);
+    WRITE_IMAGE(dst, pos, probability);
   }
 }
