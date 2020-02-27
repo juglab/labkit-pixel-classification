@@ -24,8 +24,10 @@ public class ClijRandomForestKernel {
 		parameters.put("probabilities", probabilities);
 		parameters.put("indices", indices);
 		parameters.put("num_features", numberOfFeatures);
+		HashMap<String, Object> constants = new HashMap<>();
+		constants.put("NUMBER_OF_CLASSES", probabilities.getWidth());
 		clij.execute(ClijDemo.class, "random_forest.cl", "random_forest", globalSizes, globalSizes,
-			parameters);
+			parameters, constants);
 	}
 
 	public static void findMax(CLIJ2 clij,
