@@ -21,6 +21,9 @@ __kernel void random_forest
   const unsigned short num_nodes = (unsigned short) GET_IMAGE_HEIGHT(thresholds);
   float results[NUMBER_OF_CLASSES];
   float features[NUMBER_OF_FEATURES];
+  __local unsigned short indices_local[INDICES_SIZE];
+  event_t event = async_work_group_copy(indices_local, indices, INDICES_SIZE, 0);
+  wait_group_events(1, &event);
 
   // zero probabilities
   for(int i = 0; i < NUMBER_OF_CLASSES; i++) {
@@ -35,11 +38,11 @@ __kernel void random_forest
   for(int tree = 0; tree < num_trees; tree++) {
     unsigned short nodeIndex = 0;
     while(nodeIndex < num_nodes) {
-      const unsigned short attributeIndex = READ_IMAGE(indices, sampler, (int4)(0,nodeIndex,tree,0)).x;
+      const unsigned short attributeIndex = indices_local[(tree * GET_IMAGE_HEIGHT(indices) + nodeIndex) * 3];
       const float attributeValue = features[attributeIndex];
       const float threshold = READ_IMAGE(thresholds, sampler, (int4)(0,nodeIndex,tree,0)).x;
       const int smaller = (int) (attributeValue >= threshold) + 1;
-      nodeIndex = READ_IMAGE(indices, sampler, (int4)(smaller,nodeIndex,tree,0)).x;
+      nodeIndex = indices_local[(tree * GET_IMAGE_HEIGHT(indices) + nodeIndex) * 3 + smaller];
     }
     const unsigned short leafIndex = nodeIndex - num_nodes;
     for(int i = 0; i < NUMBER_OF_CLASSES; i++) {

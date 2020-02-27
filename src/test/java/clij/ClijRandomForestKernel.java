@@ -3,6 +3,7 @@ package clij;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij2.CLIJ2;
+import net.imglib2.util.Intervals;
 
 import java.util.HashMap;
 
@@ -27,6 +28,7 @@ public class ClijRandomForestKernel {
 		HashMap<String, Object> constants = new HashMap<>();
 		constants.put("NUMBER_OF_CLASSES", probabilities.getWidth());
 		constants.put("NUMBER_OF_FEATURES", numberOfFeatures);
+		constants.put("INDICES_SIZE", Intervals.numElements(indices.getDimensions()));
 		clij.execute(ClijDemo.class, "random_forest.cl", "random_forest", globalSizes, globalSizes,
 			parameters, constants);
 	}
