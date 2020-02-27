@@ -26,6 +26,7 @@ public class ClijRandomForestKernel {
 		parameters.put("num_features", numberOfFeatures);
 		HashMap<String, Object> constants = new HashMap<>();
 		constants.put("NUMBER_OF_CLASSES", probabilities.getWidth());
+		constants.put("NUMBER_OF_FEATURES", numberOfFeatures);
 		clij.execute(ClijDemo.class, "random_forest.cl", "random_forest", globalSizes, globalSizes,
 			parameters, constants);
 	}
