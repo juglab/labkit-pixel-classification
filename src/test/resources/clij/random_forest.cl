@@ -22,7 +22,9 @@ __kernel void random_forest
   float results[NUMBER_OF_CLASSES];
   float features[NUMBER_OF_FEATURES];
   __local unsigned short indices_local[INDICES_SIZE];
+  __local float thresholds_local[INDICES_SIZE / 3];
   event_t event = async_work_group_copy(indices_local, indices, INDICES_SIZE, 0);
+  async_work_group_copy(thresholds_local, thresholds, INDICES_SIZE / 3, event);
   wait_group_events(1, &event);
 
   // zero probabilities
@@ -40,13 +42,13 @@ __kernel void random_forest
     while(nodeIndex < num_nodes) {
       const unsigned short attributeIndex = indices_local[(tree * GET_IMAGE_HEIGHT(indices) + nodeIndex) * 3];
       const float attributeValue = features[attributeIndex];
-      const float threshold = READ_IMAGE(thresholds, sampler, (int4)(0,nodeIndex,tree,0)).x;
+      const float threshold = thresholds_local[tree * GET_IMAGE_HEIGHT(thresholds) + nodeIndex];
       const int smaller = (int) (attributeValue >= threshold) + 1;
       nodeIndex = indices_local[(tree * GET_IMAGE_HEIGHT(indices) + nodeIndex) * 3 + smaller];
     }
     const unsigned short leafIndex = nodeIndex - num_nodes;
     for(int i = 0; i < NUMBER_OF_CLASSES; i++) {
-      results[i] += READ_IMAGE(probabilities, sampler, (int4)(i,leafIndex,tree,0)).x;
+      results[i] += probabilities[(tree * GET_IMAGE_HEIGHT(probabilities) + leafIndex) * NUMBER_OF_CLASSES + i];
     }
   }
 
@@ -58,7 +60,6 @@ __kernel void random_forest
 
   // normalize distribution
   for(int i = 0; i < NUMBER_OF_CLASSES; i++) {
-    const int4 pos = (int4)(x,y,i + offsetOutput,0);
-    WRITE_IMAGE(dst, pos, results[i] / sum);
+    dst[((i + offsetOutput) * GET_IMAGE_HEIGHT(dst) + y) * GET_IMAGE_WIDTH(dst) + x] = results[i] / sum;
   }
 }
