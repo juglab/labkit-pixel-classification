@@ -20,10 +20,15 @@ __kernel void random_forest
   const int num_trees = GET_IMAGE_DEPTH(thresholds);
   const unsigned short num_nodes = (unsigned short) GET_IMAGE_HEIGHT(thresholds);
   float results[NUMBER_OF_CLASSES];
+  float features[NUMBER_OF_FEATURES];
 
   // zero probabilities
   for(int i = 0; i < NUMBER_OF_CLASSES; i++) {
     results[i] = 0;
+  }
+
+  for(int i = 0; i < NUMBER_OF_FEATURES; i++) {
+    features[i] = READ_IMAGE(src, sampler, (int4)(x,y,i + offsetInput,0)).x;
   }
 
   // run random forest
@@ -31,7 +36,7 @@ __kernel void random_forest
     unsigned short nodeIndex = 0;
     while(nodeIndex < num_nodes) {
       const unsigned short attributeIndex = READ_IMAGE(indices, sampler, (int4)(0,nodeIndex,tree,0)).x;
-      const float attributeValue = READ_IMAGE(src, sampler, (int4)(x,y,attributeIndex + offsetInput,0)).x;
+      const float attributeValue = features[attributeIndex];
       const float threshold = READ_IMAGE(thresholds, sampler, (int4)(0,nodeIndex,tree,0)).x;
       const int smaller = (int) (attributeValue >= threshold) + 1;
       nodeIndex = READ_IMAGE(indices, sampler, (int4)(smaller,nodeIndex,tree,0)).x;
