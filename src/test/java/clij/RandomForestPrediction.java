@@ -1,8 +1,8 @@
 
 package clij;
 
-import net.haesleinhuepf.clij.CLIJ;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
@@ -77,7 +77,7 @@ public class RandomForestPrediction implements SimpleClassifier {
 			distribution[k] += leafProbabilities[(tree * numberOfLeafs + leaf) * numberOfClasses + k];
 	}
 
-	public void distribution(CLIJ clij, ClearCLBuffer features, ClearCLBuffer distribution) {
+	public void distribution(CLIJ2 clij, ClearCLBuffer features, ClearCLBuffer distribution) {
 		long numberOfSlices = distribution.getDepth() / numberOfClasses;
 		int numberOfFeatures = (int) (features.getDepth() / numberOfSlices);
 		Img<FloatType> indices = asFloats(ArrayImgs.ints(nodeIndices, 3, numberOfNodes, numberOfTrees));

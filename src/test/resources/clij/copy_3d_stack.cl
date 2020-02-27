@@ -1,4 +1,4 @@
-__kernel void copy_3d_stack(DTYPE_IMAGE_OUT_3D dst, DTYPE_IMAGE_IN_3D src, int offset, int step) {
+__kernel void copy_3d_stack(IMAGE_dst_TYPE dst, IMAGE_src_TYPE src, int offset, int step) {
   const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
 
   const int x = get_global_id(0);
@@ -10,6 +10,6 @@ __kernel void copy_3d_stack(DTYPE_IMAGE_OUT_3D dst, DTYPE_IMAGE_IN_3D src, int o
   const int4 dpos = (int4){x,y,dz,0};
   const int4 spos = (int4){x,y,z,0};
 
-  const DTYPE_IN out = READ_IMAGE_3D(src,sampler,spos).x;
-  WRITE_IMAGE_3D(dst,dpos, CONVERT_DTYPE_OUT(out));
+  const IMAGE_dst_PIXEL_TYPE out = (IMAGE_dst_PIXEL_TYPE) READ_src_IMAGE(src,sampler,spos).x;
+  WRITE_dst_IMAGE(dst, dpos, out);
 }

@@ -2,8 +2,8 @@ __constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_T
 
 __kernel void find_max
 (
-  __global float* dst,
-  __global float* src,
+  IMAGE_dst_TYPE dst,
+  IMAGE_src_TYPE src,
   const int num_classes
 )
 {
@@ -13,13 +13,13 @@ __kernel void find_max
   // normalize distribution
   int maxIndex = 0;
   int4 pos = (int4)(x,y,offset,0);
-  float maxValue = READ_IMAGE_3D(src, sampler, pos).x;
+  float maxValue = READ_src_IMAGE(src, sampler, pos).x;
   for(int i = 1; i < num_classes; i++) {
     pos.z = i + offset;
-    float value = READ_IMAGE_3D(src, sampler, pos).x;
+    float value = READ_src_IMAGE(src, sampler, pos).x;
     bool bigger = value > maxValue;
     maxValue = bigger ? value : maxValue;
     maxIndex = bigger ? i : maxIndex;
   }
-  WRITE_IMAGE_3D(dst, (int4)(x,y,z,0), maxIndex);
+  WRITE_dst_IMAGE(dst, (int4)(x,y,z,0), maxIndex);
 }
