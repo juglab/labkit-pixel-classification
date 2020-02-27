@@ -18,14 +18,11 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractGroupFeatureOp extends AbstractFeatureOp {
 
-	@Parameter
-	private Context context;
-
 	protected FeatureJoiner featureGroup = new FeatureJoiner(Collections.emptyList());
 
 	@Override
 	public void initialize() {
-		featureGroup = new FeatureJoiner(initFeatures().stream().map(x -> x.newInstance(context,
+		featureGroup = new FeatureJoiner(initFeatures().stream().map(x -> x.newInstance(context(),
 			globalSettings()))
 			.collect(Collectors.toList()));
 	}
