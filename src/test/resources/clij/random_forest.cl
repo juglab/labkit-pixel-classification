@@ -19,27 +19,27 @@ __kernel void random_forest
   const int num_classes = GET_IMAGE_WIDTH(probabilities);
   const int offsetOutput = z * num_classes;
   const int num_trees = GET_IMAGE_DEPTH(thresholds);
-  const int num_nodes = GET_IMAGE_HEIGHT(thresholds);
+  const unsigned short num_nodes = (unsigned short) GET_IMAGE_HEIGHT(thresholds);
 
   // zero probabilities
   for(int i = 0; i < num_classes; i++) {
-    int4 pos = (int4)(x,y,i + offsetOutput,0);
+    const int4 pos = (int4)(x,y,i + offsetOutput,0);
     WRITE_dst_IMAGE(dst, pos, 0);
   }
 
   // run random forest
   for(int tree = 0; tree < num_trees; tree++) {
-    int nodeIndex = 0;
+    unsigned short nodeIndex = 0;
     while(nodeIndex < num_nodes) {
-      int attributeIndex = (int) READ_IMAGE(indices, sampler, (int4)(0,nodeIndex,tree,0)).x;
-      float attributeValue = READ_IMAGE(src, sampler, (int4)(x,y,attributeIndex + offsetInput,0)).x;
-      float threshold = READ_IMAGE(thresholds, sampler, (int4)(0,nodeIndex,tree,0)).x;
-      int smaller = attributeValue < threshold ? 1 : 2;
-      nodeIndex = (int) READ_IMAGE(indices, sampler, (int4)(smaller,nodeIndex,tree,0)).x;
+      const unsigned short attributeIndex = READ_IMAGE(indices, sampler, (int4)(0,nodeIndex,tree,0)).x;
+      const float attributeValue = READ_IMAGE(src, sampler, (int4)(x,y,attributeIndex + offsetInput,0)).x;
+      const float threshold = READ_IMAGE(thresholds, sampler, (int4)(0,nodeIndex,tree,0)).x;
+      const int smaller = (int) (attributeValue >= threshold) + 1;
+      nodeIndex = READ_IMAGE(indices, sampler, (int4)(smaller,nodeIndex,tree,0)).x;
     }
-    const int leafIndex = nodeIndex - num_nodes;
+    const unsigned short leafIndex = nodeIndex - num_nodes;
     for(int i = 0; i < num_classes; i++) {
-      int4 pos = (int4)(x,y,i + offsetOutput,0);
+      const int4 pos = (int4)(x,y,i + offsetOutput,0);
       float probability = READ_IMAGE(dst, sampler, pos).x;
       probability += READ_IMAGE(probabilities, sampler, (int4)(i,leafIndex,tree,0)).x;
       WRITE_IMAGE(dst, pos, probability);
@@ -54,7 +54,7 @@ __kernel void random_forest
 
   // normalize distribution
   for(int i = 0; i < num_classes; i++) {
-    int4 pos = (int4)(x,y,i + offsetOutput,0);
+    const int4 pos = (int4)(x,y,i + offsetOutput,0);
     float probability = READ_IMAGE(dst, sampler, pos).x;
     probability /= sum;
     WRITE_IMAGE(dst, pos, probability);

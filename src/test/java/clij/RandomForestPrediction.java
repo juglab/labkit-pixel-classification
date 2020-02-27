@@ -3,12 +3,10 @@ package clij;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij2.CLIJ2;
-import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Intervals;
 import weka.core.Instance;
 
 import java.util.List;
@@ -24,11 +22,11 @@ public class RandomForestPrediction implements SimpleClassifier {
 
 	private final int numberOfLeafs;
 
-	private final int[] nodeIndices;
+	private final short[] nodeIndices;
 
-	private final double[] nodeThresholds;
+	private final float[] nodeThresholds;
 
-	private final double[] leafProbabilities;
+	private final float[] leafProbabilities;
 
 	public RandomForestPrediction(MyRandomForest forest, int numberOfClasses) {
 		List<RandomTreePrediction> trees = forest.trees().stream().map(RandomTreePrediction::new)
@@ -37,26 +35,26 @@ public class RandomForestPrediction implements SimpleClassifier {
 		this.numberOfTrees = trees.size();
 		this.numberOfNodes = trees.stream().mapToInt(x -> x.numberOfNodes).max().getAsInt();
 		this.numberOfLeafs = trees.stream().mapToInt(x -> x.numberOfLeafs).max().getAsInt();
-		this.nodeIndices = new int[numberOfTrees * numberOfNodes * 3];
-		this.nodeThresholds = new double[numberOfTrees * numberOfNodes];
-		this.leafProbabilities = new double[numberOfTrees * numberOfLeafs * numberOfClasses];
+		this.nodeIndices = new short[numberOfTrees * numberOfNodes * 3];
+		this.nodeThresholds = new float[numberOfTrees * numberOfNodes];
+		this.leafProbabilities = new float[numberOfTrees * numberOfLeafs * numberOfClasses];
 		for (int j = 0; j < numberOfTrees; j++) {
 			RandomTreePrediction tree = trees.get(j);
 			for (int i = 0; i < tree.numberOfNodes; i++) {
-				nodeIndices[(j * numberOfNodes + i) * 3] = tree.attributeIndicies[i];
+				nodeIndices[(j * numberOfNodes + i) * 3] = (short) tree.attributeIndicies[i];
 				nodeIndices[(j * numberOfNodes + i) * 3 + 1] = encodeLeaf(tree.smallerChild[i]);
 				nodeIndices[(j * numberOfNodes + i) * 3 + 2] = encodeLeaf(tree.biggerChild[i]);
-				nodeThresholds[j * numberOfNodes + i] = tree.threshold[i];
+				nodeThresholds[j * numberOfNodes + i] = (float) tree.threshold[i];
 			}
 			for (int i = 0; i < tree.leafCount; i++)
 				for (int k = 0; k < numberOfClasses; k++)
 					leafProbabilities[(j * numberOfLeafs + i) * numberOfClasses + k] =
-						tree.classProbabilities[i][k];
+						(float) tree.classProbabilities[i][k];
 		}
 	}
 
-	private int encodeLeaf(int index) {
-		return index >= 0 ? index : numberOfNodes - 1 - index;
+	private short encodeLeaf(int index) {
+		return (short) (index >= 0 ? index : numberOfNodes - 1 - index);
 	}
 
 	@Override
@@ -84,11 +82,11 @@ public class RandomForestPrediction implements SimpleClassifier {
 	public void distribution(CLIJ2 clij, ClearCLBuffer features, ClearCLBuffer distribution) {
 		long numberOfSlices = distribution.getDepth() / numberOfClasses;
 		int numberOfFeatures = (int) (features.getDepth() / numberOfSlices);
-		Img<FloatType> indices = asFloats(ArrayImgs.ints(nodeIndices, 3, numberOfNodes, numberOfTrees));
-		Img<FloatType> thresholds = asFloats(ArrayImgs.doubles(nodeThresholds, 1, numberOfNodes,
-			numberOfTrees));
-		Img<FloatType> probabilities = asFloats(ArrayImgs.doubles(leafProbabilities, numberOfClasses,
-			numberOfLeafs, numberOfTrees));
+		Img<UnsignedShortType> indices = ArrayImgs.unsignedShorts(nodeIndices, 3, numberOfNodes,
+			numberOfTrees);
+		Img<FloatType> thresholds = ArrayImgs.floats(nodeThresholds, 1, numberOfNodes, numberOfTrees);
+		Img<FloatType> probabilities = ArrayImgs.floats(leafProbabilities, numberOfClasses,
+			numberOfLeafs, numberOfTrees);
 		ClijRandomForestKernel.randomForest(clij,
 			distribution,
 			features,
@@ -96,11 +94,5 @@ public class RandomForestPrediction implements SimpleClassifier {
 			clij.push(probabilities),
 			clij.push(indices),
 			numberOfFeatures);
-	}
-
-	private Img<FloatType> asFloats(Img<? extends RealType<?>> ints) {
-		Img<FloatType> result = ArrayImgs.floats(Intervals.dimensionsAsLongArray(ints));
-		RealTypeConverters.copyFromTo(ints, result);
-		return result;
 	}
 }
