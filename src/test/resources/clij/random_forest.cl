@@ -16,15 +16,14 @@ __kernel void random_forest
 {
   const int x = get_global_id(0), y = get_global_id(1), z = get_global_id(2);
   const int offsetInput = z * num_features;
-  const int num_classes = GET_IMAGE_WIDTH(probabilities);
-  const int offsetOutput = z * num_classes;
+  const int offsetOutput = z * NUMBER_OF_CLASSES;
   const int num_trees = GET_IMAGE_DEPTH(thresholds);
   const unsigned short num_nodes = (unsigned short) GET_IMAGE_HEIGHT(thresholds);
+  float results[NUMBER_OF_CLASSES];
 
   // zero probabilities
-  for(int i = 0; i < num_classes; i++) {
-    const int4 pos = (int4)(x,y,i + offsetOutput,0);
-    WRITE_dst_IMAGE(dst, pos, 0);
+  for(int i = 0; i < NUMBER_OF_CLASSES; i++) {
+    results[i] = 0;
   }
 
   // run random forest
@@ -38,25 +37,20 @@ __kernel void random_forest
       nodeIndex = READ_IMAGE(indices, sampler, (int4)(smaller,nodeIndex,tree,0)).x;
     }
     const unsigned short leafIndex = nodeIndex - num_nodes;
-    for(int i = 0; i < num_classes; i++) {
-      const int4 pos = (int4)(x,y,i + offsetOutput,0);
-      float probability = READ_IMAGE(dst, sampler, pos).x;
-      probability += READ_IMAGE(probabilities, sampler, (int4)(i,leafIndex,tree,0)).x;
-      WRITE_IMAGE(dst, pos, probability);
+    for(int i = 0; i < NUMBER_OF_CLASSES; i++) {
+      results[i] += READ_IMAGE(probabilities, sampler, (int4)(i,leafIndex,tree,0)).x;
     }
   }
 
   // calculate sum of the distribution
   float sum = 0;
-  for(int i = 0; i < num_classes; i++) {
-    sum += READ_IMAGE(dst, sampler, (int4)(x,y,i + offsetOutput,0)).x;
+  for(int i = 0; i < NUMBER_OF_CLASSES; i++) {
+    sum += results[i];
   }
 
   // normalize distribution
-  for(int i = 0; i < num_classes; i++) {
+  for(int i = 0; i < NUMBER_OF_CLASSES; i++) {
     const int4 pos = (int4)(x,y,i + offsetOutput,0);
-    float probability = READ_IMAGE(dst, sampler, pos).x;
-    probability /= sum;
-    WRITE_IMAGE(dst, pos, probability);
+    WRITE_IMAGE(dst, pos, results[i] / sum);
   }
 }
