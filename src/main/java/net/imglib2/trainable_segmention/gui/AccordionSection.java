@@ -1,5 +1,8 @@
 package net.imglib2.trainable_segmention.gui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
@@ -43,4 +46,13 @@ public abstract class AccordionSection< AS extends AccordionSection< AS > > exte
 		anim.start();
 		collapsed = false;
 	}
+	
+	  @SuppressWarnings("unchecked")
+	  public void remove(ActionEvent e) {
+	    owner.removeSection((AS)this);
+	  }
+
+	  public void mouseClicked(MouseEvent e) {
+	    //Default does nothing
+	  }
 }

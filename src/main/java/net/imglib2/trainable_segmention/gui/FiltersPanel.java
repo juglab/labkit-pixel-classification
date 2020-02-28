@@ -17,7 +17,6 @@ public class FiltersPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
-	private FiltersListPanel accordionPanel;
 
 	public FiltersPanel(Context context, GlobalSettings globals) {
 		setLayout( new BorderLayout() );
@@ -25,8 +24,9 @@ public class FiltersPanel extends JPanel {
 	}
 
 	public void init(Context context, GlobalSettings globals) {
-		accordionPanel = new FiltersListPanel(context, globals);
-		JScrollPane scrollPane = new JScrollPane( accordionPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED );
+		FiltersListPanel accordionPanel = new FiltersListPanel(context, globals);
+		JScrollPane scrollPane = new JScrollPane( accordionPanel);
+		scrollPane.setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		add( scrollPane, BorderLayout.CENTER );
 	}
 
@@ -35,7 +35,7 @@ public class FiltersPanel extends JPanel {
 		final JFrame frame = new JFrame();
 		FiltersPanel panel = new FiltersPanel(context, GlobalSettings.default2d().build());
 		frame.getContentPane().add( panel );
-		frame.setSize( 400, 400 );
+		frame.setSize( 600, 800 );
 		frame.pack();
 		frame.setLocationRelativeTo( null );
 		frame.setVisible( true );

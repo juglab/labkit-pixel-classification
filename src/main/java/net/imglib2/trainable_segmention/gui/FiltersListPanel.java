@@ -4,8 +4,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 
 import org.scijava.Context;
 
@@ -24,36 +22,24 @@ public class FiltersListPanel extends AccordionPanel< FiltersListSection > {
 	}
 
 	private void init( Context context, GlobalSettings globals ) {
-		DefaultListModel< JCheckBox > newFiltersListModel = new DefaultListModel<>();
-		CheckBoxList newFiltersList = new CheckBoxList( newFiltersListModel );
-		DefaultListModel< JCheckBox > oldFiltersListModel = new DefaultListModel<>();
-		CheckBoxList oldFiltersList = new CheckBoxList( oldFiltersListModel );
+		DefaultListModel< FiltersListRow > newFiltersListModel = new DefaultListModel<>();
+		FiltersList newFiltersList = new FiltersList( newFiltersListModel );
+		DefaultListModel< FiltersListRow > oldFiltersListModel = new DefaultListModel<>();
+		FiltersList oldFiltersList = new FiltersList( oldFiltersListModel );
 		List< ValuePair< Class< ? extends FeatureOp >, String > > features = AvailableFeatures.getValidFeatures( context, GlobalSettings.default2d().build() );
 		features.sort( Comparator.comparing( ValuePair::getB ) );
 		features.forEach( featureClassAndLabel -> {
 			String s = featureClassAndLabel.getB();
 			if ( Character.isUpperCase( s.charAt( 0 ) ) )
-				oldFiltersListModel.addElement( new JCheckBox( s ) );
+				oldFiltersListModel.addElement( new FiltersListRow( s ) );
 			else
-				newFiltersListModel.addElement( new JCheckBox( s ) );
+				newFiltersListModel.addElement( new FiltersListRow( s ) );
 		} );
 
-		FiltersListSection oldSection = new FiltersListSection("Deprecated Filters", oldFiltersList, false);
+		FiltersListSection oldSection = new FiltersListSection(this,  "Deprecated Filters", oldFiltersList, false );
 		addSection( oldSection, true );
-		FiltersListSection newSection = new FiltersListSection("Current Filters", newFiltersList, true );
+		FiltersListSection newSection = new FiltersListSection(this, "Current Filters", newFiltersList, true );
 		addSection( newSection, false );
-	}
-
-	public static void main( String... args ) {
-		Context context = new Context();
-		final JFrame frame = new JFrame();
-		FiltersListPanel panel = new FiltersListPanel( context, GlobalSettings.default2d().build() );
-		frame.getContentPane().add( panel );
-		frame.setSize( 400, 400 );
-		frame.pack();
-		frame.setLocationRelativeTo( null );
-		frame.setVisible( true );
-
 	}
 
 }

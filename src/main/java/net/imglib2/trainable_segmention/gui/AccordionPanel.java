@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.BoxLayout;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /**
@@ -20,9 +21,10 @@ public class AccordionPanel< AS extends AccordionSection< AS > > extends JPanel 
 	private static final long serialVersionUID = 1L;
 	private Set< AS > expandedSections = new HashSet<>();
 	private List< AS > sections = new ArrayList<>();
+	private boolean confirmRemove = true;
 
 	public AccordionPanel() {
-		setLayout( new BoxLayout( this, BoxLayout.Y_AXIS ));
+		setLayout( new BoxLayout( this, BoxLayout.Y_AXIS ) );
 		setFocusable( false );
 	}
 
@@ -44,10 +46,30 @@ public class AccordionPanel< AS extends AccordionSection< AS > > extends JPanel 
 		configureNewSection( newSection, collapse );
 	}
 
+	public void removeSection( AS section ) {
+		if ( this.confirmRemove ) {
+			int confirm = JOptionPane.showConfirmDialog( this, getRemoveConfirmationMessage(), null, JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE );
+			if ( confirm != JOptionPane.YES_OPTION ) { return; }
+		}
+		sections.remove( section );
+		remove( section );
+		revalidate();
+		repaint();
+		sectionRemoved( section );
+	}
+
+	protected String getRemoveConfirmationMessage() {
+		return "Are you sure you want to remove this section?";
+	}
+
+	protected void sectionRemoved( AS section ) {
+		//Default does nothing
+	}
+
 	private void configureNewSection( AS newSection, boolean collapse ) {
 		newSection.setOwner( this );
 		if ( collapse ) {
-			setSectionCollapsed(newSection);
+			setSectionCollapsed( newSection );
 		} else {
 			setSectionExpanded( newSection );
 		}

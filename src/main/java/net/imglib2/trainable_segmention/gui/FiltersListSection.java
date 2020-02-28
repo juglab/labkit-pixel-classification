@@ -11,6 +11,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.border.CompoundBorder;
 
 /**
@@ -28,6 +29,7 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 	public JComponent filtersList;
 	private IconPanel iconPanel;
 	private JLabel titleComponent;
+	private JPopupMenu popupMenu;
 
 	public enum AccordionControlIcons {
 
@@ -46,8 +48,8 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 
 	/**
 	 */
-	public FiltersListSection( String title, JComponent filtersList, boolean isExpanded ) {
-
+	public FiltersListSection( AccordionPanel< FiltersListSection > owner, String title, JComponent filtersList, boolean isExpanded ) {
+		this.owner = owner;
 		this.filtersList = filtersList;
 
 		titlePanel = new JPanel();
@@ -66,7 +68,9 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 		titlePanel.add( titleComponent );
 
 		add( filtersList, BorderLayout.CENTER );
-
+		if ( !isExpanded )
+			this.collapse();
+		
 		revalidate();
 	}
 
@@ -134,4 +138,15 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 	JComponent getExpandableComponent() {
 		return filtersList;
 	}
+
+	@Override
+	public void mouseClicked( MouseEvent event ) {
+		if ( event.getButton() == MouseEvent.BUTTON3 || event.getButton() == MouseEvent.BUTTON2 ) {
+			if ( !popupMenu.isVisible() )
+				popupMenu.show( this, event.getX(), event.getY() );
+			else
+				popupMenu.setVisible( false );
+		}
+	}
+
 }
