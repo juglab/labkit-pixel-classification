@@ -1,9 +1,9 @@
 
-package clij;
+package net.imglib2.trainable_segmention.clij_random_forest;
 
 import weka.core.Instance;
 
-public class RandomTreePrediction implements SimpleClassifier {
+public class RandomTreePrediction {
 
 	final int numberOfNodes;
 	final int numberOfLeafs;
@@ -15,7 +15,7 @@ public class RandomTreePrediction implements SimpleClassifier {
 	final int[] biggerChild;
 	final double[][] classProbabilities;
 
-	public RandomTreePrediction(MyRandomTree tree) {
+	public RandomTreePrediction(TransparentRandomTree tree) {
 		this.numberOfLeafs = countLeafs(tree);
 		this.numberOfNodes = countNodes(tree);
 		this.attributeIndicies = new int[numberOfNodes];
@@ -26,30 +26,30 @@ public class RandomTreePrediction implements SimpleClassifier {
 		addTree(tree);
 	}
 
-	private int countNodes(MyRandomTree node) {
-		return node.isLeaf() ? 0 : 1 + countNodes(node.childLessThan()) + countNodes(node
-			.childGreaterThan());
+	private int countNodes(TransparentRandomTree node) {
+		return node.isLeaf() ? 0 : 1 + countNodes(node.smallerChild()) + countNodes(node
+			.biggerChild());
 	}
 
-	private int countLeafs(MyRandomTree node) {
-		return node.isLeaf() ? 1 : countLeafs(node.childLessThan()) + countLeafs(node
-			.childGreaterThan());
+	private int countLeafs(TransparentRandomTree node) {
+		return node.isLeaf() ? 1 : countLeafs(node.smallerChild()) + countLeafs(node
+			.biggerChild());
 	}
 
-	int addTree(MyRandomTree node) {
+	int addTree(TransparentRandomTree node) {
 		return node.isLeaf() ? addLeaf(node) : addNode(node);
 	}
 
-	private int addNode(MyRandomTree node) {
+	private int addNode(TransparentRandomTree node) {
 		int i = nodeCount++;
 		attributeIndicies[i] = node.attributeIndex();
 		threshold[i] = node.threshold();
-		smallerChild[i] = addTree(node.childLessThan());
-		biggerChild[i] = addTree(node.childGreaterThan());
+		smallerChild[i] = addTree(node.smallerChild());
+		biggerChild[i] = addTree(node.biggerChild());
 		return i;
 	}
 
-	private int addLeaf(MyRandomTree node) {
+	private int addLeaf(TransparentRandomTree node) {
 		int i = leafCount++;
 		if (i >= classProbabilities.length)
 			throw new AssertionError();
@@ -57,7 +57,6 @@ public class RandomTreePrediction implements SimpleClassifier {
 		return -1 - i;
 	}
 
-	@Override
 	public double[] distributionForInstance(Instance instance) {
 		int nodeIndex = 0;
 		while (nodeIndex >= 0) {

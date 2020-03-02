@@ -1,11 +1,19 @@
 
-package clij;
+package net.imglib2.trainable_segmention.clij_random_forest;
 
 import net.imglib2.util.Cast;
 
 import java.lang.reflect.Field;
 
+/**
+ * This utility class allows to access the private fields of another
+ * class via Java reflection.
+ */
 class ReflectionUtils {
+
+	private ReflectionUtils() {
+		// prevent from being instantiated.
+	}
 
 	public static Object getPrivateField(Object object, String fieldName) {
 		try {

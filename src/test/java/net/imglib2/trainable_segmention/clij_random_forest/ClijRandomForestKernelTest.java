@@ -1,5 +1,5 @@
 
-package clij;
+package net.imglib2.trainable_segmention.clij_random_forest;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
@@ -8,7 +8,9 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
+import net.imglib2.trainable_segmention.clij_random_forest.ClijRandomForestKernel;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.After;
@@ -58,11 +60,11 @@ public class ClijRandomForestKernelTest {
 			0, 0,
 			0, 0
 		}, numberOfClasses, numberOfLeafs, numberOfTrees);
-		Img<FloatType> indices = ArrayImgs.floats(new float[] {
-			0, -1, 1,
-			0, -2, -3,
+		Img<UnsignedShortType> indices = ArrayImgs.unsignedShorts(new short[] {
+			0, 2, 1,
+			0, 3, 4,
 
-			0, -1, -2,
+			0, 2, 3,
 			0, 0, 0
 		}, 3, numberOfNodes, numberOfTrees);
 
