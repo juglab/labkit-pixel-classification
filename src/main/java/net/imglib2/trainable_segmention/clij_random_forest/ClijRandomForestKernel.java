@@ -1,5 +1,5 @@
 
-package clij;
+package net.imglib2.trainable_segmention.clij_random_forest;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij2.CLIJ2;
@@ -29,7 +29,8 @@ public class ClijRandomForestKernel {
 		constants.put("NUMBER_OF_CLASSES", probabilities.getWidth());
 		constants.put("NUMBER_OF_FEATURES", numberOfFeatures);
 		constants.put("INDICES_SIZE", Intervals.numElements(indices.getDimensions()));
-		clij.execute(ClijDemo.class, "random_forest.cl", "random_forest", globalSizes, globalSizes,
+		clij.execute(ClijRandomForestKernel.class, "random_forest.cl", "random_forest", globalSizes,
+			globalSizes,
 			parameters, constants);
 	}
 
@@ -43,7 +44,7 @@ public class ClijRandomForestKernel {
 		parameters.put("dst", dst);
 		parameters.put("src", distributions);
 		parameters.put("num_classes", numberOfClasses);
-		clij.execute(ClijDemo.class, "find_max.cl", "find_max", globalSizes, globalSizes,
+		clij.execute(ClijRandomForestKernel.class, "find_max.cl", "find_max", globalSizes, globalSizes,
 			parameters);
 	}
 }

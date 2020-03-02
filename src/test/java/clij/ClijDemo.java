@@ -2,7 +2,6 @@
 package clij;
 
 import com.google.gson.JsonElement;
-import hr.irb.fastRandomForest.FastRandomForest;
 import ij.ImagePlus;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.clearcl.util.ElapsedTime;
@@ -18,6 +17,9 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.trainable_segmention.classification.CompositeInstance;
 import net.imglib2.trainable_segmention.classification.Segmenter;
+import net.imglib2.trainable_segmention.clij_random_forest.ClijCopy;
+import net.imglib2.trainable_segmention.clij_random_forest.ClijRandomForestKernel;
+import net.imglib2.trainable_segmention.clij_random_forest.RandomForestPrediction;
 import net.imglib2.trainable_segmention.gson.GsonUtils;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -34,7 +36,6 @@ import weka.classifiers.Classifier;
 import weka.core.Attribute;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class ClijDemo {
 
@@ -49,13 +50,12 @@ public class ClijDemo {
 			.getFile());
 		Segmenter segmenter = Segmenter.fromJson(ops, read);
 		Classifier classifier = segmenter.getClassifier();
-		Attribute[] attributes = segmenter.attributesAsArray();
 		ElapsedTime.sStandardOutput = true;
 		try {
 			ImagePlus input = new ImagePlus("/home/arzt/Documents/Datasets/Example/small-3d-stack.tif");
 			input.show();
-			RandomAccessibleInterval<? extends RealType<?>> image;
 			StopWatch stopWatch = StopWatch.createAndStart();
+			RandomAccessibleInterval<? extends RealType<?>> image;
 			try (
 				ClearCLBuffer inputCl = clij.push(input);
 				ClearCLBuffer featuresCl = calculateFeatures(clij, inputCl);
@@ -86,8 +86,8 @@ public class ClijDemo {
 	private static ClearCLBuffer calculateDistribution(CLIJ2 clij, Classifier classifier,
 		ClearCLBuffer featuresCl)
 	{
-		RandomForestPrediction prediction = new RandomForestPrediction(new MyRandomForest(Cast
-			.unchecked(classifier)), 2);
+		RandomForestPrediction prediction = new RandomForestPrediction(Cast
+			.unchecked(classifier), numberOfClasses, numberOfFeatures);
 		long slices = featuresCl.getDepth() / numberOfFeatures;
 		ClearCLBuffer distribution = clij.create(new long[] { featuresCl.getWidth(), featuresCl
 			.getHeight(), slices * numberOfClasses }, NativeTypeEnum.Float);
@@ -98,8 +98,8 @@ public class ClijDemo {
 	private static Img<UnsignedByteType> segment(Classifier classifier, Attribute[] attributes,
 		ImagePlus output)
 	{
-		MyRandomForest forest = new MyRandomForest((FastRandomForest) classifier);
-		RandomForestPrediction prediction = new RandomForestPrediction(forest, 2);
+		RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier),
+			numberOfClasses, numberOfFeatures);
 		RandomAccessibleInterval<FloatType> featureStack =
 			Views.permute(ImageJFunctions.wrapFloat(output), 2, 3);
 		CompositeIntervalView<FloatType, RealComposite<FloatType>> collapsed =
@@ -124,23 +124,10 @@ public class ClijDemo {
 			for (int i = 0; i < numberOfFeatures; i++) {
 				float sigma = i * 2;
 				clij.gaussianBlur(inputCl, tmpCl, sigma, sigma, sigma);
-				copy3dStack(clij, tmpCl, outputCl, i, numberOfFeatures);
+				ClijCopy.copy3dStack(clij, tmpCl, outputCl, i, numberOfFeatures);
 			}
 			return outputCl;
 		}
-	}
-
-	private static void copy3dStack(CLIJ2 clij, ClearCLBuffer input, ClearCLBuffer output, int offset,
-		int step)
-	{
-		long[] globalSizes = input.getDimensions();
-		HashMap<String, Object> parameters = new HashMap<>();
-		parameters.put("src", input);
-		parameters.put("dst", output);
-		parameters.put("offset", offset);
-		parameters.put("step", step);
-		clij.execute(ClijDemo.class, "copy_3d_stack.cl", "copy_3d_stack", globalSizes, globalSizes,
-			parameters);
 	}
 
 	private static void copy(CLIJ2 clij, ClearCLBuffer inputCl, Interval sourceInterval,

@@ -1,10 +1,12 @@
 
-package clij;
+package net.imglib2.trainable_segmention.clij_random_forest;
 
+import hr.irb.fastRandomForest.FastRandomForest;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.trainable_segmention.classification.CompositeInstance;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import weka.core.Instance;
@@ -12,9 +14,18 @@ import weka.core.Instance;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RandomForestPrediction implements SimpleClassifier {
+/**
+ * This class calculates the same prediction as {@link FastRandomForest}. But it
+ * uses flat arrays rather than a tree data structure to represent the tree in
+ * memory.
+ * <p>
+ * This allows the algorithm to be executed on GPU via CLIJ.
+ */
+public class RandomForestPrediction {
 
 	private final int numberOfClasses;
+
+	private final int numberOfFeatures;
 
 	private final int numberOfTrees;
 
@@ -28,10 +39,14 @@ public class RandomForestPrediction implements SimpleClassifier {
 
 	private final float[] leafProbabilities;
 
-	public RandomForestPrediction(MyRandomForest forest, int numberOfClasses) {
+	public RandomForestPrediction(FastRandomForest classifier, int numberOfClasses,
+		int numberOfFeatures)
+	{
+		TransparentRandomForest forest = new TransparentRandomForest(classifier);
 		List<RandomTreePrediction> trees = forest.trees().stream().map(RandomTreePrediction::new)
 			.collect(Collectors.toList());
 		this.numberOfClasses = numberOfClasses;
+		this.numberOfFeatures = numberOfFeatures;
 		this.numberOfTrees = trees.size();
 		this.numberOfNodes = trees.stream().mapToInt(x -> x.numberOfNodes).max().getAsInt();
 		this.numberOfLeafs = trees.stream().mapToInt(x -> x.numberOfLeafs).max().getAsInt();
@@ -57,7 +72,10 @@ public class RandomForestPrediction implements SimpleClassifier {
 		return (short) (index >= 0 ? index : numberOfNodes - 1 - index);
 	}
 
-	@Override
+	public int classifyInstance(CompositeInstance instance) {
+		return ArrayUtils.findMax(distributionForInstance(instance));
+	}
+
 	public double[] distributionForInstance(Instance instance) {
 		double[] distribution = new double[numberOfClasses];
 		for (int tree = 0; tree < numberOfTrees; tree++) {
@@ -80,19 +98,19 @@ public class RandomForestPrediction implements SimpleClassifier {
 	}
 
 	public void distribution(CLIJ2 clij, ClearCLBuffer features, ClearCLBuffer distribution) {
-		long numberOfSlices = distribution.getDepth() / numberOfClasses;
-		int numberOfFeatures = (int) (features.getDepth() / numberOfSlices);
 		Img<UnsignedShortType> indices = ArrayImgs.unsignedShorts(nodeIndices, 3, numberOfNodes,
 			numberOfTrees);
 		Img<FloatType> thresholds = ArrayImgs.floats(nodeThresholds, 1, numberOfNodes, numberOfTrees);
 		Img<FloatType> probabilities = ArrayImgs.floats(leafProbabilities, numberOfClasses,
 			numberOfLeafs, numberOfTrees);
-		ClijRandomForestKernel.randomForest(clij,
-			distribution,
-			features,
-			clij.push(thresholds),
-			clij.push(probabilities),
-			clij.push(indices),
-			numberOfFeatures);
+		try (
+			ClearCLBuffer thresholdsClBuffer = clij.push(thresholds);
+			ClearCLBuffer probabilitiesClBuffer = clij.push(probabilities);
+			ClearCLBuffer indicesClBuffer = clij.push(indices);)
+		{
+			ClijRandomForestKernel.randomForest(clij, distribution, features, thresholdsClBuffer,
+				probabilitiesClBuffer,
+				indicesClBuffer, numberOfFeatures);
+		}
 	}
 }
