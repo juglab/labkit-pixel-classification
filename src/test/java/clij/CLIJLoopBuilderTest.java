@@ -12,9 +12,9 @@ import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
 
 /**
- * Tests {@link ClijLoopBuilder}.
+ * Tests {@link CLIJLoopBuilder}.
  */
-public class ClijLoopBuilderTest {
+public class CLIJLoopBuilderTest {
 
 	private final CLIJ2 clij = CLIJ2.getInstance();
 
@@ -32,7 +32,7 @@ public class ClijLoopBuilderTest {
 	}
 
 	private void add(ClearCLBuffer a, ClearCLBuffer b, ClearCLBuffer dst) {
-		ClijLoopBuilder.clij(clij)
+		CLIJLoopBuilder.clij(clij)
 			.setImage("a", a)
 			.setImage("b", b)
 			.setImage("c", dst)
@@ -43,7 +43,7 @@ public class ClijLoopBuilderTest {
 	public void testSingleImageOperation() {
 		long[] dims = { 2, 2 };
 		ClearCLBuffer c = clij.create(dims, NativeTypeEnum.Float);
-		ClijLoopBuilder.clij(clij)
+		CLIJLoopBuilder.clij(clij)
 			.setImage("output", c)
 			.forEachPixel("output = 2.0");
 		RandomAccessibleInterval<RealType<?>> result = clij.pullRAI(c);
@@ -57,7 +57,7 @@ public class ClijLoopBuilderTest {
 		long[] dims = { 2, 2 };
 		ClearCLBuffer c = clij.create(dims, NativeTypeEnum.Byte);
 		ClearCLBuffer a = clij.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4 }, dims));
-		ClijLoopBuilder.clij(clij)
+		CLIJLoopBuilder.clij(clij)
 			.setImage("in", a)
 			.setImage("out", c)
 			.forEachPixel("out = 2.0 * in");
@@ -73,7 +73,7 @@ public class ClijLoopBuilderTest {
 		ClearCLBuffer a = clij.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4 }, dims));
 		ClearCLBuffer b = clij.create(dims);
 		ClearCLBuffer c = clij.create(dims);
-		ClijLoopBuilder.clij(clij)
+		CLIJLoopBuilder.clij(clij)
 			.setImage("a", a)
 			.setImage("b", b)
 			.setImage("c", c)
@@ -90,7 +90,7 @@ public class ClijLoopBuilderTest {
 	public void testMismatchingDimensions() {
 		ClearCLBuffer c = clij.create(new long[] { 10, 10 });
 		ClearCLBuffer b = clij.create(new long[] { 10, 11 });
-		ClijLoopBuilder.clij(clij)
+		CLIJLoopBuilder.clij(clij)
 			.setImage("c", c)
 			.setImage("b", b)
 			.forEachPixel("b = c");

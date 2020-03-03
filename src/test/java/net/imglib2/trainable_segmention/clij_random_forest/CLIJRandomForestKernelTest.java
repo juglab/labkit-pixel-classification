@@ -8,7 +8,6 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmention.clij_random_forest.ClijRandomForestKernel;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -17,7 +16,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ClijRandomForestKernelTest {
+public class CLIJRandomForestKernelTest {
 
 	private static CLIJ2 clij;
 
@@ -68,7 +67,7 @@ public class ClijRandomForestKernelTest {
 			0, 0, 0
 		}, 3, numberOfNodes, numberOfTrees);
 
-		ClijRandomForestKernel.randomForest(clij,
+		CLIJRandomForestKernel.randomForest(clij,
 			distributions,
 			clij.push(src),
 			clij.push(thresholds),
@@ -101,7 +100,7 @@ public class ClijRandomForestKernelTest {
 			-3, -3, -2, -1
 		}, 2, 2, 6);
 		ClearCLBuffer outputBuffer = clij.create(new long[] { 2, 2, 2 }, NativeTypeEnum.Float);
-		ClijRandomForestKernel.findMax(clij, clij.push(input), outputBuffer, 3);
+		CLIJRandomForestKernel.findMax(clij, clij.push(input), outputBuffer, 3);
 		RandomAccessibleInterval<? extends RealType<?>> result = clij.pullRAI(outputBuffer);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] {
 			2, 0, 1, 2,

@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.StringJoiner;
 
 /**
- * {@link ClijLoopBuilder} provides a simple way to execute pixel wise
+ * {@link CLIJLoopBuilder} provides a simple way to execute pixel wise
  * operations on images using CLIJ.
  */
-public class ClijLoopBuilder {
+public class CLIJLoopBuilder {
 
 	private static final List<String> KERNEL_PARAMETER_NAMES = Arrays.asList("a", "b", "c");
 
@@ -24,15 +24,15 @@ public class ClijLoopBuilder {
 
 	private final List<ClearCLBuffer> images = new ArrayList<>();
 
-	private ClijLoopBuilder(CLIJ2 clij) {
+	private CLIJLoopBuilder(CLIJ2 clij) {
 		this.clij = clij;
 	}
 
-	public static ClijLoopBuilder clij(CLIJ2 clij) {
-		return new ClijLoopBuilder(clij);
+	public static CLIJLoopBuilder clij(CLIJ2 clij) {
+		return new CLIJLoopBuilder(clij);
 	}
 
-	public ClijLoopBuilder setImage(String key, ClearCLBuffer image) {
+	public CLIJLoopBuilder setImage(String key, ClearCLBuffer image) {
 		keys.add(key);
 		images.add(image);
 		return this;
@@ -48,7 +48,7 @@ public class ClijLoopBuilder {
 		for (int i = 0; i < n; i++)
 			parameters.put(KERNEL_PARAMETER_NAMES.get(i), images.get(i));
 		defines.put("OPERATION_" + n + "(" + commaSeparated(keys) + ")", operation);
-		clij.execute(ClijLoopBuilderTest.class, "binary_operation.cl", "operation_" + n,
+		clij.execute(CLIJLoopBuilderTest.class, "binary_operation.cl", "operation_" + n,
 			dims, dims, parameters, defines);
 	}
 
