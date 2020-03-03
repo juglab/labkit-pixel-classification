@@ -12,9 +12,13 @@ public class CLIJView {
 	private final ClearCLBuffer buffer;
 	private final Interval interval;
 
-	public CLIJView(ClearCLBuffer buffer, Interval interval) {
+	private CLIJView(ClearCLBuffer buffer, Interval interval) {
 		this.buffer = buffer;
 		this.interval = interval;
+	}
+
+	public static CLIJView interval(ClearCLBuffer buffer, Interval interval) {
+		return new CLIJView(buffer, interval);
 	}
 
 	public ClearCLBuffer buffer() {
@@ -26,15 +30,15 @@ public class CLIJView {
 	}
 
 	public static CLIJView shrink(ClearCLBuffer buffer, long border) {
-		return new CLIJView(buffer, Intervals.expand(new FinalInterval(buffer.getDimensions()), -border) );
+		return interval(buffer, Intervals.expand(new FinalInterval(buffer.getDimensions()), -border) );
 	}
 
 	public static CLIJView shrink(ClearCLBuffer buffer, long[] border) {
 		long[] negativeBorder = LongStream.of(border).map(x -> -x).toArray();
-		return new CLIJView(buffer, Intervals.expand(new FinalInterval(buffer.getDimensions()), negativeBorder));
+		return interval(buffer, Intervals.expand(new FinalInterval(buffer.getDimensions()), negativeBorder));
 	}
 
 	public static CLIJView wrap(ClearCLBuffer buffer) {
-		return new CLIJView(buffer, new FinalInterval(buffer.getDimensions()));
+		return interval(buffer, new FinalInterval(buffer.getDimensions()));
 	}
 }
