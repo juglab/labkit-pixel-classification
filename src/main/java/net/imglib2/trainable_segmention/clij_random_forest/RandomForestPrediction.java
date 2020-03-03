@@ -104,7 +104,7 @@ public class RandomForestPrediction {
 				ClearCLBuffer probabilitiesClBuffer = clij.push(probabilities);
 				ClearCLBuffer indicesClBuffer = clij.push(indices);
 		) {
-			ClijRandomForestKernel.randomForest(clij, distribution, features, thresholdsClBuffer, probabilitiesClBuffer,
+			CLIJRandomForestKernel.randomForest(clij, distribution, features, thresholdsClBuffer, probabilitiesClBuffer,
 					indicesClBuffer, numberOfFeatures );
 		}
 	}

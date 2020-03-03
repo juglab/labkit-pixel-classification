@@ -17,8 +17,8 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.trainable_segmention.classification.CompositeInstance;
 import net.imglib2.trainable_segmention.classification.Segmenter;
-import net.imglib2.trainable_segmention.clij_random_forest.ClijCopy;
-import net.imglib2.trainable_segmention.clij_random_forest.ClijRandomForestKernel;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJRandomForestKernel;
 import net.imglib2.trainable_segmention.clij_random_forest.RandomForestPrediction;
 import net.imglib2.trainable_segmention.gson.GsonUtils;
 import net.imglib2.type.numeric.RealType;
@@ -37,7 +37,7 @@ import weka.core.Attribute;
 
 import java.util.HashMap;
 
-public class ClijDemo {
+public class CLIJDemo {
 
 	private static final int numberOfFeatures = 10;
 	private static final int numberOfClasses = 2;
@@ -46,7 +46,7 @@ public class ClijDemo {
 
 		CLIJ2 clij = CLIJ2.getInstance();
 		OpService ops = new Context().service(OpService.class);
-		JsonElement read = GsonUtils.read(ClijDemo.class.getResource("/clij/test.classifier").getFile());
+		JsonElement read = GsonUtils.read(CLIJDemo.class.getResource("/clij/test.classifier").getFile());
 		Segmenter segmenter = Segmenter.fromJson(ops, read);
 		Classifier classifier = segmenter.getClassifier();
 		ElapsedTime.sStandardOutput = true;
@@ -78,7 +78,7 @@ public class ClijDemo {
 		long slices = distribution.getDepth() / numberOfClasses;
 		ClearCLBuffer result = clij.create(new long[] { distribution.getWidth(), distribution
 			.getHeight(), slices }, NativeTypeEnum.Float);
-		ClijRandomForestKernel.findMax(clij, distribution, result, numberOfClasses);
+		CLIJRandomForestKernel.findMax(clij, distribution, result, numberOfClasses);
 		return result;
 	}
 
@@ -123,7 +123,7 @@ public class ClijDemo {
 			for (int i = 0; i < numberOfFeatures; i++) {
 				float sigma = i * 2;
 				clij.gaussianBlur(inputCl, tmpCl, sigma, sigma, sigma);
-				ClijCopy.copy3dStack(clij, tmpCl, outputCl, i, numberOfFeatures);
+				CLIJCopy.copy3dStack(clij, tmpCl, outputCl, i, numberOfFeatures);
 			}
 			return outputCl;
 		}
@@ -142,7 +142,7 @@ public class ClijDemo {
 		parameters.put("dst_offset_x", (int) destinationInterval.min(0));
 		parameters.put("dst_offset_y", (int) destinationInterval.min(1));
 		parameters.put("dst_offset_z", (int) destinationInterval.min(2));
-		clij.execute(ClijDemo.class, "copy_with_offset.cl", "copy_with_offset", globalSizes, globalSizes,
+		clij.execute(CLIJDemo.class, "copy_with_offset.cl", "copy_with_offset", globalSizes, globalSizes,
 			parameters);
 	}
 

@@ -7,7 +7,7 @@ import net.imglib2.util.Intervals;
 
 import java.util.HashMap;
 
-public class ClijRandomForestKernel {
+public class CLIJRandomForestKernel {
 
 	public static void randomForest(CLIJ2 clij,
 			ClearCLBuffer distributions,
@@ -29,7 +29,7 @@ public class ClijRandomForestKernel {
 		constants.put("NUMBER_OF_CLASSES", probabilities.getWidth());
 		constants.put("NUMBER_OF_FEATURES", numberOfFeatures);
 		constants.put("INDICES_SIZE", Intervals.numElements(indices.getDimensions()));
-		clij.execute(ClijRandomForestKernel.class, "random_forest.cl", "random_forest", globalSizes, globalSizes,
+		clij.execute(CLIJRandomForestKernel.class, "random_forest.cl", "random_forest", globalSizes, globalSizes,
 			parameters, constants);
 	}
 
@@ -43,7 +43,7 @@ public class ClijRandomForestKernel {
 		parameters.put("dst", dst);
 		parameters.put("src", distributions);
 		parameters.put("num_classes", numberOfClasses);
-		clij.execute(ClijRandomForestKernel.class, "find_max.cl", "find_max", globalSizes, globalSizes,
+		clij.execute(CLIJRandomForestKernel.class, "find_max.cl", "find_max", globalSizes, globalSizes,
 			parameters);
 	}
 }

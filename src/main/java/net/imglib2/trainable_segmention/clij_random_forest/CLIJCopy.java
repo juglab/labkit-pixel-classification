@@ -7,7 +7,7 @@ import net.imglib2.util.Intervals;
 
 import java.util.HashMap;
 
-public class ClijCopy {
+public class CLIJCopy {
 	public static void copy3dStack(CLIJ2 clij, ClearCLBuffer input, ClearCLBuffer output, int offset,
 			int step)
 	{
@@ -17,7 +17,7 @@ public class ClijCopy {
 		parameters.put("dst", output);
 		parameters.put("offset", offset);
 		parameters.put("step", step);
-		clij.execute(ClijCopy.class, "copy_3d_stack.cl", "copy_3d_stack", globalSizes, globalSizes,
+		clij.execute(CLIJCopy.class, "copy_3d_stack.cl", "copy_3d_stack", globalSizes, globalSizes,
 			parameters);
 	}
 
@@ -34,7 +34,7 @@ public class ClijCopy {
 		long[] globalSizes = Intervals.dimensionsAsLongArray(src.interval());
 		if(!Intervals.equalDimensions(src.interval(), dst.interval()))
 			throw new IllegalArgumentException();
-		clij.execute(ClijCopy.class, "copy_with_offset.cl", "copy_with_offset", globalSizes, globalSizes,
+		clij.execute(CLIJCopy.class, "copy_with_offset.cl", "copy_with_offset", globalSizes, globalSizes,
 				parameters);
 	}
 

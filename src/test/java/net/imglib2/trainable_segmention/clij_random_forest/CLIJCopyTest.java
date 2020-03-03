@@ -1,10 +1,8 @@
 package net.imglib2.trainable_segmention.clij_random_forest;
 
-import net.haesleinhuepf.clij.CLIJ;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij2.CLIJ2;
-import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
@@ -15,9 +13,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests {@link ClijCopy}
+ * Tests {@link CLIJCopy}
  */
-public class ClijCopyTest {
+public class CLIJCopyTest {
 
 	private CLIJ2 clij;
 
@@ -37,7 +35,7 @@ public class ClijCopyTest {
 		ClearCLBuffer destination = clij.create(new long[]{3, 3}, NativeTypeEnum.Float);
 		CLIJView sourceView = new CLIJView(source, Intervals.createMinSize(0, 1, 2, 2));
 		CLIJView destinationView = new CLIJView(destination, Intervals.createMinSize(1, 0, 2, 2));
-		ClijCopy.copy(clij, sourceView, destinationView);
+		CLIJCopy.copy(clij, sourceView, destinationView);
 		RandomAccessibleInterval<FloatType> result = clij.pullRAI(destination);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[]{0, 4, 5, 0, 7, 8, 0, 0, 0}, 3, 3);
 		ImgLib2Assert.assertImageEquals(expected, result);
