@@ -5,11 +5,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import net.haesleinhuepf.clij2.CLIJ2;
 import net.imagej.ops.OpEnvironment;
-import net.imagej.ops.Ops;
 import net.imagej.ops.special.hybrid.AbstractUnaryHybridCF;
 import net.imagej.ops.special.hybrid.UnaryHybridCF;
 import net.imglib2.*;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureStack;
+import net.imglib2.trainable_segmention.clij_random_forest.RandomForestPrediction;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.RevampUtils;
@@ -20,6 +22,7 @@ import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Cast;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.CompositeIntervalView;
@@ -77,31 +80,24 @@ public class Segmenter {
 	}
 
 	public Img<UnsignedByteType> segment(RandomAccessibleInterval<?> image) {
+		Interval interval = features.outputIntervalFromInput(image);
+		CLIJFeatureStack featureStack = features.applyWithCLIJ(Views.extendBorder(image), interval);
+		RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier), classNames.size(), features.count());
+		CLIJ2 clij = CLIJ2.getInstance();
+		prediction.segment(clij, featureStack.asClearCLBuffer());
 		return segment(image, new UnsignedByteType());
 	}
 
 	public <T extends IntegerType<T> & NativeType<T>> Img<T> segment(
 		RandomAccessibleInterval<?> image, T type)
 	{
-		Objects.requireNonNull(image);
-		Objects.requireNonNull(type);
-		Interval outputInterval = features.outputIntervalFromInput(image);
-		Img<T> result = ops.create().img(outputInterval, type);
-		segment(result, Views.extendBorder(image));
-		return result;
+		throw new UnsupportedOperationException();
 	}
 
 	public void segment(RandomAccessibleInterval<? extends IntegerType<?>> out,
 		RandomAccessible<?> image)
 	{
-		Objects.requireNonNull(out);
-		Objects.requireNonNull(image);
-		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
-		LoopBuilder.setImages(Views.collapseReal(featureValues), out).multiThreaded().forEachChunk(
-			chunk -> {
-				chunk.forEachPixel(pixelClassificationOp()::compute);
-				return null;
-			});
+		throw new UnsupportedOperationException();
 	}
 
 	public RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> predict(

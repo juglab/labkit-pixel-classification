@@ -48,19 +48,16 @@ public class SingleGaussianBlurFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public List<ClearCLBuffer> applyWithCLIJ(CLIJ2 clij, FeatureInput input) {
+	public void applyWithCLIJ(CLIJ2 clij, FeatureInput input, List<CLIJView> output) {
 		Interval interval = input.targetInterval();
 		double[] sigmas = globalSettings().pixelSize().stream().mapToDouble(p -> sigma / p).toArray();
-		long[] border = DoubleStream.of(sigmas).mapToLong(x -> (long)(3.5 * x)).toArray();
+		long[] border = DoubleStream.of(sigmas).mapToLong(x -> (long)(4 * x)).toArray();
 		try(
-			ClearCLBuffer inputClBuffer = clij.push(Views.interval(input.original(), Intervals.expand(interval, border)));
-			ClearCLBuffer tmp = clij.create(inputClBuffer);
+				ClearCLBuffer inputClBuffer = clij.push(Views.interval(input.original(), Intervals.expand(interval, border)));
+				ClearCLBuffer tmp = clij.create(inputClBuffer);
 		) {
-			ClearCLBuffer outputClBuffer = clij.create(Intervals.dimensionsAsLongArray(interval), NativeTypeEnum.Float);
-			clij.gaussianBlur3D(inputClBuffer, tmp, sigma, sigma, sigma);
-			CLIJCopy.copy(clij, CLIJView.shrink(tmp, border), CLIJView.wrap(outputClBuffer));
-			return Collections.singletonList(outputClBuffer);
+			clij.gaussianBlur3D(inputClBuffer, tmp, sigmas[0], sigmas[1], sigmas[2]);
+			CLIJCopy.copy(clij, CLIJView.shrink(tmp, border), output.get(0));
 		}
 	}
-
 }

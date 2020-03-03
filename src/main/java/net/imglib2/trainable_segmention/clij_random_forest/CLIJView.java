@@ -41,4 +41,5 @@ public class CLIJView {
 	public static CLIJView wrap(ClearCLBuffer buffer) {
 		return interval(buffer, new FinalInterval(buffer.getDimensions()));
 	}
+
 }

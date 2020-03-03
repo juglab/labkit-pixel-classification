@@ -108,4 +108,7 @@ public class RandomForestPrediction {
 					indicesClBuffer, numberOfFeatures );
 		}
 	}
+
+	public void segment(CLIJ2 clij, ClearCLBuffer buffer) {
+	}
 }
