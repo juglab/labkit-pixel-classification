@@ -6,11 +6,8 @@ import ij.ImagePlus;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.clearcl.util.ElapsedTime;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.haesleinhuepf.clij.kernels.Kernels;
 import net.haesleinhuepf.clij2.CLIJ2;
 import net.imagej.ops.OpService;
-import net.imglib2.FinalInterval;
-import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
@@ -18,6 +15,7 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.trainable_segmention.classification.CompositeInstance;
 import net.imglib2.trainable_segmention.classification.Segmenter;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJMultiChannelImage;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJRandomForestKernel;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.trainable_segmention.clij_random_forest.RandomForestPrediction;
@@ -36,7 +34,7 @@ import preview.net.imglib2.loops.LoopBuilder;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 
-import java.util.HashMap;
+import java.util.List;
 
 public class CLIJDemo {
 
@@ -59,8 +57,8 @@ public class CLIJDemo {
 			RandomAccessibleInterval<? extends RealType<?>> image;
 			try (
 				ClearCLBuffer inputCl = clij.push(input);
-				ClearCLBuffer featuresCl = calculateFeatures(clij, inputCl);
-				ClearCLBuffer distributionCl = calculateDistribution(clij, classifier, featuresCl);
+				CLIJMultiChannelImage featuresCl = calculateFeatures(clij, inputCl);
+				CLIJMultiChannelImage distributionCl = calculateDistribution(clij, classifier, featuresCl);
 				ClearCLBuffer segmentationCl = calculateSegmentation(clij, distributionCl))
 			{
 				image = clij.pullRAI(segmentationCl);
@@ -76,24 +74,23 @@ public class CLIJDemo {
 		}
 	}
 
-	private static ClearCLBuffer calculateSegmentation(CLIJ2 clij, ClearCLBuffer distribution) {
-		long slices = distribution.getDepth() / numberOfClasses;
-		ClearCLBuffer result = clij.create(new long[] { distribution.getWidth(), distribution
-			.getHeight(), slices }, NativeTypeEnum.Float);
-		CLIJRandomForestKernel.findMax(clij, distribution, result, numberOfClasses);
+	private static ClearCLBuffer calculateSegmentation(CLIJ2 clij,
+		CLIJMultiChannelImage distribution)
+	{
+		ClearCLBuffer result = clij.create(distribution.getSpatialDimensions(), NativeTypeEnum.Float);
+		CLIJRandomForestKernel.findMax(clij, distribution, result);
 		return result;
 	}
 
-	private static ClearCLBuffer calculateDistribution(CLIJ2 clij, Classifier classifier,
-		ClearCLBuffer featuresCl)
+	private static CLIJMultiChannelImage calculateDistribution(CLIJ2 clij, Classifier classifier,
+		CLIJMultiChannelImage featuresCl)
 	{
 		RandomForestPrediction prediction = new RandomForestPrediction(Cast
 			.unchecked(classifier), numberOfClasses, numberOfFeatures);
-		long slices = featuresCl.getDepth() / numberOfFeatures;
-		ClearCLBuffer distribution = clij.create(new long[] { featuresCl.getWidth(), featuresCl
-			.getHeight(), slices * numberOfClasses }, NativeTypeEnum.Float);
-		prediction.distribution(clij, featuresCl, distribution);
-		return distribution;
+		CLIJMultiChannelImage output = new CLIJMultiChannelImage(clij, featuresCl
+			.getSpatialDimensions(), numberOfClasses);
+		prediction.distribution(clij, featuresCl, output);
+		return output;
 	}
 
 	private static Img<UnsignedByteType> segment(Classifier classifier, Attribute[] attributes,
@@ -118,51 +115,17 @@ public class CLIJDemo {
 		return segmentation;
 	}
 
-	private static ClearCLBuffer calculateFeatures(CLIJ2 clij, ClearCLBuffer inputCl) {
+	private static CLIJMultiChannelImage calculateFeatures(CLIJ2 clij, ClearCLBuffer inputCl) {
 		try (ClearCLBuffer tmpCl = clij.create(inputCl)) {
-			ClearCLBuffer outputCl = clij.create(new long[] { inputCl.getWidth(), inputCl
-				.getHeight(), inputCl.getDepth() * numberOfFeatures }, NativeTypeEnum.Float);
-			long[] size = inputCl.getDimensions();
+			CLIJMultiChannelImage output = new CLIJMultiChannelImage(clij, inputCl.getDimensions(),
+				numberOfFeatures);
+			List<CLIJView> slices = output.channels();
 			for (int i = 0; i < numberOfFeatures; i++) {
 				float sigma = i * 2;
 				clij.gaussianBlur(inputCl, tmpCl, sigma, sigma, sigma);
-				CLIJCopy.copy(clij, CLIJView.wrap(tmpCl), CLIJView.interval(outputCl, FinalInterval
-					.createMinSize(new long[] { 0, 0, size[2] * i }, size)));
+				CLIJCopy.copy(clij, CLIJView.wrap(tmpCl), slices.get(i));
 			}
-			return outputCl;
+			return output;
 		}
-	}
-
-	private static void copy(CLIJ2 clij, ClearCLBuffer inputCl, Interval sourceInterval,
-		ClearCLBuffer outputCl, Interval destinationInterval)
-	{
-		long[] globalSizes = Intervals.dimensionsAsLongArray(sourceInterval);
-		HashMap<String, Object> parameters = new HashMap<>();
-		parameters.put("src", inputCl);
-		parameters.put("dst", outputCl);
-		parameters.put("src_offset_x", (int) sourceInterval.min(0));
-		parameters.put("src_offset_y", (int) sourceInterval.min(1));
-		parameters.put("src_offset_z", (int) sourceInterval.min(2));
-		parameters.put("dst_offset_x", (int) destinationInterval.min(0));
-		parameters.put("dst_offset_y", (int) destinationInterval.min(1));
-		parameters.put("dst_offset_z", (int) destinationInterval.min(2));
-		clij.execute(CLIJDemo.class, "copy_with_offset.cl", "copy_with_offset", globalSizes,
-			globalSizes,
-			parameters);
-	}
-
-	private static Interval interval(ClearCLBuffer inputCl) {
-		return new FinalInterval(inputCl.getDimensions());
-	}
-
-	private static void crop(CLIJ2 clij, ClearCLBuffer inputCl, ClearCLBuffer outputCl) {
-		HashMap<String, Object> parameters = new HashMap<>();
-		parameters.put("src", inputCl);
-		parameters.put("dst", outputCl);
-		parameters.put("start_x", 0);
-		parameters.put("start_y", 0);
-		parameters.put("start_z", 0);
-		long[] globalSizes = outputCl.getDimensions();
-		clij.execute(Kernels.class, "duplication.cl", "crop_3d", globalSizes, globalSizes, parameters);
 	}
 }

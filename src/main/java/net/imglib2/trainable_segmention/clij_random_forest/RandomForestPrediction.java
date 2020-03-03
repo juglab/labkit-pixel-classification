@@ -3,6 +3,7 @@ package net.imglib2.trainable_segmention.clij_random_forest;
 
 import hr.irb.fastRandomForest.FastRandomForest;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
@@ -97,7 +98,9 @@ public class RandomForestPrediction {
 			distribution[k] += leafProbabilities[(tree * numberOfLeafs + leaf) * numberOfClasses + k];
 	}
 
-	public void distribution(CLIJ2 clij, ClearCLBuffer features, ClearCLBuffer distribution) {
+	public void distribution(CLIJ2 clij, CLIJMultiChannelImage features,
+		CLIJMultiChannelImage distribution)
+	{
 		Img<UnsignedShortType> indices = ArrayImgs.unsignedShorts(nodeIndices, 3, numberOfNodes,
 			numberOfTrees);
 		Img<FloatType> thresholds = ArrayImgs.floats(nodeThresholds, 1, numberOfNodes, numberOfTrees);
@@ -108,9 +111,21 @@ public class RandomForestPrediction {
 			ClearCLBuffer probabilitiesClBuffer = clij.push(probabilities);
 			ClearCLBuffer indicesClBuffer = clij.push(indices);)
 		{
-			CLIJRandomForestKernel.randomForest(clij, distribution, features, thresholdsClBuffer,
-				probabilitiesClBuffer,
-				indicesClBuffer, numberOfFeatures);
+			CLIJRandomForestKernel.randomForest(clij, distribution.asClearCLBuffer(), features
+				.asClearCLBuffer(),
+				thresholdsClBuffer, probabilitiesClBuffer, indicesClBuffer, numberOfFeatures);
+		}
+	}
+
+	public ClearCLBuffer segment(CLIJ2 clij, CLIJMultiChannelImage features) {
+		try (CLIJMultiChannelImage distribution = new CLIJMultiChannelImage(clij, features
+			.getSpatialDimensions(), numberOfClasses))
+		{
+			distribution(clij, features, distribution);
+			ClearCLBuffer output = clij.create(distribution.getSpatialDimensions(),
+				NativeTypeEnum.UnsignedShort);
+			CLIJRandomForestKernel.findMax(clij, distribution, output);
+			return output;
 		}
 	}
 }

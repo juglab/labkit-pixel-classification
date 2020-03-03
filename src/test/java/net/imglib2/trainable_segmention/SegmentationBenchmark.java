@@ -73,7 +73,7 @@ public class SegmentationBenchmark {
 	}
 
 	@Benchmark
-	public Img<UnsignedByteType> benchmarkSegment() {
+	public Object benchmarkSegment() {
 		return Parallelization.runSingleThreaded(() -> segmenter.segment(image));
 	}
 

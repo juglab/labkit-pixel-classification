@@ -1,10 +1,13 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
+import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import net.haesleinhuepf.clij2.CLIJ2;
 import net.imagej.ops.Op;
 import net.imagej.ops.special.function.UnaryFunctionOp;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import org.scijava.plugin.SciJavaPlugin;
@@ -30,6 +33,10 @@ public interface FeatureOp extends SciJavaPlugin, Op,
 	}
 
 	void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output);
+
+	default void applyWithCLIJ(CLIJ2 clij, FeatureInput input, List<CLIJView> output) {
+		throw new UnsupportedOperationException();
+	}
 
 	GlobalSettings globalSettings();
 

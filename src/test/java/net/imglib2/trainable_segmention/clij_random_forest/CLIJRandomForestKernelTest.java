@@ -99,9 +99,9 @@ public class CLIJRandomForestKernelTest {
 
 			3, 1, 1, 3,
 			-3, -3, -2, -1
-		}, 2, 2, 6);
+		}, 2, 2, 2, 3);
 		ClearCLBuffer outputBuffer = clij.create(new long[] { 2, 2, 2 }, NativeTypeEnum.Float);
-		CLIJRandomForestKernel.findMax(clij, clij.push(input), outputBuffer, 3);
+		CLIJRandomForestKernel.findMax(clij, new CLIJMultiChannelImage(clij, input), outputBuffer);
 		RandomAccessibleInterval<? extends RealType<?>> result = clij.pullRAI(outputBuffer);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] {
 			2, 0, 1, 2,
