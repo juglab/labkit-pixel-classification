@@ -15,8 +15,7 @@ __kernel void random_forest
 )
 {
   const int x = get_global_id(0), y = get_global_id(1), z = get_global_id(2);
-  const int offsetInput = z * num_features;
-  const int offsetOutput = z * NUMBER_OF_CLASSES;
+  const int num_slices = GET_IMAGE_DEPTH(src) / NUMBER_OF_FEATURES;
   const int num_trees = GET_IMAGE_DEPTH(thresholds);
   const unsigned short num_nodes = (unsigned short) GET_IMAGE_HEIGHT(thresholds);
   float results[NUMBER_OF_CLASSES];
@@ -33,7 +32,7 @@ __kernel void random_forest
   }
 
   for(int i = 0; i < NUMBER_OF_FEATURES; i++) {
-    features[i] = READ_IMAGE(src, sampler, (int4)(x,y,i + offsetInput,0)).x;
+    features[i] = READ_IMAGE(src, sampler, (int4)(x,y,i * num_slices + z,0)).x;
   }
 
   // run random forest
@@ -60,6 +59,6 @@ __kernel void random_forest
 
   // normalize distribution
   for(int i = 0; i < NUMBER_OF_CLASSES; i++) {
-    dst[((i + offsetOutput) * GET_IMAGE_HEIGHT(dst) + y) * GET_IMAGE_WIDTH(dst) + x] = results[i] / sum;
+    dst[((i * num_slices + z) * GET_IMAGE_HEIGHT(dst) + y) * GET_IMAGE_WIDTH(dst) + x] = results[i] / sum;
   }
 }

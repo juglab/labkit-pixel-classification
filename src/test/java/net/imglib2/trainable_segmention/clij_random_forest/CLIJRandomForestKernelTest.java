@@ -78,9 +78,9 @@ public class CLIJRandomForestKernelTest {
 		RandomAccessibleInterval<? extends RealType<?>> result = clij.pullRAI(distributions);
 		Img<FloatType> expected = ArrayImgs.floats(new float[] {
 			0.4f, 0.75f, 0.5f,
-			0.6f, 0.25f, 0.5f,
-
 			0.5f, 0.75f, 0.4f,
+
+			0.6f, 0.25f, 0.5f,
 			0.5f, 0.25f, 0.6f
 		}, 3, 1, 4);
 		ImgLib2Assert.assertImageEqualsRealType(expected, result, 0.00001);
@@ -92,11 +92,12 @@ public class CLIJRandomForestKernelTest {
 	public void testFindMax() {
 		Img<FloatType> input = ArrayImgs.floats(new float[] {
 			1, 3, 2, 2,
-			2, 2, 3, 1,
-			3, 1, 1, 3,
-
 			-1, -2, -3, -3,
+
+			2, 2, 3, 1,
 			-2, -1, -1, -1,
+
+			3, 1, 1, 3,
 			-3, -3, -2, -1
 		}, 2, 2, 6);
 		ClearCLBuffer outputBuffer = clij.create(new long[] { 2, 2, 2 }, NativeTypeEnum.Float);
