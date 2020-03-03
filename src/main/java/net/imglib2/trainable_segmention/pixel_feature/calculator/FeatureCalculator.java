@@ -1,6 +1,9 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
+import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
+import net.haesleinhuepf.clij2.CLIJ2;
 import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.OpService;
 import net.imglib2.Interval;
@@ -8,6 +11,7 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.trainable_segmention.RevampUtils;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureJoiner;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -16,6 +20,7 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import org.scijava.Context;
 
@@ -33,6 +38,8 @@ public class FeatureCalculator {
 	private final FeatureSettings settings;
 
 	private final InputPreprocessor preprocessor;
+
+	private final CLIJ2 clij = CLIJ2.getInstance();
 
 	public FeatureCalculator(OpEnvironment ops, FeatureSettings settings) {
 		this.settings = settings;
@@ -103,6 +110,26 @@ public class FeatureCalculator {
 			count() - 1), new FloatType());
 		apply(extendedImage, RevampUtils.slices(result));
 		return result;
+	}
+
+	public ClearCLBuffer applyWithCLIJ(RandomAccessible<FloatType> input, Interval interval) {
+		double[] pixelSize = settings.globals().pixelSizeAsDoubleArray();
+		List<ClearCLBuffer> features = joiner.applyWithCLIJ(clij, new FeatureInput(input, interval, pixelSize));
+		return stackInterleaved(interval, features);
+	}
+
+	private ClearCLBuffer stackInterleaved(Interval interval, List<ClearCLBuffer> features) {
+		try {
+			long[] size = Intervals.dimensionsAsLongArray(interval);
+			size[2] *= features.size();
+			ClearCLBuffer result = clij.create(size, NativeTypeEnum.Float);
+			for (int i = 0; i < features.size(); i++)
+				CLIJCopy.copy3dStack(clij, features.get(i), result, i, features.size());
+			return result;
+		} finally {
+			for(ClearCLBuffer feature : features)
+				feature.close();
+		}
 	}
 
 	public Interval outputIntervalFromInput(RandomAccessibleInterval<?> image) {

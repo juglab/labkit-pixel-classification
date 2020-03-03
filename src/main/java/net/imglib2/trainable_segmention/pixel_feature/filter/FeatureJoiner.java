@@ -1,8 +1,9 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
+import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import net.haesleinhuepf.clij2.CLIJ2;
 import net.imagej.ops.OpEnvironment;
-import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
@@ -66,6 +67,14 @@ public class FeatureJoiner {
 			feature.apply(in, out.subList(startIndex, startIndex + count));
 			startIndex += count;
 		}
+	}
+
+	public List<ClearCLBuffer> applyWithCLIJ(CLIJ2 clij, FeatureInput input) {
+		List<ClearCLBuffer> result = new ArrayList<>(count());
+		for (FeatureOp feature : features) {
+			result.addAll(feature.applyWithCLIJ(clij, input));
+		}
+		return result;
 	}
 
 	public List<String> attributeLabels() {
