@@ -33,8 +33,8 @@ public class CLIJCopyTest {
 	public void testCopy() {
 		ClearCLBuffer source = clij.push(ArrayImgs.floats(new float[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, 3, 3));
 		ClearCLBuffer destination = clij.create(new long[]{3, 3}, NativeTypeEnum.Float);
-		CLIJView sourceView = new CLIJView(source, Intervals.createMinSize(0, 1, 2, 2));
-		CLIJView destinationView = new CLIJView(destination, Intervals.createMinSize(1, 0, 2, 2));
+		CLIJView sourceView = CLIJView.interval(source, Intervals.createMinSize(0, 1, 2, 2));
+		CLIJView destinationView = CLIJView.interval(destination, Intervals.createMinSize(1, 0, 2, 2));
 		CLIJCopy.copy(clij, sourceView, destinationView);
 		RandomAccessibleInterval<FloatType> result = clij.pullRAI(destination);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[]{0, 4, 5, 0, 7, 8, 0, 0, 0}, 3, 3);

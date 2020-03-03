@@ -19,6 +19,7 @@ import net.imglib2.trainable_segmention.classification.CompositeInstance;
 import net.imglib2.trainable_segmention.classification.Segmenter;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJRandomForestKernel;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.trainable_segmention.clij_random_forest.RandomForestPrediction;
 import net.imglib2.trainable_segmention.gson.GsonUtils;
 import net.imglib2.type.numeric.RealType;
@@ -120,10 +121,11 @@ public class CLIJDemo {
 		try (ClearCLBuffer tmpCl = clij.create(inputCl)) {
 			ClearCLBuffer outputCl = clij.create(new long[] { inputCl.getWidth(), inputCl
 				.getHeight(), inputCl.getDepth() * numberOfFeatures }, NativeTypeEnum.Float);
+			long[] size = inputCl.getDimensions();
 			for (int i = 0; i < numberOfFeatures; i++) {
 				float sigma = i * 2;
 				clij.gaussianBlur(inputCl, tmpCl, sigma, sigma, sigma);
-				CLIJCopy.copy3dStack(clij, tmpCl, outputCl, i, numberOfFeatures);
+				CLIJCopy.copy(clij, CLIJView.wrap(tmpCl), CLIJView.interval(outputCl, FinalInterval.createMinSize(new long[]{0,0, size[2] * i}, size)));
 			}
 			return outputCl;
 		}
