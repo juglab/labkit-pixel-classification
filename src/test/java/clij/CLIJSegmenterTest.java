@@ -7,6 +7,7 @@ import net.imagej.ops.OpEnvironment;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.VirtualStackAdapter;
+import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegions;
@@ -48,8 +49,12 @@ public class CLIJSegmenterTest {
 		RandomAccessibleInterval<? extends IntegerType<?>> result = segmenter.segment(img);
 		ImagePlus display = ImageJFunctions.show((RandomAccessibleInterval) result);
 		display.setDisplayRange(0, 2);
-		while (display.isVisible())
-			;
+	}
+
+	@Test
+	public void testSliceClassification() {
+		Segmenter segmenter = trainClassifier();
+		segmenter.segment(ArrayImgs.unsignedBytes(img.dimension(0), img.dimension(1), 1), Views.extendBorder(img));
 	}
 
 	private Segmenter trainClassifier() {

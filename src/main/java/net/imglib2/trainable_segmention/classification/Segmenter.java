@@ -5,12 +5,15 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij2.CLIJ2;
 import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.special.hybrid.AbstractUnaryHybridCF;
 import net.imagej.ops.special.hybrid.UnaryHybridCF;
 import net.imglib2.*;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureStack;
+import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJMultiChannelImage;
 import net.imglib2.trainable_segmention.clij_random_forest.RandomForestPrediction;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
@@ -23,6 +26,7 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Cast;
+import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.CompositeIntervalView;
@@ -79,25 +83,38 @@ public class Segmenter {
 		return features.settings();
 	}
 
-	public Img<UnsignedByteType> segment(RandomAccessibleInterval<?> image) {
-		Interval interval = features.outputIntervalFromInput(image);
-		CLIJFeatureStack featureStack = features.applyWithCLIJ(Views.extendBorder(image), interval);
-		RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier), classNames.size(), features.count());
-		CLIJ2 clij = CLIJ2.getInstance();
-		prediction.segment(clij, featureStack.asClearCLBuffer());
+	public RandomAccessibleInterval<UnsignedByteType> segment(RandomAccessibleInterval<?> image) {
 		return segment(image, new UnsignedByteType());
 	}
 
-	public <T extends IntegerType<T> & NativeType<T>> Img<T> segment(
-		RandomAccessibleInterval<?> image, T type)
-	{
-		throw new UnsupportedOperationException();
+	private <T extends NativeType<T>> RandomAccessibleInterval<T> createImage(T type, Interval interval) {
+		// FIXME: use this in all places where it's useful.
+		long[] size = Intervals.dimensionsAsLongArray(interval);
+		long[] min = Intervals.minAsLongArray(interval);
+		Img<T> img = new ArrayImgFactory<>(type).create(size);
+		return Views.translate(img, min);
 	}
 
-	public void segment(RandomAccessibleInterval<? extends IntegerType<?>> out,
-		RandomAccessible<?> image)
+	public <T extends IntegerType<T> & NativeType<T>> RandomAccessibleInterval<T> segment(
+		RandomAccessibleInterval<?> image, T type)
 	{
-		throw new UnsupportedOperationException();
+		Interval interval = features.outputIntervalFromInput(image);
+		RandomAccessibleInterval<T> rai = createImage(type, interval);
+		segment(rai, Views.extendBorder(image));
+		return rai;
+	}
+
+	public synchronized void segment(RandomAccessibleInterval<? extends IntegerType<?>> out, RandomAccessible<?> image)
+	{
+		RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier), classNames.size(), features.count());
+		CLIJ2 clij = CLIJ2.getInstance();
+		try(
+			CLIJMultiChannelImage featureStack = features.applyWithCLIJ(image, out);
+			ClearCLBuffer segmentationBuffer = prediction.segment(clij, featureStack)
+		)
+		{
+			CLIJCopy.copyToRai(segmentationBuffer, out);
+		}
 	}
 
 	public RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> predict(

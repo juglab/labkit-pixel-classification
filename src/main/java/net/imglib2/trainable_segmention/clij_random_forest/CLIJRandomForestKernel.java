@@ -34,15 +34,14 @@ public class CLIJRandomForestKernel {
 	}
 
 	public static void findMax(CLIJ2 clij,
-		ClearCLBuffer distributions,
-		ClearCLBuffer dst,
-		int numberOfClasses)
+		CLIJMultiChannelImage distributions,
+		ClearCLBuffer dst)
 	{
 		long[] globalSizes = { dst.getWidth(), dst.getHeight(), dst.getDepth() };
 		HashMap<String, Object> parameters = new HashMap<>();
 		parameters.put("dst", dst);
-		parameters.put("src", distributions);
-		parameters.put("num_classes", numberOfClasses);
+		parameters.put("src", distributions.asClearCLBuffer());
+		parameters.put("num_classes", (int) distributions.getNChannels());
 		clij.execute(CLIJRandomForestKernel.class, "find_max.cl", "find_max", globalSizes, globalSizes,
 			parameters);
 	}

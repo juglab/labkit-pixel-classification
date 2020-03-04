@@ -40,4 +40,11 @@ public class CLIJCopyTest {
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[]{0, 4, 5, 0, 7, 8, 0, 0, 0}, 3, 3);
 		ImgLib2Assert.assertImageEquals(expected, result);
 	}
+
+	@Test
+	public void testCopyToRai() {
+		ClearCLBuffer source = clij.push(ArrayImgs.floats(new float[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, 3, 3));
+		RandomAccessibleInterval<FloatType> target = ArrayImgs.floats(3, 3);
+		CLIJCopy.copyToRai(source, target);
+	}
 }

@@ -7,7 +7,7 @@ import net.imagej.patcher.LegacyInjector;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.VirtualStackAdapter;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureStack;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJMultiChannelImage;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
@@ -46,7 +46,7 @@ public class CLIJFeatureCalculatorTest {
 			.addFeature(SingleFeatures.gauss(8))
 			.build();
 		FinalInterval interval = Intervals.expand(input, -40);
-		try(CLIJFeatureStack featureStack = calculator.applyWithCLIJ(Views.extendBorder(input), interval))
+		try(CLIJMultiChannelImage featureStack = calculator.applyWithCLIJ(Views.extendBorder(input), interval))
 		{
 			RandomAccessibleInterval<FloatType> result = featureStack.asRAI();
 			RandomAccessibleInterval<FloatType> expected = calculator.apply(Views.extendBorder(input), interval);
@@ -62,7 +62,7 @@ public class CLIJFeatureCalculatorTest {
 			.addFeature(SingleFeatures.gauss(2))
 			.build();
 		FinalInterval interval = Intervals.expand(input, -40);
-		try(CLIJFeatureStack featureStack = calculator.applyWithCLIJ(Views.extendBorder(input), interval))
+		try(CLIJMultiChannelImage featureStack = calculator.applyWithCLIJ(Views.extendBorder(input), interval))
 		{
 			RandomAccessibleInterval<FloatType> result = featureStack.asRAI();
 			RandomAccessibleInterval<FloatType> expected = calculator.apply(Views.extendBorder(input), interval);
