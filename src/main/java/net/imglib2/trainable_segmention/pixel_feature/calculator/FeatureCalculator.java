@@ -7,9 +7,9 @@ import net.imagej.ops.OpService;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJMultiChannelImage;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureJoiner;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
@@ -86,8 +86,9 @@ public class FeatureCalculator {
 	 */
 	public void apply(RandomAccessible<?> input, List<RandomAccessibleInterval<FloatType>> output) {
 		RandomAccessibleInterval<FloatType> interval = output.get(0);
-		CLIJMultiChannelImage result = applyWithCLIJ(input, interval);
-		result.copyTo(Views.stack(output));
+		try (CLIJMultiChannelImage result = applyWithCLIJ(input, interval)) {
+			result.copyTo(Views.stack(output));
+		}
 	}
 
 	public RandomAccessibleInterval<FloatType> apply(RandomAccessibleInterval<?> image) {
@@ -109,8 +110,10 @@ public class FeatureCalculator {
 			.dimensionsAsLongArray(interval), joiner.count());
 		List<List<CLIJView>> outputs = split(featureStack.channels(), channels.size());
 		for (int i = 0; i < channels.size(); i++) {
-			FeatureInput in = new FeatureInput(channels.get(i), interval, pixelSize);
-			joiner.applyWithCLIJ(clij, in, outputs.get(i));
+			try (CLIJFeatureInput in = new CLIJFeatureInput(clij, channels.get(i), interval, pixelSize)) {
+				joiner.prefetch(in);
+				joiner.apply(in, outputs.get(i));
+			}
 		}
 		return featureStack;
 	}
