@@ -1,9 +1,9 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
-import net.haesleinhuepf.clij2.CLIJ2;
 import net.imagej.ops.OpEnvironment;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
@@ -63,8 +63,13 @@ public class FeatureJoiner {
 		genericApply(output, (featureOp, o) -> featureOp.apply(input, o));
 	}
 
-	public void applyWithCLIJ(CLIJ2 clij, FeatureInput input, List<CLIJView> output) {
-		genericApply(output, (featureOp, o) -> featureOp.applyWithCLIJ(clij, input, o));
+	public void prefetch(CLIJFeatureInput input) {
+		for (FeatureOp feature : features)
+			feature.prefetch(input);
+	}
+
+	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
+		genericApply(output, (featureOp, o) -> featureOp.apply(input, o));
 	}
 
 	public <T> void genericApply(List<T> output, BiConsumer<FeatureOp, List<T>> applyFeature) {
