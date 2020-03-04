@@ -57,7 +57,7 @@ public class SegmenterTestMultiChannel {
 	@Test
 	public void testSegment() {
 		Segmenter segmenter = trainSegmenter();
-		Img<UnsignedByteType> result = segmenter.segment(trainingImage);
+		RandomAccessibleInterval<UnsignedByteType> result = segmenter.segment(trainingImage);
 		Utils.assertImagesEqual(ArrayImgs.unsignedBytes(new byte[] { 1, 1, 0, 1 }, 2, 2), result);
 	}
 
