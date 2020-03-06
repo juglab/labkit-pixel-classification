@@ -2,6 +2,7 @@ package clij;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij2.CLIJ2;
+import net.imglib2.util.ValuePair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,13 +15,13 @@ import java.util.StringJoiner;
  */
 public class CLIJLoopBuilder {
 
-	private static final List<String> KERNEL_PARAMETER_NAMES = Arrays.asList("a", "b", "c", "d", "e", "f", "g");
-
 	private final CLIJ2 clij;
 
-	private final List<String> keys = new ArrayList<>();
-
-	private final List<ClearCLBuffer> images = new ArrayList<>();
+	private final List<String> parameterDefinition = new ArrayList<>();
+	private final List<String> preOperation = new ArrayList<>();
+	private final List<String> postOperation = new ArrayList<>();
+	private final HashMap<String, Object> parameterValues = new HashMap<>();
+	private final List<ValuePair<String, long[]>> imageSizes = new ArrayList<>();
 
 	private CLIJLoopBuilder(CLIJ2 clij) {
 		this.clij = clij;
@@ -30,54 +31,86 @@ public class CLIJLoopBuilder {
 		return new CLIJLoopBuilder(clij);
 	}
 
-	public CLIJLoopBuilder setImage(String key, ClearCLBuffer image) {
-		keys.add(key);
-		images.add(image);
+	public CLIJLoopBuilder addInput(String variable, ClearCLBuffer image) {
+		String parameterName = addImageParameter(variable, image);
+		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = PIXEL(" + parameterName + ")");
 		return this;
 	}
 
-	public void forEachPixel(String operation) {
-		int n = images.size();
-		if(n > KERNEL_PARAMETER_NAMES.size())
-			throw new IllegalArgumentException("Two many images.");
-		long[] dims = checkDimensions(keys, images);
-		HashMap<String, Object> parameters = new HashMap<>();
-		HashMap<String, Object> defines = new HashMap<>();
-		StringJoiner parameter_define = new StringJoiner(", ");
-		StringJoiner operation_define = new StringJoiner(", ", "OPERATION_FUNCTION(", ")");
-		for (int i = 0; i < n; i++) {
-			String key = KERNEL_PARAMETER_NAMES.get(i);
-			parameter_define.add("IMAGE_" + key + "_TYPE " + key);
-			operation_define.add("PIXEL(" + key + ")");
-			parameters.put(key, images.get(i));
-		}
-		defines.put("PARAMETER", parameter_define.toString());
-		defines.put("OPERATION", operation_define.toString());
-		defines.put("OPERATION_FUNCTION(" + commaSeparated(keys) + ")", operation);
-		clij.execute(CLIJLoopBuilderTest.class, "binary_operation.cl", "operation",
-				dims, dims, parameters, defines);
+	public CLIJLoopBuilder addInput(String variable, int image) {
+		addParameter("int", variable, image);
+		return this;
 	}
 
-	private static StringJoiner commaSeparated(List<String> keys) {
+	public CLIJLoopBuilder addInput(String variable, long image) {
+		addParameter("long", variable, image);
+		return this;
+	}
+
+	public CLIJLoopBuilder addInput(String variable, float image) {
+		addParameter("float", variable, image);
+		return this;
+	}
+
+	public CLIJLoopBuilder addInput(String variable, double image) {
+		addParameter("double", variable, image);
+		return this;
+	}
+
+	public CLIJLoopBuilder addOutput(String variable, ClearCLBuffer image) {
+		String parameterName = addImageParameter(variable, image);
+		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = 0");
+		postOperation.add("PIXEL(" + parameterName + ") = " + variable);
+		return this;
+	}
+
+	private String addImageParameter(String variable, ClearCLBuffer image) {
+		String parameterName = "image_" + (imageSizes.size() + 1);
+		addParameter("IMAGE_" + parameterName + "_TYPE ", parameterName, image);
+		imageSizes.add(new ValuePair<>(variable, image.getDimensions()));
+		return parameterName;
+	}
+
+	private void addParameter(String parameterType, String parameterName, Object value) {
+		parameterDefinition.add(parameterType + " " + parameterName);
+		parameterValues.put(parameterName, value);
+	}
+
+	public void forEachPixel(String operation) {
+		long[] dims = checkDimensions();
+		HashMap<String, Object> defines = new HashMap<>();
+		defines.put("PARAMETER", commaSeparated(parameterDefinition));
+		StringJoiner operation_define = new StringJoiner("; ");
+		preOperation.forEach(operation_define::add);
+		operation_define.add(operation);
+		postOperation.forEach(operation_define::add);
+		defines.put("OPERATION", operation_define.toString());
+		clij.execute(CLIJLoopBuilderTest.class, "binary_operation.cl", "operation",
+				dims, dims, parameterValues, defines);
+	}
+
+	private static String commaSeparated(List<String> keys) {
 		StringJoiner p = new StringJoiner(",");
 		for (String key : keys)
 			p.add(key);
-		return p;
+		return p.toString();
 	}
 
-	private long[] checkDimensions(List<String> keys, List<ClearCLBuffer> images) {
-		long[] dims = images.get(0).getDimensions();
-		for(ClearCLBuffer image : images) {
-			if(!Arrays.equals(dims, image.getDimensions()))
-				wrongDimensionsError(keys, images);
+	private long[] checkDimensions() {
+		long[] dims = imageSizes.get(0).getB();
+		for(ValuePair<String, long[]> image : imageSizes) {
+			if(!Arrays.equals(dims, image.getB()))
+				wrongDimensionsError();
 		}
 		return dims;
 	}
 
-	private void wrongDimensionsError(List<String> keys, List<ClearCLBuffer> images) {
+	private void wrongDimensionsError() {
 		StringJoiner joiner = new StringJoiner(" ");
-		for (int i = 0; i < keys.size(); i++) {
-			joiner.add("size(" + keys.get(i) + ")=" + Arrays.toString(images.get(i).getDimensions()) );
+		for (ValuePair<String, long[]> pair : imageSizes) {
+			String imageName = pair.getA();
+			long[] imageSize = pair.getB();
+			joiner.add("size(" + imageName + ")=" + Arrays.toString(imageSize) );
 		}
 		throw new IllegalArgumentException("Error the sizes of the input images don't match: " + joiner);
 	}
