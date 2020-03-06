@@ -14,24 +14,25 @@ public class CLIJFeatureInput implements AutoCloseable {
 
 	private final CLIJ2 clij;
 	private final AutoClose autoClose = new AutoClose();
-	private static RandomAccessible<FloatType> original;
+	private final RandomAccessible<FloatType> original;
 	private final Interval targetInterval;
 	private final double[] pixelSize;
 
-	private static Interval requestedOriginalInterval = FinalInterval.createMinMax(0, 0, 254, 1690-1,1399-1,321);
-	private static ClearCLBuffer originalBuffer = null;
+	private Interval requestedOriginalInterval;
+	private ClearCLBuffer originalBuffer = null;
 
 	public CLIJFeatureInput(CLIJ2 clij, RandomAccessible<FloatType> original, Interval targetInterval, double[] pixelSize) {
 		this.clij = clij;
-		if(this.original == null)
-			this.original = original;
+		this.original = original;
 		this.targetInterval = targetInterval;
 		this.pixelSize = pixelSize;
+		this.requestedOriginalInterval = targetInterval;
 	}
 
-	public void prefetchOriginal(Interval interval) {
-//		if(!Intervals.contains(requestedOriginalInterval, interval))
-//			throw new IllegalStateException("FIXME, we need more of the image + " + interval);
+	public void prefetchOriginal(FinalInterval interval) {
+		if(originalBuffer != null)
+			throw new IllegalStateException("Image was already used, prefetch isn't allowed anymore.");
+		requestedOriginalInterval = Intervals.union(requestedOriginalInterval, interval);
 	}
 
 	/**
@@ -40,14 +41,11 @@ public class CLIJFeatureInput implements AutoCloseable {
 	 * Only the roi of the CLIJView has to be taken into account.
 	 */
 	public CLIJView original(FinalInterval interval) {
-		if(!Intervals.contains(requestedOriginalInterval, interval)) {
-			System.err.println("Interval was not prefetched. " + interval);
-			CLIJView wrap = CLIJView.wrap(clij.create(Intervals.dimensionsAsLongArray(interval)));
-			autoClose.add(wrap.buffer());
-			return wrap;
-		}
+		if(!Intervals.contains(requestedOriginalInterval, interval))
+			throw new AssertionError("Interval was not prefetched.");
 		if(originalBuffer == null) {
 			originalBuffer = clij.push(Views.interval(original, requestedOriginalInterval));
+			autoClose.add(originalBuffer);
 		}
 		FinalInterval roi = Intervals.translateInverse(interval, Intervals.minAsLongArray(requestedOriginalInterval));
 		return CLIJView.interval(originalBuffer, roi);
