@@ -86,6 +86,22 @@ public class CLIJLoopBuilderTest {
 			resultC, 0.0);
 	}
 
+	@Test
+	public void testFourImages() {
+		ClearCLBuffer a = clij.push(ArrayImgs.floats(new float[] { 1 }, 1, 1));
+		ClearCLBuffer b = clij.push(ArrayImgs.floats(new float[] { 2 }, 1, 1));
+		ClearCLBuffer c = clij.push(ArrayImgs.floats(new float[] { 3 }, 1, 1));
+		ClearCLBuffer d = clij.push(ArrayImgs.floats(new float[] { 0 }, 1, 1));
+		CLIJLoopBuilder.clij(clij)
+			.setImage("a", a)
+			.setImage("b", b)
+			.setImage("c", c)
+			.setImage("d", d)
+			.forEachPixel("d = a + b + c");
+		RandomAccessibleInterval<FloatType> result = clij.pullRAI(d);
+		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 6 }, 1, 1), result, 0.0);
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void testMismatchingDimensions() {
 		ClearCLBuffer c = clij.create(new long[] { 10, 10 });
