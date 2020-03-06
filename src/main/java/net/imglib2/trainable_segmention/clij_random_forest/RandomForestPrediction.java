@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * <p>
  * This allows the algorithm to be executed on GPU via CLIJ.
  */
-public class RandomForestPrediction implements AutoCloseable {
+public class RandomForestPrediction {
 
 	private final int numberOfClasses;
 
@@ -39,9 +39,6 @@ public class RandomForestPrediction implements AutoCloseable {
 	private final float[] nodeThresholds;
 
 	private final float[] leafProbabilities;
-	private ClearCLBuffer thresholdsClBuffer;
-	private ClearCLBuffer probabilitiesClBuffer;
-	private ClearCLBuffer indicesClBuffer;
 
 	public RandomForestPrediction(FastRandomForest classifier, int numberOfClasses, int numberOfFeatures) {
 		TransparentRandomForest forest = new TransparentRandomForest(classifier);
@@ -103,14 +100,14 @@ public class RandomForestPrediction implements AutoCloseable {
 		Img<UnsignedShortType> indices = ArrayImgs.unsignedShorts(nodeIndices, 3, numberOfNodes, numberOfTrees);
 		Img<FloatType> thresholds = ArrayImgs.floats(nodeThresholds, 1, numberOfNodes, numberOfTrees);
 		Img<FloatType> probabilities = ArrayImgs.floats(leafProbabilities, numberOfClasses, numberOfLeafs, numberOfTrees);
-		if(thresholdsClBuffer == null)
-			thresholdsClBuffer = clij.push(thresholds);
-		if (probabilitiesClBuffer == null)
-			probabilitiesClBuffer = clij.push(probabilities);
-		if (indicesClBuffer == null)
-			indicesClBuffer = clij.push(indices);
-		CLIJRandomForestKernel.randomForest(clij, distribution.asClearCLBuffer(), features.asClearCLBuffer(),
-				thresholdsClBuffer, probabilitiesClBuffer, indicesClBuffer, numberOfFeatures );
+		try (
+				ClearCLBuffer thresholdsClBuffer = clij.push(thresholds);
+				ClearCLBuffer probabilitiesClBuffer = clij.push(probabilities);
+				ClearCLBuffer indicesClBuffer = clij.push(indices);
+		) {
+			CLIJRandomForestKernel.randomForest(clij, distribution.asClearCLBuffer(), features.asClearCLBuffer(),
+					thresholdsClBuffer, probabilitiesClBuffer, indicesClBuffer, numberOfFeatures );
+		}
 	}
 
 	public ClearCLBuffer segment(CLIJ2 clij, CLIJMultiChannelImage features) {
@@ -121,10 +118,5 @@ public class RandomForestPrediction implements AutoCloseable {
 			CLIJRandomForestKernel.findMax(clij, distribution, output);
 			return output;
 		}
-	}
-
-	@Override
-	public void close() throws Exception {
-
 	}
 }
