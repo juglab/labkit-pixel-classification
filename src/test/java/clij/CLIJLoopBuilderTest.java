@@ -33,9 +33,9 @@ public class CLIJLoopBuilderTest {
 
 	private void add(ClearCLBuffer a, ClearCLBuffer b, ClearCLBuffer dst) {
 		CLIJLoopBuilder.clij(clij)
-			.setImage("a", a)
-			.setImage("b", b)
-			.setImage("c", dst)
+			.addInput("a", a)
+			.addInput("b", b)
+			.addOutput("c", dst)
 			.forEachPixel("c = a + b");
 	}
 
@@ -44,7 +44,7 @@ public class CLIJLoopBuilderTest {
 		long[] dims = { 2, 2 };
 		ClearCLBuffer c = clij.create(dims, NativeTypeEnum.Float);
 		CLIJLoopBuilder.clij(clij)
-			.setImage("output", c)
+			.addOutput("output", c)
 			.forEachPixel("output = 2.0");
 		RandomAccessibleInterval<RealType<?>> result = clij.pullRAI(c);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] { 2, 2, 2, 2 }, 2,
@@ -58,8 +58,8 @@ public class CLIJLoopBuilderTest {
 		ClearCLBuffer c = clij.create(dims, NativeTypeEnum.Byte);
 		ClearCLBuffer a = clij.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4 }, dims));
 		CLIJLoopBuilder.clij(clij)
-			.setImage("in", a)
-			.setImage("out", c)
+			.addInput("in", a)
+			.addOutput("out", c)
 			.forEachPixel("out = 2.0 * in");
 		RandomAccessibleInterval<RealType<?>> result = clij.pullRAI(c);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] { 2, 4, 6, 8 },
@@ -74,9 +74,9 @@ public class CLIJLoopBuilderTest {
 		ClearCLBuffer b = clij.create(dims);
 		ClearCLBuffer c = clij.create(dims);
 		CLIJLoopBuilder.clij(clij)
-			.setImage("a", a)
-			.setImage("b", b)
-			.setImage("c", c)
+			.addInput("a", a)
+			.addOutput("b", b)
+			.addOutput("c", c)
 			.forEachPixel("b = 2 * a; c = a + b");
 		RandomAccessibleInterval<RealType<?>> resultB = clij.pullRAI(b);
 		RandomAccessibleInterval<RealType<?>> resultC = clij.pullRAI(c);
@@ -93,10 +93,10 @@ public class CLIJLoopBuilderTest {
 		ClearCLBuffer c = clij.push(ArrayImgs.floats(new float[] { 3 }, 1, 1));
 		ClearCLBuffer d = clij.push(ArrayImgs.floats(new float[] { 0 }, 1, 1));
 		CLIJLoopBuilder.clij(clij)
-			.setImage("a", a)
-			.setImage("b", b)
-			.setImage("c", c)
-			.setImage("d", d)
+			.addInput("a", a)
+			.addInput("b", b)
+			.addInput("c", c)
+			.addOutput("d", d)
 			.forEachPixel("d = a + b + c");
 		RandomAccessibleInterval<FloatType> result = clij.pullRAI(d);
 		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 6 }, 1, 1), result, 0.0);
@@ -107,8 +107,32 @@ public class CLIJLoopBuilderTest {
 		ClearCLBuffer c = clij.create(new long[] { 10, 10 });
 		ClearCLBuffer b = clij.create(new long[] { 10, 11 });
 		CLIJLoopBuilder.clij(clij)
-			.setImage("c", c)
-			.setImage("b", b)
+			.addInput("c", c)
+			.addInput("b", b)
 			.forEachPixel("b = c");
+	}
+
+	@Test
+	public void testVariable() {
+		ClearCLBuffer d = clij.push(ArrayImgs.floats(new float[] { 0 }, 1, 1));
+		CLIJLoopBuilder.clij(clij)
+			.addInput("a", 42)
+			.addOutput("d", d)
+			.forEachPixel("d = a");
+		RandomAccessibleInterval<FloatType> result = clij.pullRAI(d);
+		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 42 }, 1, 1), result,
+			0.0);
+	}
+
+	@Test
+	public void testFloatVariable() {
+		ClearCLBuffer d = clij.push(ArrayImgs.floats(new float[] { 0 }, 1, 1));
+		CLIJLoopBuilder.clij(clij)
+			.addInput("a", 42f)
+			.addOutput("d", d)
+			.forEachPixel("d = a");
+		RandomAccessibleInterval<FloatType> result = clij.pullRAI(d);
+		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 42 }, 1, 1), result,
+			0.0);
 	}
 }
