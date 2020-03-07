@@ -7,8 +7,10 @@ import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Intervals;
 import org.junit.Test;
 
 /**
@@ -133,6 +135,46 @@ public class CLIJLoopBuilderTest {
 			.forEachPixel("d = a");
 		RandomAccessibleInterval<FloatType> result = clij.pullRAI(d);
 		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 42 }, 1, 1), result,
+			0.0);
+	}
+
+	@Test
+	public void testCLIJViewInput() {
+		CLIJView a = CLIJView.interval(clij.push(ArrayImgs.floats(new float[] { 0, 0, 0, 42 }, 2, 2)),
+			Intervals.createMinSize(1, 1, 1, 1));
+		ClearCLBuffer d = clij.push(ArrayImgs.floats(new float[] { 0 }, 1, 1));
+		CLIJLoopBuilder.clij(clij)
+			.addInput("a", a)
+			.addOutput("d", d)
+			.forEachPixel("d = a");
+		RandomAccessibleInterval<FloatType> result = clij.pullRAI(d);
+		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 42 }, 1, 1), result,
+			0.0);
+	}
+
+	@Test
+	public void testCLIJViewOutput() {
+		CLIJView a = CLIJView.interval(clij.create(new long[] { 2, 2 }, NativeTypeEnum.Float), Intervals
+			.createMinSize(1, 1, 1, 1));
+		CLIJLoopBuilder.clij(clij)
+			.addOutput("a", a)
+			.forEachPixel("a = 42");
+		RandomAccessibleInterval<FloatType> result = clij.pullRAI(a.buffer());
+		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 0, 0, 0, 42 }, 2, 2),
+			result, 0.0);
+	}
+
+	@Test
+	public void testDifference() {
+		ClearCLBuffer a = clij.push(ArrayImgs.floats(new float[] { 1, 7, 8 }, 3, 1));
+		ClearCLBuffer o = clij.create(new long[] { 2, 1 }, NativeTypeEnum.Float);
+		CLIJLoopBuilder.clij(clij)
+			.addInput("a", CLIJView.interval(a, Intervals.createMinSize(1, 0, 2, 1)))
+			.addInput("b", CLIJView.interval(a, Intervals.createMinSize(0, 0, 2, 1)))
+			.addOutput("c", o)
+			.forEachPixel("c = a - b");
+		RandomAccessibleInterval<FloatType> result = clij.pullRAI(o);
+		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 6, 1 }, 2, 1), result,
 			0.0);
 	}
 }

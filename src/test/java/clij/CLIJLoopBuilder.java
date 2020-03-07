@@ -3,6 +3,9 @@ package clij;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij2.CLIJ2;
+import net.imglib2.Interval;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.util.Intervals;
 import net.imglib2.util.ValuePair;
 
 import java.util.ArrayList;
@@ -33,13 +36,6 @@ public class CLIJLoopBuilder {
 		return new CLIJLoopBuilder(clij);
 	}
 
-	public CLIJLoopBuilder addInput(String variable, ClearCLBuffer image) {
-		String parameterName = addImageParameter(variable, image);
-		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = PIXEL(" +
-			parameterName + ")");
-		return this;
-	}
-
 	public CLIJLoopBuilder addInput(String variable, int image) {
 		addParameter("int", variable, image);
 		return this;
@@ -60,17 +56,59 @@ public class CLIJLoopBuilder {
 		return this;
 	}
 
+	public CLIJLoopBuilder addInput(String variable, ClearCLBuffer image) {
+		String parameterName = addImageParameter(variable, image);
+		registerSize(variable, image.getDimensions());
+		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = PIXEL(" +
+			parameterName + ")");
+		return this;
+	}
+
 	public CLIJLoopBuilder addOutput(String variable, ClearCLBuffer image) {
 		String parameterName = addImageParameter(variable, image);
+		registerSize(variable, image.getDimensions());
 		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = 0");
 		postOperation.add("PIXEL(" + parameterName + ") = " + variable);
 		return this;
 	}
 
+	public CLIJLoopBuilder addInput(String variable, CLIJView image) {
+		String parameterName = addCLIJViewParameters(variable, image);
+		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = " +
+			pixelAt(parameterName, image.interval()));
+		return this;
+	}
+
+	public CLIJLoopBuilder addOutput(String variable, CLIJView image) {
+		String parameterName = addCLIJViewParameters(variable, image);
+		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = 0");
+		postOperation.add(pixelAt(parameterName, image.interval()) + " = " + variable);
+		return this;
+	}
+
+	private String pixelAt(String parameterName, Interval offset) {
+		return "PIXEL_AT(" + parameterName + ", x + " + getMin(offset, 0) + ", y + " + getMin(offset,
+			1) +
+			", z + " + getMin(offset, 2) + ")";
+	}
+
+	private String addCLIJViewParameters(String variable, CLIJView image) {
+		String parameterName = addImageParameter(variable, image.buffer());
+		registerSize(variable, Intervals.dimensionsAsLongArray(image.interval()));
+		return parameterName;
+	}
+
+	private void registerSize(String variable, long[] size) {
+		imageSizes.add(new ValuePair<>(variable, size));
+	}
+
+	private long getMin(Interval interval, int d) {
+		return d < interval.numDimensions() ? interval.min(d) : 0;
+	}
+
 	private String addImageParameter(String variable, ClearCLBuffer image) {
 		String parameterName = "image_" + (imageSizes.size() + 1);
 		addParameter("IMAGE_" + parameterName + "_TYPE ", parameterName, image);
-		imageSizes.add(new ValuePair<>(variable, image.getDimensions()));
 		return parameterName;
 	}
 
