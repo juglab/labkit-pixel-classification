@@ -22,11 +22,14 @@ public class GaussTest {
 		Img<FloatType> input = ArrayImgs.floats(new float[]{0, 0, 1, 0, 0}, 5, 1);
 		Img<FloatType> kernelImg = ArrayImgs.floats(kernel, kernel.length, 1);
 		Img<FloatType> expected = ArrayImgs.floats(new float[]{0.5f, 0, -0.5f}, 3, 1);
-		ClearCLBuffer inputBuffer = clij.push(input);
-		ClearCLBuffer kernelBuffer = clij.push(kernelImg);
-		ClearCLBuffer outputBuffer = clij.create(new long[]{3, 1});
-		Gauss.convolve(clij, inputBuffer, kernelBuffer, outputBuffer);
-		RandomAccessibleInterval output = clij.pullRAI(outputBuffer);
-		ImgLib2Assert.assertImageEqualsRealType(expected, output, 0);
+		try(
+			ClearCLBuffer inputBuffer = clij.push(input);
+			ClearCLBuffer kernelBuffer = clij.push(kernelImg);
+			ClearCLBuffer outputBuffer = clij.create(new long[]{3, 1});
+		) {
+			Gauss.convolve(clij, inputBuffer, kernelBuffer, outputBuffer);
+			RandomAccessibleInterval output = clij.pullRAI(outputBuffer);
+			ImgLib2Assert.assertImageEqualsRealType(expected, output, 0);
+		}
 	}
 }

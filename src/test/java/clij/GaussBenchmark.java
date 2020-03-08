@@ -32,6 +32,9 @@ public class GaussBenchmark {
 
 	@TearDown
 	public void tearDown() {
+		input.close();
+		kernel.close();
+		output.close();
 		clij.clear();
 	}
 
