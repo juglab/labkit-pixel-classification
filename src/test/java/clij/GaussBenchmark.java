@@ -26,9 +26,9 @@ public class GaussBenchmark {
 
 	private final CLIJ2 clij = CLIJ2.getInstance();
 
-	private final ClearCLBuffer input = clij.push(RandomImgs.seed(42).nextImage(new FloatType(), 100, 100, 100));
-	private final ClearCLBuffer kernel = clij.push(RandomImgs.seed(42).nextImage(new FloatType(), 11, 1));
-	private final ClearCLBuffer output = clij.create(new long[]{90, 100, 100});
+	private final ClearCLBuffer kernel = clij.push(RandomImgs.seed(42).nextImage(new FloatType(), 50, 1));
+	private final ClearCLBuffer output = clij.create(new long[]{100, 100, 100});
+	private final ClearCLBuffer input = clij.push(RandomImgs.seed(42).nextImage(new FloatType(), 100 + kernel.getWidth() - 1, 100, 100));
 
 	@TearDown
 	public void tearDown() {
