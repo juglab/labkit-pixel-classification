@@ -6,14 +6,10 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.array.ArrayImg;
-import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.img.basictypeaccess.ByteAccess;
-import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
-import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,7 +56,9 @@ public class CLIJMultiChannelImage implements AutoCloseable {
 
 	private List<Interval> channelIntervals() {
 		return IntStream.range(0, (int) numChannels).mapToObj(i -> {
-			long[] min = {0, 0, spatialDimensions[2] * i};
+			int n = spatialDimensions.length;
+			long[] min = new long[n];
+			min[n - 1] = spatialDimensions[n - 1] * i;
 			return createMinSize(min, spatialDimensions);
 		}).collect(Collectors.toList());
 	}
