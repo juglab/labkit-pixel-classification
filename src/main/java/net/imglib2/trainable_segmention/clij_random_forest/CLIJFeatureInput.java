@@ -1,70 +1,76 @@
 package net.imglib2.trainable_segmention.clij_random_forest;
 
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
-import net.imglib2.trainable_segmention.utils.AutoClose;
+import net.imglib2.trainable_segmention.clij_random_forest.compute_cache.ComputeCache;
+import net.imglib2.trainable_segmention.clij_random_forest.compute_cache.DerivativeContent;
+import net.imglib2.trainable_segmention.clij_random_forest.compute_cache.GaussContent;
+import net.imglib2.trainable_segmention.clij_random_forest.compute_cache.OriginalContent;
+import net.imglib2.trainable_segmention.clij_random_forest.compute_cache.SecondDerivativeContent;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Intervals;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class CLIJFeatureInput implements AutoCloseable {
 
 	private final CLIJ2 clij;
-	private final AutoClose autoClose = new AutoClose();
-	private final RandomAccessible<FloatType> original;
 	private final Interval targetInterval;
-	private final double[] pixelSize;
 
-	private final Request originalRequest;
-	private final Map<Double, Request> gaussRequest;
-
+	private final ComputeCache cache;
 
 	public CLIJFeatureInput(CLIJ2 clij, RandomAccessible<FloatType> original, Interval targetInterval, double[] pixelSize) {
 		this.clij = clij;
-		this.original = original;
 		this.targetInterval = targetInterval;
-		this.pixelSize = pixelSize;
-		this.originalRequest = new Request(targetInterval, new OriginalContent(clij, original));
-		this.gaussRequest = new HashMap<>();
-	}
-
-	private ClearCLBuffer copyView(CLIJ2 clij, CLIJView inputClBuffer) {
-		ClearCLBuffer buffer = clij.create(Intervals.dimensionsAsLongArray(inputClBuffer.interval()));
-		CLIJCopy.copy(clij, inputClBuffer, CLIJView.wrap(buffer));
-		return buffer;
+		this.cache = new ComputeCache(clij, original, pixelSize);
 	}
 
 	public void prefetchOriginal(Interval interval) {
-		originalRequest.request(interval);
+		cache.request(new OriginalContent(), interval);
 	}
 
-	/**
-	 * Returns a copy of the given interval of the original image.
-	 * The buffer of the CLIJView returned might be bigger that the requested interval.
-	 * Only the roi of the CLIJView has to be taken into account.
-	 */
 	public CLIJView original(FinalInterval interval) {
-		return originalRequest.get(interval);
+		return cache.get(new OriginalContent(), interval);
 	}
 
 	public void prefetchGauss(double sigma, Interval interval) {
-		gaussRequest.computeIfAbsent(sigma, key -> new Request(targetInterval, new GaussContent(clij, originalRequest, pixelSize, sigma)));
-		Request request = gaussRequest.get(sigma);
-		request.request(interval);
+		cache.request(gaussKey(sigma), interval);
 	}
 
 	public CLIJView gauss(double sigma, Interval interval) {
-		return gaussRequest.get(sigma).get(interval);
+		return cache.get(gaussKey(sigma), interval);
+	}
+
+	public void prefetchDerivative(double sigma, int dimension, Interval interval) {
+		cache.request(new DerivativeContent(gaussKey(sigma), dimension), interval);
+	}
+
+	public CLIJView derivative(double sigma, int dimension, Interval interval) {
+		return cache.get(new DerivativeContent(gaussKey(sigma), dimension), interval);
+	}
+
+	public void prefetchSecondDerivative(double sigma, int dimensionA, int dimensionB, Interval interval) {
+		cache.request(secondDerivativeKey(sigma, dimensionA, dimensionB), interval);
+	}
+
+	public CLIJView secondDerivative(double sigma, int dimensionA, int dimensionB, Interval interval) {
+		return cache.get(secondDerivativeKey(sigma, dimensionA, dimensionB), interval);
+	}
+
+	private GaussContent gaussKey(double sigma) {
+		return new GaussContent(sigma);
+	}
+
+	private ComputeCache.Content secondDerivativeKey(double sigma, int dimensionA, int dimensionB) {
+		if(dimensionA > dimensionB)
+			return secondDerivativeKey(sigma, dimensionB, dimensionA);
+		if(dimensionA == dimensionB)
+			return new SecondDerivativeContent(gaussKey(sigma), dimensionA);
+		return new DerivativeContent(new DerivativeContent(gaussKey(sigma), dimensionA), dimensionB);
 	}
 
 	@Override
 	public void close() {
-		autoClose.close();
+		cache.close();
 	}
 
 	public Interval targetInterval() {
