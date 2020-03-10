@@ -47,7 +47,7 @@ public class FeatureCalculator {
 	}
 
 	public static FeatureCalculator.Builder default2d() {
-		return new Builder();
+		return new Builder().dimensions(2);
 	}
 
 	private InputPreprocessor initPreprocessor(ChannelSetting channelSetting) {
@@ -98,7 +98,8 @@ public class FeatureCalculator {
 	public RandomAccessibleInterval<FloatType> apply(RandomAccessible<?> extendedImage,
 		Interval interval)
 	{
-		return applyWithCLIJ(extendedImage, interval).asRAI();
+		long[] min = Arrays.copyOf(Intervals.minAsLongArray(interval), interval.numDimensions() + 1);
+		return Views.translate(applyWithCLIJ(extendedImage, interval).asRAI(), min);
 	}
 
 	public CLIJMultiChannelImage applyWithCLIJ(RandomAccessible<?> input, Interval interval) {
@@ -149,7 +150,9 @@ public class FeatureCalculator {
 
 		private final List<FeatureSetting> features = new ArrayList<>();
 
-		private Builder() {}
+		private Builder() {
+			super();
+		}
 
 		public Builder ops(OpEnvironment ops) {
 			this.ops = ops;
