@@ -10,7 +10,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class DifferenceOfGaussianTest {
+public class DifferenceOfGaussiansFeatureTest {
 
 	@Test
 	public void testAtributes() {
