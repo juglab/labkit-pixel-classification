@@ -3,8 +3,12 @@ package clij;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij2.CLIJ2;
+import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.type.numeric.RealType;
@@ -163,5 +167,30 @@ public class CLIJLoopBuilderTest {
 				.forEachPixel("c = a - b");
 		RandomAccessibleInterval<FloatType> result = clij.pullRAI(o);
 		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[]{6,1}, 2, 1), result, 0.0);
+	}
+
+	@Test
+	public void testAdd3d() {
+		try(
+			ClearCLBuffer a = clij.push(create3dImage(1));
+			ClearCLBuffer b = clij.push(create3dImage(2));
+			ClearCLBuffer r = clij.create(new long[]{21, 21, 21});
+		) {
+			CLIJLoopBuilder.clij(clij)
+					.addInput("a", CLIJView.wrap(a))
+					.addInput("b", CLIJView.wrap(b))
+					.addOutput("r", CLIJView.wrap(r))
+					.forEachPixel("r = a - b");
+			ImgLib2Assert.assertImageEqualsRealType(create3dImage(-1), clij.pullRAI(r), 0);
+		}
+
+	}
+
+	private Img<FloatType> create3dImage(float factor) {
+		Img<FloatType> image = ArrayImgs.floats(21, 21, 21);
+		int i = 0;
+		for(FloatType pixel : image)
+			pixel.setReal((++i) * factor);
+		return image;
 	}
 }
