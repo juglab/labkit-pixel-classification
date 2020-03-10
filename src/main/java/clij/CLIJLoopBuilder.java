@@ -126,7 +126,7 @@ public class CLIJLoopBuilder {
 		operation_define.add(operation);
 		postOperation.forEach(operation_define::add);
 		defines.put("OPERATION", operation_define.toString());
-		clij.execute(CLIJLoopBuilderTest.class, "binary_operation.cl", "operation",
+		clij.execute(CLIJLoopBuilder.class, "binary_operation.cl", "operation",
 			dims, dims, parameterValues, defines);
 	}
 
