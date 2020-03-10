@@ -18,6 +18,7 @@ import net.imglib2.img.Img;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.trainable_segmention.utils.DoubleTernaryOperator;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ComplexType;
@@ -31,7 +32,6 @@ import net.imglib2.util.Intervals;
 import net.imglib2.util.Localizables;
 import net.imglib2.util.Pair;
 import net.imglib2.util.Util;
-import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import org.scijava.Context;
 import org.scijava.script.ScriptService;
@@ -302,9 +302,17 @@ public class Utils {
 		LoopBuilder.setImages(src, target).multiThreaded().forEachPixel((i, o) -> o.set(i));
 	}
 
+	public static double gauss(double sigma, double x) {
+		double factor = 1 / Math.sqrt(2 * Math.PI * square(sigma));
+		return factor * Math.exp(-0.5 / square(sigma) * square(x));
+	}
+
 	public static double gauss(double sigma, double x, double y) {
-		return 1 / (2 * Math.PI * square(sigma)) * Math.exp(-0.5 / square(sigma) * (square(x) + square(
-			y)));
+		return gauss(sigma, x) * gauss(sigma, y);
+	}
+
+	public static double gauss(double sigma, double x, double y, double z) {
+		return gauss(sigma, x) * gauss(sigma, y) * gauss(sigma, z);
 	}
 
 	public static double square(double x) {
@@ -321,9 +329,23 @@ public class Utils {
 		return Converters.convert(positions, converter, new FloatType());
 	}
 
+	public static RandomAccessibleInterval<FloatType> create3dImage(Interval interval,
+		DoubleTernaryOperator function)
+	{
+		RandomAccessibleInterval<Localizable> positions = Views.interval(Localizables.randomAccessible(
+			3), interval);
+		Converter<Localizable, FloatType> converter = (i, o) -> o.setReal(function.applyAsDouble(i
+			.getDoublePosition(0), i.getDoublePosition(1), i.getDoublePosition(2)));
+		return Converters.convert(positions, converter, new FloatType());
+	}
+
 	public static RandomAccessible<FloatType> dirac2d() {
+		return dirac(2);
+	}
+
+	public static RandomAccessible<FloatType> dirac(int n) {
 		RandomAccessibleInterval<FloatType> floats = ConstantUtils.constantRandomAccessibleInterval(
-			new FloatType(1), new FinalInterval(1, 1));
+			new FloatType(1), new FinalInterval(new long[n], new long[n]));
 		return Views.extendZero(floats);
 	}
 }
