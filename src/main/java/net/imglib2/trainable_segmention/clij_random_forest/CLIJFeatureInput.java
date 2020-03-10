@@ -9,7 +9,9 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.trainable_segmention.utils.AutoClose;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
-import net.imglib2.view.Views;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class CLIJFeatureInput implements AutoCloseable {
 
@@ -19,8 +21,8 @@ public class CLIJFeatureInput implements AutoCloseable {
 	private final Interval targetInterval;
 	private final double[] pixelSize;
 
-	private Interval requestedOriginalInterval;
-	private ClearCLBuffer originalBuffer = null;
+	private final Request originalRequest;
+	private final Map<Double, Request> gaussRequest;
 
 	public CLIJFeatureInput(CLIJ2 clij, RandomAccessible<FloatType> original, Interval targetInterval,
 		double[] pixelSize)
@@ -29,13 +31,18 @@ public class CLIJFeatureInput implements AutoCloseable {
 		this.original = original;
 		this.targetInterval = targetInterval;
 		this.pixelSize = pixelSize;
-		this.requestedOriginalInterval = targetInterval;
+		this.originalRequest = new Request(targetInterval, new OriginalContent(clij, original));
+		this.gaussRequest = new HashMap<>();
 	}
 
-	public void prefetchOriginal(FinalInterval interval) {
-		if (originalBuffer != null)
-			throw new IllegalStateException("Image was already used, prefetch isn't allowed anymore.");
-		requestedOriginalInterval = Intervals.union(requestedOriginalInterval, interval);
+	private ClearCLBuffer copyView(CLIJ2 clij, CLIJView inputClBuffer) {
+		ClearCLBuffer buffer = clij.create(Intervals.dimensionsAsLongArray(inputClBuffer.interval()));
+		CLIJCopy.copy(clij, inputClBuffer, CLIJView.wrap(buffer));
+		return buffer;
+	}
+
+	public void prefetchOriginal(Interval interval) {
+		originalRequest.request(interval);
 	}
 
 	/**
@@ -44,15 +51,18 @@ public class CLIJFeatureInput implements AutoCloseable {
 	 * of the CLIJView has to be taken into account.
 	 */
 	public CLIJView original(FinalInterval interval) {
-		if (!Intervals.contains(requestedOriginalInterval, interval))
-			throw new AssertionError("Interval was not prefetched.");
-		if (originalBuffer == null) {
-			originalBuffer = clij.push(Views.interval(original, requestedOriginalInterval));
-			autoClose.add(originalBuffer);
-		}
-		FinalInterval roi = Intervals.translateInverse(interval, Intervals.minAsLongArray(
-			requestedOriginalInterval));
-		return CLIJView.interval(originalBuffer, roi);
+		return originalRequest.get(interval);
+	}
+
+	public void prefetchGauss(double sigma, Interval interval) {
+		gaussRequest.computeIfAbsent(sigma, key -> new Request(targetInterval, new GaussContent(clij,
+			originalRequest, pixelSize, sigma)));
+		Request request = gaussRequest.get(sigma);
+		request.request(interval);
+	}
+
+	public CLIJView gauss(double sigma, Interval interval) {
+		return gaussRequest.get(sigma).get(interval);
 	}
 
 	@Override
