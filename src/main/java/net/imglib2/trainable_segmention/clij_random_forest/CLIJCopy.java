@@ -1,5 +1,6 @@
 package net.imglib2.trainable_segmention.clij_random_forest;
 
+import clij.CLIJLoopBuilder;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij2.CLIJ2;
@@ -49,20 +50,7 @@ public class CLIJCopy {
 	}
 
 	public static void copy(CLIJ2 clij, CLIJView src, CLIJView dst) {
-		HashMap<String, Object> parameters = new HashMap<>();
-		parameters.put("src_offset_x", min(src, 0));
-		parameters.put("src_offset_y", min(src, 1));
-		parameters.put("src_offset_z", min(src, 2));
-		parameters.put("dst_offset_x", min(dst, 0));
-		parameters.put("dst_offset_y", min(dst, 1));
-		parameters.put("dst_offset_z", min(dst, 2));
-		parameters.put("src", src.buffer());
-		parameters.put("dst", dst.buffer());
-		long[] globalSizes = Intervals.dimensionsAsLongArray(src.interval());
-		if(!Intervals.equalDimensions(src.interval(), dst.interval()))
-			throw new IllegalArgumentException();
-		clij.execute(CLIJCopy.class, "copy_with_offset.cl", "copy_with_offset", globalSizes, globalSizes,
-				parameters);
+		CLIJLoopBuilder.clij(clij).addInput("s", src).addOutput("d", dst).forEachPixel("d = s");
 	}
 
 	private static int min(CLIJView view, int d) {
