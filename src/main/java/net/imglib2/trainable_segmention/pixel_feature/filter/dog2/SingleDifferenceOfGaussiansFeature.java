@@ -1,8 +1,12 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.dog2;
 
+import clij.CLIJLoopBuilder;
+import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -51,5 +55,26 @@ public class SingleDifferenceOfGaussiansFeature extends AbstractFeatureOp {
 	{
 		LoopBuilder.setImages(minuend, subtrahend, result)
 			.forEachPixel((a, b, r) -> r.setReal(a.getRealFloat() - b.getRealFloat()));
+	}
+
+	@Override
+	public void prefetch(CLIJFeatureInput input) {
+		input.prefetchGauss(sigma1, input.targetInterval());
+		input.prefetchGauss(sigma2, input.targetInterval());
+	}
+
+	@Override
+	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
+		CLIJView gauss1 = input.gauss(sigma1, input.targetInterval());
+		CLIJView gauss2 = input.gauss(sigma2, input.targetInterval());
+		subtract(input.clij(), gauss1, gauss2, output.get(0));
+	}
+
+	private void subtract(CLIJ2 clij, CLIJView minuend, CLIJView subtrahend, CLIJView result) {
+		CLIJLoopBuilder.clij(clij)
+			.addInput("a", minuend)
+			.addInput("b", subtrahend)
+			.addOutput("r", result)
+			.forEachPixel("r = a - b");
 	}
 }
