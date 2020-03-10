@@ -158,15 +158,18 @@ public class CLIJLoopBuilderTest {
 
 	@Test
 	public void testDifference() {
-		ClearCLBuffer a = clij.push(ArrayImgs.floats(new float[]{1,7,8}, 3, 1));
-		ClearCLBuffer o = clij.create(new long[]{2, 1}, NativeTypeEnum.Float);
-		CLIJLoopBuilder.clij(clij)
-				.addInput("a", CLIJView.interval(a, Intervals.createMinSize(1,0,2,1)))
-				.addInput("b", CLIJView.interval(a, Intervals.createMinSize(0,0,2,1)))
-				.addOutput("c", o)
-				.forEachPixel("c = a - b");
-		RandomAccessibleInterval<FloatType> result = clij.pullRAI(o);
-		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[]{6,1}, 2, 1), result, 0.0);
+		try (
+			ClearCLBuffer a = clij.push(ArrayImgs.floats(new float[]{1,7,8}, 3, 1));
+			ClearCLBuffer o = clij.create(new long[]{2, 1}, NativeTypeEnum.Float);
+		) {
+			CLIJLoopBuilder.clij(clij)
+					.addInput("a", CLIJView.interval(a, Intervals.createMinSize(1, 0, 2, 1)))
+					.addInput("b", CLIJView.interval(a, Intervals.createMinSize(0, 0, 2, 1)))
+					.addOutput("c", o)
+					.forEachPixel("c = a - b");
+			RandomAccessibleInterval<FloatType> result = clij.pullRAI(o);
+			ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[]{6, 1}, 2, 1), result, 0.0);
+		}
 	}
 
 	@Test
@@ -184,6 +187,38 @@ public class CLIJLoopBuilderTest {
 			ImgLib2Assert.assertImageEqualsRealType(create3dImage(-1), clij.pullRAI(r), 0);
 		}
 
+	}
+
+	@Test
+	public void testSameImage() {
+		try (
+			ClearCLBuffer a = clij.push(ArrayImgs.floats(new float[]{1}, 1, 1));
+			ClearCLBuffer c = clij.create(new long[]{1,  1}, NativeTypeEnum.Float);
+		) {
+			CLIJLoopBuilder.clij(clij)
+					.addInput("a", a)
+					.addInput( "b", a)
+					.addOutput("c", c)
+					.forEachPixel("c = a + b");
+			RandomAccessibleInterval<FloatType> result = clij.pullRAI(c);
+			RandomAccessibleInterval<FloatType> expected = 	 ArrayImgs.floats(new float[]{2}, 1, 1);
+		}
+	}
+
+	@Test
+	public void testSameBufferCLIJView() {
+		try (
+			ClearCLBuffer a = clij.push(ArrayImgs.floats(new float[]{1, 4}, 1, 1));
+			ClearCLBuffer c = clij.create(new long[]{1, 1}, NativeTypeEnum.Float);
+		) {
+			CLIJLoopBuilder.clij(clij)
+					.addInput("a", CLIJView.interval(a, Intervals.createMinSize(0,0,1,1)))
+					.addInput( "b", CLIJView.interval(a, Intervals.createMinSize(1,0,1,1)))
+					.addOutput("c", c)
+					.forEachPixel("c = a + b");
+			RandomAccessibleInterval<FloatType> result = clij.pullRAI(c);
+			RandomAccessibleInterval<FloatType> expected = 	 ArrayImgs.floats(new float[]{5}, 1, 1);
+		}
 	}
 
 	private Img<FloatType> create3dImage(float factor) {

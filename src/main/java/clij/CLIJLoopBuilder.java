@@ -9,8 +9,10 @@ import net.imglib2.util.ValuePair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 /**
@@ -24,6 +26,7 @@ public class CLIJLoopBuilder {
 	private final List<String> preOperation = new ArrayList<>();
 	private final List<String> postOperation = new ArrayList<>();
 	private final HashMap<String, Object> parameterValues = new HashMap<>();
+	private final Map<ClearCLBuffer, String> images = new HashMap<>();
 	private final List<ValuePair<String, long[]>> imageSizes = new ArrayList<>();
 
 	private CLIJLoopBuilder(CLIJ2 clij) {
@@ -55,14 +58,14 @@ public class CLIJLoopBuilder {
 	}
 
 	public CLIJLoopBuilder addInput(String variable, ClearCLBuffer image) {
-		String parameterName = addImageParameter(variable, image);
+		String parameterName = addImageParameter(image);
 		registerSize(variable, image.getDimensions());
 		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = PIXEL(" + parameterName + ")");
 		return this;
 	}
 
 	public CLIJLoopBuilder addOutput(String variable, ClearCLBuffer image) {
-		String parameterName = addImageParameter(variable, image);
+		String parameterName = addImageParameter(image);
 		registerSize(variable, image.getDimensions());
 		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = 0");
 		postOperation.add("PIXEL(" + parameterName + ") = " + variable);
@@ -89,7 +92,7 @@ public class CLIJLoopBuilder {
 	}
 
 	private String addCLIJViewParameters(String variable, CLIJView image) {
-		String parameterName = addImageParameter(variable, image.buffer());
+		String parameterName = addImageParameter(image.buffer());
 		registerSize(variable, Intervals.dimensionsAsLongArray(image.interval()));
 		return parameterName;
 	}
@@ -102,10 +105,15 @@ public class CLIJLoopBuilder {
 		return d < interval.numDimensions() ? interval.min(d) : 0;
 	}
 
-	private String addImageParameter(String variable, ClearCLBuffer image) {
-		String parameterName = "image_" + (imageSizes.size() + 1);
-		addParameter("IMAGE_" + parameterName + "_TYPE ", parameterName, image);
-		return parameterName;
+	private String addImageParameter(ClearCLBuffer image) {
+		if(images.containsKey(image))
+			return images.get(image);
+		else {
+			String parameterName = "image_" + (images.size() + 1);
+			images.put(image, parameterName);
+			addParameter("IMAGE_" + parameterName + "_TYPE ", parameterName, image);
+			return parameterName;
+		}
 	}
 
 	private void addParameter(String parameterType, String parameterName, Object value) {
@@ -116,21 +124,17 @@ public class CLIJLoopBuilder {
 	public void forEachPixel(String operation) {
 		long[] dims = checkDimensions();
 		HashMap<String, Object> defines = new HashMap<>();
-		defines.put("PARAMETER", commaSeparated(parameterDefinition));
-		StringJoiner operation_define = new StringJoiner("; ");
-		preOperation.forEach(operation_define::add);
-		operation_define.add(operation);
-		postOperation.forEach(operation_define::add);
-		defines.put("OPERATION", operation_define.toString());
+		defines.put("PARAMETER", concatenate(", ", parameterDefinition));
+		defines.put("OPERATION", concatenate("; ", preOperation, Collections.singletonList(operation), postOperation));
 		clij.execute(CLIJLoopBuilder.class, "binary_operation.cl", "operation",
 				dims, dims, parameterValues, defines);
 	}
 
-	private static String commaSeparated(List<String> keys) {
-		StringJoiner p = new StringJoiner(",");
-		for (String key : keys)
-			p.add(key);
-		return p.toString();
+	private static String concatenate(String delimiter, List<String>... lists) {
+		StringJoiner joiner = new StringJoiner(delimiter);
+		for(List<String> values : lists)
+			values.forEach(joiner::add);
+		return joiner.toString();
 	}
 
 	private long[] checkDimensions() {
