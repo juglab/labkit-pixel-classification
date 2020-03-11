@@ -34,11 +34,11 @@ public interface FeatureOp extends SciJavaPlugin, Op,
 	void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output);
 
 	default void prefetch(CLIJFeatureInput input) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("CLIJ is not supported for: " + this.getClass().getName());
 	}
 
 	default void apply(CLIJFeatureInput input, List<CLIJView> output) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("CLIJ is not supported for: " + this.getClass().getName());
 	}
 
 	GlobalSettings globalSettings();
