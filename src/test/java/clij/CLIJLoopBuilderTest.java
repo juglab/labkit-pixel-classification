@@ -202,13 +202,14 @@ public class CLIJLoopBuilderTest {
 					.forEachPixel("c = a + b");
 			RandomAccessibleInterval<FloatType> result = clij.pullRAI(c);
 			RandomAccessibleInterval<FloatType> expected = 	 ArrayImgs.floats(new float[]{2}, 1, 1);
+			ImgLib2Assert.assertImageEqualsRealType(expected, result, 0);
 		}
 	}
 
 	@Test
 	public void testSameBufferCLIJView() {
 		try (
-			ClearCLBuffer a = clij.push(ArrayImgs.floats(new float[]{1, 4}, 1, 1));
+			ClearCLBuffer a = clij.push(ArrayImgs.floats(new float[]{1, 4}, 2, 1));
 			ClearCLBuffer c = clij.create(new long[]{1, 1}, NativeTypeEnum.Float);
 		) {
 			CLIJLoopBuilder.clij(clij)
@@ -218,6 +219,7 @@ public class CLIJLoopBuilderTest {
 					.forEachPixel("c = a + b");
 			RandomAccessibleInterval<FloatType> result = clij.pullRAI(c);
 			RandomAccessibleInterval<FloatType> expected = 	 ArrayImgs.floats(new float[]{5}, 1, 1);
+			ImgLib2Assert.assertImageEqualsRealType(expected, result, 0);
 		}
 	}
 
