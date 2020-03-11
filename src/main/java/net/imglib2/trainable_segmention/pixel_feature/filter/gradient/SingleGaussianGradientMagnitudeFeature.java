@@ -1,8 +1,12 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.gradient;
 
+import clij.CLIJLoopBuilder;
+import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -13,7 +17,6 @@ import org.scijava.plugin.Plugin;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
 
 /**
  * @author Matthias Arzt
@@ -77,5 +80,27 @@ public class SingleGaussianGradientMagnitudeFeature extends AbstractFeatureOp {
 		int[] orders = new int[globalSettings().numDimensions()];
 		orders[d] = 1;
 		return input.derivedGauss(sigma, orders);
+	}
+
+	@Override
+	public void prefetch(CLIJFeatureInput input) {
+		for (int d = 0; d < globalSettings().numDimensions(); d++)
+			input.prefetchDerivative(sigma, d, input.targetInterval());
+	}
+
+	@Override
+	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
+		boolean is3d = globalSettings().numDimensions() == 3;
+		CLIJ2 clij = input.clij();
+		CLIJLoopBuilder loopBuilder = CLIJLoopBuilder.clij(clij);
+		loopBuilder.addInput("dx", input.derivative(sigma, 0, input.targetInterval()));
+		loopBuilder.addInput("dy", input.derivative(sigma, 1, input.targetInterval()));
+		if(is3d)
+			loopBuilder.addInput("dz", input.derivative(sigma, 2, input.targetInterval()));
+		loopBuilder.addOutput("output", output.get(0));
+		String operation = is3d ?
+				"output = sqrt(dx * dx + dy * dy + dz * dz)" :
+				"output = sqrt(dx * dx + dy * dy)";
+		loopBuilder.forEachPixel(operation);
 	}
 }
