@@ -173,7 +173,7 @@ public class CLIJLoopBuilderTest {
 	}
 
 	@Test
-	public void testAdd3d() {
+	public void test3d() {
 		try(
 			ClearCLBuffer a = clij.push(create3dImage(1));
 			ClearCLBuffer b = clij.push(create3dImage(2));
@@ -187,6 +187,14 @@ public class CLIJLoopBuilderTest {
 			ImgLib2Assert.assertImageEqualsRealType(create3dImage(-1), clij.pullRAI(r), 0);
 		}
 
+	}
+
+	private Img<FloatType> create3dImage(float factor) {
+		Img<FloatType> image = ArrayImgs.floats(21, 21, 21);
+		int i = 0;
+		for(FloatType pixel : image)
+			pixel.setReal((++i) * factor);
+		return image;
 	}
 
 	@Test
@@ -223,11 +231,22 @@ public class CLIJLoopBuilderTest {
 		}
 	}
 
-	private Img<FloatType> create3dImage(float factor) {
-		Img<FloatType> image = ArrayImgs.floats(21, 21, 21);
-		int i = 0;
-		for(FloatType pixel : image)
-			pixel.setReal((++i) * factor);
-		return image;
+	@Test(expected = IllegalArgumentException.class)
+	public void testIllegalVariableName() {
+		CLIJLoopBuilder.clij(clij).addInput("float", 7).forEachPixel("");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testIllegalVariableName2() {
+		try( ClearCLBuffer image = clij.create(new long[]{1, 1}, NativeTypeEnum.Float) ) {
+			CLIJLoopBuilder.clij(clij).addInput("float", image).forEachPixel("");
+		}
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testVariableNameClash() {
+		try( ClearCLBuffer image = clij.create(new long[]{1, 1}, NativeTypeEnum.Float) ) {
+			CLIJLoopBuilder.clij(clij).addInput("coordinate_x", image).forEachPixel("coordinate_x = 8");
+		}
 	}
 }
