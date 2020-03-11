@@ -1,8 +1,12 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.laplacian;
 
+import clij.CLIJLoopBuilder;
+import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.RevampUtils;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -53,5 +57,25 @@ public class SingleLaplacianOfGaussianFeature extends AbstractFeatureOp {
 			sum += d.get(i).getRealDouble();
 		}
 		return sum;
+	}
+
+	@Override
+	public void prefetch(CLIJFeatureInput input) {
+		for (int d = 0; d < globalSettings().numDimensions(); d++)
+			input.prefetchSecondDerivative(sigma, d, d, input.targetInterval());
+	}
+
+	@Override
+	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
+		boolean is3d = globalSettings().numDimensions() == 3;
+		CLIJ2 clij = input.clij();
+		CLIJLoopBuilder loopBuilder = CLIJLoopBuilder.clij(clij);
+		loopBuilder.addInput("dxx", input.secondDerivative(sigma, 0, 0, input.targetInterval()));
+		loopBuilder.addInput("dyy", input.secondDerivative(sigma, 1, 1, input.targetInterval()));
+		if (is3d)
+			loopBuilder.addInput("dzz", input.secondDerivative(sigma, 2, 2, input.targetInterval()));
+		loopBuilder.addOutput("output", output.get(0));
+		String operation = is3d ? "output = dxx + dyy + dzz" : "output = dxx + dyy";
+		loopBuilder.forEachPixel(operation);
 	}
 }
