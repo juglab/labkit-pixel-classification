@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 
 /**
@@ -21,6 +22,9 @@ import java.util.StringJoiner;
  * operations on images using CLIJ.
  */
 public class CLIJLoopBuilder {
+
+	private List<String> COORDINATE_VARIABLE_NAMES = Arrays.asList("coordinate_x", "coordinate_y",
+		"coordinate_z");
 
 	private final CLIJ2 clij;
 
@@ -60,6 +64,7 @@ public class CLIJLoopBuilder {
 	}
 
 	public CLIJLoopBuilder addInput(String variable, ClearCLBuffer image) {
+		checkValidVariableName(variable);
 		String parameterName = addImageParameter(image);
 		registerSize(variable, image.getDimensions());
 		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = PIXEL(" +
@@ -68,6 +73,7 @@ public class CLIJLoopBuilder {
 	}
 
 	public CLIJLoopBuilder addOutput(String variable, ClearCLBuffer image) {
+		checkValidVariableName(variable);
 		String parameterName = addImageParameter(image);
 		registerSize(variable, image.getDimensions());
 		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = 0");
@@ -90,9 +96,8 @@ public class CLIJLoopBuilder {
 	}
 
 	private String pixelAt(String parameterName, Interval offset) {
-		return "PIXEL_AT(" + parameterName + ", x + " + getMin(offset, 0) + ", y + " + getMin(offset,
-			1) +
-			", z + " + getMin(offset, 2) + ")";
+		return "PIXEL_OFFSET(" + parameterName + ", " + getMin(offset, 0) + ", " + getMin(offset, 1) +
+			", " + getMin(offset, 2) + ")";
 	}
 
 	private String addCLIJViewParameters(String variable, CLIJView image) {
@@ -121,8 +126,15 @@ public class CLIJLoopBuilder {
 	}
 
 	private void addParameter(String parameterType, String parameterName, Object value) {
+		checkValidVariableName(parameterName);
 		parameterDefinition.add(parameterType + " " + parameterName);
 		parameterValues.put(parameterName, value);
+	}
+
+	private void checkValidVariableName(String variable) {
+		if (COORDINATE_VARIABLE_NAMES.contains(variable) || !OpenCLSyntax.isValidVariableName(variable))
+			throw new IllegalArgumentException("Sorry \"" + variable +
+				"\" can not be used as a variable name.");
 	}
 
 	public void forEachPixel(String operation) {
@@ -135,6 +147,7 @@ public class CLIJLoopBuilder {
 			dims, dims, parameterValues, defines);
 	}
 
+	@SafeVarargs
 	private static String concatenate(String delimiter, List<String>... lists) {
 		StringJoiner joiner = new StringJoiner(delimiter);
 		for (List<String> values : lists)
