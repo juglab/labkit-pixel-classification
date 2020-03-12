@@ -26,7 +26,7 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 	private static final ImageIcon COLLAPSED_ICON = new ImageIcon( FiltersListSection.class.getClassLoader().getResource( "arrow_right_48px.png" ) );
 
 	public JComponent titlePanel;
-	public JComponent filtersList;
+	public FiltersList filtersList;
 	private IconPanel iconPanel;
 	private JLabel titleComponent;
 	private JPopupMenu popupMenu;
@@ -48,7 +48,7 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 
 	/**
 	 */
-	public FiltersListSection( AccordionPanel< FiltersListSection > owner, String title, JComponent filtersList, boolean isExpanded ) {
+	public FiltersListSection( AccordionPanel< FiltersListSection > owner, String title, FiltersList filtersList, boolean isExpanded ) {
 		this.owner = owner;
 		this.filtersList = filtersList;
 
