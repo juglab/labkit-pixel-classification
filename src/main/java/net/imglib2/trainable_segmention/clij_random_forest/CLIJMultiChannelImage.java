@@ -35,7 +35,7 @@ public class CLIJMultiChannelImage implements AutoCloseable {
 	}
 
 	public CLIJMultiChannelImage(CLIJ2 clij, RandomAccessibleInterval<?> input) {
-		long[] allDimensions = Intervals.minAsLongArray(input);
+		long[] allDimensions = Intervals.dimensionsAsLongArray(input);
 		this.clij = clij;
 		this.spatialDimensions = Arrays.copyOf(allDimensions, allDimensions.length - 1);
 		this.numChannels = allDimensions[allDimensions.length - 1];
