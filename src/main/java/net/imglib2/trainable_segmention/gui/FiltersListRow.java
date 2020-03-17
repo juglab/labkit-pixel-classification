@@ -131,7 +131,17 @@ public class FiltersListRow extends JPanel {
 		StringJoiner joiner = new StringJoiner( "," );
 		for ( String parameter : featureSetting.parameters() )
 			joiner.add( parameter + "=" + featureSetting.getParameter( parameter ) );
-		return "<html><b>" + featureSetting.getName() + "</b><br>" + joiner + "</html>";
+		String s = joiner.toString();
+		if (s.contains("sigma")) {
+		  s = s.replace("sigma", "\u03c3");	
+		}
+		if (s.contains("psi")) {
+		  s = s.replace("psi", "\u03c8");	
+		}
+		if (s.contains("gamma")) {
+		  s = s.replace("gamma", "\u03b3");	
+		}
+		return "<html><b>" + featureSetting.getName() + "</b><br>" + s + "</html>";
 	}
 
 	public void update() {
