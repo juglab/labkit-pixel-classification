@@ -5,7 +5,6 @@ import net.imagej.ops.OpService;
 import net.imglib2.Cursor;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.trainable_segmention.ToString;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;

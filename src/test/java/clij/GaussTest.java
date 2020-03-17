@@ -8,7 +8,6 @@ import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmention.ToString;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Ignore;
@@ -69,7 +68,6 @@ public class GaussTest {
 		) {
 			Gauss.convolve(clij, CLIJView.interval(input, FinalInterval.createMinSize(1,0,2,2)), kernel, CLIJView.wrap(output), 1);
 			RandomAccessibleInterval actual = clij.pullRAI(output);
-			System.out.println(ToString.toString(actual));
 			ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[]{
 					2, 0, 0,
 					1, -2, 0

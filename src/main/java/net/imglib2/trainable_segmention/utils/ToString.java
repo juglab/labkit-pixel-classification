@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmention;
+package net.imglib2.trainable_segmention.utils;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.view.Views;
@@ -7,9 +7,12 @@ import net.imglib2.view.Views;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
-import java.util.stream.Stream;
 
 public class ToString {
+
+	public static void print(final RandomAccessibleInterval<?> image) {
+		System.out.println(toString(image));
+	}
 
 	public static String toString(final RandomAccessibleInterval<?> image) {
 		return toString(image, "");
