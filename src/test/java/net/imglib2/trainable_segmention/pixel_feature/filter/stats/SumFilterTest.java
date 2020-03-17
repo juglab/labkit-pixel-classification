@@ -4,7 +4,6 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.stats;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmention.ToString;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.view.Views;
 import org.junit.Test;
