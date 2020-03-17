@@ -8,7 +8,7 @@ import net.imglib2.util.Intervals;
 
 import java.util.stream.LongStream;
 
-public class CLIJView {
+public class CLIJView implements AutoCloseable {
 
 	private final ClearCLBuffer buffer;
 	private final Interval interval;
@@ -44,4 +44,8 @@ public class CLIJView {
 		return interval(buffer, new FinalInterval(buffer.getDimensions()));
 	}
 
+	@Override
+	public void close() {
+		buffer.close();
+	}
 }
