@@ -11,13 +11,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.border.CompoundBorder;
 
 /**
  * Sub component of the AccordionPanel
- * 
- * @param <M>
  */
 public class FiltersListSection extends AccordionSection< FiltersListSection > {
 
@@ -25,11 +22,9 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 	private static final ImageIcon EXPANDED_ICON = new ImageIcon( FiltersListSection.class.getClassLoader().getResource( "arrow_down_48px.png" ) );
 	private static final ImageIcon COLLAPSED_ICON = new ImageIcon( FiltersListSection.class.getClassLoader().getResource( "arrow_right_48px.png" ) );
 
-	public JComponent titlePanel;
-	public FiltersList filtersList;
+	private FiltersList filtersList;
 	private IconPanel iconPanel;
 	private JLabel titleComponent;
-	private JPopupMenu popupMenu;
 
 	public enum AccordionControlIcons {
 
@@ -51,17 +46,15 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 	public FiltersListSection( AccordionPanel< FiltersListSection > owner, String title, FiltersList filtersList, boolean isExpanded ) {
 		this.owner = owner;
 		this.filtersList = filtersList;
-
-		titlePanel = new JPanel();
 		setLayout( new BorderLayout() );
 
-		add( titlePanel, BorderLayout.NORTH );
-
+		JPanel titlePanel = new JPanel();
 		titlePanel.setLayout( new BorderLayout() );
 		titlePanel.setPreferredSize( new Dimension( this.getPreferredSize().width, this.getPreferredSize().height ) );
 
 		iconPanel = new IconPanel( isExpanded );
 		titlePanel.add( iconPanel, BorderLayout.WEST );
+		add( titlePanel, BorderLayout.NORTH );
 
 		titleComponent = new JLabel( title );
 		titleComponent.setBorder( new CompoundBorder( BorderFactory.createEmptyBorder( 2, 8, 2, 2 ), titleComponent.getBorder() ) );
@@ -122,10 +115,12 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 					if ( isExpanded ) {
 						iconLabel.setIcon( AccordionControlIcons.COLLAPSED.getIcon() );
 						collapse();
+						repaint();
 						isExpanded = false;
 					} else {
 						iconLabel.setIcon( AccordionControlIcons.EXPANDED.getIcon() );
 						expand();
+						repaint();
 						isExpanded = true;
 					}
 				}
@@ -138,15 +133,4 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 	JComponent getExpandableComponent() {
 		return filtersList;
 	}
-
-	@Override
-	public void mouseClicked( MouseEvent event ) {
-		if ( event.getButton() == MouseEvent.BUTTON3 || event.getButton() == MouseEvent.BUTTON2 ) {
-			if ( !popupMenu.isVisible() )
-				popupMenu.show( this, event.getX(), event.getY() );
-			else
-				popupMenu.setVisible( false );
-		}
-	}
-
 }

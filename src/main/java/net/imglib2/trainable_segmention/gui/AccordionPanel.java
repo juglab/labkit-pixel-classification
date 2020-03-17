@@ -35,15 +35,15 @@ public class AccordionPanel< AS extends AccordionSection< AS > > extends JPanel 
 	public void setSectionExpanded( AS section ) {
 		expandedSections.add( section );
 	}
-
+	
 	public void setSectionCollapsed( AS section ) {
 		expandedSections.remove( section );
 	}
-
-	public void addSection( AS newSection, boolean collapse ) {
+	
+	public void addSection( AS newSection) {
 		add( newSection );
 		sections.add( newSection );
-		configureNewSection( newSection, collapse );
+		configureNewSection( newSection);
 	}
 
 	public void removeSection( AS section ) {
@@ -53,9 +53,9 @@ public class AccordionPanel< AS extends AccordionSection< AS > > extends JPanel 
 		}
 		sections.remove( section );
 		remove( section );
+		sectionRemoved( section );
 		revalidate();
 		repaint();
-		sectionRemoved( section );
 	}
 
 	protected String getRemoveConfirmationMessage() {
@@ -66,13 +66,9 @@ public class AccordionPanel< AS extends AccordionSection< AS > > extends JPanel 
 		//Default does nothing
 	}
 
-	private void configureNewSection( AS newSection, boolean collapse ) {
+	private void configureNewSection( AS newSection) {
 		newSection.setOwner( this );
-		if ( collapse ) {
-			setSectionCollapsed( newSection );
-		} else {
-			setSectionExpanded( newSection );
-		}
+		setSectionExpanded( newSection );
 		revalidate();
 		repaint();
 	}

@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -46,9 +47,12 @@ public class FeatureSettingsUI extends JPanel {
 
 	private GlobalsPanel globalsPanel;
 
-	private FiltersListModel newFiltersListModel;
+	private FiltersListModel grpFiltersListModel;
 
+	private FiltersListModel prmFiltersListModel;
+	
 	private FiltersListModel oldFiltersListModel;
+
 
 	public FeatureSettingsUI( Context context, FeatureSettings fs ) {
 		this.context = context;
@@ -56,7 +60,8 @@ public class FeatureSettingsUI extends JPanel {
 	}
 
 	public FeatureSettings get() {
-		List< FeatureSetting > features = newFiltersListModel.getSelectedFeatureSettings();
+		List< FeatureSetting > features = grpFiltersListModel.getSelectedFeatureSettings();
+		features.addAll( prmFiltersListModel.getSelectedFeatureSettings() );
 		features.addAll( oldFiltersListModel.getSelectedFeatureSettings() );
 		final GlobalSettings globalSettings = globalsPanel.get();
 		return new FeatureSettings( globalSettings, features );
@@ -66,30 +71,40 @@ public class FeatureSettingsUI extends JPanel {
 		setLayout( new MigLayout( "insets 0", "[grow]", "[][grow][]" ) );
 		globalsPanel = new GlobalsPanel( fs.globals() );
 		add( globalsPanel, "wrap" );
-		add( new JScrollPane( initAccordionPanel( AvailableFeatures.getValidFeatures( context, fs.globals() ) ) ), "split 2, grow" );
+		add( new JScrollPane(initAccordionPanel( AvailableFeatures.getValidFeatures( context, fs.globals() ) ) ), "split 2, grow" );
 	}
 
-	/*
-	 * TODO: 1) A way to check for deprecated filters (for now check for
-	 * capitalized names)
-	 * 2) A way to check if a filter has parameters (for now assume true always)
-	 */
-	private AccordionPanel< FiltersListSection > initAccordionPanel( List< ValuePair< Class< ? extends FeatureOp >, String > > features ) {
+	private JScrollPane initAccordionPanel( List< ValuePair< Class< ? extends FeatureOp >, String > > features ) {
 		AccordionPanel< FiltersListSection > accordionPanel = new AccordionPanel<>();
-		newFiltersListModel = new FiltersListModel();
+		grpFiltersListModel = new FiltersListModel();
+		prmFiltersListModel = new FiltersListModel();
 		oldFiltersListModel = new FiltersListModel();
 		features.sort( Comparator.comparing( ValuePair::getB ) );
 		features.forEach( feature -> {
 			String s = feature.getB();
+			boolean prms = isParametrized(feature.getA());
 			if ( Character.isUpperCase( s.charAt( 0 ) ) )
-				oldFiltersListModel.add( new FiltersListRow( feature, true ) );
-			else
-				newFiltersListModel.add( new FiltersListRow( feature, true ) );
+			{
+				if (prms)
+					prmFiltersListModel.add( new FiltersListRow( feature, true ) );
+				else
+					grpFiltersListModel.add( new FiltersListRow( feature, false ) );
+			} else {
+				oldFiltersListModel.add( new FiltersListRow( feature, prms));
+			}
 		} );
 
-		accordionPanel.addSection( new FiltersListSection( accordionPanel, "Deprecated Filters", new FiltersList( context, globalsPanel, oldFiltersListModel ), false ), true );
-		accordionPanel.addSection( new FiltersListSection( accordionPanel, "Current Filters", new FiltersList( context, globalsPanel, newFiltersListModel ), true ), false );
-		return accordionPanel;
+		JScrollPane sp = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		sp.getViewport().add( accordionPanel );
+		accordionPanel.addSection( new FiltersListSection( accordionPanel, "Group Filters", new FiltersList( context, globalsPanel, grpFiltersListModel ), true));
+		accordionPanel.addSection( new FiltersListSection( accordionPanel, "Parametrized Filters", new FiltersList( context, globalsPanel, prmFiltersListModel ), true));
+		accordionPanel.addSection( new FiltersListSection( accordionPanel, "Deprecated Filters", new FiltersList( context, globalsPanel, oldFiltersListModel ), false));
+		return sp;
+	}
+	
+	private boolean isParametrized(Class< ? extends FeatureOp > featureClass) {
+		Set<String> params =FeatureSetting.fromClass( featureClass).parameters(); 
+		return !params.isEmpty();
 	}
 
 	public class GlobalsPanel extends JPanel {
@@ -130,16 +145,21 @@ public class FeatureSettingsUI extends JPanel {
 			Collection< Class< ? extends FeatureOp > > availableFeatures = AvailableFeatures.getValidFeatures( context, globalSettings ).stream().map( ValuePair::getA ).collect( Collectors.toSet() );
 
 			// Check new features
-			List< FeatureSetting > newFeatures = newFiltersListModel.getFeatureSettings();
-			List< FeatureSetting > newInvalid = newFeatures.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
+			List< FeatureSetting > newGrpFeatures = grpFiltersListModel.getFeatureSettings();
+			List< FeatureSetting > newGrpInvalid = newGrpFeatures.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
+			
+			List< FeatureSetting > newPrmFeatures = prmFiltersListModel.getFeatureSettings();
+			List< FeatureSetting > newPrmInvalid = newPrmFeatures.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
 
 			List< FeatureSetting > oldFeatures = oldFiltersListModel.getFeatureSettings();
 			List< FeatureSetting > oldInvalid = oldFeatures.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
 			List< FeatureSetting > allInvalid = new ArrayList<>( oldInvalid );
-			allInvalid.addAll( newInvalid );
+			allInvalid.addAll( newGrpInvalid );
+			allInvalid.addAll( newPrmInvalid );
 			if ( !allInvalid.isEmpty() )
 				showWarning( allInvalid );
-			newFiltersListModel.removeAll( newInvalid );
+			grpFiltersListModel.removeAll( newGrpInvalid );
+			prmFiltersListModel.removeAll( newPrmInvalid );
 			oldFiltersListModel.removeAll( oldInvalid );
 		}
 

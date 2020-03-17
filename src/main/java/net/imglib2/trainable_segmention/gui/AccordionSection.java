@@ -1,7 +1,6 @@
 package net.imglib2.trainable_segmention.gui;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -15,15 +14,15 @@ public abstract class AccordionSection< AS extends AccordionSection< AS > > exte
 
 	protected boolean collapsed = true;
 
-	public void setOwner( AccordionPanel< AS > owner ) {
-		this.owner = owner;
-	}
-
 	protected abstract int preferredCollapsedHeight();
 
 	protected abstract int preferredExpandedHeight();
 
 	abstract JComponent getExpandableComponent();
+
+	public void setOwner( AccordionPanel< AS > owner ) {
+		this.owner = owner;
+	}
 
 	@SuppressWarnings( "unchecked" )
 	public void collapse() {
@@ -34,6 +33,7 @@ public abstract class AccordionSection< AS extends AccordionSection< AS > > exte
 		anim.setEndValue( MIN_COMPONENT_HEIGHT );
 		anim.start();
 		collapsed = true;
+		repaint();
 	}
 
 	@SuppressWarnings( "unchecked" )
@@ -45,14 +45,11 @@ public abstract class AccordionSection< AS extends AccordionSection< AS > > exte
 		anim.setEndValue( calculatedHeight );
 		anim.start();
 		collapsed = false;
+		repaint();
 	}
-	
-	  @SuppressWarnings("unchecked")
-	  public void remove(ActionEvent e) {
-	    owner.removeSection((AS)this);
-	  }
 
-	  public void mouseClicked(MouseEvent e) {
-	    //Default does nothing
-	  }
+	@SuppressWarnings( "unchecked" )
+	public void remove( ActionEvent e ) {
+		owner.removeSection( ( AS ) this );
+	}
 }
