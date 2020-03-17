@@ -9,8 +9,17 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.scijava.AbstractContextual;
+import org.scijava.Context;
+import org.scijava.module.Module;
+import org.scijava.module.ModuleCanceledException;
+import org.scijava.module.ModuleException;
+import org.scijava.ui.swing.widget.SwingInputHarvester;
+import org.scijava.widget.InputHarvester;
+
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.util.ValuePair;
 
 public class FiltersListRow extends JPanel {
@@ -21,7 +30,7 @@ public class FiltersListRow extends JPanel {
 	private static final ImageIcon RM_ICON = new ImageIcon( FiltersList.class.getClassLoader().getResource( "minus_icon_16px.png" ) );
 	private static final ImageIcon PARAMS_ICON = new ImageIcon( FiltersList.class.getClassLoader().getResource( "params_icon_16px.png" ) );
 
-	private ValuePair< Class< ? extends FeatureOp >, String > feature;
+	private FeatureSetting featureSetting;
 	private boolean isParametrized = false;
 
 	private JCheckBox checkbox;
@@ -31,11 +40,10 @@ public class FiltersListRow extends JPanel {
 	private JLabel editButton;
 	private JLabel nameLabel;
 
-	public FiltersListRow( ValuePair< Class< ? extends FeatureOp >, String > feature, boolean isParametrized ) {
-		this.feature = feature;
+	public FiltersListRow( FeatureSetting featureSetting, boolean isParametrized ) {
+		this.featureSetting = featureSetting;
 		this.isParametrized = isParametrized;
 		initUI();
-
 	}
 
 	private void initUI() {
@@ -77,6 +85,14 @@ public class FiltersListRow extends JPanel {
 		docoDiag.setVisible( true );
 
 	}
+	
+	public void editParameters(Context context, GlobalSettings globalSettings ) {
+		featureSetting = new FeatureSettingsDialog( context ).show( featureSetting, globalSettings );
+		update();
+		validate();
+		repaint();
+	}
+
 
 	public JCheckBox getCheckBox() {
 		return checkbox;
@@ -101,13 +117,9 @@ public class FiltersListRow extends JPanel {
 	public boolean isSelected() {
 		return checkbox.isSelected();
 	}
-
+	
 	public FeatureSetting getFeatureSetting() {
-		return FeatureSetting.fromClass( feature.getA() );
-	}
-
-	public ValuePair< Class< ? extends FeatureOp >, String > getFeature() {
-		return feature;
+		return featureSetting;
 	}
 
 	public boolean isParametrized() {
@@ -117,13 +129,37 @@ public class FiltersListRow extends JPanel {
 	@Override
 	public String toString() {
 		StringJoiner joiner = new StringJoiner( "," );
-		for ( String parameter : getFeatureSetting().parameters() )
-			joiner.add( parameter + "=" + getFeatureSetting().getParameter( parameter ) );
-		return "<html><b>" + getFeatureSetting().getName() + "</b><br>" + joiner + "</html>";
+		for ( String parameter : featureSetting.parameters() )
+			joiner.add( parameter + "=" + featureSetting.getParameter( parameter ) );
+		return "<html><b>" + featureSetting.getName() + "</b><br>" + joiner + "</html>";
 	}
 
 	public void update() {
 		nameLabel.setText( toString() );
 		nameLabel.repaint();
 	}
+	
+	static class FeatureSettingsDialog extends AbstractContextual {
+
+		@SuppressWarnings( "rawtypes" )
+		private final InputHarvester harvester;
+
+		FeatureSettingsDialog( Context context ) {
+			harvester = new SwingInputHarvester();
+			context.inject( harvester );
+		}
+
+		FeatureSetting show( FeatureSetting op, GlobalSettings globalSetting ) {
+			try {
+				Module module = op.asModule( globalSetting );
+				harvester.harvest( module );
+				return FeatureSetting.fromModule( module );
+			} catch ( ModuleCanceledException e ) {
+				return op;
+			} catch ( ModuleException e ) {
+				throw new RuntimeException( e );
+			}
+		}
+	}
+
 }

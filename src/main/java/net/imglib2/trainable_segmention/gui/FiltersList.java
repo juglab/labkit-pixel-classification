@@ -32,12 +32,10 @@ public class FiltersList extends JList< FiltersListRow > {
 	private static final long serialVersionUID = 1L;
 
 	private int selectedIndex;
-	private final FeatureSettingsDialog featureSettingsDialog;
 	private GlobalsPanel globalsPanel;
 
 	public FiltersList( Context context, GlobalsPanel globalsPanel, FiltersListModel model ) {
 		super( model );
-		featureSettingsDialog = new FeatureSettingsDialog( context );
 		this.globalsPanel = globalsPanel;
 
 		setCellRenderer( new CheckBoxCellRenderer() );
@@ -50,14 +48,11 @@ public class FiltersList extends JList< FiltersListRow > {
 				if ( selectedIndex < 0 )
 					return;
 
-				int width = getCellBounds( selectedIndex, selectedIndex ).width;
-
 				Point p = e.getPoint().getLocation();
 				if ( selectedIndex > 0 ) {
 					Rectangle listCellBounds = getCellBounds( 0, selectedIndex - 1 );
 					p.y -= listCellBounds.height;
 				}
-				System.out.println( p);
 
 				FiltersListRow panel = getModel().getElementAt( selectedIndex );
 				JCheckBox cb = panel.getCheckBox();
@@ -70,7 +65,7 @@ public class FiltersList extends JList< FiltersListRow > {
 					validate();
 					repaint();
 				} else if ( isOverComponent( eb, p ) ) {
-					editParameters();
+					panel.editParameters(context, globalsPanel.get());
 					
 				} else if ( isOverComponent( db, p ) ) {
 					duplicateFilter();
@@ -90,7 +85,7 @@ public class FiltersList extends JList< FiltersListRow > {
 	}
 
 	private void duplicateFilter() {
-		( ( FiltersListModel ) getModel() ).add( new FiltersListRow(getModel().getElementAt( selectedIndex ).getFeature(), getModel().getElementAt( selectedIndex ).isParametrized()));
+		( ( FiltersListModel ) getModel() ).add( new FiltersListRow(getModel().getElementAt( selectedIndex ).getFeatureSetting(), getModel().getElementAt( selectedIndex ).isParametrized()));
 		ensureIndexIsVisible(getModel().getSize() - 1);
 		validate();
 		repaint();
@@ -99,14 +94,6 @@ public class FiltersList extends JList< FiltersListRow > {
 	private void removeFilter() {
 		( ( FiltersListModel ) getModel() ).remove( selectedIndex );
 		( ( FiltersListModel ) getModel() ).update();
-		validate();
-		repaint();
-	}
-
-	private void editParameters() {
-		featureSettingsDialog.show( getModel().getElementAt( selectedIndex ).getFeatureSetting(), globalsPanel.get() );
-		( ( FiltersListModel ) getModel() ).update();
-		getModel().getElementAt( selectedIndex ).update();
 		validate();
 		repaint();
 	}
@@ -144,27 +131,5 @@ public class FiltersList extends JList< FiltersListRow > {
 		}
 	}
 
-	static class FeatureSettingsDialog extends AbstractContextual {
-
-		@SuppressWarnings( "rawtypes" )
-		private final InputHarvester harvester;
-
-		FeatureSettingsDialog( Context context ) {
-			harvester = new SwingInputHarvester();
-			context.inject( harvester );
-		}
-
-		FeatureSetting show( FeatureSetting op, GlobalSettings globalSetting ) {
-			try {
-				Module module = op.asModule( globalSetting );
-				harvester.harvest( module );
-				return FeatureSetting.fromModule( module );
-			} catch ( ModuleCanceledException e ) {
-				return op;
-			} catch ( ModuleException e ) {
-				throw new RuntimeException( e );
-			}
-		}
-	}
 
 }

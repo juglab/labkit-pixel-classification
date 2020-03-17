@@ -82,15 +82,16 @@ public class FeatureSettingsUI extends JPanel {
 		features.sort( Comparator.comparing( ValuePair::getB ) );
 		features.forEach( feature -> {
 			String s = feature.getB();
+			FeatureSetting fs = FeatureSetting.fromClass( feature.getA());
 			boolean prms = isParametrized(feature.getA());
 			if ( Character.isUpperCase( s.charAt( 0 ) ) )
 			{
 				if (prms)
-					prmFiltersListModel.add( new FiltersListRow( feature, true ) );
+					prmFiltersListModel.add( new FiltersListRow( fs, true ) );
 				else
-					grpFiltersListModel.add( new FiltersListRow( feature, false ) );
+					grpFiltersListModel.add( new FiltersListRow( fs, false ) );
 			} else {
-				oldFiltersListModel.add( new FiltersListRow( feature, prms));
+				oldFiltersListModel.add( new FiltersListRow( fs, prms));
 			}
 		} );
 
