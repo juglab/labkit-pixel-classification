@@ -1,9 +1,13 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.hessian;
 
+import clij.CLIJEigenvalues;
+import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.linalg.eigen.EigenValues;
 import net.imglib2.trainable_segmention.RevampUtils;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -15,7 +19,9 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import preview.net.imglib2.loops.LoopBuilder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -89,4 +95,24 @@ public class SingleHessianEigenvaluesFeature extends AbstractFeatureOp {
 		LoopBuilder.setImages(derivative, eigenvalues).forEachPixel(calculator::compute);
 	}
 
+	@Override
+	public void prefetch(CLIJFeatureInput input) {
+		final Interval interval = input.targetInterval();
+		final int n = interval.numDimensions();
+		for(int d1 = 0; d1 < n; d1++)
+			for(int d2 = d1; d2 < n; d2++)
+				input.prefetchSecondDerivative(sigma, d1, d2, interval);
+	}
+
+	@Override
+	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
+		final Interval interval = input.targetInterval();
+		final int n = interval.numDimensions();
+		final List<CLIJView> derivatives = new ArrayList<>();
+		for(int d1 = 0; d1 < n; d1++)
+			for(int d2 = d1; d2 < n; d2++)
+				derivatives.add(input.secondDerivative(sigma, d1, d2, interval));
+		List<CLIJView> eigenvalues = new ArrayList<>(output);
+		CLIJEigenvalues.symmetric(input.clij(), derivatives, eigenvalues);
+	}
 }
