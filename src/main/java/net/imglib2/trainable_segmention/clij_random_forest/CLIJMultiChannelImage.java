@@ -29,8 +29,8 @@ public class CLIJMultiChannelImage implements AutoCloseable {
 		this.clij = clij;
 		this.spatialDimensions = spatialDimensions;
 		this.numChannels = numChannels;
-		long[] size = Arrays.copyOf(spatialDimensions, 3);
-		size[2] = spatialDimensions.length < 3 ? numChannels : size[2] * numChannels;
+		long[] size = spatialDimensions.clone();
+		size[size.length - 1] = size[size.length - 1] * numChannels;
 		this.buffer = clij.create(size);
 	}
 
