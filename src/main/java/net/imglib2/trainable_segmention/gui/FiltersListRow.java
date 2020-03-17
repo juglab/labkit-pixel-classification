@@ -17,10 +17,8 @@ import org.scijava.module.ModuleException;
 import org.scijava.ui.swing.widget.SwingInputHarvester;
 import org.scijava.widget.InputHarvester;
 
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
-import net.imglib2.util.ValuePair;
 
 public class FiltersListRow extends JPanel {
 

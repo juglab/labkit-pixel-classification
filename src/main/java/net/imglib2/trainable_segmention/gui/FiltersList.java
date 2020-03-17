@@ -6,7 +6,6 @@ import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -15,28 +14,18 @@ import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
-import org.scijava.AbstractContextual;
 import org.scijava.Context;
-import org.scijava.module.Module;
-import org.scijava.module.ModuleCanceledException;
-import org.scijava.module.ModuleException;
-import org.scijava.ui.swing.widget.SwingInputHarvester;
-import org.scijava.widget.InputHarvester;
 
 import net.imglib2.trainable_segmention.gui.FeatureSettingsUI.GlobalsPanel;
-import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 
 public class FiltersList extends JList< FiltersListRow > {
 
 	private static final long serialVersionUID = 1L;
 
 	private int selectedIndex;
-	private GlobalsPanel globalsPanel;
 
 	public FiltersList( Context context, GlobalsPanel globalsPanel, FiltersListModel model ) {
 		super( model );
-		this.globalsPanel = globalsPanel;
 
 		setCellRenderer( new CheckBoxCellRenderer() );
 
