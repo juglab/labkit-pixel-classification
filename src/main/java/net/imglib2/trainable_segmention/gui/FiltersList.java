@@ -74,10 +74,9 @@ public class FiltersList extends JList< FiltersListRow > {
 	}
 
 	private void duplicateFilter() {
-		( ( FiltersListModel ) getModel() ).add( new FiltersListRow(getModel().getElementAt( selectedIndex ).getFeatureSetting(), getModel().getElementAt( selectedIndex ).isParametrized()));
+		( ( FiltersListModel ) getModel() ).add( selectedIndex, new FiltersListRow(getModel().getElementAt( selectedIndex ).getFeatureSetting(), getModel().getElementAt( selectedIndex ).isParametrized()));
 		super.validate();
 		super.repaint();
-		ensureIndexIsVisible(getModel().getSize() - 1);
 	}
 
 	private void removeFilter() {

@@ -29,8 +29,14 @@ public class FiltersListModel extends AbstractListModel<FiltersListRow> {
 	}
 
 	public void add(FiltersListRow row) {
-		features.add( row.getFeatureSetting() );
+		features.add(row.getFeatureSetting());
 		rows.add(row);
+		update();
+	}
+	
+	public void add(int index, FiltersListRow row) {
+		features.add( index, row.getFeatureSetting());
+		rows.add(index, row);
 		update();
 	}
 

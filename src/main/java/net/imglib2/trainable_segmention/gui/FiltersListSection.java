@@ -67,10 +67,7 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 		titleComponent.setBorder( new CompoundBorder( BorderFactory.createEmptyBorder( 2, 8, 2, 2 ), titleComponent.getBorder() ) );
 		titlePanel.add( titleComponent );
 
-		JPanel listPanel = new JPanel(new GridLayout(1,1));
-		listPanel.setBackground(Color.WHITE);
-		listPanel.add(filtersList);
-		add( listPanel, BorderLayout.CENTER );
+		add( filtersList, BorderLayout.CENTER );
 		if ( !isExpanded )
 			this.collapse();
 	}
@@ -124,12 +121,10 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 					if ( isExpanded ) {
 						iconLabel.setIcon( AccordionControlIcons.COLLAPSED.getIcon() );
 						collapse();
-						repaint();
 						isExpanded = false;
 					} else {
 						iconLabel.setIcon( AccordionControlIcons.EXPANDED.getIcon() );
 						expand();
-						repaint();
 						isExpanded = true;
 					}
 				}
