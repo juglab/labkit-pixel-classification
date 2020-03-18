@@ -1,5 +1,6 @@
 package net.imglib2.trainable_segmention.gui;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -8,7 +9,9 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import javax.swing.BoxLayout;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import org.scijava.Context;
 
@@ -19,7 +22,7 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.util.ValuePair;
 
-public class FiltersListPanel extends AccordionPanel< FiltersListSection > {
+public class FiltersListPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private FiltersListModel oldFiltersListModel;
@@ -27,9 +30,9 @@ public class FiltersListPanel extends AccordionPanel< FiltersListSection > {
 	private FiltersListModel prmFiltersListModel;
 
 	public FiltersListPanel( Context context, FeatureSettings fs, GlobalsPanel gb ) {
-		super();
+		setLayout(new BoxLayout( this, BoxLayout.Y_AXIS ));
+		setBackground( Color.WHITE );
 		init( context, AvailableFeatures.getValidFeatures( context, fs.globals() ), gb );
-		revalidate();
 	}
 
 	private void init( Context context, List< ValuePair< Class< ? extends FeatureOp >, String > > features, GlobalsPanel gb ) {
@@ -51,9 +54,15 @@ public class FiltersListPanel extends AccordionPanel< FiltersListSection > {
 			}
 		} );
 
-		addSection( new FiltersListSection( this, "Group Filters", new FiltersList( context, gb, grpFiltersListModel ), true ) );
-		addSection( new FiltersListSection( this, "Parametrized Filters", new FiltersList( context, gb, prmFiltersListModel ), true ) );
-		addSection( new FiltersListSection( this, "Deprecated Filters", new FiltersList( context, gb, oldFiltersListModel ), false ) );
+		AccordionPanel<FiltersListSection> grpPanel = new AccordionPanel<>();
+		grpPanel.addSection( new FiltersListSection( grpPanel, "Group Filters", new FiltersList( context, gb, grpFiltersListModel ), true ) );
+		add(grpPanel);
+		AccordionPanel<FiltersListSection> prmPanel = new AccordionPanel<>();
+		prmPanel.addSection( new FiltersListSection( prmPanel, "Parametrized Filters", new FiltersList( context, gb, prmFiltersListModel ), true ) );
+		add(prmPanel);
+		AccordionPanel<FiltersListSection> oldPanel = new AccordionPanel<>();
+		oldPanel.addSection( new FiltersListSection( oldPanel, "Deprecated Filters", new FiltersList( context, gb, oldFiltersListModel ), false ) );
+		add(oldPanel);
 	}
 
 	private boolean isParametrized( Class< ? extends FeatureOp > featureClass ) {

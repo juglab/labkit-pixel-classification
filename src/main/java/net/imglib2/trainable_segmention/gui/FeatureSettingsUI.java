@@ -19,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.plaf.ColorUIResource;
@@ -53,7 +54,7 @@ public class FeatureSettingsUI extends JPanel {
 		globalsPanel = new GlobalsPanel( fs.globals() );
 		add( globalsPanel, "wrap" );
 		filtersListPanel = new FiltersListPanel( context, fs, globalsPanel );
-		add( new JScrollPane( filtersListPanel ), "split 2, grow" );
+		add( new JScrollPane( filtersListPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), "split 2, grow" );
 	}
 
 	public FeatureSettings get() {
@@ -122,7 +123,7 @@ public class FeatureSettingsUI extends JPanel {
 		dialog.setContentPane( optionPane );
 		dialog.setResizable( true );
 		dialog.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
-		dialog.setPreferredSize( new Dimension( 600, 625 ));
+		dialog.setPreferredSize( new Dimension( 800, 650 ));
 		optionPane.addPropertyChangeListener( e -> {
 			String prop = e.getPropertyName();
 			if ( dialog.isVisible() && ( e.getSource() == optionPane ) && ( JOptionPane.VALUE_PROPERTY.equals(
@@ -135,12 +136,7 @@ public class FeatureSettingsUI extends JPanel {
 	}
 
 	public static void main( String... args ) {
-		Context context = new Context();
-		final Optional< FeatureSettings > show = FeatureSettingsUI.show( context, new FeatureSettings( GlobalSettings.default2d().build() ) );
-		System.out.println(
-				show.map( featureSettings -> featureSettings.toJson().toString() ).orElse(
-						"Cancelled" ) );
-		System.out.println( "finished" );
+		FeatureSettingsUI.show( new Context(), new FeatureSettings( GlobalSettings.default2d().build() ) );
 	}
 
 	private static class ListOfDoubleFormatter extends JFormattedTextField.AbstractFormatter {

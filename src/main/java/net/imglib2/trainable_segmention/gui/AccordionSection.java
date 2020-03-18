@@ -9,7 +9,7 @@ public abstract class AccordionSection< AS extends AccordionSection< AS > > exte
 
 	private static final long serialVersionUID = 1L;
 	protected static final int MIN_COMPONENT_HEIGHT = 40;
-	protected static final int MIN_COMPONENT_WIDTH = 400;
+	protected static final int MIN_COMPONENT_WIDTH = 500;
 	protected AccordionPanel< AS > owner;
 
 	protected boolean collapsed = true;

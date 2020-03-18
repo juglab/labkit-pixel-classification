@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -68,6 +67,7 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 		titlePanel.add( titleComponent );
 
 		add( filtersList, BorderLayout.CENTER );
+		
 		if ( !isExpanded )
 			this.collapse();
 	}

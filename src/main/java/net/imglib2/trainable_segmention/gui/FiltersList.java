@@ -75,13 +75,13 @@ public class FiltersList extends JList< FiltersListRow > {
 
 	private void duplicateFilter() {
 		( ( FiltersListModel ) getModel() ).add( selectedIndex, new FiltersListRow(getModel().getElementAt( selectedIndex ).getFeatureSetting(), getModel().getElementAt( selectedIndex ).isParametrized()));
-		super.validate();
+		super.revalidate();
 		super.repaint();
 	}
 
 	private void removeFilter() {
 		( ( FiltersListModel ) getModel() ).remove( selectedIndex );
-		super.validate();
+		super.revalidate();
 		super.repaint();
 	}
 

@@ -46,6 +46,8 @@ public class AccordionPanel< AS extends AccordionSection< AS > > extends JPanel 
 		add( newSection );
 		sections.add( newSection );
 		configureNewSection( newSection);
+		revalidate();
+		repaint();
 	}
 
 	public void removeSection( AS section ) {
@@ -66,8 +68,6 @@ public class AccordionPanel< AS extends AccordionSection< AS > > extends JPanel 
 	private void configureNewSection( AS newSection) {
 		newSection.setOwner( this );
 		setSectionExpanded( newSection );
-		revalidate();
-		repaint();
 	}
 
 	protected List< AS > getSections() {
