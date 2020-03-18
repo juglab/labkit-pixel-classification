@@ -1,6 +1,7 @@
 package net.imglib2.trainable_segmention.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.util.StringJoiner;
 
@@ -8,6 +9,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
@@ -41,19 +43,23 @@ public class FiltersListRow extends JPanel {
 	public FiltersListRow( FeatureSetting featureSetting, boolean isParametrized ) {
 		this.featureSetting = featureSetting;
 		this.isParametrized = isParametrized;
+		setLayout( new BorderLayout() );
+		setBorder(new EmptyBorder(1,0,1,0));
+		setBackground(Color.WHITE);
 		initUI();
 	}
 
 	private void initUI() {
-		setLayout( new BorderLayout() );
 
 		checkbox = new JCheckBox();
 		add( checkbox, BorderLayout.LINE_START );
 
-		nameLabel = new JLabel(toString());
+		nameLabel = new JLabel( toString() );
+		nameLabel.setBorder( new EmptyBorder(0,4,0,0) );
 		add( nameLabel, BorderLayout.CENTER );
 
 		JPanel btnPanel = new JPanel();
+		btnPanel.setBackground(Color.WHITE);
 		btnPanel.setLayout( new FlowLayout( FlowLayout.LEFT ) );
 
 		editButton = new JLabel( PARAMS_ICON );
@@ -76,21 +82,20 @@ public class FiltersListRow extends JPanel {
 		btnPanel.add( infoButton );
 		add( btnPanel, BorderLayout.LINE_END );
 	}
-
+	
 	public void showInfoDialog() {
 
 		InfoDialog docoDiag = new InfoDialog( this, "example", "If you use this filter you will do great things" );
 		docoDiag.setVisible( true );
 
 	}
-	
-	public void editParameters(Context context, GlobalSettings globalSettings ) {
+
+	public void editParameters( Context context, GlobalSettings globalSettings ) {
 		featureSetting = new FeatureSettingsDialog( context ).show( featureSetting, globalSettings );
 		update();
 		validate();
 		repaint();
 	}
-
 
 	public JCheckBox getCheckBox() {
 		return checkbox;
@@ -115,7 +120,7 @@ public class FiltersListRow extends JPanel {
 	public boolean isSelected() {
 		return checkbox.isSelected();
 	}
-	
+
 	public FeatureSetting getFeatureSetting() {
 		return featureSetting;
 	}
@@ -130,15 +135,9 @@ public class FiltersListRow extends JPanel {
 		for ( String parameter : featureSetting.parameters() )
 			joiner.add( parameter + "=" + featureSetting.getParameter( parameter ) );
 		String s = joiner.toString();
-		if (s.contains("sigma")) {
-		  s = s.replace("sigma", "\u03c3");	
-		}
-		if (s.contains("psi")) {
-		  s = s.replace("psi", "\u03c8");	
-		}
-		if (s.contains("gamma")) {
-		  s = s.replace("gamma", "\u03b3");	
-		}
+		s = s.replace( "sigma", "\u03c3" );
+		s = s.replace( "psi", "\u03c8" );
+		s = s.replace( "gamma", "\u03b3" );
 		return "<html><b>" + featureSetting.getName() + "</b><br>" + s + "</html>";
 	}
 
@@ -146,7 +145,7 @@ public class FiltersListRow extends JPanel {
 		nameLabel.setText( toString() );
 		nameLabel.repaint();
 	}
-	
+
 	static class FeatureSettingsDialog extends AbstractContextual {
 
 		@SuppressWarnings( "rawtypes" )
@@ -165,7 +164,7 @@ public class FiltersListRow extends JPanel {
 			} catch ( ModuleCanceledException e ) {
 				return op;
 			} catch ( ModuleException e ) {
-				throw new RuntimeException( e );
+				throw new RuntimeException( e.getMessage() );
 			}
 		}
 	}

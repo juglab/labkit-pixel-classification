@@ -75,16 +75,15 @@ public class FiltersList extends JList< FiltersListRow > {
 
 	private void duplicateFilter() {
 		( ( FiltersListModel ) getModel() ).add( new FiltersListRow(getModel().getElementAt( selectedIndex ).getFeatureSetting(), getModel().getElementAt( selectedIndex ).isParametrized()));
+		super.validate();
+		super.repaint();
 		ensureIndexIsVisible(getModel().getSize() - 1);
-		validate();
-		repaint();
 	}
 
 	private void removeFilter() {
 		( ( FiltersListModel ) getModel() ).remove( selectedIndex );
-		( ( FiltersListModel ) getModel() ).update();
-		validate();
-		repaint();
+		super.validate();
+		super.repaint();
 	}
 
 	private boolean isOverComponent( Component c, Point p ) {
@@ -119,6 +118,4 @@ public class FiltersList extends JList< FiltersListRow > {
 			return row;
 		}
 	}
-
-
 }

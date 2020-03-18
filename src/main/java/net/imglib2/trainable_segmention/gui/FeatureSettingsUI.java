@@ -1,16 +1,13 @@
 
 package net.imglib2.trainable_segmention.gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,16 +19,16 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.UIManager;
 import javax.swing.WindowConstants;
+import javax.swing.plaf.ColorUIResource;
 
 import org.scijava.Context;
 
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
-import net.imglib2.util.ValuePair;
 import net.miginfocom.swing.MigLayout;
 
 /**
@@ -47,65 +44,22 @@ public class FeatureSettingsUI extends JPanel {
 
 	private GlobalsPanel globalsPanel;
 
-	private FiltersListModel grpFiltersListModel;
-
-	private FiltersListModel prmFiltersListModel;
-	
-	private FiltersListModel oldFiltersListModel;
-
+	private FiltersListPanel filtersListPanel;
 
 	public FeatureSettingsUI( Context context, FeatureSettings fs ) {
 		this.context = context;
-		initUI( fs );
+		setLayout( new MigLayout( "insets 0", "[grow]", "[][grow][]" ) );
+		setBackground(Color.WHITE);
+		globalsPanel = new GlobalsPanel( fs.globals() );
+		add( globalsPanel, "wrap" );
+		filtersListPanel = new FiltersListPanel( context, fs, globalsPanel );
+		add( new JScrollPane( filtersListPanel ), "split 2, grow" );
 	}
 
 	public FeatureSettings get() {
-		List< FeatureSetting > features = grpFiltersListModel.getSelectedFeatureSettings();
-		features.addAll( prmFiltersListModel.getSelectedFeatureSettings() );
-		features.addAll( oldFiltersListModel.getSelectedFeatureSettings() );
+		List< FeatureSetting > features = filtersListPanel.getSelectedFeatureSettings();
 		final GlobalSettings globalSettings = globalsPanel.get();
 		return new FeatureSettings( globalSettings, features );
-	}
-
-	private void initUI( FeatureSettings fs ) {
-		setLayout( new MigLayout( "insets 0", "[grow]", "[][grow][]" ) );
-		globalsPanel = new GlobalsPanel( fs.globals() );
-		add( globalsPanel, "wrap" );
-		add( new JScrollPane(initAccordionPanel( AvailableFeatures.getValidFeatures( context, fs.globals() ) ) ), "split 2, grow" );
-	}
-
-	private JScrollPane initAccordionPanel( List< ValuePair< Class< ? extends FeatureOp >, String > > features ) {
-		AccordionPanel< FiltersListSection > accordionPanel = new AccordionPanel<>();
-		grpFiltersListModel = new FiltersListModel();
-		prmFiltersListModel = new FiltersListModel();
-		oldFiltersListModel = new FiltersListModel();
-		features.sort( Comparator.comparing( ValuePair::getB ) );
-		features.forEach( feature -> {
-			String s = feature.getB();
-			FeatureSetting fs = FeatureSetting.fromClass( feature.getA());
-			boolean prms = isParametrized(feature.getA());
-			if ( Character.isUpperCase( s.charAt( 0 ) ) )
-			{
-				if (prms)
-					prmFiltersListModel.add( new FiltersListRow( fs, true ) );
-				else
-					grpFiltersListModel.add( new FiltersListRow( fs, false ) );
-			} else {
-				oldFiltersListModel.add( new FiltersListRow( fs, prms));
-			}
-		} );
-
-		JScrollPane sp = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		sp.getViewport().add( accordionPanel );
-		accordionPanel.addSection( new FiltersListSection( accordionPanel, "Group Filters", new FiltersList( context, globalsPanel, grpFiltersListModel ), true));
-		accordionPanel.addSection( new FiltersListSection( accordionPanel, "Parametrized Filters", new FiltersList( context, globalsPanel, prmFiltersListModel ), true));
-		accordionPanel.addSection( new FiltersListSection( accordionPanel, "Deprecated Filters", new FiltersList( context, globalsPanel, oldFiltersListModel ), false));
-		return sp;
-	}
-	
-	private boolean isParametrized(Class< ? extends FeatureOp > featureClass) {
-		Set<String> params =FeatureSetting.fromClass( featureClass).parameters(); 
-		return !params.isEmpty();
 	}
 
 	public class GlobalsPanel extends JPanel {
@@ -120,14 +74,16 @@ public class FeatureSettingsUI extends JPanel {
 
 		public GlobalsPanel( GlobalSettings globalSettings ) {
 			channelSetting = globalSettings.channelSetting();
-			setLayout( new MigLayout( "insets 0", "[]20pt[100pt]", "[][][]" ) );
-			add( new JLabel( "Dimensions:" ) );
+			setLayout( new MigLayout( "insets 0", "[]20pt[150pt]", "[][][]" ) );
+			setBackground(Color.WHITE);
+			add( new JLabel( "Dimensions:" ));
 			dimensionsField = new JComboBox<>( new String[] { "2D", "3D" } );
 			dimensionsField.setSelectedItem( globalSettings.numDimensions() + "D" );
 			dimensionsField.addActionListener( this::dimensionsChanged );
 			add( dimensionsField, "wrap" );
 			add( new JLabel( "Sigmas:" ) );
 			sigmasField = new JFormattedTextField( new ListOfDoubleFormatter() );
+			sigmasField.setColumns( 50 );
 			sigmasField.setValue( globalSettings.sigmas() );
 			add( sigmasField, "grow, wrap" );
 		}
@@ -138,47 +94,7 @@ public class FeatureSettingsUI extends JPanel {
 		}
 
 		private void dimensionsChanged( ActionEvent e ) {
-			checkFeatures( get(), context );
-		}
-
-		private void checkFeatures( GlobalSettings globalSettings, Context context ) {
-
-			Collection< Class< ? extends FeatureOp > > availableFeatures = AvailableFeatures.getValidFeatures( context, globalSettings ).stream().map( ValuePair::getA ).collect( Collectors.toSet() );
-
-			// Check new features
-			List< FeatureSetting > newGrpFeatures = grpFiltersListModel.getFeatureSettings();
-			List< FeatureSetting > newGrpInvalid = newGrpFeatures.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
-			
-			List< FeatureSetting > newPrmFeatures = prmFiltersListModel.getFeatureSettings();
-			List< FeatureSetting > newPrmInvalid = newPrmFeatures.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
-
-			List< FeatureSetting > oldFeatures = oldFiltersListModel.getFeatureSettings();
-			List< FeatureSetting > oldInvalid = oldFeatures.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
-			List< FeatureSetting > allInvalid = new ArrayList<>( oldInvalid );
-			allInvalid.addAll( newGrpInvalid );
-			allInvalid.addAll( newPrmInvalid );
-			if ( !allInvalid.isEmpty() )
-				showWarning( allInvalid );
-			grpFiltersListModel.removeAll( newGrpInvalid );
-			prmFiltersListModel.removeAll( newPrmInvalid );
-			oldFiltersListModel.removeAll( oldInvalid );
-		}
-
-		private void showWarning( List< FeatureSetting > invalid ) {
-			final StringBuilder text = new StringBuilder( "The following features need to be removed because they don't fit the global settings:" );
-			invalid.forEach( feature -> text.append( "\n* " ).append( toString( feature ) ) );
-			JOptionPane.showMessageDialog(
-					null,
-					text.toString(),
-					"Feature Settings",
-					JOptionPane.WARNING_MESSAGE );
-		}
-
-		private String toString( FeatureSetting feature ) {
-			StringJoiner joiner = new StringJoiner( ", " );
-			for ( String parameter : feature.parameters() )
-				joiner.add( parameter + " = " + feature.getParameter( parameter ) );
-			return feature.getName() + " " + joiner;
+			filtersListPanel.checkFeatures( get(), context );
 		}
 
 	}
@@ -199,11 +115,14 @@ public class FeatureSettingsUI extends JPanel {
 
 	private static boolean showResizeableOkCancelDialog( String title, JPanel content ) {
 		JDialog dialog = new JDialog( ( Frame ) null, title, true );
+		dialog.setBackground( Color.WHITE );
+		UIManager.put("OptionPane.background",new ColorUIResource(255,255,255));
+		UIManager.put("Panel.background",new ColorUIResource(255,255,255));
 		JOptionPane optionPane = new JOptionPane( content, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION );
 		dialog.setContentPane( optionPane );
 		dialog.setResizable( true );
 		dialog.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
-		dialog.setPreferredSize( new Dimension( 600, 600 ) );
+		dialog.setPreferredSize( new Dimension( 600, 625 ));
 		optionPane.addPropertyChangeListener( e -> {
 			String prop = e.getPropertyName();
 			if ( dialog.isVisible() && ( e.getSource() == optionPane ) && ( JOptionPane.VALUE_PROPERTY.equals(

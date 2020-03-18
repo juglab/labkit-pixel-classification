@@ -1,7 +1,10 @@
 package net.imglib2.trainable_segmention.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -47,9 +50,11 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 		this.owner = owner;
 		this.filtersList = filtersList;
 		setLayout( new BorderLayout() );
+		setBackground(Color.WHITE);
 
 		JPanel titlePanel = new JPanel();
 		titlePanel.setLayout( new BorderLayout() );
+		titlePanel.setBackground(Color.WHITE);
 		titlePanel.setPreferredSize( new Dimension( this.getPreferredSize().width, this.getPreferredSize().height ) );
 
 		iconPanel = new IconPanel( isExpanded );
@@ -57,14 +62,17 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 		add( titlePanel, BorderLayout.NORTH );
 
 		titleComponent = new JLabel( title );
+		Font f = titleComponent.getFont();
+		titleComponent.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
 		titleComponent.setBorder( new CompoundBorder( BorderFactory.createEmptyBorder( 2, 8, 2, 2 ), titleComponent.getBorder() ) );
 		titlePanel.add( titleComponent );
 
-		add( filtersList, BorderLayout.CENTER );
+		JPanel listPanel = new JPanel(new GridLayout(1,1));
+		listPanel.setBackground(Color.WHITE);
+		listPanel.add(filtersList);
+		add( listPanel, BorderLayout.CENTER );
 		if ( !isExpanded )
 			this.collapse();
-		
-		revalidate();
 	}
 
 	@Override
@@ -107,6 +115,7 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 		public IconPanel( boolean expanded ) {
 			isExpanded = expanded;
 			setLayout( new BorderLayout() );
+			setBackground(Color.WHITE);
 			iconLabel = new JLabel( isExpanded ? AccordionControlIcons.EXPANDED.getIcon() : AccordionControlIcons.COLLAPSED.getIcon() );
 			iconLabel.addMouseListener( new MouseAdapter() {
 

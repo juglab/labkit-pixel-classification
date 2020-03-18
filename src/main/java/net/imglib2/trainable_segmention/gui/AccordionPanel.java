@@ -1,5 +1,6 @@
 package net.imglib2.trainable_segmention.gui;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ public class AccordionPanel< AS extends AccordionSection< AS > > extends JPanel 
 	public AccordionPanel() {
 		setLayout( new BoxLayout( this, BoxLayout.Y_AXIS ) );
 		setFocusable( false );
+		setBackground(Color.WHITE);
 	}
 
 	public Set< AS > getExpandedSections() {
@@ -53,17 +55,12 @@ public class AccordionPanel< AS extends AccordionSection< AS > > extends JPanel 
 		}
 		sections.remove( section );
 		remove( section );
-		sectionRemoved( section );
 		revalidate();
 		repaint();
 	}
 
 	protected String getRemoveConfirmationMessage() {
 		return "Are you sure you want to remove this section?";
-	}
-
-	protected void sectionRemoved( AS section ) {
-		//Default does nothing
 	}
 
 	private void configureNewSection( AS newSection) {
