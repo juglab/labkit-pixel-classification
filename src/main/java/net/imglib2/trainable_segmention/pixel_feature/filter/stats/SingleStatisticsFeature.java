@@ -1,11 +1,18 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.stats;
 
+import clij.CLIJLoopBuilder;
+import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import net.haesleinhuepf.clij2.CLIJ2;
+import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -21,7 +28,7 @@ import preview.net.imglib2.loops.LoopBuilder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.DoubleStream;
+import java.util.stream.LongStream;
 
 @Plugin(type = FeatureOp.class, label = "statistic filters")
 public class SingleStatisticsFeature extends AbstractFeatureOp {
@@ -132,5 +139,91 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 
 	private float square(float value) {
 		return value * value;
+	}
+
+	@Override
+	public void prefetch(CLIJFeatureInput input) {
+		long[] border = globalSettings().pixelSize().stream()
+				.mapToLong(pixelSize -> (long) (radius / pixelSize)).toArray();
+		input.prefetchOriginal(Intervals.expand(input.targetInterval(), border));
+	}
+
+	@Override
+	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
+		CLIJ2 clij = input.clij();
+		long[] border = globalSettings().pixelSize().stream().mapToLong(pixelSize -> (long) (radius / pixelSize)).toArray();
+		Iterator<CLIJView> iterator = output.iterator();
+		Interval interval = input.targetInterval();
+		CLIJView original = input.original(Intervals.expand(interval, border));
+		try(
+				ClearCLBuffer inputBuffer = copyView(clij, original);
+				ClearCLBuffer tmp = clij.create(inputBuffer);
+		)
+		{
+			if(min) {
+				min(clij, inputBuffer, tmp, border);
+				CLIJCopy.copy(clij, CLIJView.shrink(tmp, border), iterator.next());
+			}
+			if(max) {
+				max(clij, inputBuffer, tmp, border);
+				CLIJCopy.copy(clij, CLIJView.shrink(tmp, border), iterator.next());
+			}
+			calculateMeanAndVariance(clij, border, iterator, inputBuffer, tmp);
+		}
+	}
+
+	private void min(CLIJ2 clij, ClearCLBuffer inputBuffer, ClearCLBuffer tmp, long[] border) {
+		if (border.length == 2)
+			clij.minimum2DBox(inputBuffer, tmp, border[0], border[1]);
+		else
+			clij.minimum3DBox(inputBuffer, tmp, border[0], border[1], border[2]);
+	}
+
+	private void max(CLIJ2 clij, ClearCLBuffer input, ClearCLBuffer output, long[] border) {
+		if (border.length == 2)
+			clij.maximum2DBox(input, output, border[0], border[1]);
+		else
+			clij.maximum3DBox(input, output, border[0], border[1], border[2]);
+	}
+
+	private void calculateMeanAndVariance(CLIJ2 clij, long[] border, Iterator<CLIJView> iterator, ClearCLBuffer inputBuffer, ClearCLBuffer tmp) {
+		if(!mean && !variance)
+			return;
+		mean(clij, inputBuffer, tmp, border);
+		if (mean)
+			CLIJCopy.copy(clij, CLIJView.shrink(tmp, border), iterator.next());
+		if (variance) {
+			try (
+					ClearCLBuffer squared = clij.create(inputBuffer);
+					ClearCLBuffer meanOfSquared = clij.create(inputBuffer);
+			) {
+				square(clij, inputBuffer, squared);
+				mean(clij, squared, meanOfSquared, border);
+				long n = LongStream.of(border).map(b -> 2 * b + 1).reduce(1, (a, b) -> a * b);
+				CLIJLoopBuilder.clij(clij)
+						.addInput("mean", CLIJView.shrink(tmp, border))
+						.addInput("mean_of_squared", CLIJView.shrink(meanOfSquared, border))
+						.addInput("factor", (float) n / (n - 1))
+						.addOutput("o", iterator.next())
+						.forEachPixel("o = (mean_of_squared - mean * mean) * factor");
+			}
+		}
+	}
+
+	private void mean(CLIJ2 clij, ClearCLBuffer input, ClearCLBuffer output, long[] border) {
+		if(border.length == 2)
+			clij.mean2DBox(input, output, border[0], border[1]);
+		else
+			clij.mean3DBox(input, output, border[0], border[1], border[2]);
+	}
+
+	private void square(CLIJ2 clij, ClearCLBuffer inputBuffer, ClearCLBuffer tmp2) {
+		CLIJLoopBuilder.clij(clij).addInput("a", inputBuffer).addOutput("b", tmp2)
+				.forEachPixel("b = a * a");
+	}
+	private ClearCLBuffer copyView(CLIJ2 clij, CLIJView inputClBuffer) {
+		ClearCLBuffer buffer = clij.create(Intervals.dimensionsAsLongArray(inputClBuffer.interval()));
+		CLIJCopy.copy(clij, inputClBuffer, CLIJView.wrap(buffer));
+		return buffer;
 	}
 }
