@@ -28,7 +28,7 @@ public class CLIJFeatureInput implements AutoCloseable {
 		cache.request(new OriginalContent(), interval);
 	}
 
-	public CLIJView original(FinalInterval interval) {
+	public CLIJView original(Interval interval) {
 		return cache.get(new OriginalContent(), interval);
 	}
 
