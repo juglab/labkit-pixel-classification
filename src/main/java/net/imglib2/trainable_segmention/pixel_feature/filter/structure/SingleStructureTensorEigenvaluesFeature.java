@@ -45,7 +45,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
-import static com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolver.iterator;
 
 @Plugin(type = FeatureOp.class, label = "structure tensor eigenvalues")
 public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
