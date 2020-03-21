@@ -159,8 +159,8 @@
 		</dependency>
 		<dependency>
 			<groupId>net.haesleinhuepf</groupId>
-			<artifactId>clij-advanced-filters_</artifactId>
-			<version>0.21.7</version>
+			<artifactId>clij2_</artifactId>
+			<version>0.26.1</version>
 		</dependency>
 		<!-- TODO: replace dependency to Trainable_Segmentation with fastRandomForest
 		<dependency>
