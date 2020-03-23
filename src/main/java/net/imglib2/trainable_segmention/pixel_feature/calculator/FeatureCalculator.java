@@ -7,6 +7,7 @@ import net.imagej.ops.OpService;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJMultiChannelImage;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
@@ -84,10 +85,10 @@ public class FeatureCalculator {
 	/**
 	 * TODO what channel order? XYZC
 	 */
-	public void apply(RandomAccessible<?> input, List<RandomAccessibleInterval<FloatType>> output) {
-		RandomAccessibleInterval<FloatType> interval = output.get(0);
-		try (CLIJMultiChannelImage result = applyWithCLIJ(input, interval)) {
-			result.copyTo(Views.stack(output));
+	public void apply(RandomAccessible<?> input, RandomAccessibleInterval<FloatType> output) {
+		Interval interval = RevampUtils.removeLastDimension(output);
+		try (CLIJMultiChannelImage result = applyUseGpu(input, interval)) {
+			result.copyTo(output);
 		}
 	}
 
@@ -99,10 +100,10 @@ public class FeatureCalculator {
 		Interval interval)
 	{
 		long[] min = Arrays.copyOf(Intervals.minAsLongArray(interval), interval.numDimensions() + 1);
-		return Views.translate(applyWithCLIJ(extendedImage, interval).asRAI(), min);
+		return Views.translate(applyUseGpu(extendedImage, interval).asRAI(), min);
 	}
 
-	public CLIJMultiChannelImage applyWithCLIJ(RandomAccessible<?> input, Interval interval) {
+	public CLIJMultiChannelImage applyUseGpu(RandomAccessible<?> input, Interval interval) {
 		if (interval.numDimensions() != settings().globals().numDimensions())
 			throw new IllegalArgumentException("Wrong dimension of the output interval.");
 		double[] pixelSize = settings.globals().pixelSizeAsDoubleArray();

@@ -39,7 +39,7 @@ public class SingleGaussianBlurFeatureTest {
 		RandomAccessibleInterval<FloatType> output = ArrayImgs.floats(5, 5);
 		RandomAccessibleInterval<FloatType> expected =
 			Utils.create2dImage(output, (x, y) -> Utils.gauss(sigma, x, y));
-		calculator.apply(input, Collections.singletonList(output));
+		calculator.apply(input, Views.addDimension(output, 0, 0));
 		ImgLib2Assert.assertImageEqualsRealType(expected, output, 0.001);
 	}
 

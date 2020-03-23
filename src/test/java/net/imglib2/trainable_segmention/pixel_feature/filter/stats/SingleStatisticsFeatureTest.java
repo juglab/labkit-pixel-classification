@@ -8,7 +8,6 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
@@ -57,7 +56,7 @@ public class SingleStatisticsFeatureTest {
 			1 / 9f, 2 / 8f, 2 / 8f, 1 / 9f,
 			1 / 9f, 2 / 8f, 2 / 8f, 1 / 9f
 		}, 4, 3);
-		calculator.apply(Views.extendBorder(input), RevampUtils.slices(output));
+		calculator.apply(Views.extendBorder(input), output);
 		ImgLib2Assert.assertImageEquals(Views.stack(expectedMin, expectedMax, expectedMean,
 			expectedVariance),
 			output);
@@ -117,7 +116,7 @@ public class SingleStatisticsFeatureTest {
 			0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0
 		}, 5, 5);
-		calculator.apply(input, RevampUtils.slices(output));
+		calculator.apply(input, output);
 		ImgLib2Assert.assertImageEquals(Views.stack(expectedMax), output);
 
 	}

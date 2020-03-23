@@ -47,12 +47,12 @@ public class CLIJFeatureCalculatorTest {
 			.addFeature(SingleFeatures.gauss(8))
 			.build();
 		FinalInterval interval = Intervals.expand(input, -40);
-		try (CLIJMultiChannelImage featureStack = calculator.applyWithCLIJ(Views.extendBorder(input),
+		try (CLIJMultiChannelImage featureStack = calculator.applyUseGpu(Views.extendBorder(input),
 			interval))
 		{
 			RandomAccessibleInterval<FloatType> result = featureStack.asRAI();
-			RandomAccessibleInterval<FloatType> expected = calculator.apply(Views.extendBorder(input),
-				interval);
+			RandomAccessibleInterval<FloatType> expected = Views.zeroMin(calculator.apply(Views
+				.extendBorder(input), interval));
 			Utils.assertImagesEqual(50, expected, result);
 		}
 	}
@@ -65,12 +65,12 @@ public class CLIJFeatureCalculatorTest {
 			.addFeature(SingleFeatures.gauss(2))
 			.build();
 		FinalInterval interval = Intervals.expand(input, -40);
-		try (CLIJMultiChannelImage featureStack = calculator.applyWithCLIJ(Views.extendBorder(input),
+		try (CLIJMultiChannelImage featureStack = calculator.applyUseGpu(Views.extendBorder(input),
 			interval))
 		{
 			RandomAccessibleInterval<FloatType> result = featureStack.asRAI();
-			RandomAccessibleInterval<FloatType> expected = calculator.apply(Views.extendBorder(input),
-				interval);
+			RandomAccessibleInterval<FloatType> expected = Views.zeroMin(calculator.apply(Views
+				.extendBorder(input), interval));
 			Utils.assertImagesEqual(50, expected, result);
 		}
 	}

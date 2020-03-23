@@ -84,7 +84,7 @@ public class BorderEffectsTest {
 			1);
 		RandomAccessibleInterval<FloatType> result = Utils.ops().create().img(featureInterval,
 			new FloatType());
-		feature.apply(image, RevampUtils.slices(result));
+		feature.apply(image, result);
 		return result;
 	}
 

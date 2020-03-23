@@ -7,6 +7,7 @@ import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.Views;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -25,7 +26,7 @@ public class SingleGaussianGradientMagnitudeFeatureTest {
 	@Test
 	public void testApply2d() {
 		RandomAccessibleInterval<FloatType> result = ArrayImgs.floats(10, 10);
-		calculator.apply(Utils.dirac2d(), Collections.singletonList(result));
+		calculator.apply(Utils.dirac2d(), Views.addDimension(result, 0, 0));
 		RandomAccessibleInterval<FloatType> expected = Utils.create2dImage(result,
 			(x, y) -> gradientMagnitudeOfGaussian(sigma, x, y));
 		ImgLib2Assert.assertImageEqualsRealType(expected, result, 0.004);

@@ -111,7 +111,7 @@ public class Segmenter {
 			classNames.size(), features.count());
 		CLIJ2 clij = CLIJ2.getInstance();
 		try (
-			CLIJMultiChannelImage featureStack = features.applyWithCLIJ(image, out);
+			CLIJMultiChannelImage featureStack = features.applyUseGpu(image, out);
 			ClearCLBuffer segmentationBuffer = prediction.segment(clij, featureStack))
 		{
 			CLIJCopy.copyToRai(segmentationBuffer, out);

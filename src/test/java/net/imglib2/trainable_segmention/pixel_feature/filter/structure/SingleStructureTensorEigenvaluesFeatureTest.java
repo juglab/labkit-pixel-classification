@@ -104,7 +104,7 @@ public class SingleStructureTensorEigenvaluesFeatureTest {
 		Views.interval(image, new FinalInterval(50, 50, 50)).forEach(FloatType::setOne);
 		Interval target = Intervals.createMinSize(40, 40, 40, 0, 20, 20, 20, 3);
 		IntervalView<FloatType> output = createImage(target);
-		calculator3d.apply(Views.extendBorder(image), RevampUtils.slices(output));
+		calculator3d.apply(Views.extendBorder(image), output);
 		RandomAccessibleInterval<FloatType> result2 = UsingImagePlus.asRAI(ImageScience
 			.computeEigenimages(sigma,
 				integrationScale, UsingImagePlus.asImagePlusXYZ(image)));
