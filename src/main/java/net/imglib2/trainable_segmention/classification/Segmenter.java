@@ -56,8 +56,6 @@ public class Segmenter {
 
 	private weka.classifiers.Classifier classifier;
 
-	private boolean isTrained = false;
-
 	private final OpEnvironment ops;
 
 	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureCalculator features,
@@ -161,10 +159,6 @@ public class Segmenter {
 
 	public Training training() {
 		return new MyTrainingData();
-	}
-
-	public boolean isTrained() {
-		return isTrained;
 	}
 
 	public JsonElement toJsonTree() {
