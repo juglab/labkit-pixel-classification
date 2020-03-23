@@ -1,32 +1,22 @@
 package net.imglib2.trainable_segmention.gui;
 
-import java.awt.event.ActionEvent;
+import javax.swing.*;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-
-public abstract class AccordionSection< AS extends AccordionSection< AS > > extends JPanel {
+public abstract class AccordionSection extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	protected static final int MIN_COMPONENT_HEIGHT = 40;
 	protected static final int MIN_COMPONENT_WIDTH = 500;
-	protected AccordionPanel< AS > owner;
 
-	protected boolean collapsed = true;
+	boolean collapsed = true;
 
 	protected abstract int preferredCollapsedHeight();
 
 	protected abstract int preferredExpandedHeight();
 
-	abstract JComponent getExpandableComponent();
+	protected abstract JComponent getExpandableComponent();
 
-	public void setOwner( AccordionPanel< AS > owner ) {
-		this.owner = owner;
-	}
-
-	@SuppressWarnings( "unchecked" )
 	public void collapse() {
-		owner.setSectionCollapsed( ( AS ) this );
 		int calculatedHeight = this.preferredExpandedHeight();
 		AccordionAnimation anim = new AccordionAnimation( this, 200 );
 		anim.setStartValue( calculatedHeight );
@@ -36,9 +26,7 @@ public abstract class AccordionSection< AS extends AccordionSection< AS > > exte
 		repaint();
 	}
 
-	@SuppressWarnings( "unchecked" )
 	public void expand() {
-		owner.setSectionExpanded( ( AS ) this );
 		int calculatedHeight = preferredExpandedHeight();
 		AccordionAnimation anim = new AccordionAnimation( this, 200 );
 		anim.setStartValue( MIN_COMPONENT_HEIGHT );
@@ -46,10 +34,5 @@ public abstract class AccordionSection< AS extends AccordionSection< AS > > exte
 		anim.start();
 		collapsed = false;
 		repaint();
-	}
-
-	@SuppressWarnings( "unchecked" )
-	public void remove( ActionEvent e ) {
-		owner.removeSection( ( AS ) this );
 	}
 }

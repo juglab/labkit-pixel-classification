@@ -18,7 +18,7 @@ import javax.swing.border.CompoundBorder;
 /**
  * Sub component of the AccordionPanel
  */
-public class FiltersListSection extends AccordionSection< FiltersListSection > {
+public class FiltersListSection extends AccordionSection {
 
 	private static final long serialVersionUID = 1L;
 	private static final ImageIcon EXPANDED_ICON = new ImageIcon( FiltersListSection.class.getClassLoader().getResource( "arrow_down_48px.png" ) );
@@ -45,8 +45,7 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 
 	/**
 	 */
-	public FiltersListSection( AccordionPanel< FiltersListSection > owner, String title, FiltersList filtersList, boolean isExpanded ) {
-		this.owner = owner;
+	public FiltersListSection(String title, FiltersList filtersList, boolean isExpanded) {
 		this.filtersList = filtersList;
 		setLayout( new BorderLayout() );
 		setBackground(Color.WHITE);
@@ -134,7 +133,7 @@ public class FiltersListSection extends AccordionSection< FiltersListSection > {
 	}
 
 	@Override
-	JComponent getExpandableComponent() {
+	public JComponent getExpandableComponent() {
 		return filtersList;
 	}
 }

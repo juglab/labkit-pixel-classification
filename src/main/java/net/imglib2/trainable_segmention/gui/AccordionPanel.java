@@ -1,14 +1,8 @@
 package net.imglib2.trainable_segmention.gui;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import javax.swing.BoxLayout;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /**
@@ -17,12 +11,9 @@ import javax.swing.JPanel;
  * @author turekg
  *
  */
-public class AccordionPanel< AS extends AccordionSection< AS > > extends JPanel {
+public class AccordionPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private Set< AS > expandedSections = new HashSet<>();
-	private List< AS > sections = new ArrayList<>();
-	private boolean confirmRemove = true;
 
 	public AccordionPanel() {
 		setLayout( new BoxLayout( this, BoxLayout.Y_AXIS ) );
@@ -30,47 +21,9 @@ public class AccordionPanel< AS extends AccordionSection< AS > > extends JPanel 
 		setBackground(Color.WHITE);
 	}
 
-	public Set< AS > getExpandedSections() {
-		return expandedSections;
-	}
-
-	public void setSectionExpanded( AS section ) {
-		expandedSections.add( section );
-	}
-	
-	public void setSectionCollapsed( AS section ) {
-		expandedSections.remove( section );
-	}
-	
-	public void addSection( AS newSection) {
+	public void addSection( AccordionSection newSection) {
 		add( newSection );
-		sections.add( newSection );
-		configureNewSection( newSection);
 		revalidate();
 		repaint();
-	}
-
-	public void removeSection( AS section ) {
-		if ( this.confirmRemove ) {
-			int confirm = JOptionPane.showConfirmDialog( this, getRemoveConfirmationMessage(), null, JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE );
-			if ( confirm != JOptionPane.YES_OPTION ) { return; }
-		}
-		sections.remove( section );
-		remove( section );
-		revalidate();
-		repaint();
-	}
-
-	protected String getRemoveConfirmationMessage() {
-		return "Are you sure you want to remove this section?";
-	}
-
-	private void configureNewSection( AS newSection) {
-		newSection.setOwner( this );
-		setSectionExpanded( newSection );
-	}
-
-	protected List< AS > getSections() {
-		return Collections.unmodifiableList( sections );
 	}
 }

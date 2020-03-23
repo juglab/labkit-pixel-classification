@@ -40,9 +40,9 @@ public class FiltersListRow extends JPanel {
 	private JLabel editButton;
 	private JLabel nameLabel;
 
-	public FiltersListRow( FeatureSetting featureSetting, boolean isParametrized ) {
+	public FiltersListRow(FeatureSetting featureSetting) {
 		this.featureSetting = featureSetting;
-		this.isParametrized = isParametrized;
+		this.isParametrized = ! featureSetting.parameters().isEmpty();
 		setLayout( new BorderLayout() );
 		setBorder(new EmptyBorder(1,0,1,0));
 		setBackground(Color.WHITE);

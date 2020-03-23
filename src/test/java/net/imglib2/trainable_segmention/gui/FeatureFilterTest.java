@@ -75,9 +75,8 @@ public class FeatureFilterTest {
 	private void testAvailableFeatures(Collection<Class<? extends FeatureOp>> expected,
 		GlobalSettings globals)
 	{
-		List<ValuePair<Class<? extends FeatureOp>, String>> f = AvailableFeatures.getValidFeatures(
-			context, globals);
-		Collection<Class<? extends FeatureOp>> features = f.stream().map(ValuePair::getA).collect(
+		List<FeatureInfo> f = AvailableFeatures.getValidFeatures(context, globals);
+		Collection<Class<? extends FeatureOp>> features = f.stream().map(FeatureInfo::clazz).collect(
 			Collectors.toSet());
 		assertContainsEquals(expected, features);
 	}

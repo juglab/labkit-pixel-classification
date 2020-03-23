@@ -4,9 +4,9 @@ import java.awt.Dimension;
 
 public class AccordionAnimation extends Animation {
 
-	private AccordionSection<?> accordionSection;
+	private AccordionSection accordionSection;
 
-	public AccordionAnimation(AccordionSection<?> accordionSection, int durationMs) {
+	public AccordionAnimation(AccordionSection accordionSection, int durationMs) {
 		super(durationMs);
 		this.accordionSection = accordionSection;
 	}

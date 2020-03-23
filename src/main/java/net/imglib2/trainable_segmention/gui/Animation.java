@@ -8,31 +8,27 @@ import javax.swing.Timer;
 public abstract class Animation implements ActionListener {
 
 	/** start value (typically in pixels) */
-	protected int startValue = 0;
+	private int startValue = 0;
 	/** end value (typically in pixels) */
-	protected int endValue = 0;
+	private int endValue = 0;
 	/** duration over which the animation takes place */
-	protected long durationMillis = 0;
+	private long durationMillis = 0;
 
 	/**
 	 * A value (difference of start and end values) that corresponds to value
 	 * per millisecond
 	 */
-	protected double valuePerMilli = 0.0;
+	private double valuePerMilli = 0.0;
 
 	/** The ctm of the last performed animation operation */
-	protected long startMillis;
+	private long startMillis;
 
-	protected Timer timer;
+	private Timer timer;
 
-	protected double value = 0;
+	private double value = 0;
 
 	/**
 	 * Constructor where you specify <i>time</i> between the two pixel values.
-	 *
-	 * @param startValue
-	 * @param endValue
-	 * @param durationMillis
 	 */
 	public Animation( int startValue, int endValue, int durationMillis ) {
 		this.startValue = startValue;
@@ -46,10 +42,6 @@ public abstract class Animation implements ActionListener {
 	/**
 	 * Constructor where you specify <i>value/ms</i> between the two pixel
 	 * values.
-	 *
-	 * @param startValue
-	 * @param endValue
-	 * @param durationMillis
 	 */
 	public Animation( int startValue, int endValue, double valuePerMilli ) {
 

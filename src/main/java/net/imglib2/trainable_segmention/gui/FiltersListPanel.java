@@ -2,8 +2,10 @@ package net.imglib2.trainable_segmention.gui;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -13,6 +15,14 @@ import javax.swing.BoxLayout;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import net.imglib2.trainable_segmention.pixel_feature.filter.dog2.DifferenceOfGaussiansFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussianBlurFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.GaussianGradientMagnitudeFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.HessianEigenvaluesFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.laplacian.LaplacianOfGaussianFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.stats.StatisticsFeature;
+import net.imglib2.trainable_segmention.pixel_feature.filter.structure.StructureTensorEigenvaluesFeature;
 import org.scijava.Context;
 
 import net.imglib2.trainable_segmention.gui.FeatureSettingsUI.GlobalsPanel;
@@ -20,7 +30,6 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
-import net.imglib2.util.ValuePair;
 
 public class FiltersListPanel extends JPanel {
 
@@ -35,34 +44,39 @@ public class FiltersListPanel extends JPanel {
 		init( context, AvailableFeatures.getValidFeatures( context, fs.globals() ), gb );
 	}
 
-	private void init( Context context, List< ValuePair< Class< ? extends FeatureOp >, String > > features, GlobalsPanel gb ) {
+	private void init( Context context, List< FeatureInfo > features, GlobalsPanel gb ) {
 		grpFiltersListModel = new FiltersListModel();
 		prmFiltersListModel = new FiltersListModel();
 		oldFiltersListModel = new FiltersListModel();
-		features.sort( Comparator.comparing( ValuePair::getB ) );
-		features.forEach( feature -> {
-			String s = feature.getB();
-			FeatureSetting fs = FeatureSetting.fromClass( feature.getA() );
-			boolean prms = isParametrized( feature.getA() );
-			if ( Character.isUpperCase( s.charAt( 0 ) ) ) {
-				if ( prms )
-					prmFiltersListModel.add( new FiltersListRow( fs, true ) );
-				else
-					grpFiltersListModel.add( new FiltersListRow( fs, false ) );
-			} else {
-				oldFiltersListModel.add( new FiltersListRow( fs, prms ) );
-			}
-		} );
+		features.sort( Comparator.comparing( FeatureInfo::label ) );
+		for(FeatureInfo feature : features) {
+			FeatureSetting fs = FeatureSetting.fromClass( feature.clazz() );
+			FiltersListRow row = new FiltersListRow(fs);
+			if ( feature.isDeprecated() )
+				oldFiltersListModel.add(row);
+			else if ( isBasic( feature.clazz() ) )
+				grpFiltersListModel.add(row);
+			else
+				prmFiltersListModel.add(row);
+		}
 
-		AccordionPanel<FiltersListSection> grpPanel = new AccordionPanel<>();
-		grpPanel.addSection( new FiltersListSection( grpPanel, "Group Filters", new FiltersList( context, gb, grpFiltersListModel ), true ) );
-		add(grpPanel);
-		AccordionPanel<FiltersListSection> prmPanel = new AccordionPanel<>();
-		prmPanel.addSection( new FiltersListSection( prmPanel, "Parametrized Filters", new FiltersList( context, gb, prmFiltersListModel ), true ) );
-		add(prmPanel);
-		AccordionPanel<FiltersListSection> oldPanel = new AccordionPanel<>();
-		oldPanel.addSection( new FiltersListSection( oldPanel, "Deprecated Filters", new FiltersList( context, gb, oldFiltersListModel ), false ) );
-		add(oldPanel);
+		AccordionPanel accordion = new AccordionPanel();
+		accordion.addSection( new FiltersListSection("Basic Filters", new FiltersList( context, gb, grpFiltersListModel ), true ) );
+		accordion.addSection( new FiltersListSection("Additional Filters", new FiltersList( context, gb, prmFiltersListModel ), false ) );
+		accordion.addSection( new FiltersListSection("Deprecated Filters", new FiltersList( context, gb, oldFiltersListModel ), false ) );
+		add(accordion);
+	}
+
+	Set<Class<?>> BASIC_FILTERS = new HashSet<>(Arrays.asList(IdendityFeature.class, GaussianBlurFeature.class,
+			DifferenceOfGaussiansFeature.class,
+			GaussianGradientMagnitudeFeature.class,
+			LaplacianOfGaussianFeature.class,
+			HessianEigenvaluesFeature.class,
+			StructureTensorEigenvaluesFeature.class,
+			StatisticsFeature.class));
+
+	private boolean isBasic(Class<? extends FeatureOp> clazz) {
+		return BASIC_FILTERS.contains(clazz);
 	}
 
 	private boolean isParametrized( Class< ? extends FeatureOp > featureClass ) {
@@ -89,7 +103,7 @@ public class FiltersListPanel extends JPanel {
 	
 	public void checkFeatures( GlobalSettings globalSettings, Context context ) {
 
-		Collection< Class< ? extends FeatureOp > > availableFeatures = AvailableFeatures.getValidFeatures( context, globalSettings ).stream().map( ValuePair::getA ).collect( Collectors.toSet() );
+		Collection< Class< ? extends FeatureOp > > availableFeatures = AvailableFeatures.getValidFeatures( context, globalSettings ).stream().map( FeatureInfo::clazz ).collect( Collectors.toSet() );
 
 		// Check new features
 		List< FeatureSetting > newGrpFeatures = grpFiltersListModel.getFeatureSettings();
