@@ -5,7 +5,6 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import net.imagej.ops.OpService;
 import net.imglib2.FinalInterval;
-import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
@@ -39,7 +38,6 @@ public class FeatureStack3DTest {
 	private OpService ops = context.service(OpService.class);
 
 	private Img<FloatType> img = initSample();
-	private ImagePlus image = ImageJFunctions.wrap(img, "sample");
 
 	private Img<FloatType> initSample() {
 		Img<FloatType> img = ArrayImgs.floats(new long[] { 50, 50, 50 });
@@ -125,7 +123,7 @@ public class FeatureStack3DTest {
 	private FeatureStackArray calculateFeatureStack(int featureIndex) {
 		boolean[] enabledFeatures = new boolean[FeatureStack3D.availableFeatures.length];
 		enabledFeatures[featureIndex] = true;
-		FeatureStack3D stack = new FeatureStack3D(image.duplicate());
+		FeatureStack3D stack = new FeatureStack3D(ImageJFunctions.wrap(img, "sample").duplicate());
 		stack.setEnableFeatures(enabledFeatures);
 		stack.updateFeaturesMT();
 		return stack.getFeatureStackArray();

@@ -42,9 +42,9 @@ import static org.junit.Assert.assertEquals;
  */
 public class FeatureStackTest {
 
-	private static ImagePlus bridgeImage = Utils.loadImage("nuclei.tif");
+	private final ImagePlus bridgeImage = Utils.loadImage("nuclei.tif");
 
-	private static Img<FloatType> bridgeImg = ImagePlusAdapter.convertFloat(bridgeImage);
+	private final Img<FloatType> bridgeImg = ImagePlusAdapter.convertFloat(bridgeImage);
 
 	public static RandomAccessibleInterval<FloatType> createStack(
 		RandomAccessibleInterval<FloatType> image, FeatureSetting feature)

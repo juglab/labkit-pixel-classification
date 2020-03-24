@@ -3,6 +3,7 @@ package preview.net.imglib2.algorithm.gauss3;
 
 import ij.IJ;
 import ij.ImagePlus;
+import net.imagej.patcher.LegacyInjector;
 import net.imglib2.Localizable;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.gradient.PartialDerivative;
@@ -33,6 +34,13 @@ import java.util.function.BiFunction;
 import static org.junit.Assume.assumeFalse;
 
 public class Gauss3Test<T extends RealType<T> & NativeType<T>> {
+
+	static {
+		try {
+			LegacyInjector.preinit();
+		}
+		catch (Exception e) {}
+	}
 
 	private T type = Cast.unchecked(new DoubleType());
 	private double sigma = 4;

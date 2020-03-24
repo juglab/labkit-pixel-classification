@@ -1,10 +1,8 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
-import ij.ImagePlus;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
-import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
@@ -40,8 +38,8 @@ public class ColorFeatureGroupTest {
 	private final FeatureCalculator grayGroup = new FeatureCalculator(Utils.ops(),
 		new FeatureSettings(graySettings, SingleFeatures.gauss(8.0)));
 
-	private final Img<ARGBType> image = ImageJFunctions.wrapRGBA(new ImagePlus(
-		"https://imagej.nih.gov/ij/images/clown.png"));
+	private final Img<ARGBType> image = Utils.loadImageARGBType(
+		"https://imagej.nih.gov/ij/images/clown.png");
 
 	@Test
 	public void testAttributes() {

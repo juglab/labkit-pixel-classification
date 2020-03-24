@@ -1,22 +1,14 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.stats;
 
-import net.imagej.ops.OpEnvironment;
-import net.imagej.ops.OpService;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
-import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
-import org.scijava.Context;
 
 /**
  * Tests {@link StatisticsFeature}.

@@ -21,6 +21,7 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.trainable_segmention.utils.DoubleTernaryOperator;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.integer.IntType;
@@ -347,5 +348,10 @@ public class Utils {
 		RandomAccessibleInterval<FloatType> floats = ConstantUtils.constantRandomAccessibleInterval(
 			new FloatType(1), new FinalInterval(new long[n], new long[n]));
 		return Views.extendZero(floats);
+	}
+
+	public static Img<ARGBType> loadImageARGBType(String pathOrURL) {
+		return ImageJFunctions.wrapRGBA(new ImagePlus(
+			pathOrURL));
 	}
 }
