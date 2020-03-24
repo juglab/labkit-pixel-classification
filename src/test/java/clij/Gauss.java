@@ -38,8 +38,8 @@ public class Gauss {
 		setSkips(defines, "OUTPUT", output, d);
 		long[] globalSizes = getDimensions(output.interval());
 		ArrayUtils.swap(globalSizes, 0, d);
-		clij.execute(Gauss.class, "gauss.cl", "convolve1d", globalSizes,
-			globalSizes, localSizes, parameters, defines);
+		clij.executeSubsequently(Gauss.class, "gauss.cl", "convolve1d", globalSizes,
+			globalSizes, localSizes, parameters, defines, null).close();
 	}
 
 	private static void setSkips(HashMap<String, Object> defines, String prefix, CLIJView view,
