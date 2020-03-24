@@ -38,19 +38,6 @@ import java.util.Optional;
 
 public class CLIJCopy {
 
-	public static void copy3dStack(CLIJ2 clij, ClearCLBuffer input, ClearCLBuffer output, int offset,
-		int step)
-	{
-		long[] globalSizes = input.getDimensions();
-		HashMap<String, Object> parameters = new HashMap<>();
-		parameters.put("src", input);
-		parameters.put("dst", output);
-		parameters.put("offset", offset);
-		parameters.put("step", step);
-		clij.execute(CLIJCopy.class, "copy_3d_stack.cl", "copy_3d_stack", globalSizes, globalSizes,
-			parameters);
-	}
-
 	public static void copy(CLIJ2 clij, CLIJView src, CLIJView dst) {
 		CLIJLoopBuilder.clij(clij).addInput("s", src).addOutput("d", dst).forEachPixel("d = s");
 	}

@@ -13,8 +13,6 @@ import java.util.HashMap;
 
 public class Gauss {
 
-	private static CLKernelExecutor executor;
-
 	public static void convolve(CLIJ2 clij, ClearCLBuffer input, ClearCLBuffer kernel,
 		ClearCLBuffer output)
 	{
