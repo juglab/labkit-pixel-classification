@@ -2,6 +2,7 @@
 package net.imglib2.trainable_segmention.clij_random_forest;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
@@ -32,14 +33,14 @@ public class CLIJMultiChannelImage implements AutoCloseable {
 		this.numChannels = numChannels;
 		long[] size = spatialDimensions.clone();
 		size[size.length - 1] = size[size.length - 1] * numChannels;
-		this.buffer = clij.create(size);
+		this.buffer = clij.create(size, NativeTypeEnum.Float);
 	}
 
-	public CLIJMultiChannelImage(CLIJ2 clij, RandomAccessibleInterval<?> input) {
-		long[] allDimensions = Intervals.dimensionsAsLongArray(input);
+	public CLIJMultiChannelImage(CLIJ2 clij, RandomAccessibleInterval<?> input, long numChannels) {
 		this.clij = clij;
-		this.spatialDimensions = Arrays.copyOf(allDimensions, allDimensions.length - 1);
-		this.numChannels = allDimensions[allDimensions.length - 1];
+		this.spatialDimensions = Intervals.dimensionsAsLongArray(input);
+		spatialDimensions[spatialDimensions.length - 1] /= numChannels;
+		this.numChannels = numChannels;
 		this.buffer = clij.push(input);
 	}
 

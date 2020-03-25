@@ -40,8 +40,8 @@ public class CLIJRandomForestKernelTest {
 		int numberOfClasses = 2;
 		int numberOfNodes = 2;
 		int numberOfLeafs = 3;
-		ClearCLBuffer distributions = clij.create(
-			new long[] { width, height, numberOfClasses * depth }, NativeTypeEnum.Float);
+		CLIJMultiChannelImage distributions = new CLIJMultiChannelImage(clij, new long[] { width,
+			height, depth }, numberOfClasses);
 		Img<FloatType> src = ArrayImgs.floats(new float[] {
 			41, 43, 45,
 			45, 43, 41
@@ -69,20 +69,20 @@ public class CLIJRandomForestKernelTest {
 
 		CLIJRandomForestKernel.randomForest(clij,
 			distributions,
-			clij.push(src),
+			new CLIJMultiChannelImage(clij, src, numberOfFeatures),
 			clij.push(thresholds),
 			clij.push(probabilities),
 			clij.push(indices),
 			numberOfFeatures);
 
-		RandomAccessibleInterval<? extends RealType<?>> result = clij.pullRAI(distributions);
+		RandomAccessibleInterval<? extends RealType<?>> result = distributions.asRAI();
 		Img<FloatType> expected = ArrayImgs.floats(new float[] {
 			0.4f, 0.75f, 0.5f,
 			0.5f, 0.75f, 0.4f,
 
 			0.6f, 0.25f, 0.5f,
 			0.5f, 0.25f, 0.6f
-		}, 3, 1, 4);
+		}, 3, 1, 2, 2);
 		ImgLib2Assert.assertImageEqualsRealType(expected, result, 0.00001);
 		Views.iterable(result).forEach(System.out::println);
 
@@ -99,14 +99,33 @@ public class CLIJRandomForestKernelTest {
 
 			3, 1, 1, 3,
 			-3, -3, -2, -1
-		}, 2, 2, 2, 3);
-		ClearCLBuffer outputBuffer = clij.create(new long[] { 2, 2, 2 }, NativeTypeEnum.Float);
-		CLIJRandomForestKernel.findMax(clij, new CLIJMultiChannelImage(clij, input), outputBuffer);
+		}, 2, 2, 6);
+		ClearCLBuffer outputBuffer = clij.create(new long[] { 2, 2, 2 }, NativeTypeEnum.UnsignedShort);
+		CLIJRandomForestKernel.findMax(clij, new CLIJMultiChannelImage(clij, input, 3), outputBuffer);
 		RandomAccessibleInterval<? extends RealType<?>> result = clij.pullRAI(outputBuffer);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] {
 			2, 0, 1, 2,
 			0, 1, 1, 1
 		}, 2, 2, 2);
+		ImgLib2Assert.assertImageEqualsRealType(expected, result, 0.0);
+	}
+
+	@Test
+	public void testFindMax2d() {
+		Img<FloatType> input = ArrayImgs.floats(new float[] {
+			1, 3,
+			-1, -2,
+
+			2, 2,
+			-2, -1,
+		}, 2, 4);
+		ClearCLBuffer outputBuffer = clij.create(new long[] { 2, 2 }, NativeTypeEnum.UnsignedShort);
+		CLIJRandomForestKernel.findMax(clij, new CLIJMultiChannelImage(clij, input, 2), outputBuffer);
+		RandomAccessibleInterval<? extends RealType<?>> result = clij.pullRAI(outputBuffer);
+		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] {
+			1, 0,
+			0, 1
+		}, 2, 2);
 		ImgLib2Assert.assertImageEqualsRealType(expected, result, 0.0);
 	}
 

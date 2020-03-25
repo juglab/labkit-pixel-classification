@@ -113,7 +113,7 @@ public class FeatureCalculator {
 	public RandomAccessibleInterval<FloatType> apply(RandomAccessible<?> extendedImage,
 		Interval interval)
 	{
-		FinalInterval fullInterval = Intervals.addDimension(interval, 0, joiner.count() - 1);
+		FinalInterval fullInterval = Intervals.addDimension(interval, 0, count() - 1);
 		if (useGPU)
 			return Views.translate(applyUseGpu(extendedImage, interval).asRAI(),
 				Intervals.minAsLongArray(fullInterval));
@@ -143,7 +143,7 @@ public class FeatureCalculator {
 		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
 		CLIJ2 clij = CLIJ2.getInstance();
 		CLIJMultiChannelImage featureStack = new CLIJMultiChannelImage(clij, Intervals
-			.dimensionsAsLongArray(interval), joiner.count());
+			.dimensionsAsLongArray(interval), count());
 		List<List<CLIJView>> outputs = split(featureStack.channels(), channels.size());
 		for (int i = 0; i < channels.size(); i++) {
 			try (CLIJFeatureInput in = new CLIJFeatureInput(clij, channels.get(i), interval, pixelSize)) {

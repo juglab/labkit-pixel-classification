@@ -1,21 +1,20 @@
 __constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
 
-#define READ_IMAGE(a,b,c) READ_ ## a ## _IMAGE(a,b,c)
-#define WRITE_IMAGE(a,b,c) WRITE_ ## a ## _IMAGE(a,b,c)
+#define PIXEL(image, x, y, z) image[((z) * GET_IMAGE_HEIGHT(image) + (y)) * GET_IMAGE_WIDTH(image) + (x)]
 #define IMAGE_TYPE(a) IMAGE_ ## a ## _TYPE a
 
 __kernel void random_forest
 (
-  IMAGE_dst_TYPE dst,
-  IMAGE_src_TYPE src,
-  IMAGE_thresholds_TYPE thresholds,
-  IMAGE_probabilities_TYPE probabilities,
-  IMAGE_indices_TYPE indices,
-  const int num_features
+  IMAGE_TYPE(dst),
+  IMAGE_TYPE(src),
+  IMAGE_TYPE(thresholds),
+  IMAGE_TYPE(probabilities),
+  IMAGE_TYPE(indices)
 )
 {
   const int x = get_global_id(0), y = get_global_id(1), z = get_global_id(2);
-  const int num_slices = GET_IMAGE_DEPTH(src) / NUMBER_OF_FEATURES;
+  const int src_channel_skip = GET_IMAGE_WIDTH(src) * GET_IMAGE_HEIGHT(src) * GET_IMAGE_DEPTH(src) / NUMBER_OF_FEATURES;
+  const int dst_channel_skip = GET_IMAGE_WIDTH(dst) * GET_IMAGE_HEIGHT(dst) * GET_IMAGE_DEPTH(dst) / NUMBER_OF_CLASSES;
   const int num_trees = GET_IMAGE_DEPTH(thresholds);
   const unsigned short num_nodes = (unsigned short) GET_IMAGE_HEIGHT(thresholds);
   float results[NUMBER_OF_CLASSES];
@@ -32,7 +31,7 @@ __kernel void random_forest
   }
 
   for(int i = 0; i < NUMBER_OF_FEATURES; i++) {
-    features[i] = READ_IMAGE(src, sampler, (int4)(x,y,i * num_slices + z,0)).x;
+    features[i] = PIXEL(src, x + i * src_channel_skip, y, z);
   }
 
   // run random forest
@@ -59,6 +58,6 @@ __kernel void random_forest
 
   // normalize distribution
   for(int i = 0; i < NUMBER_OF_CLASSES; i++) {
-    dst[((i * num_slices + z) * GET_IMAGE_HEIGHT(dst) + y) * GET_IMAGE_WIDTH(dst) + x] = results[i] / sum;
+    PIXEL(dst, x + i * dst_channel_skip, y, z) = results[i] / sum;
   }
 }

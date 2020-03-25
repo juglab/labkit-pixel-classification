@@ -10,21 +10,20 @@ import java.util.HashMap;
 public class CLIJRandomForestKernel {
 
 	public static void randomForest(CLIJ2 clij,
-		ClearCLBuffer distributions,
-		ClearCLBuffer src,
+		CLIJMultiChannelImage distributions,
+		CLIJMultiChannelImage src,
 		ClearCLBuffer thresholds,
 		ClearCLBuffer probabilities,
 		ClearCLBuffer indices,
 		int numberOfFeatures)
 	{
-		long[] globalSizes = { src.getWidth(), src.getHeight(), src.getDepth() / numberOfFeatures };
+		long[] globalSizes = src.getSpatialDimensions().clone();
 		HashMap<String, Object> parameters = new HashMap<>();
-		parameters.put("src", src);
-		parameters.put("dst", distributions);
+		parameters.put("src", src.asClearCLBuffer());
+		parameters.put("dst", distributions.asClearCLBuffer());
 		parameters.put("thresholds", thresholds);
 		parameters.put("probabilities", probabilities);
 		parameters.put("indices", indices);
-		parameters.put("num_features", numberOfFeatures);
 		HashMap<String, Object> constants = new HashMap<>();
 		constants.put("NUMBER_OF_CLASSES", probabilities.getWidth());
 		constants.put("NUMBER_OF_FEATURES", numberOfFeatures);
