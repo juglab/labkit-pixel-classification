@@ -62,7 +62,7 @@ public class RandomForestPrediction {
 				nodeIndices[(j * numberOfNodes + i) * 3 + 2] = encodeLeaf(tree.biggerChild[i]);
 				nodeThresholds[j * numberOfNodes + i] = (float) tree.threshold[i];
 			}
-			for (int i = 0; i < tree.leafCount; i++)
+			for (int i = 0; i < tree.numberOfLeafs; i++)
 				for (int k = 0; k < numberOfClasses; k++)
 					leafProbabilities[(j * numberOfLeafs + i) * numberOfClasses + k] =
 						(float) tree.classProbabilities[i][k];
@@ -87,7 +87,7 @@ public class RandomForestPrediction {
 
 	private void addDistributionForTree(Instance instance, int tree, double[] distribution) {
 		int node = 0;
-		while (node >= numberOfNodes) {
+		while (node < numberOfNodes) {
 			int attributeIndex = nodeIndices[(tree * numberOfNodes + node) * 3];
 			double attributeValue = instance.value(attributeIndex);
 			int b = attributeValue < nodeThresholds[(tree * numberOfNodes) + node] ? 1 : 2;
@@ -111,8 +111,7 @@ public class RandomForestPrediction {
 			ClearCLBuffer probabilitiesClBuffer = clij.push(probabilities);
 			ClearCLBuffer indicesClBuffer = clij.push(indices);)
 		{
-			CLIJRandomForestKernel.randomForest(clij, distribution.asClearCLBuffer(), features
-				.asClearCLBuffer(),
+			CLIJRandomForestKernel.randomForest(clij, distribution, features,
 				thresholdsClBuffer, probabilitiesClBuffer, indicesClBuffer, numberOfFeatures);
 		}
 	}

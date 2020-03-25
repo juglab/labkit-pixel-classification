@@ -7,8 +7,8 @@ public class RandomTreePrediction {
 
 	final int numberOfNodes;
 	final int numberOfLeafs;
-	int nodeCount = 0;
-	int leafCount = 0;
+	private int nodeCount = 0;
+	private int leafCount = 0;
 	final int[] attributeIndicies;
 	final double[] threshold;
 	final int[] smallerChild;
@@ -16,14 +16,25 @@ public class RandomTreePrediction {
 	final double[][] classProbabilities;
 
 	public RandomTreePrediction(TransparentRandomTree tree) {
-		this.numberOfLeafs = countLeafs(tree);
-		this.numberOfNodes = countNodes(tree);
-		this.attributeIndicies = new int[numberOfNodes];
-		this.threshold = new double[numberOfNodes];
-		this.smallerChild = new int[numberOfNodes];
-		this.biggerChild = new int[numberOfNodes];
-		this.classProbabilities = new double[numberOfLeafs][];
-		addTree(tree);
+		if (tree.isLeaf()) {
+			this.numberOfLeafs = 1;
+			this.numberOfNodes = 1;
+			this.attributeIndicies = new int[] { 0 };
+			this.threshold = new double[] { 0.0 };
+			this.smallerChild = new int[] { -1 };
+			this.biggerChild = new int[] { -1 };
+			this.classProbabilities = new double[][] { tree.classProbabilities() };
+		}
+		else {
+			this.numberOfLeafs = countLeafs(tree);
+			this.numberOfNodes = countNodes(tree);
+			this.attributeIndicies = new int[numberOfNodes];
+			this.threshold = new double[numberOfNodes];
+			this.smallerChild = new int[numberOfNodes];
+			this.biggerChild = new int[numberOfNodes];
+			this.classProbabilities = new double[numberOfLeafs][];
+			addTree(tree);
+		}
 	}
 
 	private int countNodes(TransparentRandomTree node) {
