@@ -17,7 +17,7 @@ public class FastSqrtTest {
 	@Test
 	public void testSqrtForDouble() {
 		double sqrt = FastSqrt.sqrt((double) 5);
-		assertEquals(5, sqrt * sqrt, 0);
+		assertEquals(5, sqrt * sqrt, 1.e-10);
 	}
 
 }
