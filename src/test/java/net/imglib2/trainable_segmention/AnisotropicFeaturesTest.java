@@ -19,12 +19,31 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.scijava.Context;
 import preview.net.imglib2.algorithm.gauss3.Gauss3;
 import preview.net.imglib2.loops.LoopBuilder;
 import preview.net.imglib2.parallel.Parallelization;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assume.assumeFalse;
+
+@RunWith(Parameterized.class)
 public class AnisotropicFeaturesTest {
+
+	public AnisotropicFeaturesTest(boolean useGpu) {
+		this.useGpu = useGpu;
+	}
+
+	@Parameterized.Parameters(name = "useGpu = {0}")
+	public static List<Boolean> data() {
+		return Arrays.asList(false, true);
+	}
+
+	private final boolean useGpu;
 
 	private static OpService ops = new Context().service(OpService.class);
 
@@ -36,7 +55,7 @@ public class AnisotropicFeaturesTest {
 	@Test
 	public void testHessian() {
 		testAnisotropy2d(39, GroupedFeatures.hessian());
-		testAnisotropy3d(GroupedFeatures.hessian());
+		testAnisotropy3d(40, GroupedFeatures.hessian());
 	}
 
 	@Test
@@ -56,11 +75,14 @@ public class AnisotropicFeaturesTest {
 
 	@Test
 	public void testStructure() {
-		testAnisotropy3d(GroupedFeatures.structureTensor());
+		testAnisotropy2d(32, GroupedFeatures.structureTensor());
+		testAnisotropy3d(33, GroupedFeatures.structureTensor());
 	}
 
+	@Deprecated
 	@Test
 	public void testLipschitz() {
+		assumeFalse(useGpu);
 		testAnisotropy(SingleFeatures.lipschitz(0.01, 20));
 	}
 
@@ -70,12 +92,11 @@ public class AnisotropicFeaturesTest {
 	}
 
 	private void testAnisotropy(FeatureSetting setting) {
-		testAnisotropy2d(setting);
-		testAnisotropy3d(setting);
+		testAnisotropy2d(40, setting);
+		testAnisotropy3d(40, setting);
 	}
 
-	private void testAnisotropy3d(FeatureSetting setting) {
-		FeatureSettings settings = new FeatureSettings(GlobalSettings.default3d().build(), setting);
+	private void testAnisotropy3d(double expectedPsnr, FeatureSetting setting) {
 		RandomAccessibleInterval<DoubleType> image = testImage(100, 100, 100);
 		RandomAccessibleInterval<DoubleType> scaleImage = Views.subsample(image, 1, 1, 2);
 
@@ -84,6 +105,7 @@ public class AnisotropicFeaturesTest {
 			.dimensions(3)
 			.addFeature(setting)
 			.build();
+		calculator.setUseGPU(useGpu);
 		RandomAccessibleInterval<FloatType> result = calculator.apply(Views.extendBorder(image),
 			Intervals.createMinSize(24, 24, 24, 50, 50, 50));
 		RandomAccessibleInterval<FloatType> scaledFeatures = Views.subsample(result, 1, 1, 2, 1);
@@ -94,13 +116,10 @@ public class AnisotropicFeaturesTest {
 			.addFeature(setting)
 			.pixelSize(1, 1, 2)
 			.build();
+		calculator2.setUseGPU(useGpu);
 		RandomAccessibleInterval<FloatType> scaledImagesFeatures = calculator2.apply(Views.extendBorder(
 			scaleImage), Intervals.createMinSize(24, 24, 12, 50, 50, 25));
-		Utils.assertImagesEqual(40, scaledFeatures, Views.zeroMin(scaledImagesFeatures));
-	}
-
-	private void testAnisotropy2d(FeatureSetting setting) {
-		testAnisotropy2d(40, setting);
+		Utils.assertImagesEqual(expectedPsnr, scaledFeatures, Views.zeroMin(scaledImagesFeatures));
 	}
 
 	private void testAnisotropy2d(double expectedPsnr, FeatureSetting setting) {
@@ -111,6 +130,7 @@ public class AnisotropicFeaturesTest {
 			.ops(ops)
 			.addFeature(setting)
 			.build();
+		calculator.setUseGPU(useGpu);
 		RandomAccessibleInterval<FloatType> result = calculator.apply(Views.extendBorder(image),
 			Intervals.createMinSize(24, 24, 50, 50));
 		RandomAccessibleInterval<FloatType> scaledFeatures = Views.subsample(result, 1, 2, 1);
@@ -120,6 +140,7 @@ public class AnisotropicFeaturesTest {
 			.addFeature(setting)
 			.pixelSize(1, 2)
 			.build();
+		calculator2.setUseGPU(useGpu);
 		RandomAccessibleInterval<FloatType> scaledImagesFeatures = calculator2.apply(Views.extendBorder(
 			scaleImage), Intervals.createMinSize(24, 12, 50, 25));
 		Utils.assertImagesEqual(expectedPsnr, scaledFeatures, Views.zeroMin(scaledImagesFeatures));

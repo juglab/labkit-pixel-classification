@@ -9,13 +9,26 @@ import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculat
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(Parameterized.class)
 public class SingleGaussianGradientMagnitudeFeatureTest {
+
+	public SingleGaussianGradientMagnitudeFeatureTest(boolean useGpu) {
+		this.calculator.setUseGPU(useGpu);
+	}
+
+	@Parameterized.Parameters(name = "useGpu = {0}")
+	public static List<Boolean> data() {
+		return Arrays.asList(false, true);
+	}
 
 	private final double sigma = 3.0;
 

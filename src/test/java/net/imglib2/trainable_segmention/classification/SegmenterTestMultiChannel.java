@@ -12,6 +12,7 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.roi.labeling.LabelingType;
+import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
@@ -20,11 +21,13 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.view.composite.Composite;
+import net.imglib2.view.Views;
 import org.junit.Test;
 import org.scijava.Context;
 
 import java.util.Collections;
+
+import static org.junit.Assert.assertEquals;
 
 public class SegmenterTestMultiChannel {
 
@@ -74,12 +77,12 @@ public class SegmenterTestMultiChannel {
 	@Test
 	public void testPredict() {
 		Segmenter segmenter = trainSegmenter();
-		RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> result = segmenter.predict(
+		RandomAccessibleInterval<? extends RealType<?>> result = segmenter.predict(
 			trainingImage);
-		Utils.assertIntervalEquals(new FinalInterval(2, 2), result);
+		ImgLib2Assert.assertIntervalEquals(new FinalInterval(2, 2, 2), result);
 		RandomAccessibleInterval<ByteType> segmentation = Converters.convert(
-			result, (in, out) -> out.setInteger(in.get(0).getRealFloat() > in.get(1).getRealFloat() ? 0
-				: 1),
+			Views.collapse(result),
+			(in, out) -> out.setInteger(in.get(0).getRealFloat() > in.get(1).getRealFloat() ? 0 : 1),
 			new ByteType());
 		Utils.assertImagesEqual(ArrayImgs.bytes(new byte[] { 1, 1, 0, 1 }, 2, 2), segmentation);
 	}

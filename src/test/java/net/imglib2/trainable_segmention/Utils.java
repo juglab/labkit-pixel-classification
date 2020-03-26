@@ -109,15 +109,6 @@ public class Utils {
 		ImgLib2Assert.assertImageEquals(a, b);
 	}
 
-	public static <A extends Type<A>> void assertIntervalEquals(
-		Interval expected,
-		Interval actual)
-	{
-		if (!Intervals.equals(expected, actual))
-			fail("Intervals differ, expected = " + showInterval(expected) + ", actual = " + showInterval(
-				actual));
-	}
-
 	public static void assertImagesEqual(final ImagePlus expected,
 		final RandomAccessibleInterval<FloatType> actual)
 	{
@@ -140,7 +131,7 @@ public class Utils {
 	public static <T extends NumericType<T>> void showDifference(
 		RandomAccessibleInterval<T> expectedImage, RandomAccessibleInterval<T> resultImage)
 	{
-		assertIntervalEquals(expectedImage, resultImage);
+		ImgLib2Assert.assertIntervalEquals(expectedImage, resultImage);
 		ImagePlus window = ImageJFunctions.show(tile(expectedImage, resultImage, subtract(expectedImage,
 			resultImage)));
 		try {

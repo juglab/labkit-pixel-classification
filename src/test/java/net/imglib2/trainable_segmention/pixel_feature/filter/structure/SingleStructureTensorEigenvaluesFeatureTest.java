@@ -24,6 +24,8 @@ import net.imglib2.util.Localizables;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import trainableSegmentation.ImageScience;
 
 import java.util.ArrayList;
@@ -37,7 +39,18 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests {@link SingleStructureTensorEigenvaluesFeature}.
  */
+@RunWith(Parameterized.class)
 public class SingleStructureTensorEigenvaluesFeatureTest {
+
+	public SingleStructureTensorEigenvaluesFeatureTest(boolean useGpu) {
+		calculator2d.setUseGPU(useGpu);
+		calculator3d.setUseGPU(useGpu);
+	}
+
+	@Parameterized.Parameters(name = "useGpu = {0}")
+	public static List<Boolean> data() {
+		return Arrays.asList(false, true);
+	}
 
 	private final double sigma = 2.0;
 	private final double integrationScale = 5.0;

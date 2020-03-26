@@ -1,27 +1,38 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.dog2;
 
-import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.Utils;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJMultiChannelImage;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(Parameterized.class)
 public class SingleDifferenceOfGaussiansFeatureTest {
+
+	public SingleDifferenceOfGaussiansFeatureTest(boolean useGpu) {
+		this.calculator.setUseGPU(useGpu);
+		this.calculator3d.setUseGPU(useGpu);
+	}
+
+	@Parameterized.Parameters(name = "useGpu = {0}")
+	public static List<Boolean> data() {
+		return Arrays.asList(false, true);
+	}
 
 	private double sigma1 = 2.0;
 

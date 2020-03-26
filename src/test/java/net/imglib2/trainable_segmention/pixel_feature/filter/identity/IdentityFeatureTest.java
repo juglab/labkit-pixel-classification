@@ -10,11 +10,26 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Tests {@link IdendityFeature}.
  */
+@RunWith(Parameterized.class)
 public class IdentityFeatureTest {
+
+	public IdentityFeatureTest(boolean useGpu) {
+		this.calculator.setUseGPU(useGpu);
+	}
+
+	@Parameterized.Parameters(name = "useGpu = {0}")
+	public static List<Boolean> data() {
+		return Arrays.asList(false, true);
+	}
 
 	private final FeatureCalculator calculator = FeatureCalculator.default2d()
 		.addFeature(SingleFeatures.identity())

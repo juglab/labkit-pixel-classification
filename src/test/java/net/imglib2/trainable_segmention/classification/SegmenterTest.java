@@ -23,6 +23,8 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import weka.classifiers.meta.RandomCommittee;
 
 import java.io.IOException;
@@ -30,13 +32,26 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Tests {@link Segmenter}
  *
  * @author Matthias Arzt
  */
+@RunWith(Parameterized.class)
 public class SegmenterTest {
+
+	public SegmenterTest(boolean useGpu) {
+		this.useGpu = useGpu;
+	}
+
+	@Parameterized.Parameters(name = "useGpu = {0}")
+	public static List<Boolean> data() {
+		return Arrays.asList(false, true);
+	}
+
+	private final boolean useGpu;
 
 	private Img<FloatType> img = ImageJFunctions.convertFloat(Utils.loadImage("nuclei.tif"));
 
@@ -47,6 +62,7 @@ public class SegmenterTest {
 	@Test
 	public void testClassification() {
 		Segmenter segmenter = trainClassifier();
+		segmenter.setUseGpu(useGpu);
 		RandomAccessibleInterval<? extends IntegerType<?>> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());
 	}
@@ -89,6 +105,7 @@ public class SegmenterTest {
 
 	@Test
 	public void testDifferentWekaClassifiers() {
+		assumeFalse(useGpu);
 		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(),
 			SingleFeatures.identity(), new FeatureSetting(GaussFeature.class));
 		Segmenter segmenter = Trainer.train(ops, img, labeling, featureSettings, new RandomCommittee());

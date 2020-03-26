@@ -191,32 +191,41 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 	{
 		if (!mean && !variance)
 			return;
-		mean(clij, inputBuffer, tmp, border);
+		calculateMean(clij, inputBuffer, tmp, border);
 		if (mean)
 			CLIJCopy.copy(clij, CLIJView.shrink(tmp, border), iterator.next());
-		if (variance) {
-			try (
-				ClearCLBuffer squared = clij.create(inputBuffer);
-				ClearCLBuffer meanOfSquared = clij.create(inputBuffer);)
-			{
-				square(clij, inputBuffer, squared);
-				mean(clij, squared, meanOfSquared, border);
-				long n = LongStream.of(border).map(b -> 2 * b + 1).reduce(1, (a, b) -> a * b);
-				CLIJLoopBuilder.clij(clij)
-					.addInput("mean", CLIJView.shrink(tmp, border))
-					.addInput("mean_of_squared", CLIJView.shrink(meanOfSquared, border))
-					.addInput("factor", (float) n / (n - 1))
-					.addOutput("o", iterator.next())
-					.forEachPixel("o = (mean_of_squared - mean * mean) * factor");
-			}
-		}
+		if (variance)
+			calculateVariance(clij, border, inputBuffer, tmp, iterator.next());
 	}
 
-	private void mean(CLIJ2 clij, ClearCLBuffer input, ClearCLBuffer output, long[] border) {
+	private void calculateMean(CLIJ2 clij, ClearCLBuffer input, ClearCLBuffer output, long[] border) {
 		if (border.length == 2)
 			clij.mean2DBox(input, output, border[0], border[1]);
 		else
 			clij.mean3DBox(input, output, border[0], border[1], border[2]);
+	}
+
+	private void calculateVariance(CLIJ2 clij, long[] border, ClearCLBuffer input, ClearCLBuffer mean,
+		CLIJView variance)
+	{
+		try (
+			ClearCLBuffer squared = clij.create(input);
+			ClearCLBuffer meanOfSquared = clij.create(input);)
+		{
+			square(clij, input, squared);
+			calculateMean(clij, squared, meanOfSquared, border);
+			long n = LongStream.of(border).map(b -> 2 * b + 1).reduce(1, (a, b) -> a * b);
+			if (n == 1)
+				CLIJLoopBuilder.clij(clij).addOutput("variance", variance).forEachPixel("variance = 0");
+			else {
+				CLIJLoopBuilder.clij(clij)
+					.addInput("mean", CLIJView.shrink(mean, border))
+					.addInput("mean_of_squared", CLIJView.shrink(meanOfSquared, border))
+					.addInput("factor", (float) n / (n - 1))
+					.addOutput("variance", variance)
+					.forEachPixel("variance = (mean_of_squared - mean * mean) * factor");
+			}
+		}
 	}
 
 	private void square(CLIJ2 clij, ClearCLBuffer inputBuffer, ClearCLBuffer tmp2) {

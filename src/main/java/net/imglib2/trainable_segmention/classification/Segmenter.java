@@ -29,9 +29,7 @@ import net.imglib2.util.Cast;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
-import net.imglib2.view.composite.CompositeIntervalView;
 import net.imglib2.view.composite.GenericComposite;
-import net.imglib2.view.composite.RealComposite;
 import preview.net.imglib2.loops.LoopBuilder;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -58,6 +56,8 @@ public class Segmenter {
 
 	private final OpEnvironment ops;
 
+	private boolean useGpu = false;
+
 	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureCalculator features,
 		Classifier classifier)
 	{
@@ -71,6 +71,11 @@ public class Segmenter {
 		Classifier classifier)
 	{
 		this(ops, classNames, new FeatureCalculator(ops, features), classifier);
+	}
+
+	public void setUseGpu(boolean useGpu) {
+		this.useGpu = useGpu;
+		features().setUseGPU(useGpu);
 	}
 
 	public FeatureCalculator features() {
@@ -107,6 +112,28 @@ public class Segmenter {
 	public void segment(RandomAccessibleInterval<? extends IntegerType<?>> out,
 		RandomAccessible<?> image)
 	{
+		Objects.requireNonNull(out);
+		Objects.requireNonNull(image);
+		if (useGpu)
+			segmentGpu(image, out);
+		else
+			segmentCpu(image, out);
+	}
+
+	private void segmentCpu(RandomAccessible<?> image,
+		RandomAccessibleInterval<? extends IntegerType<?>> out)
+	{
+		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
+		LoopBuilder.setImages(Views.collapseReal(featureValues), out).multiThreaded().forEachChunk(
+			chunk -> {
+				chunk.forEachPixel(pixelClassificationOp()::compute);
+				return null;
+			});
+	}
+
+	private void segmentGpu(RandomAccessible<?> image,
+		RandomAccessibleInterval<? extends IntegerType<?>> out)
+	{
 		RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier),
 			classNames.size(), features.count());
 		CLIJ2 clij = CLIJ2.getInstance();
@@ -118,29 +145,56 @@ public class Segmenter {
 		}
 	}
 
-	public RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> predict(
+	public RandomAccessibleInterval<? extends RealType<?>> predict(
 		RandomAccessibleInterval<?> image)
 	{
 		Objects.requireNonNull(image);
 		Interval outputInterval = features.outputIntervalFromInput(image);
-		Img<FloatType> img = ops.create().img(RevampUtils.appendDimensionToInterval(
-			outputInterval, 0, classNames.size()), new FloatType());
-		CompositeIntervalView<FloatType, RealComposite<FloatType>> collapsed = Views.collapseReal(img);
-		predict(collapsed, Views.extendBorder(image));
-		return collapsed;
+		Img<FloatType> result = ops.create().img(RevampUtils.appendDimensionToInterval(
+			outputInterval, 0, classNames.size() - 1), new FloatType());
+		predict(result, Views.extendBorder(image));
+		return result;
 	}
 
-	public void predict(RandomAccessibleInterval<? extends Composite<? extends RealType<?>>> out,
+	public void predict(RandomAccessibleInterval<? extends RealType<?>> out,
 		RandomAccessible<?> image)
 	{
 		Objects.requireNonNull(out);
 		Objects.requireNonNull(image);
-		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
-		LoopBuilder.setImages(Views.collapseReal(featureValues), out).multiThreaded().forEachChunk(
-			chunk -> {
-				chunk.forEachPixel(pixelPredictionOp()::compute);
-				return null;
-			});
+		if (useGpu)
+			predictGpu(out, image);
+		else
+			predictCpu(out, image);
+	}
+
+	private void predictCpu(RandomAccessibleInterval<? extends RealType<?>> out,
+		RandomAccessible<?> image)
+	{
+		Interval interval = RevampUtils.removeLastDimension(out);
+		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, interval);
+		LoopBuilder.setImages(Views.collapseReal(featureValues), Views.collapse(out)).multiThreaded()
+			.forEachChunk(
+				chunk -> {
+					chunk.forEachPixel(pixelPredictionOp()::compute);
+					return null;
+				});
+	}
+
+	private void predictGpu(RandomAccessibleInterval<? extends RealType<?>> out,
+		RandomAccessible<?> image)
+	{
+		CLIJ2 clij = CLIJ2.getInstance();
+		Interval interval = RevampUtils.removeLastDimension(out);
+		RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier),
+			classNames.size(), features.count());
+		try (
+			CLIJMultiChannelImage featureStack = features.applyUseGpu(image, interval);
+			CLIJMultiChannelImage distribution = new CLIJMultiChannelImage(clij, featureStack
+				.getSpatialDimensions(), features.count()))
+		{
+			prediction.distribution(clij, featureStack, distribution);
+			featureStack.copyTo(out);
+		}
 	}
 
 	public UnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>>

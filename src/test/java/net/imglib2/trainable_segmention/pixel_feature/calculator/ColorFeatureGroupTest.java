@@ -24,19 +24,15 @@ import static org.junit.Assert.assertEquals;
  */
 public class ColorFeatureGroupTest {
 
-	private final GlobalSettings colorSettings = GlobalSettings.default2d()
+	private final FeatureCalculator colorGroup = FeatureCalculator.default2d()
 		.channels(ChannelSetting.RGB)
+		.addFeature(SingleFeatures.gauss(8.0))
 		.build();
 
-	private final GlobalSettings graySettings = GlobalSettings.default2d()
+	private final FeatureCalculator grayGroup = FeatureCalculator.default2d()
 		.channels(ChannelSetting.SINGLE)
+		.addFeature(SingleFeatures.gauss(8.0))
 		.build();
-
-	private final FeatureCalculator colorGroup = new FeatureCalculator(Utils.ops(),
-		new FeatureSettings(colorSettings, SingleFeatures.gauss(8.0)));
-
-	private final FeatureCalculator grayGroup = new FeatureCalculator(Utils.ops(),
-		new FeatureSettings(graySettings, SingleFeatures.gauss(8.0)));
 
 	private final Img<ARGBType> image = Utils.loadImageARGBType(
 		"https://imagej.nih.gov/ij/images/clown.png");

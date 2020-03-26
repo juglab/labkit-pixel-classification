@@ -48,7 +48,7 @@ public class FeatureStack3DTest {
 
 	@Test
 	public void testGaussian() {
-		testFeatureIgnoreAttributes(60, FeatureStack3D.GAUSSIAN, GroupedFeatures.gauss());
+		testFeatureIgnoreAttributes(59, FeatureStack3D.GAUSSIAN, GroupedFeatures.gauss());
 	}
 
 	@Test
@@ -63,7 +63,7 @@ public class FeatureStack3DTest {
 
 	@Test
 	public void testGradient() {
-		testFeatureIgnoreAttributes(45, FeatureStack3D.EDGES, GroupedFeatures.gradient());
+		testFeatureIgnoreAttributes(44, FeatureStack3D.EDGES, GroupedFeatures.gradient());
 	}
 
 	private void testFeature(int expectedPsnr, int featureID, FeatureSetting featureSetting) {

@@ -15,13 +15,26 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Localizables;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(Parameterized.class)
 public class SingleHessianEigenvaluesFeatureTest {
+
+	public SingleHessianEigenvaluesFeatureTest(boolean useGpu) {
+		this.calculator.setUseGPU(useGpu);
+		this.calculator3d.setUseGPU(useGpu);
+	}
+
+	@Parameterized.Parameters(name = "useGpu = {0}")
+	public static List<Boolean> data() {
+		return Arrays.asList(false, true);
+	}
 
 	private final FeatureCalculator calculator = FeatureCalculator.default2d()
 		.addFeature(SingleHessianEigenvaluesFeature.class)
