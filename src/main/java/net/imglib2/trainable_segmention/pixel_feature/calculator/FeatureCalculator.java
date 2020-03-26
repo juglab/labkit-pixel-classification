@@ -43,7 +43,7 @@ public class FeatureCalculator {
 	}
 
 	public static FeatureCalculator.Builder default2d() {
-		return new Builder();
+		return new Builder().dimensions(2);
 	}
 
 	private InputPreprocessor initPreprocessor(ChannelSetting channelSetting) {
