@@ -54,14 +54,11 @@ public class Segmenter {
 
 	private weka.classifiers.Classifier classifier;
 
-	private final OpEnvironment ops;
-
 	private boolean useGpu = false;
 
-	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureCalculator features,
+	private Segmenter(List<String> classNames, FeatureCalculator features,
 		Classifier classifier)
 	{
-		this.ops = Objects.requireNonNull(ops);
 		this.classNames = Collections.unmodifiableList(classNames);
 		this.features = Objects.requireNonNull(features);
 		this.classifier = Objects.requireNonNull(classifier);
@@ -70,7 +67,7 @@ public class Segmenter {
 	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureSettings features,
 		Classifier classifier)
 	{
-		this(ops, classNames, new FeatureCalculator(ops, features), classifier);
+		this(classNames, new FeatureCalculator(ops, features), classifier);
 	}
 
 	public void setUseGpu(boolean useGpu) {
@@ -150,8 +147,9 @@ public class Segmenter {
 	{
 		Objects.requireNonNull(image);
 		Interval outputInterval = features.outputIntervalFromInput(image);
-		Img<FloatType> result = ops.create().img(RevampUtils.appendDimensionToInterval(
-			outputInterval, 0, classNames.size() - 1), new FloatType());
+		RandomAccessibleInterval<FloatType> result = RevampUtils.createImage(RevampUtils
+			.appendDimensionToInterval(
+				outputInterval, 0, classNames.size() - 1), new FloatType());
 		predict(result, Views.extendBorder(image));
 		return result;
 	}
@@ -197,13 +195,13 @@ public class Segmenter {
 		}
 	}
 
-	public UnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>>
+	private UnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>>
 		pixelPredictionOp()
 	{
 		return new PixelPredictionOp();
 	}
 
-	public UnaryHybridCF<Composite<? extends RealType<?>>, IntegerType<?>> pixelClassificationOp() {
+	private UnaryHybridCF<Composite<? extends RealType<?>>, IntegerType<?>> pixelClassificationOp() {
 		return new PixelClassifierOp();
 	}
 
@@ -259,7 +257,7 @@ public class Segmenter {
 
 	// -- Helper methods --
 
-	public Attribute[] attributesAsArray() {
+	private Attribute[] attributesAsArray() {
 		List<Attribute> attributes = attributes();
 		return attributes.toArray(new Attribute[attributes.size()]);
 	}

@@ -45,8 +45,8 @@ public class BorderEffectsTest {
 	private final Img<FloatType> fullImage = ImageJFunctions.convertFloat(Utils.loadImage(
 		"bridge.png"));
 
-	private RandomAccessibleInterval<FloatType> image = RevampUtils.copy(Utils.ops(), Views.interval(
-		fullImage, bigInterval));
+	private RandomAccessibleInterval<FloatType> image = RevampUtils.copy(Views.interval(fullImage,
+		bigInterval));
 
 	@Test
 	public void testGauss() {

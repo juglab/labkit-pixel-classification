@@ -252,12 +252,6 @@ public class Utils {
 			fail("Actual PSNR is lower than expected. Actual: " + psnr + " Expected: " + expectedPsnr);
 	}
 
-	public static Img<FloatType> copy(Img<FloatType> input) {
-		Img<FloatType> result = ops().create().img(input);
-		ops().copy().iterableInterval(result, input);
-		return result;
-	}
-
 	public static <T extends NumericType<T>> RandomAccessibleInterval<T> subtract(
 		RandomAccessibleInterval<T> expected, RandomAccessibleInterval<T> result)
 	{

@@ -8,8 +8,10 @@ import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.RealType;
@@ -45,6 +47,14 @@ public class RevampUtils {
 		return LongStream.range(output.min(axis), output.max(axis) + 1)
 			.mapToObj(pos -> Views.hyperSlice(output, axis, pos))
 			.collect(Collectors.toList());
+	}
+
+	public static <T extends NativeType<T>> RandomAccessibleInterval<T> createImage(Interval interval,
+		T type)
+	{
+		long[] min = Intervals.minAsLongArray(interval);
+		long[] size = Intervals.dimensionsAsLongArray(interval);
+		return Views.translate(new ArrayImgFactory<>(type).create(size), min);
 	}
 
 	public static long[] extend(long[] in, long elem) {
@@ -94,7 +104,8 @@ public class RevampUtils {
 	public static RandomAccessibleInterval<FloatType> gauss(OpEnvironment ops,
 		RandomAccessible<FloatType> input, Interval outputInterval, double[] sigmas)
 	{
-		RandomAccessibleInterval<FloatType> blurred = ops.create().img(outputInterval, new FloatType());
+		RandomAccessibleInterval<FloatType> blurred = RevampUtils.createImage(outputInterval,
+			new FloatType());
 		Gauss3.gauss(sigmas, input, blurred);
 		return blurred;
 	}
@@ -111,7 +122,8 @@ public class RevampUtils {
 	{
 		if (outputInterval.numDimensions() != 2)
 			throw new IllegalArgumentException("Only two dimensional images supported.");
-		RandomAccessibleInterval<FloatType> output = ops.create().img(outputInterval, new FloatType());
+		RandomAccessibleInterval<FloatType> output = RevampUtils.createImage(outputInterval,
+			new FloatType());
 		ops.filter().convolve(output, input, SOBEL_FILTER_X);
 		return output;
 	}
@@ -127,7 +139,8 @@ public class RevampUtils {
 	{
 		if (outputInterval.numDimensions() != 2)
 			throw new IllegalArgumentException("Only two dimensional images supported.");
-		RandomAccessibleInterval<FloatType> output = ops.create().img(outputInterval, new FloatType());
+		RandomAccessibleInterval<FloatType> output = RevampUtils.createImage(outputInterval,
+			new FloatType());
 		ops.filter().convolve(output, input, SOBEL_FILTER_Y);
 		return output;
 	}
@@ -155,14 +168,12 @@ public class RevampUtils {
 		return Converters.convert(input, converter, new FloatType());
 	}
 
-	static private Img<FloatType> copy(OpEnvironment ops, IterableInterval<FloatType> input) {
-		Img<FloatType> result = ops.create().img(input, input.firstElement());
-		ops.copy().iterableInterval(result, input);
-		return result;
-	}
-
-	public static Img<FloatType> copy(OpEnvironment ops, RandomAccessibleInterval<FloatType> input) {
-		return copy(ops, Views.iterable(input));
+	public static RandomAccessibleInterval<FloatType> copy(
+		RandomAccessibleInterval<FloatType> input)
+	{
+		RandomAccessibleInterval<FloatType> output = RevampUtils.createImage(input, new FloatType());
+		RealTypeConverters.copyFromTo(input, output);
+		return output;
 	}
 
 	public static boolean containsNaN(RandomAccessibleInterval<? extends ComplexType<?>> result) {

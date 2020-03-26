@@ -11,11 +11,11 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.classification.Segmenter;
 import net.imglib2.trainable_segmention.classification.Trainer;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
-import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -77,7 +77,7 @@ public class CLIJSegmenterTest {
 
 	private static LabelRegions<String> loadLabeling(String file) {
 		Img<? extends IntegerType<?>> img = ImageJFunctions.wrapByte(new ImagePlus(file));
-		final ImgLabeling<String, IntType> labeling = new ImgLabeling<>(Utils.ops().create().img(img,
+		final ImgLabeling<String, IntType> labeling = new ImgLabeling<>(RevampUtils.createImage(img,
 			new IntType()));
 		Views.interval(Views.pair(img, labeling), labeling).forEach(p -> {
 			int value = p.getA().getInteger();

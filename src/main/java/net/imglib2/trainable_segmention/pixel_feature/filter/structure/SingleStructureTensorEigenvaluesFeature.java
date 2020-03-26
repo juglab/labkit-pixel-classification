@@ -99,7 +99,7 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 	{
 		Interval interval = RevampUtils.removeLastDimension(derivatives);
 		Interval outputInterval = Intervals.addDimension(interval, 0, getNumberOfProducts() - 1);
-		RandomAccessibleInterval<DoubleType> output = ops().create().img(outputInterval,
+		RandomAccessibleInterval<DoubleType> output = RevampUtils.createImage(outputInterval,
 			new DoubleType());
 		LoopBuilder.setImages(Views.collapseReal(derivatives), Views.collapseReal(output)).forEachPixel(
 			getProductPerPixelAction());
@@ -109,15 +109,16 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 	private RandomAccessibleInterval<DoubleType> derivatives(FeatureInput input,
 		Interval derivativeInterval)
 	{
-		RandomAccessibleInterval<DoubleType> gauss = ops().create().img(Intervals.expand(
-			derivativeInterval, 1));
+		RandomAccessibleInterval<DoubleType> gauss = RevampUtils.createImage(
+			Intervals.expand(derivativeInterval, 1), new DoubleType());
 		List<Double> pixelSize = globalSettings().pixelSize();
 		double[] sigmas = pixelSize.stream().mapToDouble(p -> sigma / p).toArray();
 		RandomAccessible<FloatType> original = input.original();
 		Gauss3.gauss(sigmas, original, gauss);
 		int n = derivativeInterval.numDimensions();
-		Img<DoubleType> tmp = ops().create().img(RevampUtils.appendDimensionToInterval(
-			derivativeInterval, 0, n - 1), new DoubleType());
+		RandomAccessibleInterval<DoubleType> tmp = RevampUtils.createImage(RevampUtils
+			.appendDimensionToInterval(
+				derivativeInterval, 0, n - 1), new DoubleType());
 		for (int i = 0; i < n; i++)
 			derive(gauss, Views.hyperSlice(tmp, n, i), i, pixelSize.get(i));
 		return tmp;

@@ -4,12 +4,14 @@ package net.imglib2.trainable_segmention;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converters;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
+import net.imglib2.view.Views;
 import org.junit.Test;
 
 import java.util.function.BiConsumer;
@@ -47,10 +49,11 @@ public class RevampUtilsTest {
 	private void testRequiredInput(Interval outputInterval, Interval inputInterval,
 		BiConsumer<RandomAccessible<FloatType>, Interval> operation)
 	{
-		Img<ByteType> inputAccessed = Utils.ops().create().img(inputInterval, new ByteType());
+		RandomAccessibleInterval<ByteType> inputAccessed = RevampUtils.createImage(inputInterval,
+			new ByteType());
 		RandomAccessible<FloatType> input = recordAccessView(inputAccessed);
 		operation.accept(input, outputInterval);
-		inputAccessed.forEach(x -> assertEquals(1, x.get()));
+		Views.iterable(inputAccessed).forEach(x -> assertEquals(1, x.get()));
 	}
 
 	/**
@@ -59,15 +62,13 @@ public class RevampUtilsTest {
 	 * pixel of "accessed" is set to one.
 	 */
 	private static RandomAccessible<FloatType> recordAccessView(
-		Img<? extends NumericType<?>> accessed)
+		RandomAccessibleInterval<? extends NumericType<?>> accessed)
 	{
-		accessed.forEach(NumericType::setZero);
-		return Converters.convert(
-			(RandomAccessible<? extends NumericType<?>>) accessed,
-			(in, out) -> {
-				in.setOne();
-				out.setZero();
-			}, new FloatType());
+		Views.iterable(accessed).forEach(NumericType::setZero);
+		return Converters.convert(accessed, (in, out) -> {
+			in.setOne();
+			out.setZero();
+		}, new FloatType());
 	}
 
 	@Test

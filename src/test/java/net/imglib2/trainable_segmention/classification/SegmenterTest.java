@@ -9,6 +9,7 @@ import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
@@ -115,7 +116,7 @@ public class SegmenterTest {
 
 	private static LabelRegions<String> loadLabeling(String file) {
 		Img<? extends IntegerType<?>> img = ImageJFunctions.wrapByte(Utils.loadImage(file));
-		final ImgLabeling<String, IntType> labeling = new ImgLabeling<>(Utils.ops().create().img(img,
+		final ImgLabeling<String, IntType> labeling = new ImgLabeling<>(RevampUtils.createImage(img,
 			new IntType()));
 		Views.interval(Views.pair(img, labeling), labeling).forEach(p -> {
 			int value = p.getA().getInteger();
