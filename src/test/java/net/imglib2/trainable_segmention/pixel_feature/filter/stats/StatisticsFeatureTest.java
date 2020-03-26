@@ -37,7 +37,7 @@ public class StatisticsFeatureTest {
 		}, 5, 5);
 		Img<FloatType> output = ArrayImgs.floats(5, 5, 8);
 		// process
-		feature.apply(input, RevampUtils.slices(output));
+		feature.apply(Views.extendBorder(input), RevampUtils.slices(output));
 		// test
 		Img<FloatType> expectedMin1 = filled5x5Image(0);
 		Img<FloatType> expectedMax1 = ArrayImgs.floats(new float[] {
