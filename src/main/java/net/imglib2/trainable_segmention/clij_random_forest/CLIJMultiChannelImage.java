@@ -8,12 +8,15 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.array.ArrayImg;
+import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
-import java.util.Arrays;
+import java.nio.FloatBuffer;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -83,17 +86,29 @@ public class CLIJMultiChannelImage implements AutoCloseable {
 		return numChannels;
 	}
 
-	public void copyTo(RandomAccessibleInterval<FloatType> image) {
-		if (image instanceof ArrayImg) {
-			throw new UnsupportedOperationException("FIXME: implement fast copy to array img.");
-//			 FIXME
-//			ArrayDataAccess access = (ArrayDataAccess) (((ArrayImg) image).update(null));
-//			float[] array = (float[]) access.getCurrentStorageArray();
-//			FloatBuffer floatBuffer = FloatBuffer.wrap(array);
-//			buffer.writeTo(floatBuffer, true);
+	public void copyTo(RandomAccessibleInterval<? extends RealType<?>> image) {
+		Optional<float[]> floatArray = getUnderlyingFloatArray(image);
+		if (floatArray.isPresent()) {
+			FloatBuffer floatBuffer = FloatBuffer.wrap(floatArray.get());
+			buffer.writeTo(floatBuffer, true);
 		}
 		else {
 			RealTypeConverters.copyFromTo(Views.zeroMin(asRAI()), Views.zeroMin(image));
 		}
+	}
+
+	private Optional<float[]> getUnderlyingFloatArray(
+		RandomAccessibleInterval<? extends RealType<?>> image)
+	{
+		if (!(image instanceof ArrayImg))
+			return Optional.empty();
+		Object access = ((ArrayImg) image).update(null);
+		if (!(image instanceof ArrayDataAccess))
+			return Optional.empty();
+		ArrayDataAccess<?> arrayDataAccess = (ArrayDataAccess<?>) access;
+		Object array = arrayDataAccess.getCurrentStorageArray();
+		if (!(array instanceof float[]))
+			return Optional.empty();
+		return Optional.of((float[]) array);
 	}
 }
