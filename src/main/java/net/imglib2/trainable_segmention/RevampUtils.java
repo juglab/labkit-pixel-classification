@@ -6,19 +6,16 @@ import net.imagej.ops.OpService;
 import net.imglib2.*;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
+import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.ComplexType;
-import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.ByteType;
-import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Cast;
 import net.imglib2.util.Intervals;
-import net.imglib2.view.IntervalView;
 import net.imglib2.view.StackView;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
@@ -147,27 +144,15 @@ public class RevampUtils {
 		return ops.filter().convolve(blurred, kernel, new OutOfBoundsBorderFactory<>());
 	}
 
-	public static RandomAccessibleInterval<IntType> toInt(RandomAccessibleInterval<FloatType> input) {
-		Converter<FloatType, IntType> floatToInt = (in, out) -> out.set((int) in.get());
-		return Converters.convert(input, floatToInt, new IntType());
-	}
-
-	public static RandomAccessibleInterval<FloatType> toFloat(
-		RandomAccessibleInterval<? extends RealType<?>> input)
-	{
-		if (input.randomAccess().get() instanceof FloatType)
-			return uncheckedCast(input);
-		Converter<RealType<?>, FloatType> intToFloat = (in, out) -> out.set(in.getRealFloat());
-		return Converters.convert(input, intToFloat, new FloatType());
-	}
-
 	public static RandomAccessible<FloatType> randomAccessibleToFloat(
 		RandomAccessible<? extends RealType<?>> input)
 	{
-		if (input.randomAccess().get() instanceof FloatType)
+		RealType<?> inputType = input.randomAccess().get();
+		if (inputType instanceof FloatType)
 			return uncheckedCast(input);
-		Converter<RealType<?>, FloatType> intToFloat = (in, out) -> out.set(in.getRealFloat());
-		return Converters.convert(input, intToFloat, new FloatType());
+		Converter<RealType<?>, FloatType> converter = RealTypeConverters.getConverter(inputType,
+			new FloatType());
+		return Converters.convert(input, converter, new FloatType());
 	}
 
 	static private Img<FloatType> copy(OpEnvironment ops, IterableInterval<FloatType> input) {
@@ -191,50 +176,6 @@ public class RevampUtils {
 		long[] result = new long[count];
 		Arrays.fill(result, value);
 		return result;
-	}
-
-	public static double[] nCopies(int count, double value) {
-		double[] result = new double[count];
-		Arrays.fill(result, value);
-		return result;
-	}
-
-	public static Iterable<Localizable> neigborsLocations(int n) {
-		Img<ByteType> img = ArrayImgs.bytes(nCopies(n, 3));
-		IntervalView<ByteType> translate = Views.translate(img, nCopies(n, -1));
-		Cursor<ByteType> cursor = translate.localizingCursor();
-
-		return () -> new java.util.Iterator<Localizable>() {
-
-			@Override
-			public boolean hasNext() {
-				return cursor.hasNext();
-			}
-
-			@Override
-			public Localizable next() {
-				cursor.fwd();
-				return cursor;
-			}
-		};
-	}
-
-	public static double distance(Localizable a, Localizable b) {
-		int n = a.numDimensions();
-		long sum = 0;
-		for (int i = 0; i < n; i++) {
-			long difference = a.getLongPosition(i) - b.getLongPosition(i);
-			sum += difference * difference;
-		}
-		return Math.sqrt(sum);
-	}
-
-	public static <T> List<T> filterForClass(Class<T> tClass, List<?> in) {
-		return in.stream().filter(tClass::isInstance).map(tClass::cast).collect(Collectors.toList());
-	}
-
-	public static Object[] prepend(Object x, Object[] xs) {
-		return Stream.concat(Stream.of(x), Stream.of(xs)).toArray();
 	}
 
 	public static void wrapException(RunnableWithException r) {
@@ -269,13 +210,6 @@ public class RevampUtils {
 		return new DenseInstance(1.0, values);
 	}
 
-	public static void copyInteger(RandomAccessibleInterval<? extends IntegerType<?>> in,
-		RandomAccessibleInterval<? extends IntegerType<?>> result)
-	{
-		Views.interval(Views.pair(in, result), in).forEach(p -> p.getB().setInteger(p.getA()
-			.getInteger()));
-	}
-
 	public static List<RandomAccessible<FloatType>> splitChannels(RandomAccessible<ARGBType> image) {
 		return convertersStream().map(x -> Converters.convert(image, x, new FloatType())).collect(
 			Collectors.toList());
@@ -301,15 +235,6 @@ public class RevampUtils {
 		@SuppressWarnings("unchecked")
 		T result = (T) input;
 		return result;
-	}
-
-	public static <T> RandomAccessible<T> castRandomAccessible(RandomAccessible<?> input,
-		Class<T> tClass)
-	{
-		if (tClass.isInstance(input.randomAccess().get()))
-			return uncheckedCast(input);
-		throw new IllegalArgumentException("RandomAccessible input must be of type " + tClass
-			.getName());
 	}
 
 	public static <T> RandomAccessibleInterval<Composite<T>> vectorizeStack(
