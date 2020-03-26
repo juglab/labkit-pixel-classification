@@ -35,7 +35,8 @@ public class AnisotropicFeaturesTest {
 
 	@Test
 	public void testHessian() {
-		testAnisotropy(GroupedFeatures.hessian());
+		testAnisotropy2d(39, GroupedFeatures.hessian());
+		testAnisotropy3d(GroupedFeatures.hessian());
 	}
 
 	@Test

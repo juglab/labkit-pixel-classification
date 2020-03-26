@@ -116,7 +116,7 @@ public class SingleStatisticsFeatureTest {
 			0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0
 		}, 5, 5);
-		calculator.apply(input, output);
+		calculator.apply(Views.extendBorder(input), output);
 		ImgLib2Assert.assertImageEquals(Views.stack(expectedMax), output);
 
 	}
