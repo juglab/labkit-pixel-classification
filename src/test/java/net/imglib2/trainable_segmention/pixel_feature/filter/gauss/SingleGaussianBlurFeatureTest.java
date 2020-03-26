@@ -35,7 +35,7 @@ public class SingleGaussianBlurFeatureTest {
 
 	@Test
 	public void test() {
-		RandomAccessible<FloatType> input = Utils.dirac2d();
+		RandomAccessible<FloatType> input = Utils.dirac(2);
 		RandomAccessibleInterval<FloatType> output = ArrayImgs.floats(5, 5);
 		RandomAccessibleInterval<FloatType> expected =
 			Utils.create2dImage(output, (x, y) -> Utils.gauss(sigma, x, y));
@@ -44,14 +44,14 @@ public class SingleGaussianBlurFeatureTest {
 	}
 
 	@Test
-	public void testCLIJ() {
+	public void test3D() {
 		RandomAccessible<FloatType> input = Utils.dirac(3);
 		FinalInterval interval = new FinalInterval(5, 5, 5);
 		RandomAccessibleInterval<FloatType> result = Views.hyperSlice(calculator3d.apply(input,
 			interval), 3, 0);
 		RandomAccessibleInterval<FloatType> expected = Utils.create3dImage(interval, (x, y, z) -> Utils
 			.gauss(sigma, x, y, z));
-		Utils.assertImagesEqual(50, expected, result);
+		Utils.assertImagesEqual(40, expected, result);
 	}
 
 	@Test
