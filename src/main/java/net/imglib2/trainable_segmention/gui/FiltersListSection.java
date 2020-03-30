@@ -6,14 +6,23 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.CompoundBorder;
+
+import org.scijava.Context;
+
+import net.imglib2.trainable_segmention.gui.icons.IconResources;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
+import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 
 /**
  * Sub component of the AccordionPanel
@@ -21,12 +30,13 @@ import javax.swing.border.CompoundBorder;
 public class FiltersListSection extends AccordionSection {
 
 	private static final long serialVersionUID = 1L;
-	private static final ImageIcon EXPANDED_ICON = new ImageIcon( FiltersListSection.class.getClassLoader().getResource( "arrow_down_48px.png" ) );
-	private static final ImageIcon COLLAPSED_ICON = new ImageIcon( FiltersListSection.class.getClassLoader().getResource( "arrow_right_48px.png" ) );
+	private static final ImageIcon EXPANDED_ICON = new ImageIcon( IconResources.getResource( "arrow_down_48px.png" ) );
+	private static final ImageIcon COLLAPSED_ICON = new ImageIcon( IconResources.getResource( "arrow_right_48px.png" ) );
 
-	private FiltersList filtersList;
+	private List<FeatureSetting> featureSettings;
 	private IconPanel iconPanel;
 	private JLabel titleComponent;
+	private JPanel expandablePanel;
 
 	public enum AccordionControlIcons {
 
@@ -45,8 +55,8 @@ public class FiltersListSection extends AccordionSection {
 
 	/**
 	 */
-	public FiltersListSection(String title, FiltersList filtersList, boolean isExpanded) {
-		this.filtersList = filtersList;
+	public FiltersListSection(String title, Context context, GlobalSettings gs, List<FeatureSetting> featureSettings, boolean isExpanded) {
+		this.featureSettings = featureSettings;
 		setLayout( new BorderLayout() );
 		setBackground(Color.WHITE);
 
@@ -65,10 +75,24 @@ public class FiltersListSection extends AccordionSection {
 		titleComponent.setBorder( new CompoundBorder( BorderFactory.createEmptyBorder( 2, 8, 2, 2 ), titleComponent.getBorder() ) );
 		titlePanel.add( titleComponent );
 
-		add( filtersList, BorderLayout.CENTER );
+		createExpandablePanel(context, gs);
+		add( expandablePanel, BorderLayout.CENTER );
 		
 		if ( !isExpanded )
 			this.collapse();
+	}
+	
+	private void createExpandablePanel(Context context, GlobalSettings gs) {
+		expandablePanel = new JPanel();
+		expandablePanel.setLayout( new BoxLayout(expandablePanel, BoxLayout.Y_AXIS) );
+		for (FeatureSetting fs: featureSettings) {
+			if (fs.parameters().isEmpty())
+			{
+				expandablePanel.add( new NonParametrizedRow(fs) );
+			} else {
+				expandablePanel.add( new ParametrizedRow(context, gs, fs) );
+			}
+		}
 	}
 
 	@Override
@@ -134,6 +158,6 @@ public class FiltersListSection extends AccordionSection {
 
 	@Override
 	public JComponent getExpandableComponent() {
-		return filtersList;
+		return expandablePanel;
 	}
 }

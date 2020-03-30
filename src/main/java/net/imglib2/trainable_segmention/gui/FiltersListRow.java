@@ -19,16 +19,17 @@ import org.scijava.module.ModuleException;
 import org.scijava.ui.swing.widget.SwingInputHarvester;
 import org.scijava.widget.InputHarvester;
 
+import net.imglib2.trainable_segmention.gui.icons.IconResources;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 
 public class FiltersListRow extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private static final ImageIcon INFO_ICON = new ImageIcon( FiltersListRow.class.getClassLoader().getResource( "info_icon_16px.png" ) );
-	private static final ImageIcon DUP_ICON = new ImageIcon( FiltersList.class.getClassLoader().getResource( "plus_icon_16px.png" ) );
-	private static final ImageIcon RM_ICON = new ImageIcon( FiltersList.class.getClassLoader().getResource( "minus_icon_16px.png" ) );
-	private static final ImageIcon PARAMS_ICON = new ImageIcon( FiltersList.class.getClassLoader().getResource( "params_icon_16px.png" ) );
+	private static final ImageIcon INFO_ICON = new ImageIcon( IconResources.getResource( "info_icon_16px.png" ) );
+	private static final ImageIcon DUP_ICON = new ImageIcon( IconResources.getResource( "plus_icon_16px.png" ) );
+	private static final ImageIcon RM_ICON = new ImageIcon( IconResources.getResource( "minus_icon_16px.png" ) );
+	private static final ImageIcon PARAMS_ICON = new ImageIcon( IconResources.getResource( "params_icon_16px.png" ) );
 
 	private FeatureSetting featureSetting;
 	private boolean isParametrized = false;

@@ -45,7 +45,7 @@ public class FeatureSettingsUI extends JPanel {
 
 	private GlobalsPanel globalsPanel;
 
-	private FiltersListPanel filtersListPanel;
+	private FiltersPanel filtersListPanel;
 
 	public FeatureSettingsUI( Context context, FeatureSettings fs ) {
 		this.context = context;
@@ -53,7 +53,7 @@ public class FeatureSettingsUI extends JPanel {
 		setBackground(Color.WHITE);
 		globalsPanel = new GlobalsPanel( fs.globals() );
 		add( globalsPanel, "wrap" );
-		filtersListPanel = new FiltersListPanel( context, fs, globalsPanel );
+		filtersListPanel = new FiltersPanel( context, fs, globalsPanel );
 		add( new JScrollPane( filtersListPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), "split 2, grow" );
 	}
 

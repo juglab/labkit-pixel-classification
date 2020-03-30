@@ -31,39 +31,38 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 
-public class FiltersListPanel extends JPanel {
+public class FiltersPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private FiltersListModel oldFiltersListModel;
-	private FiltersListModel grpFiltersListModel;
-	private FiltersListModel prmFiltersListModel;
+	private List<FeatureSetting> oldFilters;
+	private List<FeatureSetting> grpFilters;
+	private List<FeatureSetting> prmFilters;
 
-	public FiltersListPanel( Context context, FeatureSettings fs, GlobalsPanel gb ) {
+	public FiltersPanel( Context context, FeatureSettings fs, GlobalsPanel gb ) {
 		setLayout(new BoxLayout( this, BoxLayout.Y_AXIS ));
 		setBackground( Color.WHITE );
 		init( context, AvailableFeatures.getValidFeatures( context, fs.globals() ), gb );
 	}
 
 	private void init( Context context, List< FeatureInfo > features, GlobalsPanel gb ) {
-		grpFiltersListModel = new FiltersListModel();
-		prmFiltersListModel = new FiltersListModel();
-		oldFiltersListModel = new FiltersListModel();
+		grpFilters = new ArrayList<>();
+		prmFilters = new ArrayList<>();
+		oldFilters = new ArrayList<>();
 		features.sort( Comparator.comparing( FeatureInfo::label ) );
 		for(FeatureInfo feature : features) {
 			FeatureSetting fs = FeatureSetting.fromClass( feature.clazz() );
-			FiltersListRow row = new FiltersListRow(fs);
 			if ( feature.isDeprecated() )
-				oldFiltersListModel.add(row);
+				oldFilters.add(fs);
 			else if ( isBasic( feature.clazz() ) )
-				grpFiltersListModel.add(row);
+				grpFilters.add(fs);
 			else
-				prmFiltersListModel.add(row);
+				prmFilters.add(fs);
 		}
 
 		AccordionPanel accordion = new AccordionPanel();
-		accordion.addSection( new FiltersListSection("Basic Filters", new FiltersList( context, gb, grpFiltersListModel ), true ) );
-		accordion.addSection( new FiltersListSection("Additional Filters", new FiltersList( context, gb, prmFiltersListModel ), false ) );
-		accordion.addSection( new FiltersListSection("Deprecated Filters", new FiltersList( context, gb, oldFiltersListModel ), false ) );
+		accordion.addSection( new FiltersListSection("Basic Filters", context, gb.get(), grpFilters, true ) );
+		accordion.addSection( new FiltersListSection("Additional Filters", context, gb.get(), prmFilters, false ) );
+		accordion.addSection( new FiltersListSection("Deprecated Filters", context, gb.get(), oldFilters, false ) );
 		add(accordion);
 	}
 
@@ -79,11 +78,6 @@ public class FiltersListPanel extends JPanel {
 		return BASIC_FILTERS.contains(clazz);
 	}
 
-	private boolean isParametrized( Class< ? extends FeatureOp > featureClass ) {
-		Set< String > params = FeatureSetting.fromClass( featureClass ).parameters();
-		return !params.isEmpty();
-	}
-	
 	private void showWarning( List< FeatureSetting > invalid ) {
 		final StringBuilder text = new StringBuilder( "The following features need to be removed because they don't fit the global settings:" );
 		invalid.forEach( feature -> text.append( "\n* " ).append( toString( feature ) ) );
@@ -106,28 +100,25 @@ public class FiltersListPanel extends JPanel {
 		Collection< Class< ? extends FeatureOp > > availableFeatures = AvailableFeatures.getValidFeatures( context, globalSettings ).stream().map( FeatureInfo::clazz ).collect( Collectors.toSet() );
 
 		// Check new features
-		List< FeatureSetting > newGrpFeatures = grpFiltersListModel.getFeatureSettings();
-		List< FeatureSetting > newGrpInvalid = newGrpFeatures.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
+		List< FeatureSetting > newGrpInvalid = grpFilters.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
 		
-		List< FeatureSetting > newPrmFeatures = prmFiltersListModel.getFeatureSettings();
-		List< FeatureSetting > newPrmInvalid = newPrmFeatures.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
+		List< FeatureSetting > newPrmInvalid = prmFilters.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
 
-		List< FeatureSetting > oldFeatures = oldFiltersListModel.getFeatureSettings();
-		List< FeatureSetting > oldInvalid = oldFeatures.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
+		List< FeatureSetting > oldInvalid = oldFilters.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
 		List< FeatureSetting > allInvalid = new ArrayList<>( oldInvalid );
 		allInvalid.addAll( newGrpInvalid );
 		allInvalid.addAll( newPrmInvalid );
 		if ( !allInvalid.isEmpty() )
 			showWarning( allInvalid );
-		grpFiltersListModel.removeAll( newGrpInvalid );
-		prmFiltersListModel.removeAll( newPrmInvalid );
-		oldFiltersListModel.removeAll( oldInvalid );
+		grpFilters.removeAll( newGrpInvalid );
+		prmFilters.removeAll( newPrmInvalid );
+		oldFilters.removeAll( oldInvalid );
 	}
 	
 	public List<FeatureSetting> getSelectedFeatureSettings() {
-		List< FeatureSetting > featureSettings = grpFiltersListModel.getSelectedFeatureSettings();
-		featureSettings.addAll( prmFiltersListModel.getSelectedFeatureSettings() );
-		featureSettings.addAll( oldFiltersListModel.getSelectedFeatureSettings() );
+		List< FeatureSetting > featureSettings = new ArrayList<>(grpFilters);
+		featureSettings.addAll( prmFilters );
+		featureSettings.addAll( oldFilters );
 		return featureSettings;
 	}
 }
