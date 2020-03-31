@@ -29,8 +29,8 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 public class ParametersRow extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private static final ImageIcon RM_ICON = new ImageIcon( IconResources.getResource( "minus_icon_16px.png" ) );
-	private static final ImageIcon PARAMS_ICON = new ImageIcon( IconResources.getResource( "params_icon_16px.png" ) );
+	private static final ImageIcon RM_ICON = IconResources.getIcon( "minus_icon_16px.png" );
+	private static final ImageIcon PARAMS_ICON = IconResources.getIcon( "params_icon_16px.png" );
 
 	private GlobalSettings globalSettings;
 	private Context context;

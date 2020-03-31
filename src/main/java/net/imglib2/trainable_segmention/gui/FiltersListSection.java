@@ -29,8 +29,8 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 public class FiltersListSection extends AccordionSection {
 
 	private static final long serialVersionUID = 1L;
-	private static final ImageIcon EXPANDED_ICON = new ImageIcon( IconResources.getResource( "arrow_down_48px.png" ) );
-	private static final ImageIcon COLLAPSED_ICON = new ImageIcon( IconResources.getResource( "arrow_right_48px.png" ) );
+	private static final ImageIcon EXPANDED_ICON = IconResources.getIcon( "arrow_down_48px.png" );
+	private static final ImageIcon COLLAPSED_ICON = IconResources.getIcon( "arrow_right_48px.png" );
 
 	private List<FeatureSetting> featureSettings;
 	private IconPanel iconPanel;

@@ -23,9 +23,9 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 public class ParametrizedRow extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private static final ImageIcon CUBE_ICON = new ImageIcon( IconResources.getResource( "cube_icon_16px.png" ) );
-	private static final ImageIcon DUP_ICON = new ImageIcon( IconResources.getResource( "plus_icon_16px.png" ) );
-	private static final ImageIcon INFO_ICON = new ImageIcon( IconResources.getResource( "info_icon_16px.png" ) );
+	private static final ImageIcon CUBE_ICON = IconResources.getIcon( "cube_icon_16px.png" );
+	private static final ImageIcon DUP_ICON = IconResources.getIcon( "plus_icon_16px.png" );
+	private static final ImageIcon INFO_ICON = IconResources.getIcon( "info_icon_16px.png" );
 
 	private GlobalSettings globalSettings;
 	private Context context;
