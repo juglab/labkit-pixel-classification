@@ -9,9 +9,9 @@ import java.util.StringJoiner;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
@@ -21,13 +21,13 @@ import org.scijava.module.ModuleException;
 import org.scijava.ui.swing.widget.SwingInputHarvester;
 import org.scijava.widget.InputHarvester;
 
-import net.imglib2.trainable_segmention.gui.icons.IconResources;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 
 public class ParametersRow extends JPanel {
 
 	private static final long serialVersionUID = 1L;
+	private static final ImageIcon DOT_ICON = IconResources.getIcon( "dot_icon_16px.png" );
 	private static final ImageIcon RM_ICON = IconResources.getIcon( "minus_icon_16px.png" );
 	private static final ImageIcon PARAMS_ICON = IconResources.getIcon( "params_icon_16px.png" );
 
@@ -36,30 +36,27 @@ public class ParametersRow extends JPanel {
 	private FeatureSetting featureSetting;
 
 	
-	private JCheckBox checkbox;
 	private JLabel paramsLabel;
 
-	public ParametersRow( Context context, GlobalSettings globalSettings, FeatureSetting featureSetting, boolean isFirstRow) {
+	public ParametersRow( Context context, GlobalSettings globalSettings, FeatureSetting featureSetting) {
 		this.context = context;
 		this.globalSettings = globalSettings;
 		this.featureSetting = featureSetting;
 		setLayout( new BorderLayout() );
 		setBackground( Color.WHITE );
-		initUI(isFirstRow);
+		initUI();
 	}
 
-	private void initUI(boolean isFirstRow) {
+	private void initUI() {
 
 		JPanel cbPanel = new JPanel();
 		cbPanel.setLayout( new FlowLayout( FlowLayout.LEFT ) );
 		cbPanel.setBackground( Color.WHITE );
-		cbPanel.add( Box.createHorizontalStrut( 5 ) );
-		checkbox = new JCheckBox();
-		cbPanel.add( checkbox );
+		cbPanel.add( Box.createHorizontalStrut( 15 ) );
+		
+		paramsLabel = new JLabel( paramsString(), DOT_ICON, SwingConstants.LEFT );
+		cbPanel.add( paramsLabel, BorderLayout.WEST );
 		add( cbPanel, BorderLayout.WEST );
-
-		paramsLabel = new JLabel( paramsString() );
-		add( paramsLabel, BorderLayout.CENTER );
 
 		JPanel btnPanel = new JPanel();
 		btnPanel.setBackground( Color.WHITE );
@@ -68,8 +65,6 @@ public class ParametersRow extends JPanel {
 		JButton rmButton = new JButton( RM_ICON );
 		rmButton.setToolTipText( "Remove filter" );
 		rmButton.addActionListener( this::remove );
-		if (isFirstRow) 
-			rmButton.setEnabled(false);
 		btnPanel.add( rmButton );
 
 		JButton editButton = new JButton( PARAMS_ICON );
@@ -104,10 +99,6 @@ public class ParametersRow extends JPanel {
 		s = s.replace( "psi", "\u03c8" );
 		s = s.replace( "gamma", "\u03b3" );
 		return "<html>" + s + "</html>";
-	}
-
-	public boolean isSelected() {
-		return checkbox.isSelected();
 	}
 
 	public FeatureSetting getFeatureSetting() {

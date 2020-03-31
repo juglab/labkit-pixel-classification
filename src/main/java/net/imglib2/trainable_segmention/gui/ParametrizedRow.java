@@ -11,20 +11,17 @@ import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 
 import org.scijava.Context;
 
-import net.imglib2.trainable_segmention.gui.icons.IconResources;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 
 public class ParametrizedRow extends JPanel implements SelectableRow {
 
 	private static final long serialVersionUID = 1L;
-	private static final ImageIcon CUBE_ICON = IconResources.getIcon( "cube_icon_16px.png" );
 	private static final ImageIcon DUP_ICON = IconResources.getIcon( "plus_icon_16px.png" );
 	private static final ImageIcon INFO_ICON = IconResources.getIcon( "info_icon_16px.png" );
 
@@ -32,6 +29,7 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 	private Context context;
 
 	private FeatureSetting featureSetting;
+	private JCheckBox checkbox;
 
 	public ParametrizedRow( Context context, GlobalSettings globalSettings, FeatureSetting featureSetting ) {
 		this.context = context;
@@ -47,10 +45,9 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 		titleRow.setLayout( new BorderLayout() );
 		titleRow.setBackground( Color.WHITE );
 
-		JLabel titleLabel = new JLabel( CUBE_ICON );
-		titleLabel.setText( featureSetting.getName() );
-		titleLabel.setBorder( new EmptyBorder( 0, 4, 0, 0 ) );
-		titleRow.add( titleLabel, BorderLayout.WEST );
+		checkbox = new JCheckBox( featureSetting.getName() );
+		checkbox.addActionListener( this::checkForParameterRow );
+		titleRow.add( checkbox, BorderLayout.WEST );
 
 		JPanel btnPanel = new JPanel();
 		btnPanel.setBackground( Color.WHITE );
@@ -67,7 +64,7 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 		btnPanel.add( infoButton );
 		titleRow.add( btnPanel, BorderLayout.EAST );
 		add( titleRow );
-		add( new ParametersRow( context, globalSettings, featureSetting, true ) );
+		add( new ParametersRow( context, globalSettings, featureSetting) );
 	}
 
 	private void showInfoDialog( ActionEvent e ) {
@@ -76,13 +73,17 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 	}
 
 	private void duplicate( ActionEvent e ) {
-		add( new ParametersRow( context, globalSettings, FeatureSetting.copy( featureSetting ), false ) );
+		add( new ParametersRow( context, globalSettings, FeatureSetting.copy( featureSetting )) );
 		getParent().getParent().getParent().revalidate();
 		getParent().getParent().getParent().repaint();
 	}
-
-	public List< FeatureSetting > getSelected() {
-		return null;
+	
+	private void checkForParameterRow (ActionEvent e) {
+		if (getComponents().length == 1) {
+			add( new ParametersRow( context, globalSettings, featureSetting) );
+			getParent().getParent().getParent().revalidate();
+			getParent().getParent().getParent().repaint();
+		}
 	}
 
 	@Override
@@ -95,10 +96,13 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 	@Override
 	public List< FeatureSetting > getSelectedFeatureSettings() {
 		List<FeatureSetting> selected = new ArrayList<>();
-		Component[] children = getComponents(); 
-		for( Component child: children) {
-			if (child instanceof ParametersRow && ( ( ParametersRow ) child ).isSelected())
-				selected.add( ( ( ParametersRow ) child ).getFeatureSetting());
+		if (checkbox.isSelected())
+		{
+			Component[] children = getComponents(); 
+			for( Component child: children) {
+				if (child instanceof ParametersRow )
+					selected.add( ( ( ParametersRow ) child ).getFeatureSetting());
+			}
 		}
 		return selected;
 	}

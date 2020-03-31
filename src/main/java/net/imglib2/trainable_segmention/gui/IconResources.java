@@ -1,4 +1,4 @@
-package net.imglib2.trainable_segmention.gui.icons;
+package net.imglib2.trainable_segmention.gui;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -41,7 +41,7 @@ public class IconResources {
 	}
 
 	private URL getResourceImpl( String name ) {
-		return getClass().getResource( "/icons/" + name );
+		return ClassLoader.getSystemResource( name );
 	}
 
 	private ImageIcon getIconImpl( String name ) {

@@ -21,7 +21,6 @@ import javax.swing.border.CompoundBorder;
 
 import org.scijava.Context;
 
-import net.imglib2.trainable_segmention.gui.icons.IconResources;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 
@@ -85,6 +84,7 @@ public class FiltersListSection extends AccordionSection {
 	
 	private void createExpandablePanel(Context context, GlobalSettings gs) {
 		expandablePanel = new JPanel();
+		expandablePanel.setBackground( Color.WHITE );
 		expandablePanel.setLayout( new BoxLayout(expandablePanel, BoxLayout.Y_AXIS) );
 		for (FeatureSetting fs: featureSettings) {
 			if (fs.parameters().isEmpty())
