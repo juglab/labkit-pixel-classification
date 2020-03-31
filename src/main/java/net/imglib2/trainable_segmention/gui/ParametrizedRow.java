@@ -74,15 +74,15 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 
 	private void duplicate( ActionEvent e ) {
 		add( new ParametersRow( context, globalSettings, FeatureSetting.copy( featureSetting )) );
-		getParent().getParent().getParent().revalidate();
-		getParent().getParent().getParent().repaint();
+		revalidate();
+		repaint();
 	}
 	
 	private void checkForParameterRow (ActionEvent e) {
 		if (getComponents().length == 1) {
 			add( new ParametersRow( context, globalSettings, featureSetting) );
-			getParent().getParent().getParent().revalidate();
-			getParent().getParent().getParent().repaint();
+			revalidate();
+			repaint();
 		}
 	}
 
