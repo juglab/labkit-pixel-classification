@@ -2,9 +2,7 @@
 package net.imglib2.trainable_segmention.classification;
 
 import com.google.gson.JsonElement;
-import net.imagej.ops.OpEnvironment;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
@@ -26,6 +24,7 @@ import net.imglib2.view.Views;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.scijava.Context;
 import weka.classifiers.meta.RandomCommittee;
 
 import java.io.IOException;
@@ -58,7 +57,7 @@ public class SegmenterTest {
 
 	private LabelRegions<String> labeling = loadLabeling("nucleiLabeling.tif");
 
-	private final OpEnvironment ops = Utils.ops();
+	private final Context context = new Context();
 
 	@Test
 	public void testClassification() {
@@ -75,7 +74,7 @@ public class SegmenterTest {
 			.build();
 		FeatureSettings featureSettings = new FeatureSettings(globals, SingleFeatures.identity(),
 			GroupedFeatures.gauss());
-		return Trainer.train(ops, img, labeling, featureSettings);
+		return Trainer.train(context, img, labeling, featureSettings);
 	}
 
 	private void checkExpected(RandomAccessibleInterval<? extends IntegerType<?>> result,
@@ -97,7 +96,7 @@ public class SegmenterTest {
 		// store
 		JsonElement json = segmenter.toJsonTree();
 		// load
-		Segmenter segmenter2 = Segmenter.fromJson(ops, json);
+		Segmenter segmenter2 = Segmenter.fromJson(context, json);
 		// test
 		RandomAccessibleInterval<? extends IntegerType<?>> result = segmenter.segment(img);
 		RandomAccessibleInterval<? extends IntegerType<?>> result2 = segmenter2.segment(img);
@@ -109,7 +108,8 @@ public class SegmenterTest {
 		assumeFalse(useGpu);
 		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(),
 			SingleFeatures.identity(), new FeatureSetting(GaussFeature.class));
-		Segmenter segmenter = Trainer.train(ops, img, labeling, featureSettings, new RandomCommittee());
+		Segmenter segmenter = Trainer.train(context, img, labeling, featureSettings,
+			new RandomCommittee());
 		RandomAccessibleInterval<? extends IntegerType<?>> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());
 	}

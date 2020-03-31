@@ -9,8 +9,6 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
@@ -22,7 +20,6 @@ import org.scijava.Context;
 import trainableSegmentation.FeatureStack3D;
 import trainableSegmentation.FeatureStackArray;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -66,18 +63,16 @@ public class FeatureStack3DTest {
 		testFeatureIgnoreAttributes(44, FeatureStack3D.EDGES, GroupedFeatures.gradient());
 	}
 
-	private void testFeature(int expectedPsnr, int featureID, FeatureSetting featureSetting) {
-		FeatureStackArray fsa = calculateFeatureStack(featureID);
-		FeatureCalculator group = setupFeatureCalculator(featureSetting);
-		testAttributes(fsa, group);
-		testFeatures(expectedPsnr, fsa, group);
-	}
-
 	private void testFeatureIgnoreAttributes(int expectedPsnr, int featureID,
 		FeatureSetting featureSetting)
 	{
 		FeatureStackArray fsa = calculateFeatureStack(featureID);
-		FeatureCalculator group = setupFeatureCalculator(featureSetting);
+		FeatureCalculator group = FeatureCalculator.default2d()
+			.dimensions(3)
+			.sigmaRange(1.0, 8.0)
+			.addFeature(SingleFeatures.identity())
+			.addFeature(featureSetting)
+			.build();
 		testFeatures(expectedPsnr, fsa, group);
 	}
 
@@ -85,12 +80,6 @@ public class FeatureStack3DTest {
 		RandomAccessibleInterval<FloatType> expected = stripOriginalAndBorder(getImage(fsa));
 		RandomAccessibleInterval<FloatType> result = stripOriginalAndBorder(group.apply(img));
 		Utils.assertImagesEqual(expectedPsnr, expected, result);
-	}
-
-	private void testAttributes(FeatureStackArray fsa, FeatureCalculator group) {
-		List<String> expectedLabels = oldAttributes(fsa);
-		List<String> actualLabels = getAttributeLabels(group);
-		assertEquals(expectedLabels, actualLabels);
 	}
 
 	private RandomAccessibleInterval<FloatType> stripOriginalAndBorder(
@@ -107,12 +96,6 @@ public class FeatureStack3DTest {
 		return Views.interval(image, new FinalInterval(min, max));
 	}
 
-	private FeatureCalculator setupFeatureCalculator(FeatureSetting featureSetting) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3d().build(), Arrays
-			.asList(SingleFeatures.identity(), featureSetting));
-		return new FeatureCalculator(Utils.ops(), featureSettings);
-	}
-
 	private RandomAccessibleInterval<FloatType> getImage(FeatureStackArray fsa) {
 		List<Img<FloatType>> slices = IntStream.range(0, fsa.getSize())
 			.mapToObj(index -> stackToImg(fsa.get(index).getStack(), Integer.toString(index)))
@@ -127,14 +110,6 @@ public class FeatureStack3DTest {
 		stack.setEnableFeatures(enabledFeatures);
 		stack.updateFeaturesMT();
 		return stack.getFeatureStackArray();
-	}
-
-	private List<String> getAttributeLabels(FeatureCalculator group) {
-		return group.attributeLabels();
-	}
-
-	private List<String> oldAttributes(FeatureStackArray fsa) {
-		return FeatureStackTest.oldAttributes(fsa.get(0));
 	}
 
 	private Img<FloatType> stackToImg(ImageStack stack1, String title) {

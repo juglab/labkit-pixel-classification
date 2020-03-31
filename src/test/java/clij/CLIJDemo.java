@@ -44,10 +44,10 @@ public class CLIJDemo {
 	public static void main(String... args) {
 
 		CLIJ2 clij = CLIJ2.getInstance();
-		OpService ops = new Context().service(OpService.class);
+		Context context = new Context();
 		JsonElement read = GsonUtils.read(CLIJDemo.class.getResource("/clij/test.classifier")
 			.getFile());
-		Segmenter segmenter = Segmenter.fromJson(ops, read);
+		Segmenter segmenter = Segmenter.fromJson(context, read);
 		Classifier classifier = segmenter.getClassifier();
 		ElapsedTime.sStandardOutput = true;
 		try {

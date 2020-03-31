@@ -41,7 +41,7 @@ public class FeatureCalculationBenchmark {
 	private static final String labelingFileName =
 		"drosophila_3d_labeling.tif";
 
-	private final OpService ops = new Context().service(OpService.class);
+	private final Context context = new Context();
 
 	private final RandomAccessibleInterval<FloatType> image = Utils.loadImageFloatType(imageFilename);
 
@@ -79,7 +79,7 @@ public class FeatureCalculationBenchmark {
 		return Parallelization.runSingleThreaded(() -> {
 			final FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3d()
 				.build(), setting);
-			FeatureCalculator featureCalculator = new FeatureCalculator(ops, featureSettings);
+			FeatureCalculator featureCalculator = new FeatureCalculator(context, featureSettings);
 			return featureCalculator.apply(image);
 		});
 	}

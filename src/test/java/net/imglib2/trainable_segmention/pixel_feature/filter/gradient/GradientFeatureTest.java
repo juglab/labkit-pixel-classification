@@ -6,13 +6,12 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
+import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
+import net.imglib2.view.Views;
 import org.junit.Test;
-
-import java.util.Collections;
 
 /**
  * Created by arzt on 18.07.17.
@@ -30,16 +29,15 @@ public class GradientFeatureTest {
 
 		// process
 		RandomAccessibleInterval<FloatType> result = RevampUtils.createImage(interval, new FloatType());
-		SingleFeatures.gradient(1.0).newInstance(Utils.ops(), GlobalSettings.default3d().build()).apply(
-			in, Collections.singletonList(result));
+		FeatureCalculator calculator = FeatureCalculator.default2d()
+			.dimensions(3)
+			.addFeature(SingleFeatures.gradient(1))
+			.build();
+		calculator.apply(in, Views.addDimension(result, 0, 0));
 
 		// test
 		RandomAccessibleInterval<FloatType> expected = Utils.create3dImage(interval,
 			(x, y, z) -> Math.sqrt(4 * x * x + 16 * y * y + 36 * z * z));
 		Utils.assertImagesEqual(60.0, expected, result);
-	}
-
-	public static void main(String... args) {
-		new GradientFeatureTest().test();
 	}
 }

@@ -4,17 +4,12 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.stats;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.StackProcessor;
-import net.imagej.ops.OpService;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.test.RandomImgs;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
-import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
-import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
@@ -50,7 +45,6 @@ import java.util.Collections;
 @BenchmarkMode(Mode.AverageTime)
 public class MaxFilterBenchmark {
 
-	private OpService ops = new Context().service(OpService.class);
 	private ImageStack inputStack = randomize(ImageStack.create(100, 100, 100, 32));
 	private ImageStack outputStack = ImageStack.create(100, 100, 100, 32);
 
@@ -79,10 +73,12 @@ public class MaxFilterBenchmark {
 	@Deprecated
 	@Benchmark
 	public void benchmarkOps() {
-		FeatureOp feature = new FeatureSetting(SingleSphereShapedFeature.class, "radius", 4,
-			"operation", SingleSphereShapedFeature.MAX)
-				.newInstance(ops, GlobalSettings.default3d().build());
-		feature.apply(Views.extendBorder(input), Collections.singletonList(output));
+		FeatureCalculator calculator = FeatureCalculator.default2d()
+			.dimensions(3)
+			.addFeature(SingleSphereShapedFeature.class, "radius", 4,
+				"operation", SingleSphereShapedFeature.MAX)
+			.build();
+		calculator.apply(Views.extendBorder(input), Views.addDimension(output, 0, 0));
 	}
 
 	// @Setup

@@ -1,7 +1,6 @@
 
 package net.imglib2.trainable_segmention;
 
-import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.Img;
@@ -45,7 +44,7 @@ public class AnisotropicFeaturesTest {
 
 	private final boolean useGpu;
 
-	private static OpService ops = new Context().service(OpService.class);
+	private static Context context = new Context();
 
 	@Test
 	public void testGradient() {
@@ -101,7 +100,7 @@ public class AnisotropicFeaturesTest {
 		RandomAccessibleInterval<DoubleType> scaleImage = Views.subsample(image, 1, 1, 2);
 
 		FeatureCalculator calculator = FeatureCalculator.default2d()
-			.ops(ops)
+			.context(context)
 			.dimensions(3)
 			.addFeature(setting)
 			.build();
@@ -111,7 +110,7 @@ public class AnisotropicFeaturesTest {
 		RandomAccessibleInterval<FloatType> scaledFeatures = Views.subsample(result, 1, 1, 2, 1);
 
 		FeatureCalculator calculator2 = FeatureCalculator.default2d()
-			.ops(ops)
+			.context(context)
 			.dimensions(3)
 			.addFeature(setting)
 			.pixelSize(1, 1, 2)
@@ -127,7 +126,7 @@ public class AnisotropicFeaturesTest {
 		RandomAccessibleInterval<DoubleType> scaleImage = Views.subsample(image, 1, 2);
 
 		FeatureCalculator calculator = FeatureCalculator.default2d()
-			.ops(ops)
+			.context(context)
 			.addFeature(setting)
 			.build();
 		calculator.setUseGPU(useGpu);
@@ -136,7 +135,7 @@ public class AnisotropicFeaturesTest {
 		RandomAccessibleInterval<FloatType> scaledFeatures = Views.subsample(result, 1, 2, 1);
 
 		FeatureCalculator calculator2 = FeatureCalculator.default2d()
-			.ops(ops)
+			.context(context)
 			.addFeature(setting)
 			.pixelSize(1, 2)
 			.build();

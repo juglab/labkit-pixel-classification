@@ -5,7 +5,6 @@ import net.imagej.ops.OpEnvironment;
 import net.imglib2.*;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.algorithm.fft2.FFTConvolution;
-import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
@@ -22,7 +21,6 @@ import preview.net.imglib2.loops.LoopBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 /**
  * @deprecated

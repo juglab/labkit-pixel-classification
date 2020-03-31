@@ -59,10 +59,9 @@ public class SingleSobelGradientFeature extends AbstractFeatureOp {
 		Interval dyInputInterval = RevampUtils.deriveYRequiredInput(out);
 		Interval blurredInterval = Intervals.union(dxInputInterval, dyInputInterval);
 
-		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(ops(), in, blurredInterval,
-			sigmas);
-		RandomAccessibleInterval<FloatType> dx = RevampUtils.deriveX(ops(), blurred, out);
-		RandomAccessibleInterval<FloatType> dy = RevampUtils.deriveY(ops(), blurred, out);
+		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(in, blurredInterval, sigmas);
+		RandomAccessibleInterval<FloatType> dx = RevampUtils.deriveX(blurred, out);
+		RandomAccessibleInterval<FloatType> dy = RevampUtils.deriveY(blurred, out);
 		RandomAccessible<Pair<FloatType, FloatType>> derivatives = Views.pair(dx, dy);
 		mapToFloat(derivatives, out, input -> norm2(input.getA().get(), input.getB().get()));
 	}

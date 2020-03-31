@@ -74,20 +74,20 @@ public class SingleHessianFeature extends AbstractFeatureOp {
 			RevampUtils.deriveXRequiredInput(firstDerivativeInterval), RevampUtils.deriveYRequiredInput(
 				firstDerivativeInterval));
 
-		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(ops(), image, blurredInterval,
+		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(image, blurredInterval,
 			sigmas);
-		RandomAccessibleInterval<FloatType> dx = RevampUtils.deriveX(ops(), blurred,
+		RandomAccessibleInterval<FloatType> dx = RevampUtils.deriveX(blurred,
 			firstDerivativeInterval);
-		RandomAccessibleInterval<FloatType> dy = RevampUtils.deriveY(ops(), blurred,
+		RandomAccessibleInterval<FloatType> dy = RevampUtils.deriveY(blurred,
 			firstDerivativeInterval);
-		RandomAccessibleInterval<FloatType> dxx = RevampUtils.deriveX(ops(), dx,
+		RandomAccessibleInterval<FloatType> dxx = RevampUtils.deriveX(dx,
 			secondDerivativeInterval);
-		RandomAccessibleInterval<FloatType> dxy = RevampUtils.deriveY(ops(), dx,
+		RandomAccessibleInterval<FloatType> dxy = RevampUtils.deriveY(dx,
 			secondDerivativeInterval);
-		RandomAccessibleInterval<FloatType> dyy = RevampUtils.deriveY(ops(), dy,
+		RandomAccessibleInterval<FloatType> dyy = RevampUtils.deriveY(dy,
 			secondDerivativeInterval);
 
-		LoopBuilder.setImages(RevampUtils.vectorizeStack(output), dxx, dxy, dyy).forEachPixel(
+		LoopBuilder.setImages(RevampUtils.vectorizeStack(output), dyy, dxy, dxx).forEachPixel(
 			(o, s_xx, s_xy, s_yy) -> calculateHessianPerPixel(o, s_xx.getRealFloat(), s_xy.getRealFloat(),
 				s_yy.getRealFloat()));
 	}

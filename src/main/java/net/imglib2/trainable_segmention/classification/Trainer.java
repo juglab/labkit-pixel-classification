@@ -3,7 +3,6 @@ package net.imglib2.trainable_segmention.classification;
 
 import hr.irb.fastRandomForest.FastRandomForest;
 import ij.Prefs;
-import net.imagej.ops.OpEnvironment;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
@@ -17,6 +16,7 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.GenericComposite;
+import org.scijava.Context;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 
@@ -97,18 +97,18 @@ public class Trainer {
 		return map;
 	}
 
-	public static Segmenter train(OpEnvironment ops, RandomAccessibleInterval<?> image,
+	public static Segmenter train(Context context, RandomAccessibleInterval<?> image,
 		LabelRegions<?> labeling, FeatureSettings features)
 	{
-		return train(ops, image, labeling, features, initRandomForest());
+		return train(context, image, labeling, features, initRandomForest());
 	}
 
-	public static Segmenter train(OpEnvironment ops, RandomAccessibleInterval<?> image,
+	public static Segmenter train(Context context, RandomAccessibleInterval<?> image,
 		LabelRegions<?> labeling, FeatureSettings features, Classifier initialWekaClassifier)
 	{
 		List<String> classNames = labeling.getExistingLabels().stream().map(Object::toString).collect(
 			Collectors.toList());
-		Segmenter segmenter = new Segmenter(ops, classNames, features, initialWekaClassifier);
+		Segmenter segmenter = new Segmenter(context, classNames, features, initialWekaClassifier);
 		Trainer.of(segmenter).trainLabeledImage(image, labeling);
 		return segmenter;
 	}

@@ -67,7 +67,7 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 		Interval firstDerivativeInterval = Intervals.expand(secondDerivativeInterval, 1);
 		Interval blurredInterval = Intervals.expand(firstDerivativeInterval, 1);
 
-		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(ops(), image, blurredInterval,
+		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(image, blurredInterval,
 			sigmas);
 		RandomAccessibleInterval<FloatType> dx = derive(blurred, firstDerivativeInterval, 0);
 		RandomAccessibleInterval<FloatType> dy = derive(blurred, firstDerivativeInterval, 1);

@@ -7,9 +7,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij2.CLIJ2;
-import net.imagej.ops.OpEnvironment;
-import net.imagej.ops.special.hybrid.AbstractUnaryHybridCF;
-import net.imagej.ops.special.hybrid.UnaryHybridCF;
 import net.imglib2.*;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
@@ -19,7 +16,6 @@ import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculat
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
@@ -29,7 +25,7 @@ import net.imglib2.util.Cast;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
-import net.imglib2.view.composite.GenericComposite;
+import org.scijava.Context;
 import preview.net.imglib2.loops.LoopBuilder;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -64,10 +60,10 @@ public class Segmenter {
 		this.classifier = Objects.requireNonNull(classifier);
 	}
 
-	public Segmenter(OpEnvironment ops, List<String> classNames, FeatureSettings features,
+	public Segmenter(Context context, List<String> classNames, FeatureSettings features,
 		Classifier classifier)
 	{
-		this(classNames, new FeatureCalculator(ops, features), classifier);
+		this(classNames, new FeatureCalculator(context, features), classifier);
 	}
 
 	public void setUseGpu(boolean useGpu) {
@@ -123,7 +119,12 @@ public class Segmenter {
 		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
 		LoopBuilder.setImages(Views.collapseReal(featureValues), out).multiThreaded().forEachChunk(
 			chunk -> {
-				chunk.forEachPixel(pixelClassificationOp()::compute);
+				CompositeInstance compositeInstance = new CompositeInstance(null, attributesAsArray());
+				chunk.forEachPixel((input, output) -> {
+					compositeInstance.setSource(input);
+					RevampUtils.wrapException(() -> output.setInteger((int) classifier.classifyInstance(
+						compositeInstance)));
+				});
 				return null;
 			});
 	}
@@ -173,7 +174,14 @@ public class Segmenter {
 		LoopBuilder.setImages(Views.collapseReal(featureValues), Views.collapse(out)).multiThreaded()
 			.forEachChunk(
 				chunk -> {
-					chunk.forEachPixel(pixelPredictionOp()::compute);
+					CompositeInstance compositeInstance = new CompositeInstance(null, attributesAsArray());
+					chunk.forEachPixel((input, output) -> {
+						compositeInstance.setSource(input);
+						double[] result = RevampUtils.wrapException(() -> classifier.distributionForInstance(
+							compositeInstance));
+						for (int i = 0, n = result.length; i < n; i++)
+							output.get(i).setReal(result[i]);
+					});
 					return null;
 				});
 	}
@@ -195,16 +203,6 @@ public class Segmenter {
 		}
 	}
 
-	private UnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>>
-		pixelPredictionOp()
-	{
-		return new PixelPredictionOp();
-	}
-
-	private UnaryHybridCF<Composite<? extends RealType<?>>, IntegerType<?>> pixelClassificationOp() {
-		return new PixelClassifierOp();
-	}
-
 	public List<String> classNames() {
 		return classNames;
 	}
@@ -221,10 +219,10 @@ public class Segmenter {
 		return json;
 	}
 
-	public static Segmenter fromJson(OpEnvironment ops, JsonElement json) {
+	public static Segmenter fromJson(Context context, JsonElement json) {
 		JsonObject object = json.getAsJsonObject();
 		return new Segmenter(
-			ops,
+			context,
 			new Gson().fromJson(object.get("classNames"), new TypeToken<List<String>>()
 			{}.getType()),
 			FeatureSettings.fromJson(object.get("features")),
@@ -251,7 +249,6 @@ public class Segmenter {
 		@Override
 		public void train() {
 			RevampUtils.wrapException(() -> classifier.buildClassifier(instances));
-
 		}
 	}
 
@@ -266,65 +263,5 @@ public class Segmenter {
 		Stream<Attribute> featureAttributes = features.attributeLabels().stream().map(Attribute::new);
 		Stream<Attribute> classAttribute = Stream.of(new Attribute("class", classNames));
 		return Stream.concat(featureAttributes, classAttribute).collect(Collectors.toList());
-	}
-
-	// -- Helper classes --
-
-	private class PixelClassifierOp extends
-		AbstractUnaryHybridCF<Composite<? extends RealType<?>>, IntegerType<?>>
-	{
-
-		CompositeInstance compositeInstance = new CompositeInstance(null, attributesAsArray());
-
-		@Override
-		public UnaryHybridCF<Composite<? extends RealType<?>>, IntegerType<?>>
-			getIndependentInstance()
-		{
-			return new PixelClassifierOp();
-		}
-
-		@Override
-		public IntegerType<?> createOutput(Composite<? extends RealType<?>> input) {
-			return new UnsignedByteType();
-		}
-
-		@Override
-		public void compute(Composite<? extends RealType<?>> input, IntegerType<?> output) {
-			compositeInstance.setSource(input);
-			RevampUtils.wrapException(() -> output.setInteger((int) classifier.classifyInstance(
-				compositeInstance)));
-		}
-
-	}
-
-	private class PixelPredictionOp extends
-		AbstractUnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>>
-	{
-
-		CompositeInstance compositeInstance = new CompositeInstance(null, attributesAsArray());
-
-		@Override
-		public UnaryHybridCF<Composite<? extends RealType<?>>, Composite<? extends RealType<?>>>
-			getIndependentInstance()
-		{
-			return new PixelPredictionOp();
-		}
-
-		@Override
-		public void compute(Composite<? extends RealType<?>> input,
-			Composite<? extends RealType<?>> output)
-		{
-			compositeInstance.setSource(input);
-			double[] result = RevampUtils.wrapException(() -> classifier.distributionForInstance(
-				compositeInstance));
-			for (int i = 0, n = result.length; i < n; i++)
-				output.get(i).setReal(result[i]);
-		}
-
-		@Override
-		public Composite<? extends RealType<?>> createOutput(Composite<? extends RealType<?>> input) {
-			return new GenericComposite<>(ArrayImgs.doubles(compositeInstance.numClasses())
-				.randomAccess());
-		}
 	}
 }

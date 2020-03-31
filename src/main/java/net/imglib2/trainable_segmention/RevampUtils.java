@@ -1,13 +1,10 @@
 
 package net.imglib2.trainable_segmention;
 
-import net.imagej.ops.OpEnvironment;
-import net.imagej.ops.OpService;
 import net.imglib2.*;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealTypeConverters;
-import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
@@ -21,6 +18,8 @@ import net.imglib2.util.Intervals;
 import net.imglib2.view.StackView;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
+import preview.net.imglib2.algorithm.convolution.kernel.Kernel1D;
+import preview.net.imglib2.algorithm.convolution.kernel.SeparableKernelConvolution;
 import weka.core.DenseInstance;
 import preview.net.imglib2.algorithm.gauss3.Gauss3;
 
@@ -95,14 +94,14 @@ public class RevampUtils {
 		return Arrays.copyOf(longs, longs.length - 1);
 	}
 
-	public static RandomAccessibleInterval<FloatType> gauss(OpService ops,
-		RandomAccessibleInterval<FloatType> image, double[] sigmas)
+	public static RandomAccessibleInterval<FloatType> gauss(RandomAccessibleInterval<FloatType> image,
+		double[] sigmas)
 	{
-		return gauss(ops, Views.extendBorder(image), (Interval) image, sigmas);
+		return gauss(Views.extendBorder(image), (Interval) image, sigmas);
 	}
 
-	public static RandomAccessibleInterval<FloatType> gauss(OpEnvironment ops,
-		RandomAccessible<FloatType> input, Interval outputInterval, double[] sigmas)
+	public static RandomAccessibleInterval<FloatType> gauss(RandomAccessible<FloatType> input,
+		Interval outputInterval, double[] sigmas)
 	{
 		RandomAccessibleInterval<FloatType> blurred = RevampUtils.createImage(outputInterval,
 			new FloatType());
@@ -117,14 +116,16 @@ public class RevampUtils {
 		return Intervals.expand(outputInterval, border);
 	}
 
-	public static RandomAccessibleInterval<FloatType> deriveX(OpEnvironment ops,
-		RandomAccessible<FloatType> input, Interval outputInterval)
+	public static RandomAccessibleInterval<FloatType> deriveX(RandomAccessible<FloatType> input,
+		Interval outputInterval)
 	{
 		if (outputInterval.numDimensions() != 2)
 			throw new IllegalArgumentException("Only two dimensional images supported.");
 		RandomAccessibleInterval<FloatType> output = RevampUtils.createImage(outputInterval,
 			new FloatType());
-		ops.filter().convolve(output, input, SOBEL_FILTER_X);
+		SeparableKernelConvolution.convolution(Kernel1D.centralAsymmetric(1, 0, -1), Kernel1D
+			.centralAsymmetric(1, 2, 1))
+			.process(input, output);
 		return output;
 	}
 
@@ -134,14 +135,16 @@ public class RevampUtils {
 		return Intervals.expand(output, new long[] { 1, 1 });
 	}
 
-	public static RandomAccessibleInterval<FloatType> deriveY(OpEnvironment ops,
-		RandomAccessible<FloatType> input, Interval outputInterval)
+	public static RandomAccessibleInterval<FloatType> deriveY(RandomAccessible<FloatType> input,
+		Interval outputInterval)
 	{
 		if (outputInterval.numDimensions() != 2)
 			throw new IllegalArgumentException("Only two dimensional images supported.");
 		RandomAccessibleInterval<FloatType> output = RevampUtils.createImage(outputInterval,
 			new FloatType());
-		ops.filter().convolve(output, input, SOBEL_FILTER_Y);
+		SeparableKernelConvolution.convolution(Kernel1D.centralAsymmetric(1, 2, 1), Kernel1D
+			.centralAsymmetric(1, 0, -1))
+			.process(input, output);
 		return output;
 	}
 
@@ -149,12 +152,6 @@ public class RevampUtils {
 		if (output.numDimensions() != 2)
 			throw new IllegalArgumentException("Only two dimensional images supported.");
 		return Intervals.expand(output, new long[] { 1, 1 });
-	}
-
-	public static RandomAccessibleInterval<FloatType> convolve(OpService ops,
-		RandomAccessibleInterval<FloatType> blurred, RandomAccessibleInterval<FloatType> kernel)
-	{
-		return ops.filter().convolve(blurred, kernel, new OutOfBoundsBorderFactory<>());
 	}
 
 	public static RandomAccessible<FloatType> randomAccessibleToFloat(

@@ -2,8 +2,6 @@
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import net.haesleinhuepf.clij2.CLIJ2;
-import net.imagej.ops.OpEnvironment;
-import net.imagej.ops.OpService;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
@@ -44,10 +42,10 @@ public class FeatureCalculator {
 
 	private boolean useGPU = false;
 
-	public FeatureCalculator(OpEnvironment ops, FeatureSettings settings) {
+	public FeatureCalculator(Context context, FeatureSettings settings) {
 		this.settings = settings;
 		List<FeatureOp> featureOps = settings.features().stream()
-			.map(x -> x.newInstance(ops, settings.globals())).collect(Collectors.toList());
+			.map(x -> x.newInstance(context, settings.globals())).collect(Collectors.toList());
 		this.joiner = new FeatureJoiner(featureOps);
 		this.preprocessor = initPreprocessor(settings.globals().channelSetting());
 	}
@@ -65,10 +63,6 @@ public class FeatureCalculator {
 			return new MultiChannelInputPreprocessor(settings.globals());
 		throw new UnsupportedOperationException("Unsupported channel setting: " + settings().globals()
 			.channelSetting());
-	}
-
-	public OpEnvironment ops() {
-		return joiner.ops();
 	}
 
 	public FeatureSettings settings() {
@@ -182,7 +176,7 @@ public class FeatureCalculator {
 
 	public static class Builder extends GlobalSettings.AbstractBuilder<Builder> {
 
-		private OpEnvironment ops;
+		private Context context;
 
 		private final List<FeatureSetting> features = new ArrayList<>();
 
@@ -190,8 +184,8 @@ public class FeatureCalculator {
 			super();
 		}
 
-		public Builder ops(OpEnvironment ops) {
-			this.ops = ops;
+		public Builder context(Context context) {
+			this.context = context;
 			return this;
 		}
 
@@ -211,11 +205,11 @@ public class FeatureCalculator {
 		}
 
 		public FeatureCalculator build() {
-			if (ops == null)
-				ops = new Context().service(OpService.class);
+			if (context == null)
+				context = new Context();
 			GlobalSettings globalSettings = buildGlobalSettings();
 			FeatureSettings featureSettings = new FeatureSettings(globalSettings, features);
-			return new FeatureCalculator(ops, featureSettings);
+			return new FeatureCalculator(context, featureSettings);
 		}
 	}
 }

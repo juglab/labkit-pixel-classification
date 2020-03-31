@@ -1,8 +1,6 @@
 
 package net.imglib2.trainable_segmention.classification;
 
-import net.imagej.ops.OpEnvironment;
-import net.imagej.ops.OpService;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
@@ -31,7 +29,7 @@ import static org.junit.Assert.assertEquals;
 
 public class SegmenterTestMultiChannel {
 
-	private OpEnvironment ops = new Context().service(OpService.class);
+	private Context context = new Context();
 
 	private Img<UnsignedByteType> trainingImage = ArrayImgs.unsignedBytes(new byte[] {
 		1, 0,
@@ -71,7 +69,7 @@ public class SegmenterTestMultiChannel {
 			.build();
 		FeatureSettings features = new FeatureSettings(globalSetting,
 			SingleFeatures.identity());
-		return Trainer.train(ops, trainingImage, labeling, features);
+		return Trainer.train(context, trainingImage, labeling, features);
 	}
 
 	@Test

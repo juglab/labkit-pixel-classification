@@ -24,6 +24,7 @@ import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
+import org.scijava.Context;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +43,7 @@ public class CLIJSegmenterTest {
 	private LabelRegions<String> labeling = loadLabeling(
 		"/home/arzt/Documents/Datasets/Example/small-3d-stack-labeling.tif");
 
-	private final OpEnvironment ops = Utils.ops();
+	private final Context context = new Context();
 
 	@Test
 	public void testClassification() {
@@ -69,7 +70,7 @@ public class CLIJSegmenterTest {
 		List<String> classNames = ((LabelRegions<?>) labeling).getExistingLabels().stream().map(
 			Object::toString).collect(
 				Collectors.toList());
-		Segmenter segmenter = new Segmenter(ops, classNames, featureSettings, Trainer
+		Segmenter segmenter = new Segmenter(context, classNames, featureSettings, Trainer
 			.initRandomForest());
 		Trainer.of(segmenter).trainLabeledImage(img, labeling);
 		return segmenter;

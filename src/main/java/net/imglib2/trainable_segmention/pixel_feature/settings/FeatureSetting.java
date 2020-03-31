@@ -5,9 +5,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.OpInfo;
+import net.imagej.ops.OpService;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import org.scijava.Context;
 import org.scijava.command.Command;
 import org.scijava.command.CommandInfo;
 import org.scijava.module.Module;
@@ -86,11 +87,11 @@ public class FeatureSetting {
 		return new FeatureSetting(fs.commandInfo, fs.parameterValues::get);
 	}
 
-	public FeatureOp newInstance(OpEnvironment ops, GlobalSettings globalSettings) {
+	public FeatureOp newInstance(Context context, GlobalSettings globalSettings) {
 		@SuppressWarnings("unchecked")
 		FeatureOp delegateObject = (FeatureOp) asModule(globalSettings).getDelegateObject();
-		ops.context().inject(delegateObject);
-		delegateObject.setEnvironment(ops);
+		context.inject(delegateObject);
+		delegateObject.setEnvironment(context.service(OpService.class));
 		delegateObject.initialize();
 		return delegateObject;
 	}
@@ -184,7 +185,8 @@ public class FeatureSetting {
 
 	// -- Helper methods --
 
-	private static final List<String> EXCLUDE = Arrays.asList("in", "out", "globalSettings");
+	private static final List<String> EXCLUDE = Arrays.asList("in", "out", "globalSettings",
+		"context");
 
 	private boolean isParameterValid(ModuleItem<?> mi) {
 		return !(EXCLUDE.contains(mi.getName())) &&

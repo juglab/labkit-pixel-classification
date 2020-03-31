@@ -2,7 +2,6 @@
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import clij.CLIJLoopBuilder;
-import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
@@ -14,15 +13,12 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 import preview.net.imglib2.loops.LoopBuilder;
 
@@ -46,16 +42,14 @@ public class FeatureCalculatorTest {
 
 	private final boolean useGpu;
 
-	private final OpService ops = new Context().service(OpService.class);
-
 	private final FeatureSetting add_42 = new FeatureSetting(AddValue.class, "value", 42);
 	private final FeatureSetting add_12 = new FeatureSetting(AddValue.class, "value", 12);
 
 	@Test
 	public void test1() {
-		GlobalSettings globalSettings = GlobalSettings.default2d().build();
-		FeatureSettings settings = new FeatureSettings(globalSettings, add_42, add_12);
-		FeatureCalculator calculator = new FeatureCalculator(ops, settings);
+		FeatureCalculator calculator = FeatureCalculator.default2d()
+			.addFeatures(add_42, add_12)
+			.build();
 		calculator.setUseGPU(useGpu);
 		Img<FloatType> input = ArrayImgs.floats(new float[] { 2 }, 1, 1);
 		RandomAccessibleInterval<FloatType> out = calculator.apply(input);
@@ -64,12 +58,11 @@ public class FeatureCalculatorTest {
 
 	@Test
 	public void test2() {
-		GlobalSettings globalSettings = GlobalSettings.default2d()
+		FeatureCalculator calculator = FeatureCalculator.default2d()
 			.channels(ChannelSetting.multiple(2))
-			.dimensions(2).sigmas(Collections.singletonList(1.0))
+			.sigmas(1.0)
+			.addFeatures(add_42, add_12)
 			.build();
-		FeatureSettings settings = new FeatureSettings(globalSettings, add_42, add_12);
-		FeatureCalculator calculator = new FeatureCalculator(ops, settings);
 		calculator.setUseGPU(useGpu);
 		Img<FloatType> input = ArrayImgs.floats(new float[] { 2, 3 }, 1, 1, 2);
 		RandomAccessibleInterval<FloatType> out = calculator.apply(input);

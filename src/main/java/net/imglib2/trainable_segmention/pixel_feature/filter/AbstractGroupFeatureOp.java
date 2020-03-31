@@ -6,6 +6,8 @@ import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.type.numeric.real.FloatType;
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,11 +18,14 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractGroupFeatureOp extends AbstractFeatureOp {
 
+	@Parameter
+	private Context context;
+
 	protected FeatureJoiner featureGroup = new FeatureJoiner(Collections.emptyList());
 
 	@Override
 	public void initialize() {
-		featureGroup = new FeatureJoiner(initFeatures().stream().map(x -> x.newInstance(ops(),
+		featureGroup = new FeatureJoiner(initFeatures().stream().map(x -> x.newInstance(context,
 			globalSettings()))
 			.collect(Collectors.toList()));
 	}

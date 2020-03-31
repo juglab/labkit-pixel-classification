@@ -49,9 +49,12 @@ public class FeatureStackTest {
 	public static RandomAccessibleInterval<FloatType> createStack(
 		RandomAccessibleInterval<FloatType> image, FeatureSetting feature)
 	{
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
-			.asList(SingleFeatures.identity(), feature));
-		return new FeatureCalculator(Utils.ops(), featureSettings).apply(image);
+		FeatureCalculator calculator = FeatureCalculator.default2d()
+			.sigmaRange(1.0, 16.0)
+			.addFeature(SingleFeatures.identity())
+			.addFeature(feature)
+			.build();
+		return calculator.apply(image);
 	}
 
 	@Test
@@ -102,9 +105,12 @@ public class FeatureStackTest {
 	}
 
 	private static List<String> getAttributeLabels(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
-			.asList(SingleFeatures.identity(), feature));
-		return new FeatureCalculator(Utils.ops(), featureSettings).attributeLabels();
+		FeatureCalculator calculator = FeatureCalculator.default2d()
+			.sigmaRange(1.0, 16.0)
+			.addFeature(SingleFeatures.identity())
+			.addFeature(feature)
+			.build();
+		return calculator.attributeLabels();
 	}
 
 	@Deprecated

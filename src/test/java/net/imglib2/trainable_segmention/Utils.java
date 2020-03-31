@@ -53,13 +53,6 @@ import static org.junit.Assert.fail;
  */
 public class Utils {
 
-	private static final OpEnvironment ops = new Context(OpService.class, ScriptService.class)
-		.service(OpService.class);
-
-	public static OpEnvironment ops() {
-		return ops;
-	}
-
 	public static void assertImagesEqual(ImagePlus expected, ImagePlus actual) {
 		assertTrue(diffImagePlus(expected, actual) == 0);
 	}
