@@ -1,6 +1,7 @@
 package net.imglib2.trainable_segmention.gui;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -132,9 +133,12 @@ public class FiltersPanel extends JPanel {
 	}
 	
 	public List<FeatureSetting> getSelectedFeatureSettings() {
-		List< FeatureSetting > featureSettings = new ArrayList<>(grpFilters);
-		featureSettings.addAll( prmFilters );
-		featureSettings.addAll( oldFilters );
-		return featureSettings;
+		List< FeatureSetting > selected = new ArrayList<>();
+		Component[] children = getComponents(); 
+		for( Component child: children) {
+			if (child instanceof FiltersListSection)
+				selected.addAll( ( ( FiltersListSection ) child ).getSelectedFeatureSettings());
+		}
+		return selected;
 	}
 }

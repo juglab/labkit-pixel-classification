@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -13,7 +15,7 @@ import javax.swing.JPanel;
 import net.imglib2.trainable_segmention.gui.icons.IconResources;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 
-public class NonParametrizedRow extends JPanel {
+public class NonParametrizedRow extends JPanel implements SelectableRow {
 
 	private static final long serialVersionUID = 1L;
 	private static final ImageIcon INFO_ICON = IconResources.getIcon( "info_icon_16px.png" );
@@ -50,11 +52,15 @@ public class NonParametrizedRow extends JPanel {
 		docoDiag.setVisible( true );
 	}
 
-	public boolean isSelected() {
-		return checkbox.isSelected();
-	}
-
 	public FeatureSetting getFeatureSetting() {
 		return featureSetting;
+	}
+
+	@Override
+	public List< FeatureSetting > getSelectedFeatureSettings() {
+		List<FeatureSetting> selected = new ArrayList<>();
+		if (checkbox.isSelected())
+			selected.add(featureSetting);
+		return selected;
 	}
 }

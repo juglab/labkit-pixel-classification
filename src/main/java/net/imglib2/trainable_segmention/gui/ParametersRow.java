@@ -2,7 +2,6 @@ package net.imglib2.trainable_segmention.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.util.StringJoiner;
@@ -36,12 +35,11 @@ public class ParametersRow extends JPanel {
 	private Context context;
 	private FeatureSetting featureSetting;
 
-	private JPanel parent;
+	
 	private JCheckBox checkbox;
 	private JLabel paramsLabel;
 
-	public ParametersRow( JPanel parent, Context context, GlobalSettings globalSettings, FeatureSetting featureSetting, boolean isFirstRow) {
-		this.parent = parent ;
+	public ParametersRow( Context context, GlobalSettings globalSettings, FeatureSetting featureSetting, boolean isFirstRow) {
 		this.context = context;
 		this.globalSettings = globalSettings;
 		this.featureSetting = featureSetting;
@@ -94,7 +92,7 @@ public class ParametersRow extends JPanel {
 	}
 
 	private void remove( ActionEvent e ) {
-		parent.remove( this );
+		getParent().remove( this );
 	}
 
 	private String paramsString() {
@@ -114,15 +112,6 @@ public class ParametersRow extends JPanel {
 
 	public FeatureSetting getFeatureSetting() {
 		return featureSetting;
-	}
-
-	public int getComponentIndex() {
-		Container c = getParent();
-		for ( int i = 0; i < c.getComponentCount(); i++ ) {
-			if ( c.getComponent( i ) == this )
-				return i;
-		}
-		return -1;
 	}
 
 	static class FeatureSettingsDialog extends AbstractContextual {
@@ -147,5 +136,4 @@ public class ParametersRow extends JPanel {
 			}
 		}
 	}
-
 }

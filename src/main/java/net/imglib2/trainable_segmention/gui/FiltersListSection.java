@@ -2,10 +2,12 @@ package net.imglib2.trainable_segmention.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -153,6 +155,17 @@ public class FiltersListSection extends AccordionSection {
 			} );
 			add( iconLabel, BorderLayout.CENTER );
 		}
+	}
+	
+	public List<FeatureSetting> getSelectedFeatureSettings()
+	{
+		List<FeatureSetting> selected = new ArrayList<>();
+		Component[] children = expandablePanel.getComponents();
+		for (Component child : children) {
+			if (child instanceof SelectableRow)
+				selected.addAll( ((SelectableRow)child).getSelectedFeatureSettings());
+		}
+		return selected;
 	}
 
 	@Override

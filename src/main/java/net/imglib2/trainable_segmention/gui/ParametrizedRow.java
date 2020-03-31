@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -20,7 +21,7 @@ import net.imglib2.trainable_segmention.gui.icons.IconResources;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 
-public class ParametrizedRow extends JPanel {
+public class ParametrizedRow extends JPanel implements SelectableRow {
 
 	private static final long serialVersionUID = 1L;
 	private static final ImageIcon CUBE_ICON = IconResources.getIcon( "cube_icon_16px.png" );
@@ -66,7 +67,7 @@ public class ParametrizedRow extends JPanel {
 		btnPanel.add( infoButton );
 		titleRow.add( btnPanel, BorderLayout.EAST );
 		add( titleRow );
-		add( new ParametersRow( this, context, globalSettings, featureSetting, true ) );
+		add( new ParametersRow( context, globalSettings, featureSetting, true ) );
 	}
 
 	private void showInfoDialog( ActionEvent e ) {
@@ -75,7 +76,7 @@ public class ParametrizedRow extends JPanel {
 	}
 
 	private void duplicate( ActionEvent e ) {
-		add( new ParametersRow( this, context, globalSettings, FeatureSetting.copy( featureSetting ), false ) );
+		add( new ParametersRow( context, globalSettings, FeatureSetting.copy( featureSetting ), false ) );
 		getParent().getParent().getParent().revalidate();
 		getParent().getParent().getParent().repaint();
 	}
@@ -89,5 +90,16 @@ public class ParametrizedRow extends JPanel {
 		super.remove( c );
 		revalidate();
 		repaint();
+	}
+	
+	@Override
+	public List< FeatureSetting > getSelectedFeatureSettings() {
+		List<FeatureSetting> selected = new ArrayList<>();
+		Component[] children = getComponents(); 
+		for( Component child: children) {
+			if (child instanceof ParametersRow && ( ( ParametersRow ) child ).isSelected())
+				selected.add( ( ( ParametersRow ) child ).getFeatureSetting());
+		}
+		return selected;
 	}
 }

@@ -27,7 +27,6 @@ import javax.swing.plaf.ColorUIResource;
 import org.scijava.Context;
 
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
-import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.miginfocom.swing.MigLayout;
@@ -55,8 +54,7 @@ public class FeatureSettingsUI extends JPanel {
 	}
 
 	public FeatureSettings get() {
-		List< FeatureSetting > selectedFeatureSettings = filtersPanel.getSelectedFeatureSettings();
-		return new FeatureSettings( globalsPanel.get(), selectedFeatureSettings );
+		return new FeatureSettings( globalsPanel.get(), filtersPanel.getSelectedFeatureSettings());
 	}
 
 
@@ -70,8 +68,8 @@ public class FeatureSettingsUI extends JPanel {
 		if ( ok ) {
 			FeatureSettings features = get();
 			return Optional.of( features );
-		} else
-			return Optional.empty();
+		}
+		return Optional.empty();
 	}
 
 	private static boolean showResizeableOkCancelDialog( String title, JPanel content ) {
