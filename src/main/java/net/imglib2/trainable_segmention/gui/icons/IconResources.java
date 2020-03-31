@@ -4,19 +4,20 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-public class IconResources extends HashMap< String, ImageIcon > {
+public class IconResources {
 
-	private static IconResources instance = new IconResources();
+	private final Map<String, ImageIcon> map = new HashMap<>();
 
-	private static final long serialVersionUID = 1L;
+	private static final IconResources instance = new IconResources();
 
-	private static BufferedImage backupImage = new BufferedImage( 24, 24, BufferedImage.TYPE_INT_ARGB );
+	private static final BufferedImage backupImage = new BufferedImage( 24, 24, BufferedImage.TYPE_INT_ARGB );
 	
-	private static ImageIcon backupIcon = new ImageIcon( backupImage );
+	private static final ImageIcon backupIcon = new ImageIcon( backupImage );
 
 	public static URL getResource( String name ) {
 		return instance.getResourceImpl( name );
@@ -40,11 +41,11 @@ public class IconResources extends HashMap< String, ImageIcon > {
 	}
 
 	private URL getResourceImpl( String name ) {
-		return getClass().getResource( name );
+		return getClass().getResource( "/icons/" + name );
 	}
 
 	private ImageIcon getIconImpl( String name ) {
-		ImageIcon icon = get( name );
+		ImageIcon icon = map.get( name );
 		if ( icon == null ) {
 			try {
 				icon = new ImageIcon( getResourceImpl( name ) );
@@ -52,7 +53,7 @@ public class IconResources extends HashMap< String, ImageIcon > {
 				//Fail gracefully
 				icon = backupIcon;
 			}
-			put( name, icon );
+			map.put( name, icon );
 		}
 		return icon;
 	}
