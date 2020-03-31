@@ -23,7 +23,5 @@ public class AccordionPanel extends JPanel {
 
 	public void addSection( AccordionSection newSection) {
 		add( newSection );
-		revalidate();
-		repaint();
 	}
 }

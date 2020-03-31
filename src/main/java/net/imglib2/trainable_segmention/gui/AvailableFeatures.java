@@ -8,10 +8,8 @@ import org.scijava.InstantiableException;
 import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class AvailableFeatures {
 

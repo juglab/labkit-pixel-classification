@@ -41,64 +41,24 @@ public class FeatureSettingsUI extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Context context;
-
 	private GlobalsPanel globalsPanel;
 
-	private FiltersPanel filtersListPanel;
+	private FiltersPanel filtersPanel;
 
 	public FeatureSettingsUI( Context context, FeatureSettings fs ) {
-		this.context = context;
 		setLayout( new MigLayout( "insets 0", "[grow]", "[][grow][]" ) );
 		setBackground(Color.WHITE);
 		globalsPanel = new GlobalsPanel( fs.globals() );
 		add( globalsPanel, "wrap" );
-		filtersListPanel = new FiltersPanel( context, fs, globalsPanel );
-		add( new JScrollPane( filtersListPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), "split 2, grow" );
+		filtersPanel = new FiltersPanel( context, fs, globalsPanel);
+		add( new JScrollPane( filtersPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), "split 2, grow" );
 	}
 
 	public FeatureSettings get() {
-		List< FeatureSetting > features = filtersListPanel.getSelectedFeatureSettings();
-		final GlobalSettings globalSettings = globalsPanel.get();
-		return new FeatureSettings( globalSettings, features );
+		List< FeatureSetting > selectedFeatureSettings = filtersPanel.getSelectedFeatureSettings();
+		return new FeatureSettings( globalsPanel.get(), selectedFeatureSettings );
 	}
 
-	public class GlobalsPanel extends JPanel {
-
-		private static final long serialVersionUID = 1L;
-
-		private final ChannelSetting channelSetting;
-
-		private final JComboBox< String > dimensionsField;
-
-		private final JFormattedTextField sigmasField;
-
-		public GlobalsPanel( GlobalSettings globalSettings ) {
-			channelSetting = globalSettings.channelSetting();
-			setLayout( new MigLayout( "insets 0", "[]20pt[150pt]", "[][][]" ) );
-			setBackground(Color.WHITE);
-			add( new JLabel( "Dimensions:" ));
-			dimensionsField = new JComboBox<>( new String[] { "2D", "3D" } );
-			dimensionsField.setSelectedItem( globalSettings.numDimensions() + "D" );
-			dimensionsField.addActionListener( this::dimensionsChanged );
-			add( dimensionsField, "wrap" );
-			add( new JLabel( "Sigmas:" ) );
-			sigmasField = new JFormattedTextField( new ListOfDoubleFormatter() );
-			sigmasField.setColumns( 50 );
-			sigmasField.setValue( globalSettings.sigmas() );
-			add( sigmasField, "grow, wrap" );
-		}
-
-		@SuppressWarnings( "unchecked" )
-		GlobalSettings get() {
-			return GlobalSettings.default2d().channels( channelSetting ).dimensions( dimensionsField.getSelectedIndex() + 2 ).sigmas( ( List< Double > ) sigmasField.getValue() ).build();
-		}
-
-		private void dimensionsChanged( ActionEvent e ) {
-			filtersListPanel.checkFeatures( get(), context );
-		}
-
-	}
 
 	public static Optional< FeatureSettings > show( Context context, FeatureSettings fg ) {
 		FeatureSettingsUI featureSettingsGui = new FeatureSettingsUI( context, fg );
@@ -139,6 +99,51 @@ public class FeatureSettingsUI extends JPanel {
 		FeatureSettingsUI.show( new Context(), new FeatureSettings( GlobalSettings.default2d().build() ) );
 	}
 
+	public class GlobalsPanel extends JPanel {
+
+		private static final long serialVersionUID = 1L;
+
+		private final ChannelSetting channelSetting;
+		private final JComboBox< String > dimensionsField;
+		private final JFormattedTextField sigmasField;
+		
+		private int dims = 2;
+
+		public GlobalsPanel( GlobalSettings globalSettings ) {
+			channelSetting = globalSettings.channelSetting();
+			setLayout( new MigLayout( "insets 0", "[]20pt[150pt]", "[][][]" ) );
+			setBackground(Color.WHITE);
+			add( new JLabel( "Dimensions:" ));
+			dimensionsField = new JComboBox<>( new String[] { "2D", "3D" } );
+			dimensionsField.setSelectedItem( globalSettings.numDimensions() + "D" );
+			dimensionsField.addActionListener( this::dimensionsChanged );
+			add( dimensionsField, "wrap" );
+			add( new JLabel( "Sigmas:" ) );
+			sigmasField = new JFormattedTextField( new ListOfDoubleFormatter() );
+			sigmasField.setColumns( 50 );
+			sigmasField.setValue( globalSettings.sigmas() );
+			add( sigmasField, "grow, wrap" );
+		}
+
+		@SuppressWarnings( "unchecked" )
+		GlobalSettings get() {
+			return GlobalSettings.default2d().channels( channelSetting ).dimensions( dimensionsField.getSelectedIndex() + 2 ).sigmas( ( List< Double > ) sigmasField.getValue() ).build();
+		}
+
+		private void dimensionsChanged( ActionEvent e ) {
+			int newDims = dimensionsField.getSelectedIndex() + 2;
+			boolean increased = false;
+			if (dims == newDims )
+				return;
+			if (dims < newDims) {
+				increased = true;
+			}
+			dims = newDims;
+
+			filtersPanel.checkFeatures( get(), increased);
+		}
+	}
+	
 	private static class ListOfDoubleFormatter extends JFormattedTextField.AbstractFormatter {
 
 		private static final long serialVersionUID = 1L;

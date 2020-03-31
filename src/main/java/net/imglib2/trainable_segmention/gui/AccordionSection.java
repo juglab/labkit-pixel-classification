@@ -18,7 +18,7 @@ public abstract class AccordionSection extends JPanel {
 
 	public void collapse() {
 		int calculatedHeight = this.preferredExpandedHeight();
-		AccordionAnimation anim = new AccordionAnimation( this, 200 );
+		AccordionAnimation anim = new AccordionAnimation( this, 5);
 		anim.setStartValue( calculatedHeight );
 		anim.setEndValue( MIN_COMPONENT_HEIGHT );
 		anim.start();
@@ -28,7 +28,7 @@ public abstract class AccordionSection extends JPanel {
 
 	public void expand() {
 		int calculatedHeight = preferredExpandedHeight();
-		AccordionAnimation anim = new AccordionAnimation( this, 200 );
+		AccordionAnimation anim = new AccordionAnimation( this, 5);
 		anim.setStartValue( MIN_COMPONENT_HEIGHT );
 		anim.setEndValue( calculatedHeight );
 		anim.start();

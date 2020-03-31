@@ -25,7 +25,6 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.stats.StatisticsFea
 import net.imglib2.trainable_segmention.pixel_feature.filter.structure.StructureTensorEigenvaluesFeature;
 import org.scijava.Context;
 
-import net.imglib2.trainable_segmention.gui.FeatureSettingsUI.GlobalsPanel;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
@@ -34,45 +33,59 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 public class FiltersPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
+	private static final Set<Class<?>> BASIC_FILTERS = new HashSet<>(Arrays.asList(IdendityFeature.class, GaussianBlurFeature.class,
+	DifferenceOfGaussiansFeature.class,
+	GaussianGradientMagnitudeFeature.class,
+	LaplacianOfGaussianFeature.class,
+	HessianEigenvaluesFeature.class,
+	StructureTensorEigenvaluesFeature.class,
+	StatisticsFeature.class));
+	
 	private List<FeatureSetting> oldFilters;
 	private List<FeatureSetting> grpFilters;
 	private List<FeatureSetting> prmFilters;
+	private AccordionPanel accordion;
+	private FeatureSettingsUI.GlobalsPanel globalsPanel;
+	private Context context;
 
-	public FiltersPanel( Context context, FeatureSettings fs, GlobalsPanel gb ) {
+	public FiltersPanel( Context context, FeatureSettings fs, FeatureSettingsUI.GlobalsPanel globalsPanel) {
+		this.context = context;
+		this.globalsPanel = globalsPanel;
 		setLayout(new BoxLayout( this, BoxLayout.Y_AXIS ));
 		setBackground( Color.WHITE );
-		init( context, AvailableFeatures.getValidFeatures( context, fs.globals() ), gb );
+		initUI(AvailableFeatures.getValidFeatures( context, fs.globals()));
 	}
 
-	private void init( Context context, List< FeatureInfo > features, GlobalsPanel gb ) {
+	private void initUI(List< FeatureInfo > featureInfos) {
+		populateFeatureSettingArrays(featureInfos);
+
+		accordion = new AccordionPanel();
+		add(accordion);
+		populateAccordionPanel();
+	}
+	
+	private void populateFeatureSettingArrays(List< FeatureInfo > featureInfos) {
 		grpFilters = new ArrayList<>();
 		prmFilters = new ArrayList<>();
 		oldFilters = new ArrayList<>();
-		features.sort( Comparator.comparing( FeatureInfo::label ) );
-		for(FeatureInfo feature : features) {
-			FeatureSetting fs = FeatureSetting.fromClass( feature.clazz() );
-			if ( feature.isDeprecated() )
+		featureInfos.sort( Comparator.comparing( FeatureInfo::label ) );
+		for(FeatureInfo featureInfo : featureInfos) {
+			FeatureSetting fs = FeatureSetting.fromClass( featureInfo.clazz() );
+			if ( featureInfo.isDeprecated() )
 				oldFilters.add(fs);
-			else if ( isBasic( feature.clazz() ) )
+			else if ( isBasic( featureInfo.clazz() ) )
 				grpFilters.add(fs);
 			else
 				prmFilters.add(fs);
 		}
-
-		AccordionPanel accordion = new AccordionPanel();
-		accordion.addSection( new FiltersListSection("Basic Filters", context, gb.get(), grpFilters, true ) );
-		accordion.addSection( new FiltersListSection("Additional Filters", context, gb.get(), prmFilters, false ) );
-		accordion.addSection( new FiltersListSection("Deprecated Filters", context, gb.get(), oldFilters, false ) );
-		add(accordion);
 	}
-
-	Set<Class<?>> BASIC_FILTERS = new HashSet<>(Arrays.asList(IdendityFeature.class, GaussianBlurFeature.class,
-			DifferenceOfGaussiansFeature.class,
-			GaussianGradientMagnitudeFeature.class,
-			LaplacianOfGaussianFeature.class,
-			HessianEigenvaluesFeature.class,
-			StructureTensorEigenvaluesFeature.class,
-			StatisticsFeature.class));
+	
+	private void populateAccordionPanel() {
+		accordion.removeAll();
+		accordion.addSection( new FiltersListSection("Basic Filters", context, globalsPanel.get(), grpFilters, true ) );
+		accordion.addSection( new FiltersListSection("Additional Filters", context, globalsPanel.get(), prmFilters, false ) );
+		accordion.addSection( new FiltersListSection("Deprecated Filters", context, globalsPanel.get(), oldFilters, false ) );
+	}
 
 	private boolean isBasic(Class<? extends FeatureOp> clazz) {
 		return BASIC_FILTERS.contains(clazz);
@@ -95,24 +108,27 @@ public class FiltersPanel extends JPanel {
 		return feature.getName() + " " + joiner;
 	}
 	
-	public void checkFeatures( GlobalSettings globalSettings, Context context ) {
+	public void checkFeatures( GlobalSettings globalSettings, boolean increased) {
 
-		Collection< Class< ? extends FeatureOp > > availableFeatures = AvailableFeatures.getValidFeatures( context, globalSettings ).stream().map( FeatureInfo::clazz ).collect( Collectors.toSet() );
-
-		// Check new features
-		List< FeatureSetting > newGrpInvalid = grpFilters.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
+		if (increased) {
+			Collection< Class< ? extends FeatureOp > > availableFeatures = AvailableFeatures.getValidFeatures( context, globalSettings ).stream().map( FeatureInfo::clazz ).collect( Collectors.toSet() );
+			List< FeatureSetting > newGrpInvalid = grpFilters.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
+			List< FeatureSetting > allInvalid = new ArrayList<>( newGrpInvalid );
+			List< FeatureSetting > newPrmInvalid = prmFilters.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
+			allInvalid.addAll( newPrmInvalid );
+			List< FeatureSetting > oldInvalid = oldFilters.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
+			allInvalid.addAll( oldInvalid );
+			if ( !allInvalid.isEmpty() )
+				showWarning( allInvalid );
+			grpFilters.removeAll( newGrpInvalid );
+			prmFilters.removeAll( newPrmInvalid );
+			oldFilters.removeAll( oldInvalid );
 		
-		List< FeatureSetting > newPrmInvalid = prmFilters.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
+		} else {
+			populateFeatureSettingArrays(AvailableFeatures.getValidFeatures( context, globalSettings ));
+		}
+		populateAccordionPanel();
 
-		List< FeatureSetting > oldInvalid = oldFilters.stream().filter( feature -> !availableFeatures.contains( feature.pluginClass() ) ).collect( Collectors.toList() );
-		List< FeatureSetting > allInvalid = new ArrayList<>( oldInvalid );
-		allInvalid.addAll( newGrpInvalid );
-		allInvalid.addAll( newPrmInvalid );
-		if ( !allInvalid.isEmpty() )
-			showWarning( allInvalid );
-		grpFilters.removeAll( newGrpInvalid );
-		prmFilters.removeAll( newPrmInvalid );
-		oldFilters.removeAll( oldInvalid );
 	}
 	
 	public List<FeatureSetting> getSelectedFeatureSettings() {
