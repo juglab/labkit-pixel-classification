@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
-import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
 /**
@@ -20,19 +19,19 @@ public class AccordionPanel extends JPanel {
 
 	public AccordionPanel() {
 		setLayout( new GridBagLayout());
+		setFocusable( false );
+		setBackground(Color.WHITE);
 		gbc = new GridBagConstraints();
 		gbc.anchor = GridBagConstraints.NORTHWEST;
 		gbc.gridx = GridBagConstraints.WEST;
 		gbc.weightx = 1.0;
-		gbc.weighty = 0.3;
+		gbc.weighty = 1.0;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
-		setFocusable( false );
-		setBackground(Color.WHITE);
 	}
 
 	public void addSection( AccordionSection newSection) {
 		gbc.gridy = GridBagConstraints.RELATIVE;
-		gbc.weighty = 0.3;
+		gbc.weighty = 0.33;
 		add( newSection, gbc );
 	}
 }
