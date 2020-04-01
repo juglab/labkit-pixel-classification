@@ -38,6 +38,7 @@ import org.scijava.Context;
 import org.scijava.script.ScriptService;
 import preview.net.imglib2.loops.LoopBuilder;
 
+import java.io.File;
 import java.net.URL;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -159,6 +160,8 @@ public class Utils {
 	}
 
 	public static ImagePlus loadImage(String s) {
+		if (new File(s).exists())
+			return new ImagePlus(s);
 		return Utils.loadImagePlusFromResource(s);
 	}
 
