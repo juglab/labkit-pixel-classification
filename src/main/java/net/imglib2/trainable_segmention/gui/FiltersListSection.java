@@ -5,8 +5,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,12 +15,14 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.CompoundBorder;
 
 import org.scijava.Context;
+
 
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -57,7 +60,7 @@ public class FiltersListSection extends AccordionSection {
 	 */
 	public FiltersListSection(String title, Context context, GlobalSettings gs, List<FeatureSetting> featureSettings, boolean isExpanded) {
 		this.featureSettings = featureSettings;
-		setLayout( new BorderLayout() );
+		setLayout( new BoxLayout(this, BoxLayout.Y_AXIS) );
 		setBackground(Color.WHITE);
 
 		JPanel titlePanel = new JPanel();
@@ -65,9 +68,9 @@ public class FiltersListSection extends AccordionSection {
 		titlePanel.setBackground(Color.WHITE);
 		titlePanel.setPreferredSize( new Dimension( this.getPreferredSize().width, this.getPreferredSize().height ) );
 
-		iconPanel = new IconPanel( isExpanded );
+		iconPanel = new IconPanel();
 		titlePanel.add( iconPanel, BorderLayout.WEST );
-		add( titlePanel, BorderLayout.NORTH );
+		add( titlePanel);
 
 		titleComponent = new JLabel( title );
 		Font f = titleComponent.getFont();
@@ -76,10 +79,11 @@ public class FiltersListSection extends AccordionSection {
 		titlePanel.add( titleComponent );
 
 		createExpandablePanel(context, gs);
-		add( expandablePanel, BorderLayout.CENTER );
+		add( expandablePanel);
 		
-		if ( !isExpanded )
-			this.collapse();
+		if ( isExpanded ) {
+			iconPanel.doClick();
+		}
 	}
 	
 	private void createExpandablePanel(Context context, GlobalSettings gs) {
@@ -130,31 +134,41 @@ public class FiltersListSection extends AccordionSection {
 	class IconPanel extends JPanel {
 
 		private static final long serialVersionUID = -1126501236314927869L;
-		private JLabel iconLabel;
-		private boolean isExpanded;
+		private JButton iconButton;
+		private boolean isExpanded = false;
 
-		public IconPanel( boolean expanded ) {
-			isExpanded = expanded;
+		public IconPanel() {
 			setLayout( new BorderLayout() );
 			setBackground(Color.WHITE);
-			iconLabel = new JLabel( isExpanded ? AccordionControlIcons.EXPANDED.getIcon() : AccordionControlIcons.COLLAPSED.getIcon() );
-			iconLabel.addMouseListener( new MouseAdapter() {
+			iconButton = new JButton( AccordionControlIcons.COLLAPSED.getIcon());
+			iconButton.setFocusPainted(false);
+	        iconButton.setMargin(new Insets(0, 0, 0, 0));
+	        iconButton.setContentAreaFilled(false);
+	        iconButton.setBorderPainted(false);
+	        iconButton.setOpaque(false);
+			iconButton.addActionListener( new ActionListener() {
 
 				@Override
-				public void mouseReleased( MouseEvent e ) {
+				public void actionPerformed( ActionEvent e ) {
 					if ( isExpanded ) {
-						iconLabel.setIcon( AccordionControlIcons.COLLAPSED.getIcon() );
+						iconButton.setIcon( AccordionControlIcons.COLLAPSED.getIcon() );
 						collapse();
 						isExpanded = false;
 					} else {
-						iconLabel.setIcon( AccordionControlIcons.EXPANDED.getIcon() );
+						iconButton.setIcon( AccordionControlIcons.EXPANDED.getIcon() );
 						expand();
 						isExpanded = true;
 					}
 				}
 			} );
-			add( iconLabel, BorderLayout.CENTER );
+			add( iconButton, BorderLayout.CENTER );
 		}
+		
+		public void doClick()
+		{
+			iconButton.doClick();
+		}
+		
 	}
 	
 	public List<FeatureSetting> getSelectedFeatureSettings()

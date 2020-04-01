@@ -4,11 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -30,13 +32,20 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 
 	private FeatureSetting featureSetting;
 	private JCheckBox checkbox;
+	private GridBagConstraints gbc;
 
 	public ParametrizedRow( Context context, GlobalSettings globalSettings, FeatureSetting featureSetting ) {
 		this.context = context;
 		this.globalSettings = globalSettings;
 		this.featureSetting = featureSetting;
-		setLayout( new BoxLayout( this, BoxLayout.Y_AXIS ) );
 		setBackground( Color.WHITE );
+		setLayout( new GridBagLayout());
+		gbc = new GridBagConstraints();
+		gbc.anchor = GridBagConstraints.NORTHWEST;
+		gbc.gridx = GridBagConstraints.WEST;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weightx = 1.0;
+		gbc.weighty = 1.0;
 		initUI();
 	}
 
@@ -54,17 +63,28 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 		btnPanel.setLayout( new FlowLayout( FlowLayout.LEFT ) );
 
 		JButton dupButton = new JButton( DUP_ICON );
+		dupButton.setFocusPainted(false);
+        dupButton.setMargin(new Insets(0, 0, 0, 0));
+        dupButton.setContentAreaFilled(false);
+        dupButton.setBorderPainted(false);
+        dupButton.setOpaque(false);
 		dupButton.setToolTipText( "Duplicate filter" );
 		dupButton.addActionListener( this::duplicate );
 		btnPanel.add( dupButton );
 
 		JButton infoButton = new JButton( INFO_ICON );
+		infoButton.setFocusPainted(false);
+        infoButton.setMargin(new Insets(0, 0, 0, 0));
+        infoButton.setContentAreaFilled(false);
+        infoButton.setBorderPainted(false);
+        infoButton.setOpaque(false);
 		infoButton.setToolTipText( "Filter information" );
 		infoButton.addActionListener( this::showInfoDialog );
 		btnPanel.add( infoButton );
 		titleRow.add( btnPanel, BorderLayout.EAST );
-		add( titleRow );
-		add( new ParametersRow( context, globalSettings, featureSetting) );
+		add( titleRow, gbc);
+		gbc.gridy = GridBagConstraints.RELATIVE;
+		add( new ParametersRow( context, globalSettings, featureSetting), gbc );
 	}
 
 	private void showInfoDialog( ActionEvent e ) {
@@ -73,14 +93,14 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 	}
 
 	private void duplicate( ActionEvent e ) {
-		add( new ParametersRow( context, globalSettings, FeatureSetting.copy( featureSetting )) );
+		add( new ParametersRow( context, globalSettings, FeatureSetting.copy( featureSetting )), gbc );
 		revalidate();
 		repaint();
 	}
 	
 	private void checkForParameterRow (ActionEvent e) {
 		if (getComponents().length == 1) {
-			add( new ParametersRow( context, globalSettings, featureSetting) );
+			add( new ParametersRow( context, globalSettings, featureSetting), gbc );
 			revalidate();
 			repaint();
 		}

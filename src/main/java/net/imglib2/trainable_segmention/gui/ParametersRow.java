@@ -3,6 +3,7 @@ package net.imglib2.trainable_segmention.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.util.StringJoiner;
 
@@ -63,11 +64,21 @@ public class ParametersRow extends JPanel {
 		btnPanel.setLayout( new FlowLayout( FlowLayout.LEFT ) );
 
 		JButton rmButton = new JButton( RM_ICON );
+		rmButton.setFocusPainted(false);
+        rmButton.setMargin(new Insets(0, 0, 0, 0));
+        rmButton.setContentAreaFilled(false);
+        rmButton.setBorderPainted(false);
+        rmButton.setOpaque(false);
 		rmButton.setToolTipText( "Remove filter" );
 		rmButton.addActionListener( this::remove );
 		btnPanel.add( rmButton );
 
 		JButton editButton = new JButton( PARAMS_ICON );
+		editButton.setFocusPainted(false);
+        editButton.setMargin(new Insets(0, 0, 0, 0));
+        editButton.setContentAreaFilled(false);
+        editButton.setBorderPainted(false);
+        editButton.setOpaque(false);
 		editButton.setToolTipText( "Edit filter parameters" );
 		editButton.addActionListener( this::editParameters );
 		btnPanel.add( editButton );

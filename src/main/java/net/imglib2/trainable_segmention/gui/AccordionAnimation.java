@@ -20,13 +20,11 @@ public class AccordionAnimation extends Animation {
 	protected void render(int value) {
 		accordionSection.setMaximumSize(new Dimension(Integer.MAX_VALUE, value));
 		accordionSection.getExpandableComponent().setVisible(true);
-		accordionSection.revalidate();
 	}
 
 	@Override
 	public void stopped () {
 		accordionSection.getExpandableComponent().setVisible(true);
-		accordionSection.revalidate();
 	}
 
 }

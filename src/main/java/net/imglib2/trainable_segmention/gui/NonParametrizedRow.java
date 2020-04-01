@@ -3,6 +3,7 @@ package net.imglib2.trainable_segmention.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,11 @@ public class NonParametrizedRow extends JPanel implements SelectableRow {
 		btnPanel.setLayout( new FlowLayout( FlowLayout.LEFT ) );
 
 		JButton infoButton = new JButton( INFO_ICON );
+		infoButton.setFocusPainted(false);
+        infoButton.setMargin(new Insets(0, 0, 0, 0));
+        infoButton.setContentAreaFilled(false);
+        infoButton.setBorderPainted(false);
+        infoButton.setOpaque(false);
 		infoButton.setToolTipText( "Filter information" );
 		infoButton.addActionListener( this::showInfoDialog );
 		btnPanel.add( infoButton );

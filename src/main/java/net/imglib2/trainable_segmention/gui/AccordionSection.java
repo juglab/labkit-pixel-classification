@@ -23,6 +23,7 @@ public abstract class AccordionSection extends JPanel {
 		anim.setEndValue( MIN_COMPONENT_HEIGHT );
 		anim.start();
 		collapsed = true;
+		revalidate();
 		repaint();
 	}
 
@@ -33,6 +34,7 @@ public abstract class AccordionSection extends JPanel {
 		anim.setEndValue( calculatedHeight );
 		anim.start();
 		collapsed = false;
+		revalidate();
 		repaint();
 	}
 }
