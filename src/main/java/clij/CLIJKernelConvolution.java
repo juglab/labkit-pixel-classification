@@ -44,9 +44,11 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 	@Override
 	public void convolve(CLIJView input, CLIJView output) {
 		final Img<DoubleType> kernelImage = ArrayImgs.doubles(kernel.fullKernel(), kernel.size());
-		final ClearCLBuffer kernelBuffer = clij.push(RealTypeConverters.convert(kernelImage,
-			new FloatType()));
-		convolve(clij, input, kernelBuffer, output, d);
+		try (ClearCLBuffer kernelBuffer = clij.push(RealTypeConverters.convert(kernelImage,
+			new FloatType())))
+		{
+			convolve(clij, input, kernelBuffer, output, d);
+		}
 	}
 
 	public static void convolve(CLIJ2 clij, ClearCLBuffer input, ClearCLBuffer kernel,
