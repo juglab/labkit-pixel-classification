@@ -51,7 +51,7 @@ public class GaussBenchmark {
 	@Benchmark
 	public RandomAccessibleInterval benchmarkGauss() {
 		for (int i = 0; i < 10; i++)
-			Gauss.convolve(clij, input, kernel, output);
+			CLIJKernelConvolution.convolve(clij, input, kernel, output);
 		return clij.pullRAI(output);
 	}
 
