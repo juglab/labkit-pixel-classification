@@ -6,11 +6,16 @@ import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.StopWatch;
 import net.imglib2.view.Views;
 
 public class OriginalContent implements ComputeCache.Content {
 
-	public OriginalContent() {}
+	private final ComputeCache cache;
+
+	public OriginalContent(ComputeCache cache) {
+		this.cache = cache;
+	}
 
 	@Override
 	public int hashCode() {
@@ -23,14 +28,17 @@ public class OriginalContent implements ComputeCache.Content {
 	}
 
 	@Override
-	public void request(ComputeCache cache, Interval interval) {
+	public void request(Interval interval) {
 
 	}
 
 	@Override
-	public ClearCLBuffer load(ComputeCache cache, Interval interval) {
+	public ClearCLBuffer load(Interval interval) {
 		CLIJ2 clij = cache.clij();
 		RandomAccessible<FloatType> original = cache.original();
-		return clij.push(Views.interval(original, interval));
+		StopWatch watch = StopWatch.createAndStart();
+		ClearCLBuffer push = clij.push(Views.interval(original, interval));
+		System.out.println("Time copying: " + watch);
+		return push;
 	}
 }

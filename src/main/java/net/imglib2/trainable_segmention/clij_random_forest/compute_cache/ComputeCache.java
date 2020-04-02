@@ -60,9 +60,9 @@ public class ComputeCache implements AutoCloseable {
 
 	public interface Content {
 
-		void request(ComputeCache cache, Interval interval);
+		void request(Interval interval);
 
-		ClearCLBuffer load(ComputeCache cache, Interval interval);
+		ClearCLBuffer load(Interval interval);
 	}
 
 	class CacheEntry {
@@ -86,14 +86,14 @@ public class ComputeCache implements AutoCloseable {
 					return;
 				requestedInterval = Intervals.union(requestedInterval, interval);
 			}
-			content.request(ComputeCache.this, requestedInterval);
+			content.request(requestedInterval);
 		}
 
 		public CLIJView get(Interval interval) {
 			if (requestedInterval == null || !Intervals.contains(this.requestedInterval, interval))
 				throw new AssertionError("Interval was not prefetched.");
 			if (buffer == null) {
-				buffer = content.load(ComputeCache.this, this.requestedInterval);
+				buffer = content.load(this.requestedInterval);
 				autoClose.add(buffer);
 			}
 			FinalInterval roi = Intervals.translateInverse(interval, Intervals.minAsLongArray(

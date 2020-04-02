@@ -28,11 +28,11 @@ public class CLIJFeatureInput implements AutoCloseable {
 	}
 
 	public void prefetchOriginal(Interval interval) {
-		cache.request(new OriginalContent(), interval);
+		cache.request(new OriginalContent(cache), interval);
 	}
 
 	public CLIJView original(Interval interval) {
-		return cache.get(new OriginalContent(), interval);
+		return cache.get(new OriginalContent(cache), interval);
 	}
 
 	public void prefetchGauss(double sigma, Interval interval) {
@@ -44,11 +44,11 @@ public class CLIJFeatureInput implements AutoCloseable {
 	}
 
 	public void prefetchDerivative(double sigma, int dimension, Interval interval) {
-		cache.request(new DerivativeContent(gaussKey(sigma), dimension), interval);
+		cache.request(new DerivativeContent(cache, gaussKey(sigma), dimension), interval);
 	}
 
 	public CLIJView derivative(double sigma, int dimension, Interval interval) {
-		return cache.get(new DerivativeContent(gaussKey(sigma), dimension), interval);
+		return cache.get(new DerivativeContent(cache, gaussKey(sigma), dimension), interval);
 	}
 
 	public void prefetchSecondDerivative(double sigma, int dimensionA, int dimensionB,
@@ -64,15 +64,16 @@ public class CLIJFeatureInput implements AutoCloseable {
 	}
 
 	private GaussContent gaussKey(double sigma) {
-		return new GaussContent(sigma);
+		return new GaussContent(cache, sigma);
 	}
 
 	private ComputeCache.Content secondDerivativeKey(double sigma, int dimensionA, int dimensionB) {
 		if (dimensionA > dimensionB)
 			return secondDerivativeKey(sigma, dimensionB, dimensionA);
 		if (dimensionA == dimensionB)
-			return new SecondDerivativeContent(gaussKey(sigma), dimensionA);
-		return new DerivativeContent(new DerivativeContent(gaussKey(sigma), dimensionA), dimensionB);
+			return new SecondDerivativeContent(cache, gaussKey(sigma), dimensionA);
+		return new DerivativeContent(cache, new DerivativeContent(cache, gaussKey(sigma), dimensionA),
+			dimensionB);
 	}
 
 	@Override

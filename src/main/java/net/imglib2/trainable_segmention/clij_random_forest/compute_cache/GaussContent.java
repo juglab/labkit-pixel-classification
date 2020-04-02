@@ -13,9 +13,12 @@ import java.util.stream.DoubleStream;
 
 public class GaussContent implements ComputeCache.Content {
 
+	private final ComputeCache cache;
+
 	private final double sigma;
 
-	public GaussContent(double sigma) {
+	public GaussContent(ComputeCache cache, double sigma) {
+		this.cache = cache;
 		this.sigma = sigma;
 	}
 
@@ -30,16 +33,16 @@ public class GaussContent implements ComputeCache.Content {
 	}
 
 	@Override
-	public void request(ComputeCache cache, Interval interval) {
+	public void request(Interval interval) {
 		Interval requiredInput = requiredInput(cache.pixelSize(), interval);
-		cache.request(new OriginalContent(), requiredInput);
+		cache.request(new OriginalContent(cache), requiredInput);
 	}
 
 	@Override
-	public ClearCLBuffer load(ComputeCache cache, Interval interval) {
+	public ClearCLBuffer load(Interval interval) {
 		CLIJ2 clij = cache.clij();
 		double[] pixelSize = cache.pixelSize();
-		CLIJView original = cache.get(new OriginalContent(), requiredInput(pixelSize, interval));
+		CLIJView original = cache.get(new OriginalContent(cache), requiredInput(pixelSize, interval));
 		try (
 			ClearCLBuffer inputCL = copyView(clij, original);
 			ClearCLBuffer tmp = clij.create(inputCL);)
