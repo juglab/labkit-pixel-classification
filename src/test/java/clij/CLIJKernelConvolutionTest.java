@@ -10,6 +10,7 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.utils.ToString;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -25,8 +26,22 @@ public class CLIJKernelConvolutionTest {
 			ClearCLBuffer kernel = clij.push(img1D(-0.5f, 0, 0.5f));
 			ClearCLBuffer output = clij.create(new long[] { 3, 1 });)
 		{
-			CLIJKernelConvolution.convolve(clij, input, kernel, output);
+			CLIJKernelConvolution.convolve(clij, CLIJView.wrap(input), kernel, CLIJView.wrap(output), 0);
 			ImgLib2Assert.assertImageEqualsRealType(img1D(0.5f, 0, -0.5f), clij.pullRAI(output), 0);
+		}
+	}
+
+	@Test
+	public void test8() {
+		try (
+			ClearCLBuffer input = clij.push(img1D(0, 1, 0));
+			ClearCLBuffer kernel = clij.push(img1D(-0.5f, 0, 0.5f));
+			ClearCLBuffer output = clij.create(new long[] { 3, 1 });)
+		{
+			CLIJKernelConvolution.convolve(clij, input, kernel, 1, output, 0);
+			RandomAccessibleInterval actual = clij.pullRAI(output);
+			ToString.print(actual);
+			ImgLib2Assert.assertImageEqualsRealType(img1D(0.5f, 0, -0.5f), actual, 0);
 		}
 	}
 
@@ -37,7 +52,7 @@ public class CLIJKernelConvolutionTest {
 			ClearCLBuffer kernel = clij.push(img1D(-0.5f, 0, 0.5f));
 			ClearCLBuffer output = clij.create(new long[] { 3, 1 });)
 		{
-			CLIJKernelConvolution.convolve(clij, input, kernel, output);
+			CLIJKernelConvolution.convolve(clij, CLIJView.wrap(input), kernel, CLIJView.wrap(output), 0);
 			ImgLib2Assert.assertImageEqualsRealType(img1D(-1, 0, 1.5f), clij.pullRAI(output), 0);
 		}
 	}
@@ -51,7 +66,7 @@ public class CLIJKernelConvolutionTest {
 			ClearCLBuffer kernel = clij.push(img1D(-0.5f, 0, 0.5f));
 			ClearCLBuffer output = clij.create(new long[] { length, 1 });)
 		{
-			CLIJKernelConvolution.convolve(clij, input, kernel, output);
+			CLIJKernelConvolution.convolve(clij, CLIJView.wrap(input), kernel, CLIJView.wrap(output), 0);
 			ImgLib2Assert.assertImageEqualsRealType(img1D(new float[length]), clij.pullRAI(output), 0);
 		}
 	}
