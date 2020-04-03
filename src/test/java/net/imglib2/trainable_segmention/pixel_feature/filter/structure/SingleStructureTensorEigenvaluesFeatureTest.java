@@ -13,7 +13,6 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
@@ -43,8 +42,8 @@ import static org.junit.Assert.assertEquals;
 public class SingleStructureTensorEigenvaluesFeatureTest {
 
 	public SingleStructureTensorEigenvaluesFeatureTest(boolean useGpu) {
-		calculator2d.setUseGPU(useGpu);
-		calculator3d.setUseGPU(useGpu);
+		calculator2d.setUseGpu(useGpu);
+		calculator3d.setUseGpu(useGpu);
 	}
 
 	@Parameterized.Parameters(name = "useGpu = {0}")

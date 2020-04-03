@@ -50,7 +50,7 @@ public class FeatureCalculatorTest {
 		FeatureCalculator calculator = FeatureCalculator.default2d()
 			.addFeatures(add_42, add_12)
 			.build();
-		calculator.setUseGPU(useGpu);
+		calculator.setUseGpu(useGpu);
 		Img<FloatType> input = ArrayImgs.floats(new float[] { 2 }, 1, 1);
 		RandomAccessibleInterval<FloatType> out = calculator.apply(input);
 		Utils.assertImagesEqual(ArrayImgs.floats(new float[] { 44, 14 }, 1, 1, 2), out);
@@ -63,7 +63,7 @@ public class FeatureCalculatorTest {
 			.sigmas(1.0)
 			.addFeatures(add_42, add_12)
 			.build();
-		calculator.setUseGPU(useGpu);
+		calculator.setUseGpu(useGpu);
 		Img<FloatType> input = ArrayImgs.floats(new float[] { 2, 3 }, 1, 1, 2);
 		RandomAccessibleInterval<FloatType> out = calculator.apply(input);
 		assertEquals(Arrays.asList("channel1_add_value_42.0", "channel2_add_value_42.0",

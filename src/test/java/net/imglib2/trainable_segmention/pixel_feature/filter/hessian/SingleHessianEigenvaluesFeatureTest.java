@@ -27,8 +27,8 @@ import static org.junit.Assert.assertEquals;
 public class SingleHessianEigenvaluesFeatureTest {
 
 	public SingleHessianEigenvaluesFeatureTest(boolean useGpu) {
-		this.calculator.setUseGPU(useGpu);
-		this.calculator3d.setUseGPU(useGpu);
+		this.calculator.setUseGpu(useGpu);
+		this.calculator3d.setUseGpu(useGpu);
 	}
 
 	@Parameterized.Parameters(name = "useGpu = {0}")

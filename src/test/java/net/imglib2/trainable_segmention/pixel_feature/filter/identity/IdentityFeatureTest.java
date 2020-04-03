@@ -23,7 +23,7 @@ import java.util.List;
 public class IdentityFeatureTest {
 
 	public IdentityFeatureTest(boolean useGpu) {
-		this.calculator.setUseGPU(useGpu);
+		this.calculator.setUseGpu(useGpu);
 	}
 
 	@Parameterized.Parameters(name = "useGpu = {0}")

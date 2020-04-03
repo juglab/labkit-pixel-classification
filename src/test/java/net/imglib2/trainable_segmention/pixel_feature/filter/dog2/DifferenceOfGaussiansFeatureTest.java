@@ -32,7 +32,7 @@ public class DifferenceOfGaussiansFeatureTest {
 			.sigmas(1.0, 2.0, 3.0)
 			.addFeature(GroupedFeatures.differenceOfGaussians())
 			.build();
-		calculator.setUseGPU(useGpu);
+		calculator.setUseGpu(useGpu);
 		List<String> attributeLabels = calculator.attributeLabels();
 		List<String> expected = Arrays.asList(
 			"difference of gaussians sigma1=1.0 sigma2=2.0",

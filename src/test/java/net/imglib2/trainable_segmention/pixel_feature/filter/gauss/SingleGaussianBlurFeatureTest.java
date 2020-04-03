@@ -25,8 +25,8 @@ import static org.junit.Assert.assertEquals;
 public class SingleGaussianBlurFeatureTest {
 
 	public SingleGaussianBlurFeatureTest(boolean useGpu) {
-		calculator.setUseGPU(useGpu);
-		calculator3d.setUseGPU(useGpu);
+		calculator.setUseGpu(useGpu);
+		calculator3d.setUseGpu(useGpu);
 	}
 
 	@Parameterized.Parameters(name = "useGpu = {0}")

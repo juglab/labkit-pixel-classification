@@ -1,23 +1,16 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.stats;
 
-import net.imagej.ops.OpEnvironment;
-import net.imagej.ops.OpService;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
-import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.scijava.Context;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 public class SingleStatisticsFeatureTest {
 
 	public SingleStatisticsFeatureTest(boolean useGpu) {
-		this.calculator.setUseGPU(useGpu);
+		this.calculator.setUseGpu(useGpu);
 		this.useGpu = useGpu;
 	}
 
@@ -92,7 +85,7 @@ public class SingleStatisticsFeatureTest {
 	public void testRadius0() {
 		FeatureCalculator calculator = FeatureCalculator.default2d().addFeature(SingleFeatures
 			.statistics(0)).build();
-		calculator.setUseGPU(useGpu);
+		calculator.setUseGpu(useGpu);
 		Img<FloatType> input = ArrayImgs.floats(new float[] {
 			0, 0, 0, 0,
 			0, 1, -1, 0,
@@ -115,7 +108,7 @@ public class SingleStatisticsFeatureTest {
 			.pixelSize(1, 2)
 			.addFeature(SingleFeatures.max(1))
 			.build();
-		calculator.setUseGPU(useGpu);
+		calculator.setUseGpu(useGpu);
 		Img<FloatType> input = ArrayImgs.floats(new float[] {
 			0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0,

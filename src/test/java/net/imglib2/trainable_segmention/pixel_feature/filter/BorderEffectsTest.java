@@ -89,7 +89,7 @@ public class BorderEffectsTest {
 
 	public void testFeature(FeatureSetting feature) {
 		FeatureCalculator calculator = FeatureCalculator.default2d().addFeature(feature).build();
-		calculator.setUseGPU(useGpu);
+		calculator.setUseGpu(useGpu);
 		RandomAccessibleInterval<FloatType> expected = calculateExpected(calculator);
 		RandomAccessibleInterval<FloatType> result = calculateResult(calculator);
 		Utils.assertImagesEqual(120.0, result, expected);

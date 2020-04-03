@@ -40,7 +40,7 @@ public class FeatureCalculator {
 
 	private final InputPreprocessor preprocessor;
 
-	private boolean useGPU = false;
+	private GpuApi gpu = null;
 
 	public FeatureCalculator(Context context, FeatureSettings settings) {
 		this.settings = settings;
@@ -81,15 +81,15 @@ public class FeatureCalculator {
 		return prepend(settings.globals().channelSetting().channels(), joiner.attributeLabels());
 	}
 
-	public void setUseGPU(boolean useGPU) {
-		this.useGPU = useGPU;
+	public void setUseGpu(boolean useGpu) {
+		this.gpu = useGpu ? GpuApi.getInstance() : null;
 	}
 
 	/**
 	 * TODO what channel order? XYZC
 	 */
 	public void apply(RandomAccessible<?> input, RandomAccessibleInterval<FloatType> output) {
-		if (useGPU) {
+		if (gpu != null) {
 			Interval interval = RevampUtils.removeLastDimension(output);
 			try (CLIJMultiChannelImage result = applyUseGpu(input, interval)) {
 				result.copyTo(output);
@@ -108,7 +108,7 @@ public class FeatureCalculator {
 		Interval interval)
 	{
 		FinalInterval fullInterval = Intervals.addDimension(interval, 0, count() - 1);
-		if (useGPU)
+		if (gpu != null)
 			return Views.translate(applyUseGpu(extendedImage, interval).asRAI(),
 				Intervals.minAsLongArray(fullInterval));
 		else {
@@ -135,7 +135,6 @@ public class FeatureCalculator {
 			throw new IllegalArgumentException("Wrong dimension of the output interval.");
 		double[] pixelSize = settings.globals().pixelSizeAsDoubleArray();
 		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
-		GpuApi gpu = GpuApi.getInstance();
 		CLIJMultiChannelImage featureStack = new CLIJMultiChannelImage(gpu, Intervals
 			.dimensionsAsLongArray(interval), count());
 		List<List<CLIJView>> outputs = split(featureStack.channels(), channels.size());
@@ -172,6 +171,10 @@ public class FeatureCalculator {
 	private static <T> List<T> filterByIndexPredicate(List<T> in, IntPredicate predicate) {
 		return IntStream.range(0, in.size()).filter(predicate).mapToObj(in::get).collect(Collectors
 			.toList());
+	}
+
+	public void setGpu(GpuApi gpu) {
+		this.gpu = gpu;
 	}
 
 	public static class Builder extends GlobalSettings.AbstractBuilder<Builder> {

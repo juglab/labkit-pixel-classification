@@ -11,8 +11,6 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -104,7 +102,7 @@ public class AnisotropicFeaturesTest {
 			.dimensions(3)
 			.addFeature(setting)
 			.build();
-		calculator.setUseGPU(useGpu);
+		calculator.setUseGpu(useGpu);
 		RandomAccessibleInterval<FloatType> result = calculator.apply(Views.extendBorder(image),
 			Intervals.createMinSize(24, 24, 24, 50, 50, 50));
 		RandomAccessibleInterval<FloatType> scaledFeatures = Views.subsample(result, 1, 1, 2, 1);
@@ -115,7 +113,7 @@ public class AnisotropicFeaturesTest {
 			.addFeature(setting)
 			.pixelSize(1, 1, 2)
 			.build();
-		calculator2.setUseGPU(useGpu);
+		calculator2.setUseGpu(useGpu);
 		RandomAccessibleInterval<FloatType> scaledImagesFeatures = calculator2.apply(Views.extendBorder(
 			scaleImage), Intervals.createMinSize(24, 24, 12, 50, 50, 25));
 		Utils.assertImagesEqual(expectedPsnr, scaledFeatures, Views.zeroMin(scaledImagesFeatures));
@@ -129,7 +127,7 @@ public class AnisotropicFeaturesTest {
 			.context(context)
 			.addFeature(setting)
 			.build();
-		calculator.setUseGPU(useGpu);
+		calculator.setUseGpu(useGpu);
 		RandomAccessibleInterval<FloatType> result = calculator.apply(Views.extendBorder(image),
 			Intervals.createMinSize(24, 24, 50, 50));
 		RandomAccessibleInterval<FloatType> scaledFeatures = Views.subsample(result, 1, 2, 1);
@@ -139,7 +137,7 @@ public class AnisotropicFeaturesTest {
 			.addFeature(setting)
 			.pixelSize(1, 2)
 			.build();
-		calculator2.setUseGPU(useGpu);
+		calculator2.setUseGpu(useGpu);
 		RandomAccessibleInterval<FloatType> scaledImagesFeatures = calculator2.apply(Views.extendBorder(
 			scaleImage), Intervals.createMinSize(24, 12, 50, 25));
 		Utils.assertImagesEqual(expectedPsnr, scaledFeatures, Views.zeroMin(scaledImagesFeatures));

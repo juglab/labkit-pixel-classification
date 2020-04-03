@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 public class SingleGaussianGradientMagnitudeFeatureTest {
 
 	public SingleGaussianGradientMagnitudeFeatureTest(boolean useGpu) {
-		this.calculator.setUseGPU(useGpu);
+		this.calculator.setUseGpu(useGpu);
 	}
 
 	@Parameterized.Parameters(name = "useGpu = {0}")
