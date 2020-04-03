@@ -40,6 +40,7 @@ public class CLIJFeatureCalculatorTest {
 			.dimensions(3)
 			.addFeature(SingleFeatures.gauss(8))
 			.build();
+		calculator.setGpu(gpu);
 		FinalInterval interval = Intervals.expand(input, -40);
 		try (CLIJMultiChannelImage featureStack = calculator.applyUseGpu(Views.extendBorder(input),
 			interval))
@@ -58,6 +59,7 @@ public class CLIJFeatureCalculatorTest {
 			.addFeature(SingleFeatures.gauss(1))
 			.addFeature(SingleFeatures.gauss(2))
 			.build();
+		calculator.setGpu(gpu);
 		FinalInterval interval = Intervals.expand(input, -40);
 		try (CLIJMultiChannelImage featureStack = calculator.applyUseGpu(Views.extendBorder(input),
 			interval))

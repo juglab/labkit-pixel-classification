@@ -1,7 +1,6 @@
 
 package clij;
 
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.converters.implementations.RandomAccessibleIntervalToClearCLBufferConverter;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.FinalInterval;
@@ -41,19 +40,18 @@ public class GaussBenchmark {
 	private final ClearCLBufferReuse buffers = new ClearCLBufferReuse(gpu);
 
 	private final FinalInterval interval = new FinalInterval(64, 64, 64);
-	private final ClearCLBuffer inputBuffer = gpu.push(RandomImgs.seed(1).nextImage(new FloatType(),
+	private final GpuImage inputBuffer = gpu.push(RandomImgs.seed(1).nextImage(new FloatType(),
 		interval));
-	private final ClearCLBuffer output = gpu.create(new long[] { 64, 64, 64 }, NativeTypeEnum.Float);
+	private final GpuImage output = gpu.create(new long[] { 64, 64, 64 }, NativeTypeEnum.Float);
 	private final RandomAccessible<FloatType> input = Utils.dirac(3);
 	private final ComputeCache cache = new ComputeCache(gpu, input, new double[] { 1, 1, 1 });
 	private final GaussContent content = new GaussContent(cache, 8);
-	private final ClearCLBuffer kernel = gaussKernel(8);
+	private final GpuImage kernel = gaussKernel(8);
 	private final long large = 64 + kernel.getWidth() - 1;
-	private final ClearCLBuffer inputBuffer2 = gpu.push(RandomImgs.seed(1).nextImage(new FloatType(),
+	private final GpuImage inputBuffer2 = gpu.push(RandomImgs.seed(1).nextImage(new FloatType(),
 		large, large, large));
-	private final ClearCLBuffer tmp1 = gpu.create(new long[] { 64, large, large },
-		NativeTypeEnum.Float);
-	private final ClearCLBuffer tmp2 = gpu.create(new long[] { 64, 64, large }, NativeTypeEnum.Float);
+	private final GpuImage tmp1 = gpu.create(new long[] { 64, large, large }, NativeTypeEnum.Float);
+	private final GpuImage tmp2 = gpu.create(new long[] { 64, 64, large }, NativeTypeEnum.Float);
 
 	@Setup
 	public void setUp() {
@@ -79,14 +77,14 @@ public class GaussBenchmark {
 
 	@Benchmark
 	public RandomAccessibleInterval benchmarkGauss() {
-		try (ClearCLBuffer load = content.load(interval)) {
+		try (GpuImage load = content.load(interval)) {
 			return gpu.pullRAI(load);
 		}
 	}
 
 	@Benchmark
 	public RandomAccessibleInterval intermediate() {
-		try (ClearCLBuffer output = gpu.create(new long[] { 64, 64, 64 }, NativeTypeEnum.Float)) {
+		try (GpuImage output = gpu.create(new long[] { 64, 64, 64 }, NativeTypeEnum.Float)) {
 			NeighborhoodOperation gauss = Gauss.gauss(gpu, 8, 8, 8);
 			gauss.convolve(CLIJView.wrap(inputBuffer2), CLIJView.wrap(output));
 			return gpu.pullRAI(output);
@@ -96,20 +94,20 @@ public class GaussBenchmark {
 	@Benchmark
 	public RandomAccessibleInterval lowLevelGauss() {
 		try (ReuseScope scope = new ReuseScope(buffers)) {
-			ClearCLBuffer tmp1 = scope.create(64, large, large);
-			ClearCLBuffer tmp2 = scope.create(64, 64, large);
-			ClearCLBuffer output = scope.create(64, 64, 64);
+			GpuImage tmp1 = scope.create(64, large, large);
+			GpuImage tmp2 = scope.create(64, 64, large);
+			GpuImage output = scope.create(64, 64, 64);
 			{
-				ClearCLBuffer kernel = scope.add(gaussKernel(8));
+				GpuImage kernel = scope.add(gaussKernel(8));
 				CLIJKernelConvolution.convolve(gpu, CLIJView.wrap(inputBuffer2), kernel, CLIJView.wrap(
 					tmp1), 0);
 			}
 			{
-				ClearCLBuffer kernel = scope.add(gaussKernel(8));
+				GpuImage kernel = scope.add(gaussKernel(8));
 				CLIJKernelConvolution.convolve(gpu, CLIJView.wrap(tmp1), kernel, CLIJView.wrap(tmp2), 1);
 			}
 			{
-				ClearCLBuffer kernel = scope.add(gaussKernel(8));
+				GpuImage kernel = scope.add(gaussKernel(8));
 				CLIJKernelConvolution.convolve(gpu, CLIJView.wrap(tmp2), kernel, CLIJView.wrap(output), 2);
 			}
 			return gpu.pullRAI(output);
@@ -130,13 +128,13 @@ public class GaussBenchmark {
 		new Runner(options).run();
 	}
 
-	private ClearCLBuffer gaussKernel(double sigma) {
+	private GpuImage gaussKernel(double sigma) {
 		double[] fullKernel = Kernel1D.symmetric(Gauss3.halfkernels(new double[] { sigma })[0])
 			.fullKernel();
-		ClearCLBuffer buffer = buffers.create(new long[] { fullKernel.length });
+		GpuImage buffer = buffers.create(new long[] { fullKernel.length });
 		RandomAccessibleIntervalToClearCLBufferConverter.copyRandomAccessibleIntervalToClearCLBuffer(
 			ArrayImgs.doubles(fullKernel, fullKernel.length, 1),
-			buffer);
+			buffer.clearCLBuffer());
 		return buffer;
 	}
 }

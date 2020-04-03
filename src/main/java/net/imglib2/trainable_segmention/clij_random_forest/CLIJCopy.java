@@ -2,7 +2,7 @@
 package net.imglib2.trainable_segmention.clij_random_forest;
 
 import clij.CLIJLoopBuilder;
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import clij.GpuImage;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import clij.GpuApi;
 import net.imglib2.Interval;
@@ -46,7 +46,7 @@ public class CLIJCopy {
 		return (int) (d < interval.numDimensions() ? interval.min(d) : 0);
 	}
 
-	public static void copyToRai(ClearCLBuffer source,
+	public static void copyToRai(GpuImage source,
 		RandomAccessibleInterval<? extends RealType<?>> target)
 	{
 		if (!Arrays.equals(source.getDimensions(), Intervals.dimensionsAsLongArray(target)))

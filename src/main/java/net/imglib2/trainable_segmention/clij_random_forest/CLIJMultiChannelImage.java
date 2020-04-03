@@ -1,7 +1,7 @@
 
 package net.imglib2.trainable_segmention.clij_random_forest;
 
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import clij.GpuImage;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import clij.GpuApi;
 import net.imglib2.Interval;
@@ -27,7 +27,7 @@ public class CLIJMultiChannelImage implements AutoCloseable {
 	private final GpuApi gpu;
 	private final long numChannels;
 	private final long[] spatialDimensions;
-	private final ClearCLBuffer buffer;
+	private final GpuImage buffer;
 
 	public CLIJMultiChannelImage(GpuApi gpu, long[] spatialDimensions, long numChannels) {
 		assert spatialDimensions.length >= 2 && spatialDimensions.length <= 3;
@@ -76,7 +76,7 @@ public class CLIJMultiChannelImage implements AutoCloseable {
 		buffer.close();
 	}
 
-	public ClearCLBuffer asClearCLBuffer() {
+	public GpuImage asClearCLBuffer() {
 		return buffer;
 	}
 

@@ -2,7 +2,7 @@
 package net.imglib2.trainable_segmention.clij_random_forest.compute_cache;
 
 import clij.CLIJLoopBuilder;
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import clij.GpuImage;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import clij.GpuApi;
 import net.imglib2.FinalInterval;
@@ -52,7 +52,7 @@ public class SecondDerivativeContent implements ComputeCache.Content {
 	}
 
 	@Override
-	public ClearCLBuffer load(Interval interval) {
+	public GpuImage load(Interval interval) {
 		GpuApi gpu = cache.gpuApi();
 		double[] pixelSize = cache.pixelSize();
 		CLIJView source = cache.get(input, requiredInput(interval));
@@ -61,7 +61,7 @@ public class SecondDerivativeContent implements ComputeCache.Content {
 			d));
 		CLIJView back = CLIJView.interval(source.buffer(), Intervals.translate(center.interval(), -1,
 			d));
-		ClearCLBuffer result = gpu.create(Intervals.dimensionsAsLongArray(center.interval()),
+		GpuImage result = gpu.create(Intervals.dimensionsAsLongArray(center.interval()),
 			NativeTypeEnum.Float);
 		CLIJLoopBuilder.gpu(gpu)
 			.addInput("f", front)

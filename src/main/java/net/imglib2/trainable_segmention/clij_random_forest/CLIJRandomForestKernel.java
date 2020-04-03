@@ -1,7 +1,7 @@
 
 package net.imglib2.trainable_segmention.clij_random_forest;
 
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import clij.GpuImage;
 import clij.GpuApi;
 import net.imglib2.util.Intervals;
 
@@ -12,9 +12,9 @@ public class CLIJRandomForestKernel {
 	public static void randomForest(GpuApi gpu,
 		CLIJMultiChannelImage distributions,
 		CLIJMultiChannelImage src,
-		ClearCLBuffer thresholds,
-		ClearCLBuffer probabilities,
-		ClearCLBuffer indices,
+		GpuImage thresholds,
+		GpuImage probabilities,
+		GpuImage indices,
 		int numberOfFeatures)
 	{
 		long[] globalSizes = src.getSpatialDimensions().clone();
@@ -34,7 +34,7 @@ public class CLIJRandomForestKernel {
 
 	public static void findMax(GpuApi gpu,
 		CLIJMultiChannelImage distributions,
-		ClearCLBuffer dst)
+		GpuImage dst)
 	{
 		long[] globalSizes = { dst.getWidth(), dst.getHeight(), dst.getDepth() };
 		HashMap<String, Object> parameters = new HashMap<>();

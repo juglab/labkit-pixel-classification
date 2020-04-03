@@ -2,7 +2,7 @@
 package net.imglib2.trainable_segmention.clij_random_forest;
 
 import hr.irb.fastRandomForest.FastRandomForest;
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import clij.GpuImage;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import clij.GpuApi;
 import net.imglib2.img.Img;
@@ -107,21 +107,21 @@ public class RandomForestPrediction {
 		Img<FloatType> probabilities = ArrayImgs.floats(leafProbabilities, numberOfClasses,
 			numberOfLeafs, numberOfTrees);
 		try (
-			ClearCLBuffer thresholdsClBuffer = gpu.push(thresholds);
-			ClearCLBuffer probabilitiesClBuffer = gpu.push(probabilities);
-			ClearCLBuffer indicesClBuffer = gpu.push(indices);)
+			GpuImage thresholdsClBuffer = gpu.push(thresholds);
+			GpuImage probabilitiesClBuffer = gpu.push(probabilities);
+			GpuImage indicesClBuffer = gpu.push(indices);)
 		{
 			CLIJRandomForestKernel.randomForest(gpu, distribution, features,
 				thresholdsClBuffer, probabilitiesClBuffer, indicesClBuffer, numberOfFeatures);
 		}
 	}
 
-	public ClearCLBuffer segment(GpuApi gpu, CLIJMultiChannelImage features) {
+	public GpuImage segment(GpuApi gpu, CLIJMultiChannelImage features) {
 		try (CLIJMultiChannelImage distribution = new CLIJMultiChannelImage(gpu, features
 			.getSpatialDimensions(), numberOfClasses))
 		{
 			distribution(gpu, features, distribution);
-			ClearCLBuffer output = gpu.create(distribution.getSpatialDimensions(),
+			GpuImage output = gpu.create(distribution.getSpatialDimensions(),
 				NativeTypeEnum.UnsignedShort);
 			CLIJRandomForestKernel.findMax(gpu, distribution, output);
 			return output;

@@ -1,7 +1,6 @@
 
 package clij;
 
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.imglib2.Interval;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.util.Intervals;
@@ -30,7 +29,7 @@ public class CLIJLoopBuilder {
 	private final List<String> preOperation = new ArrayList<>();
 	private final List<String> postOperation = new ArrayList<>();
 	private final HashMap<String, Object> parameterValues = new HashMap<>();
-	private final Map<ClearCLBuffer, String> images = new HashMap<>();
+	private final Map<GpuImage, String> images = new HashMap<>();
 	private final List<ValuePair<String, long[]>> imageSizes = new ArrayList<>();
 
 	private CLIJLoopBuilder(GpuApi gpu) {
@@ -61,7 +60,7 @@ public class CLIJLoopBuilder {
 		return this;
 	}
 
-	public CLIJLoopBuilder addInput(String variable, ClearCLBuffer image) {
+	public CLIJLoopBuilder addInput(String variable, GpuImage image) {
 		checkValidVariableName(variable);
 		String parameterName = addImageParameter(image);
 		registerSize(variable, image.getDimensions());
@@ -70,7 +69,7 @@ public class CLIJLoopBuilder {
 		return this;
 	}
 
-	public CLIJLoopBuilder addOutput(String variable, ClearCLBuffer image) {
+	public CLIJLoopBuilder addOutput(String variable, GpuImage image) {
 		checkValidVariableName(variable);
 		String parameterName = addImageParameter(image);
 		registerSize(variable, image.getDimensions());
@@ -112,7 +111,7 @@ public class CLIJLoopBuilder {
 		return d < interval.numDimensions() ? interval.min(d) : 0;
 	}
 
-	private String addImageParameter(ClearCLBuffer image) {
+	private String addImageParameter(GpuImage image) {
 		if (images.containsKey(image))
 			return images.get(image);
 		else {

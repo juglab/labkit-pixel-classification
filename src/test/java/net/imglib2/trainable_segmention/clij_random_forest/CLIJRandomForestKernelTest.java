@@ -1,7 +1,7 @@
 
 package net.imglib2.trainable_segmention.clij_random_forest;
 
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import clij.GpuImage;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import clij.GpuApi;
 import net.imglib2.RandomAccessibleInterval;
@@ -100,7 +100,7 @@ public class CLIJRandomForestKernelTest {
 			3, 1, 1, 3,
 			-3, -3, -2, -1
 		}, 2, 2, 6);
-		ClearCLBuffer outputBuffer = gpu.create(new long[] { 2, 2, 2 }, NativeTypeEnum.UnsignedShort);
+		GpuImage outputBuffer = gpu.create(new long[] { 2, 2, 2 }, NativeTypeEnum.UnsignedShort);
 		CLIJRandomForestKernel.findMax(gpu, new CLIJMultiChannelImage(gpu, input, 3), outputBuffer);
 		RandomAccessibleInterval<? extends RealType<?>> result = gpu.pullRAI(outputBuffer);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] {
@@ -119,7 +119,7 @@ public class CLIJRandomForestKernelTest {
 			2, 2,
 			-2, -1,
 		}, 2, 4);
-		ClearCLBuffer outputBuffer = gpu.create(new long[] { 2, 2 }, NativeTypeEnum.UnsignedShort);
+		GpuImage outputBuffer = gpu.create(new long[] { 2, 2 }, NativeTypeEnum.UnsignedShort);
 		CLIJRandomForestKernel.findMax(gpu, new CLIJMultiChannelImage(gpu, input, 2), outputBuffer);
 		RandomAccessibleInterval<? extends RealType<?>> result = gpu.pullRAI(outputBuffer);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] {

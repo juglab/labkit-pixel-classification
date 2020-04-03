@@ -1,8 +1,7 @@
 
 package net.imglib2.trainable_segmention.clij_random_forest;
 
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
+import clij.GpuImage;
 import clij.GpuApi;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
@@ -32,9 +31,8 @@ public class CLIJCopyTest {
 
 	@Test
 	public void testCopy() {
-		ClearCLBuffer source = gpu.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 3,
-			3));
-		ClearCLBuffer destination = gpu.create(new long[] { 3, 3 }, NativeTypeEnum.Float);
+		GpuImage source = gpu.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 3, 3));
+		GpuImage destination = gpu.push(ArrayImgs.floats(new float[9], 3, 3));
 		CLIJView sourceView = CLIJView.interval(source, Intervals.createMinSize(0, 1, 2, 2));
 		CLIJView destinationView = CLIJView.interval(destination, Intervals.createMinSize(1, 0, 2, 2));
 		CLIJCopy.copy(gpu, sourceView, destinationView);
@@ -46,8 +44,7 @@ public class CLIJCopyTest {
 
 	@Test
 	public void testCopyToRai() {
-		ClearCLBuffer source = gpu.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 3,
-			3));
+		GpuImage source = gpu.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 3, 3));
 		RandomAccessibleInterval<FloatType> target = ArrayImgs.floats(3, 3);
 		CLIJCopy.copyToRai(source, target);
 	}

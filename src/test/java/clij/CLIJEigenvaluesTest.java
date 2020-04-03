@@ -1,7 +1,6 @@
 
 package clij;
 
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
@@ -72,9 +71,9 @@ public class CLIJEigenvaluesTest {
 	private float[] solveCubicEquation(float b0, float b1, float b2) {
 		long[] dims = { 1, 1 };
 		try (
-			ClearCLBuffer x0 = gpu.create(dims, NativeTypeEnum.Float);
-			ClearCLBuffer x1 = gpu.create(dims, NativeTypeEnum.Float);
-			ClearCLBuffer x2 = gpu.create(dims, NativeTypeEnum.Float);)
+			GpuImage x0 = gpu.create(dims, NativeTypeEnum.Float);
+			GpuImage x1 = gpu.create(dims, NativeTypeEnum.Float);
+			GpuImage x2 = gpu.create(dims, NativeTypeEnum.Float);)
 		{
 			CLIJLoopBuilder.gpu(gpu)
 				.addInput("b0", b0)
@@ -106,9 +105,9 @@ public class CLIJEigenvaluesTest {
 		}
 		Img<FloatType> zeros = ArrayImgs.floats(1, n);
 		try (
-			ClearCLBuffer expectedBuffer = gpu.push(expected);
-			ClearCLBuffer zeroBuffer = gpu.push(zeros);
-			ClearCLBuffer resultBuffer = gpu.create(new long[] { 3, n }, NativeTypeEnum.Float);)
+			GpuImage expectedBuffer = gpu.push(expected);
+			GpuImage zeroBuffer = gpu.push(zeros);
+			GpuImage resultBuffer = gpu.create(new long[] { 3, n }, NativeTypeEnum.Float);)
 		{
 			CLIJView xx = CLIJView.interval(expectedBuffer, Intervals.createMinSize(0, 0, 1, n));
 			CLIJView yy = CLIJView.interval(expectedBuffer, Intervals.createMinSize(1, 0, 1, n));
@@ -133,7 +132,7 @@ public class CLIJEigenvaluesTest {
 		return Views.interval(rai, view.interval()).firstElement().getRealFloat();
 	}
 
-	private float getValue(ClearCLBuffer buffer) {
+	private float getValue(GpuImage buffer) {
 		RandomAccessibleInterval<FloatType> rai = gpu.pullRAI(buffer);
 		return Views.iterable(rai).firstElement().getRealFloat();
 	}

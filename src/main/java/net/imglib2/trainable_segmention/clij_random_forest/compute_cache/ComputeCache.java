@@ -1,7 +1,7 @@
 
 package net.imglib2.trainable_segmention.clij_random_forest.compute_cache;
 
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import clij.GpuImage;
 import clij.GpuApi;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
@@ -62,14 +62,14 @@ public class ComputeCache implements AutoCloseable {
 
 		void request(Interval interval);
 
-		ClearCLBuffer load(Interval interval);
+		GpuImage load(Interval interval);
 	}
 
 	class CacheEntry {
 
 		private final Content content;
 		private Interval requestedInterval = null;
-		private ClearCLBuffer buffer = null;
+		private GpuImage buffer = null;
 
 		public CacheEntry(Content content) {
 			this.content = content;

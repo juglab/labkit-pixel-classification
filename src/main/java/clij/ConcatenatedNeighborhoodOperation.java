@@ -1,7 +1,6 @@
 
 package clij;
 
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.Interval;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
@@ -39,7 +38,7 @@ public class ConcatenatedNeighborhoodOperation implements NeighborhoodOperation 
 			buffers.add(input);
 			for (int i = 1; i < n; i++) {
 				long[] dimensions = Intervals.dimensionsAsLongArray(intervals.get(i));
-				ClearCLBuffer buffer = gpu.create(dimensions, NativeTypeEnum.Float);
+				GpuImage buffer = gpu.create(dimensions, NativeTypeEnum.Float);
 				buffers.add(CLIJView.wrap(buffer));
 				autoClose.add(buffer);
 			}

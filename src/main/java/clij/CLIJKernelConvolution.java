@@ -1,7 +1,6 @@
 
 package clij;
 
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.converter.RealTypeConverters;
@@ -46,16 +45,14 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 	@Override
 	public void convolve(CLIJView input, CLIJView output) {
 		final Img<DoubleType> kernelImage = ArrayImgs.doubles(kernel.fullKernel(), kernel.size());
-		try (ClearCLBuffer kernelBuffer = gpu.push(RealTypeConverters.convert(kernelImage,
+		try (GpuImage kernelBuffer = gpu.push(RealTypeConverters.convert(kernelImage,
 			new FloatType())))
 		{
 			convolve(gpu, input, kernelBuffer, output, d);
 		}
 	}
 
-	public static void convolve(GpuApi gpu, CLIJView input, ClearCLBuffer kernel, CLIJView output,
-		int d)
-	{
+	public static void convolve(GpuApi gpu, CLIJView input, GpuImage kernel, CLIJView output, int d) {
 		HashMap<String, Object> parameters = new HashMap<>();
 		parameters.put("input", input.buffer());
 		parameters.put("kernelValues", kernel);
@@ -80,8 +77,8 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 			globalSizes, localSizes, parameters, defines);
 	}
 
-	public static void convolve(GpuApi gpu, ClearCLBuffer input, ClearCLBuffer kernel,
-		int kernel_center, ClearCLBuffer output, int d)
+	public static void convolve(GpuApi gpu, GpuImage input, GpuImage kernel, int kernel_center,
+		GpuImage output, int d)
 	{
 		HashMap<String, Object> parameters = new HashMap<>();
 		parameters.put("input", input);
@@ -115,7 +112,7 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 	private static void setSkips(HashMap<String, Object> defines, String prefix, CLIJView view,
 		int d)
 	{
-		ClearCLBuffer buffer = view.buffer();
+		GpuImage buffer = view.buffer();
 		Interval interval = view.interval();
 		long[] skip = { 1, buffer.getWidth(), buffer.getWidth() * buffer.getHeight() };
 		defines.put(prefix + "_OFFSET", getOffset(interval, skip));
