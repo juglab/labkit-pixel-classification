@@ -2,7 +2,6 @@
 package clij;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.Interval;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.util.Intervals;
@@ -14,7 +13,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringJoiner;
 
 /**
@@ -26,7 +24,7 @@ public class CLIJLoopBuilder {
 	private List<String> COORDINATE_VARIABLE_NAMES = Arrays.asList("coordinate_x", "coordinate_y",
 		"coordinate_z");
 
-	private final CLIJ2 clij;
+	private final GpuApi gpu;
 
 	private final List<String> parameterDefinition = new ArrayList<>();
 	private final List<String> preOperation = new ArrayList<>();
@@ -35,12 +33,12 @@ public class CLIJLoopBuilder {
 	private final Map<ClearCLBuffer, String> images = new HashMap<>();
 	private final List<ValuePair<String, long[]>> imageSizes = new ArrayList<>();
 
-	private CLIJLoopBuilder(CLIJ2 clij) {
-		this.clij = clij;
+	private CLIJLoopBuilder(GpuApi gpu) {
+		this.gpu = gpu;
 	}
 
-	public static CLIJLoopBuilder clij(CLIJ2 clij) {
-		return new CLIJLoopBuilder(clij);
+	public static CLIJLoopBuilder gpu(GpuApi gpu) {
+		return new CLIJLoopBuilder(gpu);
 	}
 
 	public CLIJLoopBuilder addInput(String variable, int image) {
@@ -143,8 +141,8 @@ public class CLIJLoopBuilder {
 		defines.put("PARAMETER", concatenate(", ", parameterDefinition));
 		defines.put("OPERATION", concatenate("; ", preOperation, Collections.singletonList(operation),
 			postOperation));
-		clij.execute(CLIJLoopBuilder.class, "binary_operation.cl", "operation",
-			dims, dims, parameterValues, defines);
+		gpu.execute(CLIJLoopBuilder.class, "binary_operation.cl", "operation",
+			dims, parameterValues, defines);
 	}
 
 	@SafeVarargs

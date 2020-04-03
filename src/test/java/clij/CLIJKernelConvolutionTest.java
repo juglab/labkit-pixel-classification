@@ -2,7 +2,7 @@
 package clij;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij2.CLIJ2;
+import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImg;
@@ -17,29 +17,29 @@ import org.junit.Test;
 
 public class CLIJKernelConvolutionTest {
 
-	CLIJ2 clij = CLIJ2.getInstance();
+	GpuApi gpu = GpuApi.getInstance();
 
 	@Test
 	public void test() {
 		try (
-			ClearCLBuffer input = clij.push(img1D(0, 0, 1, 0, 0));
-			ClearCLBuffer kernel = clij.push(img1D(-0.5f, 0, 0.5f));
-			ClearCLBuffer output = clij.create(new long[] { 3, 1 });)
+			ClearCLBuffer input = gpu.push(img1D(0, 0, 1, 0, 0));
+			ClearCLBuffer kernel = gpu.push(img1D(-0.5f, 0, 0.5f));
+			ClearCLBuffer output = gpu.create(new long[] { 3, 1 }, NativeTypeEnum.Float);)
 		{
-			CLIJKernelConvolution.convolve(clij, CLIJView.wrap(input), kernel, CLIJView.wrap(output), 0);
-			ImgLib2Assert.assertImageEqualsRealType(img1D(0.5f, 0, -0.5f), clij.pullRAI(output), 0);
+			CLIJKernelConvolution.convolve(gpu, CLIJView.wrap(input), kernel, CLIJView.wrap(output), 0);
+			ImgLib2Assert.assertImageEqualsRealType(img1D(0.5f, 0, -0.5f), gpu.pullRAI(output), 0);
 		}
 	}
 
 	@Test
 	public void test8() {
 		try (
-			ClearCLBuffer input = clij.push(img1D(0, 1, 0));
-			ClearCLBuffer kernel = clij.push(img1D(-0.5f, 0, 0.5f));
-			ClearCLBuffer output = clij.create(new long[] { 3, 1 });)
+			ClearCLBuffer input = gpu.push(img1D(0, 1, 0));
+			ClearCLBuffer kernel = gpu.push(img1D(-0.5f, 0, 0.5f));
+			ClearCLBuffer output = gpu.create(new long[] { 3, 1 }, NativeTypeEnum.Float);)
 		{
-			CLIJKernelConvolution.convolve(clij, input, kernel, 1, output, 0);
-			RandomAccessibleInterval actual = clij.pullRAI(output);
+			CLIJKernelConvolution.convolve(gpu, input, kernel, 1, output, 0);
+			RandomAccessibleInterval actual = gpu.pullRAI(output);
 			ToString.print(actual);
 			ImgLib2Assert.assertImageEqualsRealType(img1D(0.5f, 0, -0.5f), actual, 0);
 		}
@@ -48,12 +48,12 @@ public class CLIJKernelConvolutionTest {
 	@Test
 	public void testBorder() {
 		try (
-			ClearCLBuffer input = clij.push(img1D(2, 0, 0, 0, 3));
-			ClearCLBuffer kernel = clij.push(img1D(-0.5f, 0, 0.5f));
-			ClearCLBuffer output = clij.create(new long[] { 3, 1 });)
+			ClearCLBuffer input = gpu.push(img1D(2, 0, 0, 0, 3));
+			ClearCLBuffer kernel = gpu.push(img1D(-0.5f, 0, 0.5f));
+			ClearCLBuffer output = gpu.create(new long[] { 3, 1 }, NativeTypeEnum.Float);)
 		{
-			CLIJKernelConvolution.convolve(clij, CLIJView.wrap(input), kernel, CLIJView.wrap(output), 0);
-			ImgLib2Assert.assertImageEqualsRealType(img1D(-1, 0, 1.5f), clij.pullRAI(output), 0);
+			CLIJKernelConvolution.convolve(gpu, CLIJView.wrap(input), kernel, CLIJView.wrap(output), 0);
+			ImgLib2Assert.assertImageEqualsRealType(img1D(-1, 0, 1.5f), gpu.pullRAI(output), 0);
 		}
 	}
 
@@ -62,29 +62,29 @@ public class CLIJKernelConvolutionTest {
 	public void testLongLine() {
 		int length = 10000;
 		try (
-			ClearCLBuffer input = clij.push(img1D(new float[length + 2]));
-			ClearCLBuffer kernel = clij.push(img1D(-0.5f, 0, 0.5f));
-			ClearCLBuffer output = clij.create(new long[] { length, 1 });)
+			ClearCLBuffer input = gpu.push(img1D(new float[length + 2]));
+			ClearCLBuffer kernel = gpu.push(img1D(-0.5f, 0, 0.5f));
+			ClearCLBuffer output = gpu.create(new long[] { length, 1 }, NativeTypeEnum.Float);)
 		{
-			CLIJKernelConvolution.convolve(clij, CLIJView.wrap(input), kernel, CLIJView.wrap(output), 0);
-			ImgLib2Assert.assertImageEqualsRealType(img1D(new float[length]), clij.pullRAI(output), 0);
+			CLIJKernelConvolution.convolve(gpu, CLIJView.wrap(input), kernel, CLIJView.wrap(output), 0);
+			ImgLib2Assert.assertImageEqualsRealType(img1D(new float[length]), gpu.pullRAI(output), 0);
 		}
 	}
 
 	@Test
 	public void testY() {
 		try (
-			ClearCLBuffer input = clij.push(ArrayImgs.floats(new float[] {
+			ClearCLBuffer input = gpu.push(ArrayImgs.floats(new float[] {
 				0, 0, 0, 0,
 				0, 1, 0, 0,
 				0, 0, -1, 0
 			}, 4, 3));
-			ClearCLBuffer kernel = clij.push(img1D(1, 2));
-			ClearCLBuffer output = clij.create(new long[] { 3, 2 });)
+			ClearCLBuffer kernel = gpu.push(img1D(1, 2));
+			ClearCLBuffer output = gpu.create(new long[] { 3, 2 }, NativeTypeEnum.Float);)
 		{
-			CLIJKernelConvolution.convolve(clij, CLIJView.interval(input, FinalInterval.createMinSize(1,
-				0, 2, 2)), kernel, CLIJView.wrap(output), 1);
-			RandomAccessibleInterval actual = clij.pullRAI(output);
+			CLIJKernelConvolution.convolve(gpu, CLIJView.interval(input, FinalInterval.createMinSize(1, 0,
+				2, 2)), kernel, CLIJView.wrap(output), 1);
+			RandomAccessibleInterval actual = gpu.pullRAI(output);
 			ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] {
 				2, 0, 0,
 				1, -2, 0

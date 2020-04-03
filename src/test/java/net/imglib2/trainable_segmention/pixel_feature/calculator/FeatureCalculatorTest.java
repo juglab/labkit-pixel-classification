@@ -104,7 +104,7 @@ public class FeatureCalculatorTest {
 		@Override
 		public void apply(CLIJFeatureInput input, List<CLIJView> output) {
 			CLIJView image = input.original(input.targetInterval());
-			CLIJLoopBuilder.clij(input.clij())
+			CLIJLoopBuilder.gpu(input.gpuApi())
 				.addInput("a", image)
 				.addInput("b", (float) value)
 				.addOutput("c", output.get(0)).forEachPixel("c = a + b");

@@ -2,7 +2,6 @@
 package clij;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.converter.RealTypeConverters;
@@ -23,14 +22,14 @@ import java.util.List;
 
 public class CLIJKernelConvolution implements NeighborhoodOperation {
 
-	private final CLIJ2 clij;
+	private final GpuApi gpu;
 
 	private final Kernel1D kernel;
 
 	private final int d;
 
-	public CLIJKernelConvolution(CLIJ2 clij, Kernel1D kernel, int d) {
-		this.clij = clij;
+	public CLIJKernelConvolution(GpuApi gpu, Kernel1D kernel, int d) {
+		this.gpu = gpu;
 		this.kernel = kernel;
 		this.d = d;
 	}
@@ -47,14 +46,14 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 	@Override
 	public void convolve(CLIJView input, CLIJView output) {
 		final Img<DoubleType> kernelImage = ArrayImgs.doubles(kernel.fullKernel(), kernel.size());
-		try (ClearCLBuffer kernelBuffer = clij.push(RealTypeConverters.convert(kernelImage,
+		try (ClearCLBuffer kernelBuffer = gpu.push(RealTypeConverters.convert(kernelImage,
 			new FloatType())))
 		{
-			convolve(clij, input, kernelBuffer, output, d);
+			convolve(gpu, input, kernelBuffer, output, d);
 		}
 	}
 
-	public static void convolve(CLIJ2 clij, CLIJView input, ClearCLBuffer kernel, CLIJView output,
+	public static void convolve(GpuApi gpu, CLIJView input, ClearCLBuffer kernel, CLIJView output,
 		int d)
 	{
 		HashMap<String, Object> parameters = new HashMap<>();
@@ -77,11 +76,11 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 			"input[INPUT_OFFSET + INPUT_X_SKIP * (x) + INPUT_Y_SKIP * (y) + INPUT_Z_SKIP * (z)]");
 		long[] globalSizes = getDimensions(output.interval());
 		ArrayUtils.swap(globalSizes, 0, d);
-		clij.executeSubsequently(CLIJKernelConvolution.class, "gauss.cl", "convolve1d", globalSizes,
-			globalSizes, localSizes, parameters, defines, null).close();
+		gpu.execute(CLIJKernelConvolution.class, "gauss.cl", "convolve1d",
+			globalSizes, localSizes, parameters, defines);
 	}
 
-	public static void convolve(CLIJ2 clij, ClearCLBuffer input, ClearCLBuffer kernel,
+	public static void convolve(GpuApi gpu, ClearCLBuffer input, ClearCLBuffer kernel,
 		int kernel_center, ClearCLBuffer output, int d)
 	{
 		HashMap<String, Object> parameters = new HashMap<>();
@@ -103,8 +102,8 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 				",0)).x");
 		long[] globalSizes = output.getDimensions();
 		ArrayUtils.swap(globalSizes, 0, d);
-		clij.executeSubsequently(CLIJKernelConvolution.class, "gauss.cl", "convolve1d", globalSizes,
-			globalSizes, localSizes, parameters, defines, null).close();
+		gpu.execute(CLIJKernelConvolution.class, "gauss.cl", "convolve1d",
+			globalSizes, localSizes, parameters, defines);
 	}
 
 	private static String position(int d, int kernel_center) {

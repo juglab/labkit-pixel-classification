@@ -1,7 +1,7 @@
 
 package performance;
 
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
@@ -40,7 +40,6 @@ public class ParallelSegmentationBenchmark {
 			"/home/arzt/Documents/Datasets/img_TL199_Chgreen.classifier"));
 
 	public static void main(String... args) {
-		CLIJ2.getInstance().setKeepReferences(false);
 		ImageJFunctions.show(image);
 		segmenter.setUseGpu(true);
 		CellLoader<UnsignedShortType> loader = cell -> segmenter.segment(cell, Views.extendBorder(

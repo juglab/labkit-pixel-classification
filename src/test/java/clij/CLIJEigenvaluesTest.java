@@ -3,7 +3,6 @@ package clij;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
@@ -25,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 
 public class CLIJEigenvaluesTest {
 
-	CLIJ2 clij = CLIJ2.getInstance();
+	GpuApi gpu = GpuApi.getInstance();
 	AutoClose autoClose = new AutoClose();
 
 	@Test
@@ -37,7 +36,7 @@ public class CLIJEigenvaluesTest {
 			CLIJView eigenvalue1 = image(0);
 			CLIJView eigenvalue2 = image(0))
 		{
-			CLIJEigenvalues.symmetric2d(clij, xx, xy, yy, eigenvalue1, eigenvalue2);
+			CLIJEigenvalues.symmetric2d(gpu, xx, xy, yy, eigenvalue1, eigenvalue2);
 			assertEquals(2 + Math.sqrt(5), getValue(eigenvalue1), 0.0001);
 			assertEquals(2 - Math.sqrt(5), getValue(eigenvalue2), 0.0001);
 		}
@@ -56,7 +55,7 @@ public class CLIJEigenvaluesTest {
 			CLIJView eigenvalue2 = image(0);
 			CLIJView eigenvalue3 = image(0))
 		{
-			CLIJEigenvalues.symmetric3d(clij, xx, xy, xz, yy, yz, zz, eigenvalue1, eigenvalue2,
+			CLIJEigenvalues.symmetric3d(gpu, xx, xy, xz, yy, yz, zz, eigenvalue1, eigenvalue2,
 				eigenvalue3);
 			assertEquals(11.345, getValue(eigenvalue1), 0.001);
 			assertEquals(0.171, getValue(eigenvalue2), 0.001);
@@ -73,11 +72,11 @@ public class CLIJEigenvaluesTest {
 	private float[] solveCubicEquation(float b0, float b1, float b2) {
 		long[] dims = { 1, 1 };
 		try (
-			ClearCLBuffer x0 = clij.create(dims, NativeTypeEnum.Float);
-			ClearCLBuffer x1 = clij.create(dims, NativeTypeEnum.Float);
-			ClearCLBuffer x2 = clij.create(dims, NativeTypeEnum.Float);)
+			ClearCLBuffer x0 = gpu.create(dims, NativeTypeEnum.Float);
+			ClearCLBuffer x1 = gpu.create(dims, NativeTypeEnum.Float);
+			ClearCLBuffer x2 = gpu.create(dims, NativeTypeEnum.Float);)
 		{
-			CLIJLoopBuilder.clij(clij)
+			CLIJLoopBuilder.gpu(gpu)
 				.addInput("b0", b0)
 				.addInput("b1", b1)
 				.addInput("b2", b2)
@@ -107,9 +106,9 @@ public class CLIJEigenvaluesTest {
 		}
 		Img<FloatType> zeros = ArrayImgs.floats(1, n);
 		try (
-			ClearCLBuffer expectedBuffer = clij.push(expected);
-			ClearCLBuffer zeroBuffer = clij.push(zeros);
-			ClearCLBuffer resultBuffer = clij.create(new long[] { 3, n });)
+			ClearCLBuffer expectedBuffer = gpu.push(expected);
+			ClearCLBuffer zeroBuffer = gpu.push(zeros);
+			ClearCLBuffer resultBuffer = gpu.create(new long[] { 3, n }, NativeTypeEnum.Float);)
 		{
 			CLIJView xx = CLIJView.interval(expectedBuffer, Intervals.createMinSize(0, 0, 1, n));
 			CLIJView yy = CLIJView.interval(expectedBuffer, Intervals.createMinSize(1, 0, 1, n));
@@ -118,30 +117,30 @@ public class CLIJEigenvaluesTest {
 			CLIJView e1 = CLIJView.interval(resultBuffer, Intervals.createMinSize(0, 0, 1, n));
 			CLIJView e2 = CLIJView.interval(resultBuffer, Intervals.createMinSize(1, 0, 1, n));
 			CLIJView e3 = CLIJView.interval(resultBuffer, Intervals.createMinSize(2, 0, 1, n));
-			CLIJEigenvalues.symmetric3d(clij, yy, zero, zero, xx, zero, zz, e3, e2, e1);
-			RandomAccessibleInterval<FloatType> result = clij.pullRAI(resultBuffer);
+			CLIJEigenvalues.symmetric3d(gpu, yy, zero, zero, xx, zero, zz, e3, e2, e1);
+			RandomAccessibleInterval<FloatType> result = gpu.pullRAI(resultBuffer);
 			ImgLib2Assert.assertImageEqualsRealType(expected, result, 0);
 		}
 	}
 
 	private CLIJView image(float content) {
 		Img<FloatType> image = ArrayImgs.floats(new float[] { content }, 1, 1);
-		return CLIJView.wrap(clij.push(image));
+		return CLIJView.wrap(gpu.push(image));
 	}
 
 	private float getValue(CLIJView view) {
-		RandomAccessibleInterval<FloatType> rai = clij.pullRAI(view.buffer());
+		RandomAccessibleInterval<FloatType> rai = gpu.pullRAI(view.buffer());
 		return Views.interval(rai, view.interval()).firstElement().getRealFloat();
 	}
 
 	private float getValue(ClearCLBuffer buffer) {
-		RandomAccessibleInterval<FloatType> rai = clij.pullRAI(buffer);
+		RandomAccessibleInterval<FloatType> rai = gpu.pullRAI(buffer);
 		return Views.iterable(rai).firstElement().getRealFloat();
 	}
 
 	@After
 	public void after() {
 		autoClose.close();
-		clij.close();
+		gpu.close();
 	}
 }

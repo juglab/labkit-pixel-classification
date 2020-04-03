@@ -2,14 +2,14 @@
 package net.imglib2.trainable_segmention.clij_random_forest;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.util.Intervals;
 
 import java.util.HashMap;
 
 public class CLIJRandomForestKernel {
 
-	public static void randomForest(CLIJ2 clij,
+	public static void randomForest(GpuApi gpu,
 		CLIJMultiChannelImage distributions,
 		CLIJMultiChannelImage src,
 		ClearCLBuffer thresholds,
@@ -28,12 +28,11 @@ public class CLIJRandomForestKernel {
 		constants.put("NUMBER_OF_CLASSES", probabilities.getWidth());
 		constants.put("NUMBER_OF_FEATURES", numberOfFeatures);
 		constants.put("INDICES_SIZE", Intervals.numElements(indices.getDimensions()));
-		clij.execute(CLIJRandomForestKernel.class, "random_forest.cl", "random_forest", globalSizes,
-			globalSizes,
+		gpu.execute(CLIJRandomForestKernel.class, "random_forest.cl", "random_forest", globalSizes,
 			parameters, constants);
 	}
 
-	public static void findMax(CLIJ2 clij,
+	public static void findMax(GpuApi gpu,
 		CLIJMultiChannelImage distributions,
 		ClearCLBuffer dst)
 	{
@@ -42,7 +41,7 @@ public class CLIJRandomForestKernel {
 		parameters.put("dst", dst);
 		parameters.put("src", distributions.asClearCLBuffer());
 		parameters.put("num_classes", (int) distributions.getNChannels());
-		clij.execute(CLIJRandomForestKernel.class, "find_max.cl", "find_max", globalSizes, globalSizes,
-			parameters);
+		gpu.execute(CLIJRandomForestKernel.class, "find_max.cl", "find_max", globalSizes,
+			parameters, null);
 	}
 }

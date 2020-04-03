@@ -1,7 +1,7 @@
 
 package net.imglib2.trainable_segmention.clij_random_forest;
 
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
@@ -17,7 +17,7 @@ import org.junit.Test;
 
 public class CLIJFeatureInputTest {
 
-	private final CLIJ2 clij = CLIJ2.getInstance();
+	private final GpuApi gpu = GpuApi.getInstance();
 	private final double[] pixelSize = new double[] { 1, 1 };
 
 	@Test
@@ -25,9 +25,7 @@ public class CLIJFeatureInputTest {
 		RandomAccessibleInterval<FloatType> original = ArrayImgs.floats(new float[] { 1, 2, 3, 4 }, 4,
 			1);
 		FinalInterval interval = FinalInterval.createMinSize(1, 0, 2, 1);
-		try (CLIJFeatureInput featureInput = new CLIJFeatureInput(clij, original, interval,
-			pixelSize))
-		{
+		try (CLIJFeatureInput featureInput = new CLIJFeatureInput(gpu, original, interval, pixelSize)) {
 			featureInput.prefetchOriginal(interval);
 			RandomAccessibleInterval<FloatType> result = pull(featureInput.original(interval));
 			RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] { 2, 3 }, 2, 1);
@@ -41,7 +39,7 @@ public class CLIJFeatureInputTest {
 		double sigma = 2;
 		Interval targetInterval = FinalInterval.createMinSize(4, 0, 1, 1);
 		Interval interval = FinalInterval.createMinSize(3, 0, 1, 1);
-		try (CLIJFeatureInput featureInput = new CLIJFeatureInput(clij, original, targetInterval,
+		try (CLIJFeatureInput featureInput = new CLIJFeatureInput(gpu, original, targetInterval,
 			pixelSize))
 		{
 			featureInput.prefetchGauss(sigma, interval);
@@ -58,9 +56,7 @@ public class CLIJFeatureInputTest {
 			-10, 10, 10), (x, y) -> 4 * x + 1 * y);
 		int sigma = 1;
 		FinalInterval interval = new FinalInterval(1, 1);
-		try (CLIJFeatureInput featureInput = new CLIJFeatureInput(clij, original, interval,
-			pixelSize))
-		{
+		try (CLIJFeatureInput featureInput = new CLIJFeatureInput(gpu, original, interval, pixelSize)) {
 			featureInput.prefetchDerivative(sigma, 0, interval);
 			featureInput.prefetchDerivative(sigma, 1, interval);
 			RandomAccessibleInterval<FloatType> resultX = pull(featureInput.derivative(sigma, 0,
@@ -80,9 +76,7 @@ public class CLIJFeatureInputTest {
 			-10, 10, 10), (x, y) -> 4 * x * x + 1 * y * y + 3 * x * y);
 		int sigma = 1;
 		FinalInterval interval = new FinalInterval(1, 1);
-		try (CLIJFeatureInput featureInput = new CLIJFeatureInput(clij, original, interval,
-			pixelSize))
-		{
+		try (CLIJFeatureInput featureInput = new CLIJFeatureInput(gpu, original, interval, pixelSize)) {
 			featureInput.prefetchSecondDerivative(sigma, 0, 0, interval);
 			featureInput.prefetchSecondDerivative(sigma, 1, 1, interval);
 			featureInput.prefetchSecondDerivative(sigma, 0, 1, interval);
@@ -107,11 +101,11 @@ public class CLIJFeatureInputTest {
 	}
 
 	private RandomAccessibleInterval<FloatType> pull(CLIJView result) {
-		return Views.zeroMin(Views.interval(clij.pullRAI(result.buffer()), result.interval()));
+		return Views.zeroMin(Views.interval(gpu.pullRAI(result.buffer()), result.interval()));
 	}
 
 	@After
 	public void after() {
-		clij.close();
+		gpu.close();
 	}
 }

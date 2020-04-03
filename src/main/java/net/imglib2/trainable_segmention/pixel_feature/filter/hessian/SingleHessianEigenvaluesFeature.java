@@ -21,7 +21,6 @@ import preview.net.imglib2.loops.LoopBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -113,6 +112,6 @@ public class SingleHessianEigenvaluesFeature extends AbstractFeatureOp {
 			for (int d2 = d1; d2 < n; d2++)
 				derivatives.add(input.secondDerivative(sigma, d1, d2, interval));
 		List<CLIJView> eigenvalues = new ArrayList<>(output);
-		CLIJEigenvalues.symmetric(input.clij(), derivatives, eigenvalues);
+		CLIJEigenvalues.symmetric(input.gpuApi(), derivatives, eigenvalues);
 	}
 }

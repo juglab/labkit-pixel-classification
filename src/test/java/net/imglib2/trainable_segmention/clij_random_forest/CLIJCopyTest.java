@@ -3,7 +3,7 @@ package net.imglib2.trainable_segmention.clij_random_forest;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
@@ -18,27 +18,27 @@ import org.junit.Test;
  */
 public class CLIJCopyTest {
 
-	private CLIJ2 clij;
+	private GpuApi gpu;
 
 	@Before
 	public void before() {
-		clij = CLIJ2.getInstance();
+		gpu = GpuApi.getInstance();
 	}
 
 	@After
 	public void after() {
-		clij.close();
+		gpu.close();
 	}
 
 	@Test
 	public void testCopy() {
-		ClearCLBuffer source = clij.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 3,
+		ClearCLBuffer source = gpu.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 3,
 			3));
-		ClearCLBuffer destination = clij.create(new long[] { 3, 3 }, NativeTypeEnum.Float);
+		ClearCLBuffer destination = gpu.create(new long[] { 3, 3 }, NativeTypeEnum.Float);
 		CLIJView sourceView = CLIJView.interval(source, Intervals.createMinSize(0, 1, 2, 2));
 		CLIJView destinationView = CLIJView.interval(destination, Intervals.createMinSize(1, 0, 2, 2));
-		CLIJCopy.copy(clij, sourceView, destinationView);
-		RandomAccessibleInterval<FloatType> result = clij.pullRAI(destination);
+		CLIJCopy.copy(gpu, sourceView, destinationView);
+		RandomAccessibleInterval<FloatType> result = gpu.pullRAI(destination);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] { 0, 4, 5, 0, 7, 8,
 			0, 0, 0 }, 3, 3);
 		ImgLib2Assert.assertImageEquals(expected, result);
@@ -46,7 +46,7 @@ public class CLIJCopyTest {
 
 	@Test
 	public void testCopyToRai() {
-		ClearCLBuffer source = clij.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 3,
+		ClearCLBuffer source = gpu.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 3,
 			3));
 		RandomAccessibleInterval<FloatType> target = ArrayImgs.floats(3, 3);
 		CLIJCopy.copyToRai(source, target);

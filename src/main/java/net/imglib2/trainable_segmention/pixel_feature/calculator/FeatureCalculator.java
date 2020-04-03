@@ -1,7 +1,7 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
@@ -135,12 +135,12 @@ public class FeatureCalculator {
 			throw new IllegalArgumentException("Wrong dimension of the output interval.");
 		double[] pixelSize = settings.globals().pixelSizeAsDoubleArray();
 		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
-		CLIJ2 clij = CLIJ2.getInstance();
-		CLIJMultiChannelImage featureStack = new CLIJMultiChannelImage(clij, Intervals
+		GpuApi gpu = GpuApi.getInstance();
+		CLIJMultiChannelImage featureStack = new CLIJMultiChannelImage(gpu, Intervals
 			.dimensionsAsLongArray(interval), count());
 		List<List<CLIJView>> outputs = split(featureStack.channels(), channels.size());
 		for (int i = 0; i < channels.size(); i++) {
-			try (CLIJFeatureInput in = new CLIJFeatureInput(clij, channels.get(i), interval, pixelSize)) {
+			try (CLIJFeatureInput in = new CLIJFeatureInput(gpu, channels.get(i), interval, pixelSize)) {
 				joiner.prefetch(in);
 				joiner.apply(in, outputs.get(i));
 			}

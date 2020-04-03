@@ -3,7 +3,7 @@ package net.imglib2.trainable_segmention.clij_random_forest;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
@@ -18,16 +18,16 @@ import org.junit.Test;
 
 public class CLIJRandomForestKernelTest {
 
-	private static CLIJ2 clij;
+	private static GpuApi gpu;
 
 	@Before
 	public void before() {
-		clij = CLIJ2.getInstance();
+		gpu = GpuApi.getInstance();
 	}
 
 	@After
 	public void after() {
-		clij.close();
+		gpu.close();
 	}
 
 	@Test
@@ -40,8 +40,8 @@ public class CLIJRandomForestKernelTest {
 		int numberOfClasses = 2;
 		int numberOfNodes = 2;
 		int numberOfLeafs = 3;
-		CLIJMultiChannelImage distributions = new CLIJMultiChannelImage(clij, new long[] { width,
-			height, depth }, numberOfClasses);
+		CLIJMultiChannelImage distributions = new CLIJMultiChannelImage(gpu, new long[] { width, height,
+			depth }, numberOfClasses);
 		Img<FloatType> src = ArrayImgs.floats(new float[] {
 			41, 43, 45,
 			45, 43, 41
@@ -67,12 +67,12 @@ public class CLIJRandomForestKernelTest {
 			0, 0, 0
 		}, 3, numberOfNodes, numberOfTrees);
 
-		CLIJRandomForestKernel.randomForest(clij,
+		CLIJRandomForestKernel.randomForest(gpu,
 			distributions,
-			new CLIJMultiChannelImage(clij, src, numberOfFeatures),
-			clij.push(thresholds),
-			clij.push(probabilities),
-			clij.push(indices),
+			new CLIJMultiChannelImage(gpu, src, numberOfFeatures),
+			gpu.push(thresholds),
+			gpu.push(probabilities),
+			gpu.push(indices),
 			numberOfFeatures);
 
 		RandomAccessibleInterval<? extends RealType<?>> result = distributions.asRAI();
@@ -100,9 +100,9 @@ public class CLIJRandomForestKernelTest {
 			3, 1, 1, 3,
 			-3, -3, -2, -1
 		}, 2, 2, 6);
-		ClearCLBuffer outputBuffer = clij.create(new long[] { 2, 2, 2 }, NativeTypeEnum.UnsignedShort);
-		CLIJRandomForestKernel.findMax(clij, new CLIJMultiChannelImage(clij, input, 3), outputBuffer);
-		RandomAccessibleInterval<? extends RealType<?>> result = clij.pullRAI(outputBuffer);
+		ClearCLBuffer outputBuffer = gpu.create(new long[] { 2, 2, 2 }, NativeTypeEnum.UnsignedShort);
+		CLIJRandomForestKernel.findMax(gpu, new CLIJMultiChannelImage(gpu, input, 3), outputBuffer);
+		RandomAccessibleInterval<? extends RealType<?>> result = gpu.pullRAI(outputBuffer);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] {
 			2, 0, 1, 2,
 			0, 1, 1, 1
@@ -119,9 +119,9 @@ public class CLIJRandomForestKernelTest {
 			2, 2,
 			-2, -1,
 		}, 2, 4);
-		ClearCLBuffer outputBuffer = clij.create(new long[] { 2, 2 }, NativeTypeEnum.UnsignedShort);
-		CLIJRandomForestKernel.findMax(clij, new CLIJMultiChannelImage(clij, input, 2), outputBuffer);
-		RandomAccessibleInterval<? extends RealType<?>> result = clij.pullRAI(outputBuffer);
+		ClearCLBuffer outputBuffer = gpu.create(new long[] { 2, 2 }, NativeTypeEnum.UnsignedShort);
+		CLIJRandomForestKernel.findMax(gpu, new CLIJMultiChannelImage(gpu, input, 2), outputBuffer);
+		RandomAccessibleInterval<? extends RealType<?>> result = gpu.pullRAI(outputBuffer);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] {
 			1, 0,
 			0, 1

@@ -1,19 +1,18 @@
 
 package clij;
 
-import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 
 import java.util.List;
 
 public class CLIJEigenvalues {
 
-	public static void symmetric(CLIJ2 clij, List<CLIJView> matrix, List<CLIJView> eigenvalues) {
+	public static void symmetric(GpuApi gpu, List<CLIJView> matrix, List<CLIJView> eigenvalues) {
 		if (matrix.size() == 3 && eigenvalues.size() == 2)
-			symmetric2d(clij, matrix.get(0), matrix.get(1), matrix.get(2), eigenvalues.get(0), eigenvalues
+			symmetric2d(gpu, matrix.get(0), matrix.get(1), matrix.get(2), eigenvalues.get(0), eigenvalues
 				.get(1));
 		else if (matrix.size() == 6 && eigenvalues.size() == 3)
-			symmetric3d(clij, matrix.get(0), matrix.get(1), matrix.get(2), matrix.get(3), matrix.get(4),
+			symmetric3d(gpu, matrix.get(0), matrix.get(1), matrix.get(2), matrix.get(3), matrix.get(4),
 				matrix.get(5),
 				eigenvalues.get(0), eigenvalues.get(1), eigenvalues.get(2));
 		else
@@ -28,10 +27,10 @@ public class CLIJEigenvalues {
 	 * larger eigenvalue is written to eigenvalue1, and the smaller eigenvalue ist
 	 * written to eigenvalue2.
 	 */
-	public static void symmetric2d(CLIJ2 clij, CLIJView xx, CLIJView xy, CLIJView yy,
+	public static void symmetric2d(GpuApi gpu, CLIJView xx, CLIJView xy, CLIJView yy,
 		CLIJView eigenvalue1, CLIJView eigenvalue2)
 	{
-		CLIJLoopBuilder.clij(clij)
+		CLIJLoopBuilder.gpu(gpu)
 			.addInput("s_xx", xx)
 			.addInput("s_xy", xy)
 			.addInput("s_yy", yy)
@@ -50,11 +49,11 @@ public class CLIJEigenvalues {
 	 * eigenvalue is written to eigenvalue1, the middle eigenvalue is written to
 	 * eigenvalue2, and the smallest eigenvalue ist written to eigenvalue3.
 	 */
-	public static void symmetric3d(CLIJ2 clij, CLIJView xx, CLIJView xy, CLIJView xz, CLIJView yy,
+	public static void symmetric3d(GpuApi gpu, CLIJView xx, CLIJView xy, CLIJView xz, CLIJView yy,
 		CLIJView yz, CLIJView zz, CLIJView eigenvalue1, CLIJView eigenvalue2, CLIJView eigenvalue3)
 	{
 
-		CLIJLoopBuilder.clij(clij)
+		CLIJLoopBuilder.gpu(gpu)
 			.addInput("s_xx", xx)
 			.addInput("s_xy", xy)
 			.addInput("s_xz", xz)

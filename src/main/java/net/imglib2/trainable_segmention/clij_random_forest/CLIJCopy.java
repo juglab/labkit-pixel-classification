@@ -4,7 +4,7 @@ package net.imglib2.trainable_segmention.clij_random_forest;
 import clij.CLIJLoopBuilder;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.RealTypeConverters;
@@ -33,13 +33,12 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Optional;
 
 public class CLIJCopy {
 
-	public static void copy(CLIJ2 clij, CLIJView src, CLIJView dst) {
-		CLIJLoopBuilder.clij(clij).addInput("s", src).addOutput("d", dst).forEachPixel("d = s");
+	public static void copy(GpuApi gpu, CLIJView src, CLIJView dst) {
+		CLIJLoopBuilder.gpu(gpu).addInput("s", src).addOutput("d", dst).forEachPixel("d = s");
 	}
 
 	private static int min(CLIJView view, int d) {

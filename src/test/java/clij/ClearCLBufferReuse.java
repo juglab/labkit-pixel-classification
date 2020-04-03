@@ -2,7 +2,8 @@
 package clij;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij2.CLIJ2;
+import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
+import clij.GpuApi;
 
 import java.util.Arrays;
 import java.util.Deque;
@@ -12,12 +13,12 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 class ClearCLBufferReuse implements AutoCloseable {
 
-	private final CLIJ2 clij;
+	private final GpuApi gpu;
 
 	private final Map<Shape, Deque<ClearCLBuffer>> unused = new ConcurrentHashMap<>();
 
-	ClearCLBufferReuse(CLIJ2 clij) {
-		this.clij = clij;
+	ClearCLBufferReuse(GpuApi gpu) {
+		this.gpu = gpu;
 	}
 
 	public ClearCLBuffer create(long... dimensions) {
@@ -28,7 +29,7 @@ class ClearCLBufferReuse implements AutoCloseable {
 			if (buffer != null)
 				return buffer;
 		}
-		return clij.create(dimensions);
+		return gpu.create(dimensions, NativeTypeEnum.Float);
 	}
 
 	public void giveBack(ClearCLBuffer buffer) {

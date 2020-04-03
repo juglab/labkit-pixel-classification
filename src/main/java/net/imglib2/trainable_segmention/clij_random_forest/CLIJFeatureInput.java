@@ -1,8 +1,7 @@
 
 package net.imglib2.trainable_segmention.clij_random_forest;
 
-import net.haesleinhuepf.clij2.CLIJ2;
-import net.imglib2.FinalInterval;
+import clij.GpuApi;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.trainable_segmention.clij_random_forest.compute_cache.ComputeCache;
@@ -14,17 +13,17 @@ import net.imglib2.type.numeric.real.FloatType;
 
 public class CLIJFeatureInput implements AutoCloseable {
 
-	private final CLIJ2 clij;
+	private final GpuApi gpu;
 	private final Interval targetInterval;
 
 	private final ComputeCache cache;
 
-	public CLIJFeatureInput(CLIJ2 clij, RandomAccessible<FloatType> original, Interval targetInterval,
+	public CLIJFeatureInput(GpuApi gpu, RandomAccessible<FloatType> original, Interval targetInterval,
 		double[] pixelSize)
 	{
-		this.clij = clij;
+		this.gpu = gpu;
 		this.targetInterval = targetInterval;
-		this.cache = new ComputeCache(clij, original, pixelSize);
+		this.cache = new ComputeCache(gpu, original, pixelSize);
 	}
 
 	public void prefetchOriginal(Interval interval) {
@@ -85,7 +84,7 @@ public class CLIJFeatureInput implements AutoCloseable {
 		return targetInterval;
 	}
 
-	public CLIJ2 clij() {
-		return clij;
+	public GpuApi gpuApi() {
+		return gpu;
 	}
 }

@@ -48,6 +48,6 @@ public class SingleGaussianBlurFeature extends AbstractFeatureOp {
 
 	@Override
 	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
-		CLIJCopy.copy(input.clij(), input.gauss(sigma, input.targetInterval()), output.get(0));
+		CLIJCopy.copy(input.gpuApi(), input.gauss(sigma, input.targetInterval()), output.get(0));
 	}
 }

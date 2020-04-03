@@ -2,7 +2,7 @@
 package net.imglib2.trainable_segmention.pixel_feature.filter.gradient;
 
 import clij.CLIJLoopBuilder;
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
@@ -91,8 +91,8 @@ public class SingleGaussianGradientMagnitudeFeature extends AbstractFeatureOp {
 	@Override
 	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
 		boolean is3d = globalSettings().numDimensions() == 3;
-		CLIJ2 clij = input.clij();
-		CLIJLoopBuilder loopBuilder = CLIJLoopBuilder.clij(clij);
+		GpuApi gpu = input.gpuApi();
+		CLIJLoopBuilder loopBuilder = CLIJLoopBuilder.gpu(gpu);
 		loopBuilder.addInput("dx", input.derivative(sigma, 0, input.targetInterval()));
 		loopBuilder.addInput("dy", input.derivative(sigma, 1, input.targetInterval()));
 		if (is3d)

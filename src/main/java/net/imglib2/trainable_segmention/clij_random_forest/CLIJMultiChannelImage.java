@@ -3,7 +3,7 @@ package net.imglib2.trainable_segmention.clij_random_forest;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.RealTypeConverters;
@@ -24,27 +24,29 @@ import static net.imglib2.FinalInterval.createMinSize;
 
 public class CLIJMultiChannelImage implements AutoCloseable {
 
-	private final CLIJ2 clij;
+	private final GpuApi gpu;
 	private final long numChannels;
 	private final long[] spatialDimensions;
 	private final ClearCLBuffer buffer;
 
-	public CLIJMultiChannelImage(CLIJ2 clij, long[] spatialDimensions, long numChannels) {
+	public CLIJMultiChannelImage(GpuApi gpu, long[] spatialDimensions, long numChannels) {
 		assert spatialDimensions.length >= 2 && spatialDimensions.length <= 3;
-		this.clij = clij;
+		this.gpu = gpu;
 		this.spatialDimensions = spatialDimensions;
 		this.numChannels = numChannels;
 		long[] size = spatialDimensions.clone();
 		size[size.length - 1] = size[size.length - 1] * numChannels;
-		this.buffer = clij.create(size, NativeTypeEnum.Float);
+		this.buffer = gpu.create(size, NativeTypeEnum.Float);
 	}
 
-	public CLIJMultiChannelImage(CLIJ2 clij, RandomAccessibleInterval<?> input, long numChannels) {
-		this.clij = clij;
+	public CLIJMultiChannelImage(GpuApi gpu, RandomAccessibleInterval<? extends RealType<?>> input,
+		long numChannels)
+	{
+		this.gpu = gpu;
 		this.spatialDimensions = Intervals.dimensionsAsLongArray(input);
 		spatialDimensions[spatialDimensions.length - 1] /= numChannels;
 		this.numChannels = numChannels;
-		this.buffer = clij.push(input);
+		this.buffer = gpu.push(input);
 	}
 
 	public List<CLIJView> channels() {
@@ -53,7 +55,7 @@ public class CLIJMultiChannelImage implements AutoCloseable {
 	}
 
 	public RandomAccessibleInterval<FloatType> asRAI() {
-		RandomAccessibleInterval<FloatType> rai = clij.pullRAI(buffer);
+		RandomAccessibleInterval<FloatType> rai = gpu.pullRAI(buffer);
 		List<RandomAccessibleInterval<FloatType>> slices = channelIntervals().stream()
 			.map(i -> Views.zeroMin(Views.interval(rai, i)))
 			.collect(Collectors.toList());

@@ -2,7 +2,7 @@
 package net.imglib2.trainable_segmention.clij_random_forest.compute_cache;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.numeric.real.FloatType;
@@ -34,10 +34,10 @@ public class OriginalContent implements ComputeCache.Content {
 
 	@Override
 	public ClearCLBuffer load(Interval interval) {
-		CLIJ2 clij = cache.clij();
+		GpuApi gpu = cache.gpuApi();
 		RandomAccessible<FloatType> original = cache.original();
 		StopWatch watch = StopWatch.createAndStart();
-		ClearCLBuffer push = clij.push(Views.interval(original, interval));
+		ClearCLBuffer push = gpu.push(Views.interval(original, interval));
 		System.out.println("Time copying: " + watch);
 		return push;
 	}

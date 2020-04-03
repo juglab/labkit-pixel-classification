@@ -5,7 +5,7 @@ import clij.CLIJEigenvalues;
 import clij.CLIJLoopBuilder;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -23,7 +23,6 @@ import preview.net.imglib2.algorithm.convolution.Convolution;
 import preview.net.imglib2.algorithm.convolution.kernel.Kernel1D;
 import preview.net.imglib2.algorithm.convolution.kernel.SeparableKernelConvolution;
 import preview.net.imglib2.algorithm.gauss3.Gauss3;
-import net.imglib2.img.Img;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
@@ -196,11 +195,11 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 			.toArray();
 		List<CLIJView> derivatives = derivatives(input, border);
 		try (
-			CLIJMultiChannelImage products = products(input.clij(), derivatives);
-			CLIJMultiChannelImage blurredProducts = blur(input.clij(), products.channels(),
+			CLIJMultiChannelImage products = products(input.gpuApi(), derivatives);
+			CLIJMultiChannelImage blurredProducts = blur(input.gpuApi(), products.channels(),
 				integrationSigma, border);)
 		{
-			CLIJEigenvalues.symmetric(input.clij(), blurredProducts.channels(), output);
+			CLIJEigenvalues.symmetric(input.gpuApi(), blurredProducts.channels(), output);
 		}
 	}
 
@@ -215,15 +214,15 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 		return derivatives;
 	}
 
-	private CLIJMultiChannelImage products(CLIJ2 clij, List<CLIJView> derivatives) {
+	private CLIJMultiChannelImage products(GpuApi gpu, List<CLIJView> derivatives) {
 		int n = derivatives.size();
 		int numProducts = n * (n + 1) / 2;
 		long[] dimensions = Intervals.dimensionsAsLongArray(derivatives.get(0).interval());
-		CLIJLoopBuilder loopBuilder = CLIJLoopBuilder.clij(clij);
+		CLIJLoopBuilder loopBuilder = CLIJLoopBuilder.gpu(gpu);
 		StringJoiner operation = new StringJoiner("; ");
 		for (int i = 0; i < derivatives.size(); i++)
 			loopBuilder.addInput("derivative" + i, derivatives.get(i));
-		CLIJMultiChannelImage products = new CLIJMultiChannelImage(clij, dimensions, numProducts);
+		CLIJMultiChannelImage products = new CLIJMultiChannelImage(gpu, dimensions, numProducts);
 		Iterator<CLIJView> iterator = products.channels().iterator();
 		for (int i = 0; i < derivatives.size(); i++)
 			for (int j = i; j < derivatives.size(); j++) {
@@ -234,28 +233,28 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 		return products;
 	}
 
-	private CLIJMultiChannelImage blur(CLIJ2 clij, List<CLIJView> products, double[] integrationSigma,
+	private CLIJMultiChannelImage blur(GpuApi gpu, List<CLIJView> products, double[] integrationSigma,
 		long[] border)
 	{
 		long[] dimensions = Intervals.dimensionsAsLongArray(products.get(0).interval());
 		try (
-			ClearCLBuffer tmpInput = clij.create(dimensions, NativeTypeEnum.Float);
-			ClearCLBuffer tmpOutput = clij.create(dimensions, NativeTypeEnum.Float);)
+			ClearCLBuffer tmpInput = gpu.create(dimensions, NativeTypeEnum.Float);
+			ClearCLBuffer tmpOutput = gpu.create(dimensions, NativeTypeEnum.Float);)
 		{
 			long[] outputDimensions = shrink(dimensions, border);
-			CLIJMultiChannelImage blurred = new CLIJMultiChannelImage(clij, outputDimensions, products
+			CLIJMultiChannelImage blurred = new CLIJMultiChannelImage(gpu, outputDimensions, products
 				.size());
 			List<CLIJView> blurredChannels = blurred.channels();
 			for (int i = 0; i < products.size(); i++) {
 				CLIJView input = products.get(i);
 				CLIJView output = blurredChannels.get(i);
-				CLIJCopy.copy(clij, input, CLIJView.wrap(tmpInput));
+				CLIJCopy.copy(gpu, input, CLIJView.wrap(tmpInput));
 				if (integrationSigma.length == 3)
-					clij.gaussianBlur(tmpInput, tmpOutput, integrationSigma[0], integrationSigma[1],
+					gpu.gaussianBlur(tmpInput, tmpOutput, integrationSigma[0], integrationSigma[1],
 						integrationSigma[2]);
 				else
-					clij.gaussianBlur(tmpInput, tmpOutput, integrationSigma[0], integrationSigma[1]);
-				CLIJCopy.copy(clij, CLIJView.shrink(tmpOutput, border), output);
+					gpu.gaussianBlur(tmpInput, tmpOutput, integrationSigma[0], integrationSigma[1]);
+				CLIJCopy.copy(gpu, CLIJView.shrink(tmpOutput, border), output);
 			}
 			return blurred;
 		}

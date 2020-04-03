@@ -2,7 +2,7 @@
 package net.imglib2.trainable_segmention.clij_random_forest.compute_cache;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
@@ -19,12 +19,12 @@ public class ComputeCache implements AutoCloseable {
 
 	private final AutoClose autoClose = new AutoClose();
 	private final Map<Content, CacheEntry> map = new HashMap<>();
-	private final CLIJ2 clij;
+	private final GpuApi gpu;
 	private final RandomAccessible<FloatType> original;
 	private final double[] pixelSize;
 
-	public ComputeCache(CLIJ2 clij, RandomAccessible<FloatType> original, double[] pixelSize) {
-		this.clij = clij;
+	public ComputeCache(GpuApi gpu, RandomAccessible<FloatType> original, double[] pixelSize) {
+		this.gpu = gpu;
 		this.original = original;
 		this.pixelSize = pixelSize;
 	}
@@ -34,8 +34,8 @@ public class ComputeCache implements AutoCloseable {
 		cacheEntry.request(interval);
 	}
 
-	public CLIJ2 clij() {
-		return clij;
+	public GpuApi gpuApi() {
+		return gpu;
 	}
 
 	public RandomAccessible<FloatType> original() {

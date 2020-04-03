@@ -2,7 +2,6 @@
 package clij;
 
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
@@ -24,7 +23,7 @@ public class ConcatenatedNeighborhoodOperationTest {
 
 	@Test
 	public void test() {
-		CLIJ2 clij = CLIJ2.getInstance();
+		GpuApi gpu = GpuApi.getInstance();
 		Img<FloatType> dirac = ArrayImgs.floats(new float[] {
 			0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0,
@@ -32,20 +31,20 @@ public class ConcatenatedNeighborhoodOperationTest {
 			0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0
 		}, 5, 5);
-		CLIJView input = CLIJView.wrap(clij.push(dirac));
-		CLIJView output = CLIJView.wrap(clij.create(new long[] { 3, 3 }, NativeTypeEnum.Float));
-		CLIJKernelConvolution a = new CLIJKernelConvolution(clij, Kernel1D.centralAsymmetric(1, 0, -1),
+		CLIJView input = CLIJView.wrap(gpu.push(dirac));
+		CLIJView output = CLIJView.wrap(gpu.create(new long[] { 3, 3 }, NativeTypeEnum.Float));
+		CLIJKernelConvolution a = new CLIJKernelConvolution(gpu, Kernel1D.centralAsymmetric(1, 0, -1),
 			0);
-		CLIJKernelConvolution b = new CLIJKernelConvolution(clij, Kernel1D.centralAsymmetric(1, 2, 1),
+		CLIJKernelConvolution b = new CLIJKernelConvolution(gpu, Kernel1D.centralAsymmetric(1, 2, 1),
 			1);
-		ConcatenatedNeighborhoodOperation concatenation = new ConcatenatedNeighborhoodOperation(clij,
+		ConcatenatedNeighborhoodOperation concatenation = new ConcatenatedNeighborhoodOperation(gpu,
 			Arrays.asList(a, b));
 		Interval inputInterval = concatenation.getRequiredInputInterval(Intervals.createMinMax(-1, -1,
 			1, 1));
 		Interval expectedInterval = Intervals.createMinMax(-2, -2, 2, 2);
 		ImgLib2Assert.assertIntervalEquals(expectedInterval, inputInterval);
 		concatenation.convolve(input, output);
-		RandomAccessibleInterval<FloatType> rai = clij.pullRAI(output.buffer());
+		RandomAccessibleInterval<FloatType> rai = gpu.pullRAI(output.buffer());
 		ToString.print(rai);
 	}
 }

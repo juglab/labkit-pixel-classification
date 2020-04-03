@@ -3,7 +3,8 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.stats;
 
 import clij.CLIJLoopBuilder;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
+import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -150,75 +151,75 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 
 	@Override
 	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
-		CLIJ2 clij = input.clij();
+		GpuApi gpu = input.gpuApi();
 		long[] border = globalSettings().pixelSize().stream().mapToLong(pixelSize -> (long) (radius /
 			pixelSize)).toArray();
 		Iterator<CLIJView> iterator = output.iterator();
 		Interval interval = input.targetInterval();
 		CLIJView original = input.original(Intervals.expand(interval, border));
 		try (
-			ClearCLBuffer inputBuffer = copyView(clij, original);
-			ClearCLBuffer tmp = clij.create(inputBuffer);)
+			ClearCLBuffer inputBuffer = copyView(gpu, original);
+			ClearCLBuffer tmp = gpu.create(inputBuffer.getDimensions(), NativeTypeEnum.Float);)
 		{
 			if (min) {
-				min(clij, inputBuffer, tmp, border);
-				CLIJCopy.copy(clij, CLIJView.shrink(tmp, border), iterator.next());
+				min(gpu, inputBuffer, tmp, border);
+				CLIJCopy.copy(gpu, CLIJView.shrink(tmp, border), iterator.next());
 			}
 			if (max) {
-				max(clij, inputBuffer, tmp, border);
-				CLIJCopy.copy(clij, CLIJView.shrink(tmp, border), iterator.next());
+				max(gpu, inputBuffer, tmp, border);
+				CLIJCopy.copy(gpu, CLIJView.shrink(tmp, border), iterator.next());
 			}
-			calculateMeanAndVariance(clij, border, iterator, inputBuffer, tmp);
+			calculateMeanAndVariance(gpu, border, iterator, inputBuffer, tmp);
 		}
 	}
 
-	private void min(CLIJ2 clij, ClearCLBuffer inputBuffer, ClearCLBuffer tmp, long[] border) {
+	private void min(GpuApi gpu, ClearCLBuffer inputBuffer, ClearCLBuffer tmp, long[] border) {
 		if (border.length == 2)
-			clij.minimum2DBox(inputBuffer, tmp, border[0], border[1]);
+			gpu.minimum2DBox(inputBuffer, tmp, border[0], border[1]);
 		else
-			clij.minimum3DBox(inputBuffer, tmp, border[0], border[1], border[2]);
+			gpu.minimum3DBox(inputBuffer, tmp, border[0], border[1], border[2]);
 	}
 
-	private void max(CLIJ2 clij, ClearCLBuffer input, ClearCLBuffer output, long[] border) {
+	private void max(GpuApi gpu, ClearCLBuffer input, ClearCLBuffer output, long[] border) {
 		if (border.length == 2)
-			clij.maximum2DBox(input, output, border[0], border[1]);
+			gpu.maximum2DBox(input, output, border[0], border[1]);
 		else
-			clij.maximum3DBox(input, output, border[0], border[1], border[2]);
+			gpu.maximum3DBox(input, output, border[0], border[1], border[2]);
 	}
 
-	private void calculateMeanAndVariance(CLIJ2 clij, long[] border, Iterator<CLIJView> iterator,
+	private void calculateMeanAndVariance(GpuApi gpu, long[] border, Iterator<CLIJView> iterator,
 		ClearCLBuffer inputBuffer, ClearCLBuffer tmp)
 	{
 		if (!mean && !variance)
 			return;
-		calculateMean(clij, inputBuffer, tmp, border);
+		calculateMean(gpu, inputBuffer, tmp, border);
 		if (mean)
-			CLIJCopy.copy(clij, CLIJView.shrink(tmp, border), iterator.next());
+			CLIJCopy.copy(gpu, CLIJView.shrink(tmp, border), iterator.next());
 		if (variance)
-			calculateVariance(clij, border, inputBuffer, tmp, iterator.next());
+			calculateVariance(gpu, border, inputBuffer, tmp, iterator.next());
 	}
 
-	private void calculateMean(CLIJ2 clij, ClearCLBuffer input, ClearCLBuffer output, long[] border) {
+	private void calculateMean(GpuApi gpu, ClearCLBuffer input, ClearCLBuffer output, long[] border) {
 		if (border.length == 2)
-			clij.mean2DBox(input, output, border[0], border[1]);
+			gpu.mean2DBox(input, output, border[0], border[1]);
 		else
-			clij.mean3DBox(input, output, border[0], border[1], border[2]);
+			gpu.mean3DBox(input, output, border[0], border[1], border[2]);
 	}
 
-	private void calculateVariance(CLIJ2 clij, long[] border, ClearCLBuffer input, ClearCLBuffer mean,
+	private void calculateVariance(GpuApi gpu, long[] border, ClearCLBuffer input, ClearCLBuffer mean,
 		CLIJView variance)
 	{
 		try (
-			ClearCLBuffer squared = clij.create(input);
-			ClearCLBuffer meanOfSquared = clij.create(input);)
+			ClearCLBuffer squared = gpu.create(input.getDimensions(), NativeTypeEnum.Float);
+			ClearCLBuffer meanOfSquared = gpu.create(input.getDimensions(), NativeTypeEnum.Float);)
 		{
-			square(clij, input, squared);
-			calculateMean(clij, squared, meanOfSquared, border);
+			square(gpu, input, squared);
+			calculateMean(gpu, squared, meanOfSquared, border);
 			long n = LongStream.of(border).map(b -> 2 * b + 1).reduce(1, (a, b) -> a * b);
 			if (n == 1)
-				CLIJLoopBuilder.clij(clij).addOutput("variance", variance).forEachPixel("variance = 0");
+				CLIJLoopBuilder.gpu(gpu).addOutput("variance", variance).forEachPixel("variance = 0");
 			else {
-				CLIJLoopBuilder.clij(clij)
+				CLIJLoopBuilder.gpu(gpu)
 					.addInput("mean", CLIJView.shrink(mean, border))
 					.addInput("mean_of_squared", CLIJView.shrink(meanOfSquared, border))
 					.addInput("factor", (float) n / (n - 1))
@@ -228,14 +229,15 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 		}
 	}
 
-	private void square(CLIJ2 clij, ClearCLBuffer inputBuffer, ClearCLBuffer tmp2) {
-		CLIJLoopBuilder.clij(clij).addInput("a", inputBuffer).addOutput("b", tmp2)
+	private void square(GpuApi gpu, ClearCLBuffer inputBuffer, ClearCLBuffer tmp2) {
+		CLIJLoopBuilder.gpu(gpu).addInput("a", inputBuffer).addOutput("b", tmp2)
 			.forEachPixel("b = a * a");
 	}
 
-	private ClearCLBuffer copyView(CLIJ2 clij, CLIJView inputClBuffer) {
-		ClearCLBuffer buffer = clij.create(Intervals.dimensionsAsLongArray(inputClBuffer.interval()));
-		CLIJCopy.copy(clij, inputClBuffer, CLIJView.wrap(buffer));
+	private ClearCLBuffer copyView(GpuApi gpu, CLIJView inputClBuffer) {
+		ClearCLBuffer buffer = gpu.create(Intervals.dimensionsAsLongArray(inputClBuffer.interval()),
+			NativeTypeEnum.Float);
+		CLIJCopy.copy(gpu, inputClBuffer, CLIJView.wrap(buffer));
 		return buffer;
 	}
 }

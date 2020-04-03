@@ -2,7 +2,6 @@
 package clij;
 
 import ij.ImagePlus;
-import net.haesleinhuepf.clij2.CLIJ2;
 import net.imagej.ImgPlus;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
@@ -20,16 +19,16 @@ import org.junit.Test;
 
 public class CLIJFeatureCalculatorTest {
 
-	private CLIJ2 clij;
+	private GpuApi gpu;
 
 	@Before
 	public void before() {
-		clij = CLIJ2.getInstance();
+		gpu = GpuApi.getInstance();
 	}
 
 	@After
 	public void after() {
-		clij.clear();
+		gpu.close();
 	}
 
 	private ImgPlus<FloatType> input = VirtualStackAdapter.wrapFloat(

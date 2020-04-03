@@ -2,7 +2,7 @@
 package net.imglib2.trainable_segmention.pixel_feature.filter.dog2;
 
 import clij.CLIJLoopBuilder;
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
@@ -67,11 +67,11 @@ public class SingleDifferenceOfGaussiansFeature extends AbstractFeatureOp {
 	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
 		CLIJView gauss1 = input.gauss(sigma1, input.targetInterval());
 		CLIJView gauss2 = input.gauss(sigma2, input.targetInterval());
-		subtract(input.clij(), gauss1, gauss2, output.get(0));
+		subtract(input.gpuApi(), gauss1, gauss2, output.get(0));
 	}
 
-	private void subtract(CLIJ2 clij, CLIJView minuend, CLIJView subtrahend, CLIJView result) {
-		CLIJLoopBuilder.clij(clij)
+	private void subtract(GpuApi gpu, CLIJView minuend, CLIJView subtrahend, CLIJView result) {
+		CLIJLoopBuilder.gpu(gpu)
 			.addInput("a", minuend)
 			.addInput("b", subtrahend)
 			.addOutput("r", result)

@@ -1,8 +1,6 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.identity;
 
-import net.imglib2.Interval;
-import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
@@ -11,7 +9,6 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import org.scijava.plugin.Plugin;
 import preview.net.imglib2.loops.LoopBuilder;
@@ -46,7 +43,7 @@ public class IdendityFeature extends AbstractFeatureOp {
 	@Override
 	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
 		CLIJView in = input.original(input.targetInterval());
-		CLIJCopy.copy(input.clij(), in, output.get(0));
+		CLIJCopy.copy(input.gpuApi(), in, output.get(0));
 	}
 
 	@Override

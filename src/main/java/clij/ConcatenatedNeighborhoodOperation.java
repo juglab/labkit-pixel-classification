@@ -3,7 +3,6 @@ package clij;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.Interval;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
 import net.imglib2.trainable_segmention.utils.AutoClose;
@@ -15,12 +14,12 @@ import java.util.List;
 
 public class ConcatenatedNeighborhoodOperation implements NeighborhoodOperation {
 
-	private final CLIJ2 clij;
+	private final GpuApi gpu;
 
 	private final List<CLIJKernelConvolution> convolutions;
 
-	public ConcatenatedNeighborhoodOperation(CLIJ2 clij, List<CLIJKernelConvolution> convolutions) {
-		this.clij = clij;
+	public ConcatenatedNeighborhoodOperation(GpuApi gpu, List<CLIJKernelConvolution> convolutions) {
+		this.gpu = gpu;
 		this.convolutions = convolutions;
 	}
 
@@ -40,7 +39,7 @@ public class ConcatenatedNeighborhoodOperation implements NeighborhoodOperation 
 			buffers.add(input);
 			for (int i = 1; i < n; i++) {
 				long[] dimensions = Intervals.dimensionsAsLongArray(intervals.get(i));
-				ClearCLBuffer buffer = clij.create(dimensions, NativeTypeEnum.Float);
+				ClearCLBuffer buffer = gpu.create(dimensions, NativeTypeEnum.Float);
 				buffers.add(CLIJView.wrap(buffer));
 				autoClose.add(buffer);
 			}

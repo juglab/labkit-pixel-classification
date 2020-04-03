@@ -4,7 +4,7 @@ package net.imglib2.trainable_segmention.clij_random_forest.compute_cache;
 import clij.CLIJLoopBuilder;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.haesleinhuepf.clij2.CLIJ2;
+import clij.GpuApi;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
@@ -55,15 +55,15 @@ public class DerivativeContent implements ComputeCache.Content {
 
 	@Override
 	public ClearCLBuffer load(Interval interval) {
-		CLIJ2 clij = cache.clij();
+		GpuApi gpu = cache.gpuApi();
 		double[] pixelSize = cache.pixelSize();
 		CLIJView source = cache.get(input, requiredInput(interval));
 		Interval center = shrink(source.interval());
 		CLIJView front = CLIJView.interval(source.buffer(), Intervals.translate(center, 1, d));
 		CLIJView back = CLIJView.interval(source.buffer(), Intervals.translate(center, -1, d));
-		ClearCLBuffer result = clij.create(Intervals.dimensionsAsLongArray(center),
+		ClearCLBuffer result = gpu.create(Intervals.dimensionsAsLongArray(center),
 			NativeTypeEnum.Float);
-		CLIJLoopBuilder.clij(clij)
+		CLIJLoopBuilder.gpu(gpu)
 			.addInput("f", front)
 			.addInput("b", back)
 			.addInput("factor", 0.5 / pixelSize[d])
