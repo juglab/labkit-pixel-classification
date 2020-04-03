@@ -55,16 +55,6 @@ public class GpuApi implements AutoCloseable {
 		execute(anchorClass, kernelFile, kernelName, globalSizes, null, parameters, constants);
 	}
 
-	public void gaussianBlur(ClearCLBuffer input, ClearCLBuffer output, double sX, double sY,
-		double sZ)
-	{
-		clij.gaussianBlur(input, output, sX, sY, sZ);
-	}
-
-	public void gaussianBlur(ClearCLBuffer input, ClearCLBuffer output, double sX, double sY) {
-		clij.gaussianBlur(input, output, sX, sY);
-	}
-
 	public void minimum2DBox(ClearCLBuffer inputBuffer, ClearCLBuffer tmp, long l, long l1) {
 		clij.minimum2DBox(inputBuffer, tmp, l, l1);
 	}
@@ -89,6 +79,7 @@ public class GpuApi implements AutoCloseable {
 		clij.mean3DBox(inputBuffer, tmp, l, l1, l2);
 	}
 
+	@Deprecated
 	public void gaussianBlur3D(ClearCLBuffer inputBuffer, ClearCLBuffer output, int i, int i1,
 		int i2)
 	{

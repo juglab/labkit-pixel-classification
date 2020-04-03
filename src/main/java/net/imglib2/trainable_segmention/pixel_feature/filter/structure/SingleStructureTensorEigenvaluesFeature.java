@@ -3,14 +3,13 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.structure;
 
 import clij.CLIJEigenvalues;
 import clij.CLIJLoopBuilder;
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
+import clij.Gauss;
+import clij.NeighborhoodOperation;
 import clij.GpuApi;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.linalg.eigen.EigenValues;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJMultiChannelImage;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
@@ -191,22 +190,21 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
 		double[] integrationSigma = globalSettings().pixelSize().stream().mapToDouble(
 			p -> integrationScale / p).toArray();
-		long[] border = DoubleStream.of(integrationSigma).mapToLong(sigma -> (long) (4 * sigma))
-			.toArray();
+		NeighborhoodOperation integrationGauss = Gauss.gauss(input.gpuApi(), integrationSigma);
+		Interval border = integrationGauss.getRequiredInputInterval(input.targetInterval());
 		List<CLIJView> derivatives = derivatives(input, border);
 		try (
 			CLIJMultiChannelImage products = products(input.gpuApi(), derivatives);
 			CLIJMultiChannelImage blurredProducts = blur(input.gpuApi(), products.channels(),
-				integrationSigma, border);)
+				integrationGauss, input.targetInterval());)
 		{
 			CLIJEigenvalues.symmetric(input.gpuApi(), blurredProducts.channels(), output);
 		}
 	}
 
-	private List<CLIJView> derivatives(CLIJFeatureInput input, long[] border) {
+	private List<CLIJView> derivatives(CLIJFeatureInput input, Interval derivativeInterval) {
 		double[] gaussSigma = globalSettings().pixelSize().stream().mapToDouble(p -> sigma / p)
 			.toArray();
-		Interval derivativeInterval = Intervals.expand(input.targetInterval(), border);
 		int n = globalSettings().numDimensions();
 		List<CLIJView> derivatives = new ArrayList<>(3);
 		for (int d = 0; d < n; d++)
@@ -233,37 +231,15 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 		return products;
 	}
 
-	private CLIJMultiChannelImage blur(GpuApi gpu, List<CLIJView> products, double[] integrationSigma,
-		long[] border)
+	private CLIJMultiChannelImage blur(GpuApi gpu, List<CLIJView> products,
+		NeighborhoodOperation integrationGauss, Interval targertInteval)
 	{
-		long[] dimensions = Intervals.dimensionsAsLongArray(products.get(0).interval());
-		try (
-			ClearCLBuffer tmpInput = gpu.create(dimensions, NativeTypeEnum.Float);
-			ClearCLBuffer tmpOutput = gpu.create(dimensions, NativeTypeEnum.Float);)
-		{
-			long[] outputDimensions = shrink(dimensions, border);
-			CLIJMultiChannelImage blurred = new CLIJMultiChannelImage(gpu, outputDimensions, products
-				.size());
-			List<CLIJView> blurredChannels = blurred.channels();
-			for (int i = 0; i < products.size(); i++) {
-				CLIJView input = products.get(i);
-				CLIJView output = blurredChannels.get(i);
-				CLIJCopy.copy(gpu, input, CLIJView.wrap(tmpInput));
-				if (integrationSigma.length == 3)
-					gpu.gaussianBlur(tmpInput, tmpOutput, integrationSigma[0], integrationSigma[1],
-						integrationSigma[2]);
-				else
-					gpu.gaussianBlur(tmpInput, tmpOutput, integrationSigma[0], integrationSigma[1]);
-				CLIJCopy.copy(gpu, CLIJView.shrink(tmpOutput, border), output);
-			}
-			return blurred;
+		long[] dimensions = Intervals.dimensionsAsLongArray(targertInteval);
+		CLIJMultiChannelImage blurred = new CLIJMultiChannelImage(gpu, dimensions, products.size());
+		List<CLIJView> blurredChannels = blurred.channels();
+		for (int i = 0; i < products.size(); i++) {
+			integrationGauss.convolve(products.get(i), blurredChannels.get(i));
 		}
-	}
-
-	private long[] shrink(long[] dimensions, long[] border) {
-		long[] result = new long[dimensions.length];
-		for (int i = 0; i < result.length; i++)
-			result[i] = dimensions[i] - 2 * border[i];
-		return result;
+		return blurred;
 	}
 }
