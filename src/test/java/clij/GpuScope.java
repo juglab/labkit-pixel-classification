@@ -1,24 +1,27 @@
 
 package clij;
 
+import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
+
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * All {@link GpuImage} created with this scope are automatically given back if
- * the scope is closed.
+ * All {@link GpuImage} created with this scope are automatically closed when
+ * this scope is closed.
  */
-public class ReuseScope implements AutoCloseable {
+public class GpuScope implements AutoCloseable {
 
-	private final ClearCLBufferReuse reuse;
+	private final GpuApi gpu;
+
 	private final Queue<GpuImage> queue = new ConcurrentLinkedQueue<>();
 
-	public ReuseScope(ClearCLBufferReuse reuse) {
-		this.reuse = reuse;
+	public GpuScope(GpuApi gpu) {
+		this.gpu = gpu;
 	}
 
 	public GpuImage create(long... dimensions) {
-		return add(reuse.create(dimensions));
+		return add(gpu.create(dimensions, NativeTypeEnum.Float));
 	}
 
 	GpuImage add(GpuImage buffer) {
@@ -32,7 +35,7 @@ public class ReuseScope implements AutoCloseable {
 			GpuImage buffer = queue.poll();
 			if (buffer == null)
 				break;
-			reuse.giveBack(buffer);
+			buffer.close();
 		}
 	}
 }

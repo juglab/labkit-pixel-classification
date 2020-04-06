@@ -1,27 +1,49 @@
 
 package clij;
 
+import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import net.haesleinhuepf.clij.converters.implementations.RandomAccessibleIntervalToClearCLBufferConverter;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Intervals;
+import net.imglib2.util.Util;
 
 import java.util.HashMap;
 
 public class GpuApi implements AutoCloseable {
 
-	private final CLIJ2 clij;
+	final CLIJ2 clij;
+
+	private final ClearCLBufferPool pool;
 
 	public GpuApi(CLIJ2 clij) {
 		this.clij = clij;
+		this.pool = new ClearCLBufferPool(clij::create);
 	}
 
 	public GpuImage create(long[] dimensions, NativeTypeEnum type) {
-		return new GpuImage(clij.create(dimensions, type));
+		return new GpuImage(pool.create(dimensions, type), pool::release);
 	}
 
 	public GpuImage push(RandomAccessibleInterval<? extends RealType> image) {
-		return new GpuImage(clij.push(image));
+		ClearCLBuffer buffer = pool.create(Intervals.dimensionsAsLongArray(image), getNativeTypeEnum(
+			image));
+		RandomAccessibleIntervalToClearCLBufferConverter.copyRandomAccessibleIntervalToClearCLBuffer(
+			image, buffer);
+		return new GpuImage(buffer, pool::release);
+	}
+
+	private NativeTypeEnum getNativeTypeEnum(RandomAccessibleInterval<? extends RealType> image) {
+		RealType type = Util.getTypeFromInterval(image);
+		if (type instanceof FloatType)
+			return NativeTypeEnum.Float;
+		if (type instanceof UnsignedShortType)
+			return NativeTypeEnum.UnsignedShort;
+		throw new UnsupportedOperationException();
 	}
 
 	public RandomAccessibleInterval pullRAI(GpuImage image) {
@@ -30,7 +52,7 @@ public class GpuApi implements AutoCloseable {
 
 	@Override
 	public void close() {
-		clij.close();
+		pool.close();
 	}
 
 	public static GpuApi getInstance() {

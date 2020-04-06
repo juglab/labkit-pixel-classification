@@ -30,14 +30,13 @@ import preview.net.imglib2.algorithm.gauss3.Gauss3;
 
 import java.util.concurrent.TimeUnit;
 
-@Fork(1)
+@Fork(0)
 @Warmup(iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @State(Scope.Benchmark)
 public class GaussBenchmark {
 
 	private final GpuApi gpu = GpuApi.getInstance();
-	private final ClearCLBufferReuse buffers = new ClearCLBufferReuse(gpu);
 
 	private final FinalInterval interval = new FinalInterval(64, 64, 64);
 	private final GpuImage inputBuffer = gpu.push(RandomImgs.seed(1).nextImage(new FloatType(),
@@ -66,7 +65,6 @@ public class GaussBenchmark {
 		tmp1.close();
 		tmp2.close();
 		kernel.close();
-		buffers.close();
 	}
 
 	@Benchmark
@@ -93,7 +91,7 @@ public class GaussBenchmark {
 
 	@Benchmark
 	public RandomAccessibleInterval lowLevelGauss() {
-		try (ReuseScope scope = new ReuseScope(buffers)) {
+		try (GpuScope scope = new GpuScope(gpu)) {
 			GpuImage tmp1 = scope.create(64, large, large);
 			GpuImage tmp2 = scope.create(64, 64, large);
 			GpuImage output = scope.create(64, 64, 64);
@@ -131,7 +129,7 @@ public class GaussBenchmark {
 	private GpuImage gaussKernel(double sigma) {
 		double[] fullKernel = Kernel1D.symmetric(Gauss3.halfkernels(new double[] { sigma })[0])
 			.fullKernel();
-		GpuImage buffer = buffers.create(new long[] { fullKernel.length });
+		GpuImage buffer = gpu.create(new long[] { fullKernel.length }, NativeTypeEnum.Float);
 		RandomAccessibleIntervalToClearCLBufferConverter.copyRandomAccessibleIntervalToClearCLBuffer(
 			ArrayImgs.doubles(fullKernel, fullKernel.length, 1),
 			buffer.clearCLBuffer());

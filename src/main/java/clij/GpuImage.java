@@ -5,13 +5,17 @@ import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 
 import java.nio.Buffer;
+import java.util.function.Consumer;
 
 public class GpuImage implements AutoCloseable {
 
 	private final ClearCLBuffer clearClBuffer;
 
-	public GpuImage(ClearCLBuffer clearClBuffer) {
+	private final Consumer<ClearCLBuffer> onClose;
+
+	public GpuImage(ClearCLBuffer clearClBuffer, Consumer<ClearCLBuffer> onClose) {
 		this.clearClBuffer = clearClBuffer;
+		this.onClose = onClose;
 	}
 
 	public long[] getDimensions() {
@@ -36,7 +40,7 @@ public class GpuImage implements AutoCloseable {
 
 	@Override
 	public void close() {
-		clearClBuffer.close();
+		onClose.accept(clearClBuffer);
 	}
 
 	public NativeTypeEnum getNativeType() {
