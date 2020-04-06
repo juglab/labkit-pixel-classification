@@ -7,7 +7,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.linalg.eigen.EigenValues;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -104,14 +104,14 @@ public class SingleHessianEigenvaluesFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
+	public void apply(CLIJFeatureInput input, List<GpuView> output) {
 		final Interval interval = input.targetInterval();
 		final int n = interval.numDimensions();
-		final List<CLIJView> derivatives = new ArrayList<>();
+		final List<GpuView> derivatives = new ArrayList<>();
 		for (int d1 = 0; d1 < n; d1++)
 			for (int d2 = d1; d2 < n; d2++)
 				derivatives.add(input.secondDerivative(sigma, d1, d2, interval));
-		List<CLIJView> eigenvalues = new ArrayList<>(output);
+		List<GpuView> eigenvalues = new ArrayList<>(output);
 		CLIJEigenvalues.symmetric(input.gpuApi(), derivatives, eigenvalues);
 	}
 }

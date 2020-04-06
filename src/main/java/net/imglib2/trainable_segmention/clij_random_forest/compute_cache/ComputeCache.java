@@ -6,7 +6,7 @@ import clij.GpuApi;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 import net.imglib2.trainable_segmention.utils.AutoClose;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -46,7 +46,7 @@ public class ComputeCache implements AutoCloseable {
 		return pixelSize;
 	}
 
-	public CLIJView get(Content content, Interval interval) {
+	public GpuView get(Content content, Interval interval) {
 		CacheEntry cacheEntry = map.get(content);
 		if (cacheEntry == null)
 			throw new NoSuchElementException("Content was never requested: " + content);
@@ -89,7 +89,7 @@ public class ComputeCache implements AutoCloseable {
 			content.request(requestedInterval);
 		}
 
-		public CLIJView get(Interval interval) {
+		public GpuView get(Interval interval) {
 			if (requestedInterval == null || !Intervals.contains(this.requestedInterval, interval))
 				throw new AssertionError("Interval was not prefetched.");
 			if (buffer == null) {
@@ -98,7 +98,7 @@ public class ComputeCache implements AutoCloseable {
 			}
 			FinalInterval roi = Intervals.translateInverse(interval, Intervals.minAsLongArray(
 				this.requestedInterval));
-			return CLIJView.interval(buffer, roi);
+			return GpuView.interval(buffer, roi);
 		}
 	}
 }

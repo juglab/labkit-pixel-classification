@@ -6,7 +6,7 @@ import clij.GpuApi;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -64,13 +64,13 @@ public class SingleDifferenceOfGaussiansFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
-		CLIJView gauss1 = input.gauss(sigma1, input.targetInterval());
-		CLIJView gauss2 = input.gauss(sigma2, input.targetInterval());
+	public void apply(CLIJFeatureInput input, List<GpuView> output) {
+		GpuView gauss1 = input.gauss(sigma1, input.targetInterval());
+		GpuView gauss2 = input.gauss(sigma2, input.targetInterval());
 		subtract(input.gpuApi(), gauss1, gauss2, output.get(0));
 	}
 
-	private void subtract(GpuApi gpu, CLIJView minuend, CLIJView subtrahend, CLIJView result) {
+	private void subtract(GpuApi gpu, GpuView minuend, GpuView subtrahend, GpuView result) {
 		CLIJLoopBuilder.gpu(gpu)
 			.addInput("a", minuend)
 			.addInput("b", subtrahend)

@@ -11,7 +11,7 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJMultiChannelImage;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureJoiner;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -137,7 +137,7 @@ public class FeatureCalculator {
 		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
 		CLIJMultiChannelImage featureStack = new CLIJMultiChannelImage(gpu, Intervals
 			.dimensionsAsLongArray(interval), count());
-		List<List<CLIJView>> outputs = split(featureStack.channels(), channels.size());
+		List<List<GpuView>> outputs = split(featureStack.channels(), channels.size());
 		for (int i = 0; i < channels.size(); i++) {
 			try (CLIJFeatureInput in = new CLIJFeatureInput(gpu, channels.get(i), interval, pixelSize)) {
 				joiner.prefetch(in);

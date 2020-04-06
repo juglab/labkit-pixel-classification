@@ -6,7 +6,7 @@ import net.imglib2.Interval;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -43,7 +43,7 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 	}
 
 	@Override
-	public void convolve(CLIJView input, CLIJView output) {
+	public void convolve(GpuView input, GpuView output) {
 		final Img<DoubleType> kernelImage = ArrayImgs.doubles(kernel.fullKernel(), kernel.size());
 		try (GpuImage kernelBuffer = gpu.push(RealTypeConverters.convert(kernelImage,
 			new FloatType())))
@@ -52,7 +52,7 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 		}
 	}
 
-	public static void convolve(GpuApi gpu, CLIJView input, GpuImage kernel, CLIJView output, int d) {
+	public static void convolve(GpuApi gpu, GpuView input, GpuImage kernel, GpuView output, int d) {
 		HashMap<String, Object> parameters = new HashMap<>();
 		parameters.put("input", input.buffer());
 		parameters.put("kernelValues", kernel);
@@ -109,7 +109,7 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 		return "(" + list.get(0) + "),(" + list.get(1) + "),(" + list.get(2) + ")";
 	}
 
-	private static void setSkips(HashMap<String, Object> defines, String prefix, CLIJView view,
+	private static void setSkips(HashMap<String, Object> defines, String prefix, GpuView view,
 		int d)
 	{
 		GpuImage buffer = view.buffer();

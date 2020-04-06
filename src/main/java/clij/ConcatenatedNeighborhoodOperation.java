@@ -3,7 +3,7 @@ package clij;
 
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.Interval;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 import net.imglib2.trainable_segmention.utils.AutoClose;
 import net.imglib2.util.Intervals;
 
@@ -28,18 +28,18 @@ public class ConcatenatedNeighborhoodOperation implements NeighborhoodOperation 
 	}
 
 	@Override
-	public void convolve(CLIJView input, CLIJView output) {
+	public void convolve(GpuView input, GpuView output) {
 		try (AutoClose autoClose = new AutoClose()) {
 			List<Interval> intervals = intervals(output.interval());
 			if (!Intervals.equalDimensions(input.interval(), intervals.get(0)))
 				throw new IllegalArgumentException("Dimensions of the input image are not as expected.");
 			int n = convolutions.size();
-			List<CLIJView> buffers = new ArrayList<>(n);
+			List<GpuView> buffers = new ArrayList<>(n);
 			buffers.add(input);
 			for (int i = 1; i < n; i++) {
 				long[] dimensions = Intervals.dimensionsAsLongArray(intervals.get(i));
 				GpuImage buffer = gpu.create(dimensions, NativeTypeEnum.Float);
-				buffers.add(CLIJView.wrap(buffer));
+				buffers.add(GpuView.wrap(buffer));
 				autoClose.add(buffer);
 			}
 			buffers.add(output);

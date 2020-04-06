@@ -6,7 +6,7 @@ import net.imagej.ops.special.function.UnaryFunctionOp;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import org.scijava.plugin.SciJavaPlugin;
@@ -38,7 +38,7 @@ public interface FeatureOp extends SciJavaPlugin, Op,
 			.getName());
 	}
 
-	default void apply(CLIJFeatureInput input, List<CLIJView> output) {
+	default void apply(CLIJFeatureInput input, List<GpuView> output) {
 		throw new UnsupportedOperationException("CLIJ is not supported for: " + this.getClass()
 			.getName());
 	}

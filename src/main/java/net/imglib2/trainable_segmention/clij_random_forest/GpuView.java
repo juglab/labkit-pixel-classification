@@ -8,18 +8,18 @@ import net.imglib2.util.Intervals;
 
 import java.util.stream.LongStream;
 
-public class CLIJView implements AutoCloseable {
+public class GpuView implements AutoCloseable {
 
 	private final GpuImage buffer;
 	private final Interval interval;
 
-	private CLIJView(GpuImage buffer, Interval interval) {
+	private GpuView(GpuImage buffer, Interval interval) {
 		this.buffer = buffer;
 		this.interval = interval;
 	}
 
-	public static CLIJView interval(GpuImage buffer, Interval interval) {
-		return new CLIJView(buffer, interval);
+	public static GpuView interval(GpuImage buffer, Interval interval) {
+		return new GpuView(buffer, interval);
 	}
 
 	public GpuImage buffer() {
@@ -30,17 +30,13 @@ public class CLIJView implements AutoCloseable {
 		return interval;
 	}
 
-	public static CLIJView shrink(GpuImage buffer, long border) {
-		return interval(buffer, Intervals.expand(new FinalInterval(buffer.getDimensions()), -border));
-	}
-
-	public static CLIJView shrink(GpuImage buffer, long[] border) {
+	public static GpuView shrink(GpuImage buffer, long[] border) {
 		long[] negativeBorder = LongStream.of(border).map(x -> -x).toArray();
 		return interval(buffer, Intervals.expand(new FinalInterval(buffer.getDimensions()),
 			negativeBorder));
 	}
 
-	public static CLIJView wrap(GpuImage buffer) {
+	public static GpuView wrap(GpuImage buffer) {
 		return interval(buffer, new FinalInterval(buffer.getDimensions()));
 	}
 

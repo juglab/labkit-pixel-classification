@@ -12,7 +12,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.linalg.eigen.EigenValues;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJMultiChannelImage;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
@@ -187,12 +187,12 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
+	public void apply(CLIJFeatureInput input, List<GpuView> output) {
 		double[] integrationSigma = globalSettings().pixelSize().stream().mapToDouble(
 			p -> integrationScale / p).toArray();
 		NeighborhoodOperation integrationGauss = Gauss.gauss(input.gpuApi(), integrationSigma);
 		Interval border = integrationGauss.getRequiredInputInterval(input.targetInterval());
-		List<CLIJView> derivatives = derivatives(input, border);
+		List<GpuView> derivatives = derivatives(input, border);
 		try (
 			CLIJMultiChannelImage products = products(input.gpuApi(), derivatives);
 			CLIJMultiChannelImage blurredProducts = blur(input.gpuApi(), products.channels(),
@@ -202,17 +202,17 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 		}
 	}
 
-	private List<CLIJView> derivatives(CLIJFeatureInput input, Interval derivativeInterval) {
+	private List<GpuView> derivatives(CLIJFeatureInput input, Interval derivativeInterval) {
 		double[] gaussSigma = globalSettings().pixelSize().stream().mapToDouble(p -> sigma / p)
 			.toArray();
 		int n = globalSettings().numDimensions();
-		List<CLIJView> derivatives = new ArrayList<>(3);
+		List<GpuView> derivatives = new ArrayList<>(3);
 		for (int d = 0; d < n; d++)
 			derivatives.add(input.derivative(gaussSigma[d], d, derivativeInterval));
 		return derivatives;
 	}
 
-	private CLIJMultiChannelImage products(GpuApi gpu, List<CLIJView> derivatives) {
+	private CLIJMultiChannelImage products(GpuApi gpu, List<GpuView> derivatives) {
 		int n = derivatives.size();
 		int numProducts = n * (n + 1) / 2;
 		long[] dimensions = Intervals.dimensionsAsLongArray(derivatives.get(0).interval());
@@ -221,7 +221,7 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 		for (int i = 0; i < derivatives.size(); i++)
 			loopBuilder.addInput("derivative" + i, derivatives.get(i));
 		CLIJMultiChannelImage products = new CLIJMultiChannelImage(gpu, dimensions, numProducts);
-		Iterator<CLIJView> iterator = products.channels().iterator();
+		Iterator<GpuView> iterator = products.channels().iterator();
 		for (int i = 0; i < derivatives.size(); i++)
 			for (int j = i; j < derivatives.size(); j++) {
 				loopBuilder.addOutput("product" + i + j, iterator.next());
@@ -231,12 +231,12 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 		return products;
 	}
 
-	private CLIJMultiChannelImage blur(GpuApi gpu, List<CLIJView> products,
+	private CLIJMultiChannelImage blur(GpuApi gpu, List<GpuView> products,
 		NeighborhoodOperation integrationGauss, Interval targertInteval)
 	{
 		long[] dimensions = Intervals.dimensionsAsLongArray(targertInteval);
 		CLIJMultiChannelImage blurred = new CLIJMultiChannelImage(gpu, dimensions, products.size());
-		List<CLIJView> blurredChannels = blurred.channels();
+		List<GpuView> blurredChannels = blurred.channels();
 		for (int i = 0; i < products.size(); i++) {
 			integrationGauss.convolve(products.get(i), blurredChannels.get(i));
 		}

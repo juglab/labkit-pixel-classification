@@ -7,7 +7,7 @@ import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import clij.GpuApi;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 import net.imglib2.util.Intervals;
 
 import java.util.Objects;
@@ -57,10 +57,10 @@ public class DerivativeContent implements ComputeCache.Content {
 	public GpuImage load(Interval interval) {
 		GpuApi gpu = cache.gpuApi();
 		double[] pixelSize = cache.pixelSize();
-		CLIJView source = cache.get(input, requiredInput(interval));
+		GpuView source = cache.get(input, requiredInput(interval));
 		Interval center = shrink(source.interval());
-		CLIJView front = CLIJView.interval(source.buffer(), Intervals.translate(center, 1, d));
-		CLIJView back = CLIJView.interval(source.buffer(), Intervals.translate(center, -1, d));
+		GpuView front = GpuView.interval(source.buffer(), Intervals.translate(center, 1, d));
+		GpuView back = GpuView.interval(source.buffer(), Intervals.translate(center, -1, d));
 		GpuImage result = gpu.create(Intervals.dimensionsAsLongArray(center), NativeTypeEnum.Float);
 		CLIJLoopBuilder.gpu(gpu)
 			.addInput("f", front)

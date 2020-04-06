@@ -3,7 +3,7 @@ package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 
@@ -58,7 +58,7 @@ public class FeatureJoiner {
 			feature.prefetch(input);
 	}
 
-	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
+	public void apply(CLIJFeatureInput input, List<GpuView> output) {
 		genericApply(output, (featureOp, o) -> featureOp.apply(input, o));
 	}
 

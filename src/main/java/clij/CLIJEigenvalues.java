@@ -1,13 +1,13 @@
 
 package clij;
 
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 
 import java.util.List;
 
 public class CLIJEigenvalues {
 
-	public static void symmetric(GpuApi gpu, List<CLIJView> matrix, List<CLIJView> eigenvalues) {
+	public static void symmetric(GpuApi gpu, List<GpuView> matrix, List<GpuView> eigenvalues) {
 		if (matrix.size() == 3 && eigenvalues.size() == 2)
 			symmetric2d(gpu, matrix.get(0), matrix.get(1), matrix.get(2), eigenvalues.get(0), eigenvalues
 				.get(1));
@@ -27,8 +27,8 @@ public class CLIJEigenvalues {
 	 * larger eigenvalue is written to eigenvalue1, and the smaller eigenvalue ist
 	 * written to eigenvalue2.
 	 */
-	public static void symmetric2d(GpuApi gpu, CLIJView xx, CLIJView xy, CLIJView yy,
-		CLIJView eigenvalue1, CLIJView eigenvalue2)
+	public static void symmetric2d(GpuApi gpu, GpuView xx, GpuView xy, GpuView yy,
+		GpuView eigenvalue1, GpuView eigenvalue2)
 	{
 		CLIJLoopBuilder.gpu(gpu)
 			.addInput("s_xx", xx)
@@ -49,8 +49,8 @@ public class CLIJEigenvalues {
 	 * eigenvalue is written to eigenvalue1, the middle eigenvalue is written to
 	 * eigenvalue2, and the smallest eigenvalue ist written to eigenvalue3.
 	 */
-	public static void symmetric3d(GpuApi gpu, CLIJView xx, CLIJView xy, CLIJView xz, CLIJView yy,
-		CLIJView yz, CLIJView zz, CLIJView eigenvalue1, CLIJView eigenvalue2, CLIJView eigenvalue3)
+	public static void symmetric3d(GpuApi gpu, GpuView xx, GpuView xy, GpuView xz, GpuView yy,
+		GpuView yz, GpuView zz, GpuView eigenvalue1, GpuView eigenvalue2, GpuView eigenvalue3)
 	{
 
 		CLIJLoopBuilder.gpu(gpu)

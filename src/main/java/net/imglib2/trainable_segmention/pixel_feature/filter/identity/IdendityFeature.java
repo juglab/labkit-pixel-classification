@@ -4,7 +4,7 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.identity;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -41,8 +41,8 @@ public class IdendityFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(CLIJFeatureInput input, List<CLIJView> output) {
-		CLIJView in = input.original(input.targetInterval());
+	public void apply(CLIJFeatureInput input, List<GpuView> output) {
+		GpuView in = input.original(input.targetInterval());
 		CLIJCopy.copy(input.gpuApi(), in, output.get(0));
 	}
 

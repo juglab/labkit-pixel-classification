@@ -37,11 +37,11 @@ import java.util.Optional;
 
 public class CLIJCopy {
 
-	public static void copy(GpuApi gpu, CLIJView src, CLIJView dst) {
+	public static void copy(GpuApi gpu, GpuView src, GpuView dst) {
 		CLIJLoopBuilder.gpu(gpu).addInput("s", src).addOutput("d", dst).forEachPixel("d = s");
 	}
 
-	private static int min(CLIJView view, int d) {
+	private static int min(GpuView view, int d) {
 		Interval interval = view.interval();
 		return (int) (d < interval.numDimensions() ? interval.min(d) : 0);
 	}

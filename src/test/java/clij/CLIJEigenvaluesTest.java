@@ -7,7 +7,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 import net.imglib2.trainable_segmention.utils.AutoClose;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -29,11 +29,11 @@ public class CLIJEigenvaluesTest {
 	@Test
 	public void testCalculate2d() {
 		try (
-			CLIJView xx = image(1);
-			CLIJView xy = image(2);
-			CLIJView yy = image(3);
-			CLIJView eigenvalue1 = image(0);
-			CLIJView eigenvalue2 = image(0))
+			GpuView xx = image(1);
+			GpuView xy = image(2);
+			GpuView yy = image(3);
+			GpuView eigenvalue1 = image(0);
+			GpuView eigenvalue2 = image(0))
 		{
 			CLIJEigenvalues.symmetric2d(gpu, xx, xy, yy, eigenvalue1, eigenvalue2);
 			assertEquals(2 + Math.sqrt(5), getValue(eigenvalue1), 0.0001);
@@ -44,15 +44,15 @@ public class CLIJEigenvaluesTest {
 	@Test
 	public void testCalculate3d() {
 		try (
-			CLIJView xx = image(1);
-			CLIJView xy = image(2);
-			CLIJView xz = image(3);
-			CLIJView yy = image(4);
-			CLIJView yz = image(5);
-			CLIJView zz = image(6);
-			CLIJView eigenvalue1 = image(0);
-			CLIJView eigenvalue2 = image(0);
-			CLIJView eigenvalue3 = image(0))
+			GpuView xx = image(1);
+			GpuView xy = image(2);
+			GpuView xz = image(3);
+			GpuView yy = image(4);
+			GpuView yz = image(5);
+			GpuView zz = image(6);
+			GpuView eigenvalue1 = image(0);
+			GpuView eigenvalue2 = image(0);
+			GpuView eigenvalue3 = image(0))
 		{
 			CLIJEigenvalues.symmetric3d(gpu, xx, xy, xz, yy, yz, zz, eigenvalue1, eigenvalue2,
 				eigenvalue3);
@@ -109,25 +109,25 @@ public class CLIJEigenvaluesTest {
 			GpuImage zeroBuffer = gpu.push(zeros);
 			GpuImage resultBuffer = gpu.create(new long[] { 3, n }, NativeTypeEnum.Float);)
 		{
-			CLIJView xx = CLIJView.interval(expectedBuffer, Intervals.createMinSize(0, 0, 1, n));
-			CLIJView yy = CLIJView.interval(expectedBuffer, Intervals.createMinSize(1, 0, 1, n));
-			CLIJView zz = CLIJView.interval(expectedBuffer, Intervals.createMinSize(2, 0, 1, n));
-			CLIJView zero = CLIJView.wrap(zeroBuffer);
-			CLIJView e1 = CLIJView.interval(resultBuffer, Intervals.createMinSize(0, 0, 1, n));
-			CLIJView e2 = CLIJView.interval(resultBuffer, Intervals.createMinSize(1, 0, 1, n));
-			CLIJView e3 = CLIJView.interval(resultBuffer, Intervals.createMinSize(2, 0, 1, n));
+			GpuView xx = GpuView.interval(expectedBuffer, Intervals.createMinSize(0, 0, 1, n));
+			GpuView yy = GpuView.interval(expectedBuffer, Intervals.createMinSize(1, 0, 1, n));
+			GpuView zz = GpuView.interval(expectedBuffer, Intervals.createMinSize(2, 0, 1, n));
+			GpuView zero = GpuView.wrap(zeroBuffer);
+			GpuView e1 = GpuView.interval(resultBuffer, Intervals.createMinSize(0, 0, 1, n));
+			GpuView e2 = GpuView.interval(resultBuffer, Intervals.createMinSize(1, 0, 1, n));
+			GpuView e3 = GpuView.interval(resultBuffer, Intervals.createMinSize(2, 0, 1, n));
 			CLIJEigenvalues.symmetric3d(gpu, yy, zero, zero, xx, zero, zz, e3, e2, e1);
 			RandomAccessibleInterval<FloatType> result = gpu.pullRAI(resultBuffer);
 			ImgLib2Assert.assertImageEqualsRealType(expected, result, 0);
 		}
 	}
 
-	private CLIJView image(float content) {
+	private GpuView image(float content) {
 		Img<FloatType> image = ArrayImgs.floats(new float[] { content }, 1, 1);
-		return CLIJView.wrap(gpu.push(image));
+		return GpuView.wrap(gpu.push(image));
 	}
 
-	private float getValue(CLIJView view) {
+	private float getValue(GpuView view) {
 		RandomAccessibleInterval<FloatType> rai = gpu.pullRAI(view.buffer());
 		return Views.interval(rai, view.interval()).firstElement().getRealFloat();
 	}

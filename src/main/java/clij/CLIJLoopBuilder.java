@@ -2,7 +2,7 @@
 package clij;
 
 import net.imglib2.Interval;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.ValuePair;
 
@@ -78,14 +78,14 @@ public class CLIJLoopBuilder {
 		return this;
 	}
 
-	public CLIJLoopBuilder addInput(String variable, CLIJView image) {
+	public CLIJLoopBuilder addInput(String variable, GpuView image) {
 		String parameterName = addCLIJViewParameters(variable, image);
 		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = " +
 			pixelAt(parameterName, image.interval()));
 		return this;
 	}
 
-	public CLIJLoopBuilder addOutput(String variable, CLIJView image) {
+	public CLIJLoopBuilder addOutput(String variable, GpuView image) {
 		String parameterName = addCLIJViewParameters(variable, image);
 		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = 0");
 		postOperation.add(pixelAt(parameterName, image.interval()) + " = " + variable);
@@ -97,7 +97,7 @@ public class CLIJLoopBuilder {
 			", " + getMin(offset, 2) + ")";
 	}
 
-	private String addCLIJViewParameters(String variable, CLIJView image) {
+	private String addCLIJViewParameters(String variable, GpuView image) {
 		String parameterName = addImageParameter(image.buffer());
 		registerSize(variable, Intervals.dimensionsAsLongArray(image.interval()));
 		return parameterName;

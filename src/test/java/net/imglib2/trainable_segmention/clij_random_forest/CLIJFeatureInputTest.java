@@ -100,7 +100,7 @@ public class CLIJFeatureInputTest {
 		}
 	}
 
-	private RandomAccessibleInterval<FloatType> pull(CLIJView result) {
+	private RandomAccessibleInterval<FloatType> pull(GpuView result) {
 		return Views.zeroMin(Views.interval(gpu.pullRAI(result.buffer()), result.interval()));
 	}
 
