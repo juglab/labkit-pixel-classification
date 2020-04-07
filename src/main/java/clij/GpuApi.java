@@ -1,11 +1,13 @@
 
 package clij;
 
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij.converters.implementations.RandomAccessibleIntervalToClearCLBufferConverter;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -29,12 +31,10 @@ public class GpuApi implements AutoCloseable {
 		return new GpuImage(pool.create(dimensions, type), pool::release);
 	}
 
-	public GpuImage push(RandomAccessibleInterval<? extends RealType> image) {
-		ClearCLBuffer buffer = pool.create(Intervals.dimensionsAsLongArray(image), getNativeTypeEnum(
-			image));
-		RandomAccessibleIntervalToClearCLBufferConverter.copyRandomAccessibleIntervalToClearCLBuffer(
-			image, buffer);
-		return new GpuImage(buffer, pool::release);
+	public GpuImage push(RandomAccessibleInterval<? extends RealType<?>> source) {
+		GpuImage target = create(Intervals.dimensionsAsLongArray(source), getNativeTypeEnum(source));
+		CLIJCopy.copyFromTo(source, target);
+		return target;
 	}
 
 	private NativeTypeEnum getNativeTypeEnum(RandomAccessibleInterval<? extends RealType> image) {
@@ -46,8 +46,12 @@ public class GpuApi implements AutoCloseable {
 		throw new UnsupportedOperationException();
 	}
 
-	public RandomAccessibleInterval pullRAI(GpuImage image) {
-		return clij.pullRAI(image.clearCLBuffer());
+	public RandomAccessibleInterval pullRAI(GpuImage source) {
+		RealType<?> type = CLIJCopy.getImgLib2Type(source.getNativeType());
+		Img<RealType<?>> target = new ArrayImgFactory<>((NativeType) type).create(source
+			.getDimensions());
+		CLIJCopy.copyFromTo(source, target);
+		return target;
 	}
 
 	@Override

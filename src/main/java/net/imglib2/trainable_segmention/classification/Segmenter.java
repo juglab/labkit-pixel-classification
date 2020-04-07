@@ -138,7 +138,7 @@ public class Segmenter {
 			CLIJMultiChannelImage featureStack = features.applyUseGpu(image, out);
 			GpuImage segmentationBuffer = prediction.segment(gpu, featureStack))
 		{
-			CLIJCopy.copyToRai(segmentationBuffer, out);
+			CLIJCopy.copyFromTo(segmentationBuffer, out);
 		}
 	}
 

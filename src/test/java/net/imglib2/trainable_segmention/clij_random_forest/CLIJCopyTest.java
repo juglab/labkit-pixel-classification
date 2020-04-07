@@ -46,6 +46,6 @@ public class CLIJCopyTest {
 	public void testCopyToRai() {
 		GpuImage source = gpu.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 3, 3));
 		RandomAccessibleInterval<FloatType> target = ArrayImgs.floats(3, 3);
-		CLIJCopy.copyToRai(source, target);
+		CLIJCopy.copyFromTo(source, target);
 	}
 }

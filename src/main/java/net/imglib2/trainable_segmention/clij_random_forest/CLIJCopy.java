@@ -5,7 +5,6 @@ import clij.CLIJLoopBuilder;
 import clij.GpuImage;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import clij.GpuApi;
-import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.array.ArrayImg;
@@ -41,32 +40,47 @@ public class CLIJCopy {
 		CLIJLoopBuilder.gpu(gpu).addInput("s", src).addOutput("d", dst).forEachPixel("d = s");
 	}
 
-	private static int min(GpuView view, int d) {
-		Interval interval = view.interval();
-		return (int) (d < interval.numDimensions() ? interval.min(d) : 0);
+	public static void copyFromTo(RandomAccessibleInterval<? extends RealType<?>> source,
+		GpuImage target)
+	{
+		if (!Arrays.equals(Intervals.dimensionsAsLongArray(source), target.getDimensions()))
+			throw new IllegalArgumentException("Dimensions don't match.");
+		RealType<?> sourceType = Util.getTypeFromInterval(source);
+		RealType<?> targetType = getImgLib2Type(target.getNativeType());
+		Object array = getBackingArrayOrNull(source);
+		if (array != null && sourceType.getClass() == targetType.getClass()) {
+			target.clearCLBuffer().readFrom(wrapAsBuffer(array), true);
+			return;
+		}
+		else {
+			RandomAccessibleInterval<RealType<?>> tmp = new ArrayImgFactory<>((NativeType) targetType)
+				.create(target.getDimensions());
+			RealTypeConverters.copyFromTo(Views.zeroMin(source), tmp);
+			copyFromTo(tmp, target);
+		}
 	}
 
-	public static void copyToRai(GpuImage source,
+	public static void copyFromTo(GpuImage source,
 		RandomAccessibleInterval<? extends RealType<?>> target)
 	{
 		if (!Arrays.equals(source.getDimensions(), Intervals.dimensionsAsLongArray(target)))
 			throw new IllegalArgumentException("Dimensions don't match.");
 		RealType<?> sourceType = getImgLib2Type(source.getNativeType());
 		RealType<?> targetType = Util.getTypeFromInterval(target);
-		Optional<Object> optionalArray = getBackingArray(target);
-		if (optionalArray.isPresent() && sourceType.getClass() == targetType.getClass()) {
-			Object array = optionalArray.get();
-			Buffer buffer = wrapAsBuffer(array);
-			source.writeTo(buffer, true);
+		Object array = getBackingArrayOrNull(target);
+		if (array != null && sourceType.getClass() == targetType.getClass()) {
+			source.clearCLBuffer().writeTo(wrapAsBuffer(array), true);
 			return;
 		}
-		RandomAccessibleInterval<RealType<?>> tmp = new ArrayImgFactory<>((NativeType) sourceType)
-			.create(source.getDimensions());
-		copyToRai(source, tmp);
-		RealTypeConverters.copyFromTo(tmp, Views.zeroMin(target));
+		else {
+			RandomAccessibleInterval<RealType<?>> tmp = new ArrayImgFactory<>((NativeType) sourceType)
+				.create(source.getDimensions());
+			copyFromTo(source, tmp);
+			RealTypeConverters.copyFromTo(tmp, Views.zeroMin(target));
+		}
 	}
 
-	private static RealType<?> getImgLib2Type(NativeTypeEnum nativeType) {
+	public static RealType<?> getImgLib2Type(NativeTypeEnum nativeType) {
 		switch (nativeType) {
 			case Byte:
 				return new ByteType();
@@ -106,16 +120,12 @@ public class CLIJCopy {
 		throw new UnsupportedOperationException();
 	}
 
-	private static Optional<Object> getBackingArray(RandomAccessibleInterval<?> target) {
-		if (target instanceof ArrayImg)
-			return getBackingArray((ArrayImg<?, ?>) target);
-		return Optional.empty();
-	}
-
-	private static Optional<Object> getBackingArray(ArrayImg<?, ?> image) {
-		Object access = image.update(null);
-		if (access instanceof ArrayDataAccess)
-			return Optional.of(((ArrayDataAccess) access).getCurrentStorageArray());
-		return Optional.empty();
+	private static Object getBackingArrayOrNull(RandomAccessibleInterval<?> image) {
+		if (!(image instanceof ArrayImg))
+			return null;
+		Object access = ((ArrayImg<?, ?>) image).update(null);
+		if (!(access instanceof ArrayDataAccess))
+			return null;
+		return ((ArrayDataAccess) access).getCurrentStorageArray();
 	}
 }
