@@ -8,6 +8,7 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuViews;
 import net.imglib2.trainable_segmention.utils.AutoClose;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -109,13 +110,13 @@ public class CLIJEigenvaluesTest {
 			GpuImage zeroBuffer = gpu.push(zeros);
 			GpuImage resultBuffer = gpu.create(new long[] { 3, n }, NativeTypeEnum.Float);)
 		{
-			GpuView xx = GpuView.interval(expectedBuffer, Intervals.createMinSize(0, 0, 1, n));
-			GpuView yy = GpuView.interval(expectedBuffer, Intervals.createMinSize(1, 0, 1, n));
-			GpuView zz = GpuView.interval(expectedBuffer, Intervals.createMinSize(2, 0, 1, n));
-			GpuView zero = GpuView.wrap(zeroBuffer);
-			GpuView e1 = GpuView.interval(resultBuffer, Intervals.createMinSize(0, 0, 1, n));
-			GpuView e2 = GpuView.interval(resultBuffer, Intervals.createMinSize(1, 0, 1, n));
-			GpuView e3 = GpuView.interval(resultBuffer, Intervals.createMinSize(2, 0, 1, n));
+			GpuView xx = GpuViews.crop(expectedBuffer, Intervals.createMinSize(0, 0, 1, n));
+			GpuView yy = GpuViews.crop(expectedBuffer, Intervals.createMinSize(1, 0, 1, n));
+			GpuView zz = GpuViews.crop(expectedBuffer, Intervals.createMinSize(2, 0, 1, n));
+			GpuView zero = GpuViews.wrap(zeroBuffer);
+			GpuView e1 = GpuViews.crop(resultBuffer, Intervals.createMinSize(0, 0, 1, n));
+			GpuView e2 = GpuViews.crop(resultBuffer, Intervals.createMinSize(1, 0, 1, n));
+			GpuView e3 = GpuViews.crop(resultBuffer, Intervals.createMinSize(2, 0, 1, n));
 			CLIJEigenvalues.symmetric3d(gpu, yy, zero, zero, xx, zero, zz, e3, e2, e1);
 			RandomAccessibleInterval<FloatType> result = gpu.pullRAI(resultBuffer);
 			ImgLib2Assert.assertImageEqualsRealType(expected, result, 0);
@@ -124,12 +125,11 @@ public class CLIJEigenvaluesTest {
 
 	private GpuView image(float content) {
 		Img<FloatType> image = ArrayImgs.floats(new float[] { content }, 1, 1);
-		return GpuView.wrap(gpu.push(image));
+		return GpuViews.wrap(gpu.push(image));
 	}
 
 	private float getValue(GpuView view) {
-		RandomAccessibleInterval<FloatType> rai = gpu.pullRAI(view.buffer());
-		return Views.interval(rai, view.interval()).firstElement().getRealFloat();
+		return getValue(GpuViews.asGpuImage(gpu, view));
 	}
 
 	private float getValue(GpuImage buffer) {

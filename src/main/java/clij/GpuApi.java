@@ -24,11 +24,11 @@ public class GpuApi implements AutoCloseable {
 
 	public GpuApi(CLIJ2 clij) {
 		this.clij = clij;
-		this.pool = new ClearCLBufferPool(clij::create);
+		this.pool = new ClearCLBufferPool(clij.getCLIJ().getClearCLContext());
 	}
 
 	public GpuImage create(long[] dimensions, NativeTypeEnum type) {
-		return new GpuImage(pool.create(dimensions, type), pool::release);
+		return new GpuImage(pool.create(dimensions, 1, type), pool::release);
 	}
 
 	public GpuImage push(RandomAccessibleInterval<? extends RealType<?>> source) {

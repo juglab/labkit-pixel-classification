@@ -8,6 +8,7 @@ import clij.GpuApi;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.Interval;
 import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuViews;
 import net.imglib2.util.Intervals;
 
 import java.util.stream.DoubleStream;
@@ -51,7 +52,7 @@ public class GaussContent implements ComputeCache.Content {
 		GpuApi gpu = cache.gpuApi();
 		GpuView original = cache.get(source, operation.getRequiredInputInterval(interval));
 		GpuImage output = gpu.create(Intervals.dimensionsAsLongArray(interval), NativeTypeEnum.Float);
-		operation.convolve(original, GpuView.wrap(output));
+		operation.convolve(original, GpuViews.wrap(output));
 		return output;
 	}
 

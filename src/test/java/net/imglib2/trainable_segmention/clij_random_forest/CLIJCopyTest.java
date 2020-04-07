@@ -33,8 +33,8 @@ public class CLIJCopyTest {
 	public void testCopy() {
 		GpuImage source = gpu.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 3, 3));
 		GpuImage destination = gpu.push(ArrayImgs.floats(new float[9], 3, 3));
-		GpuView sourceView = GpuView.interval(source, Intervals.createMinSize(0, 1, 2, 2));
-		GpuView destinationView = GpuView.interval(destination, Intervals.createMinSize(1, 0, 2, 2));
+		GpuView sourceView = GpuViews.crop(source, Intervals.createMinSize(0, 1, 2, 2));
+		GpuView destinationView = GpuViews.crop(destination, Intervals.createMinSize(1, 0, 2, 2));
 		CLIJCopy.copy(gpu, sourceView, destinationView);
 		RandomAccessibleInterval<FloatType> result = gpu.pullRAI(destination);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] { 0, 4, 5, 0, 7, 8,

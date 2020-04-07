@@ -7,6 +7,7 @@ import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuViews;
 import net.imglib2.trainable_segmention.utils.AutoClose;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -98,7 +99,7 @@ public class ComputeCache implements AutoCloseable {
 			}
 			FinalInterval roi = Intervals.translateInverse(interval, Intervals.minAsLongArray(
 				this.requestedInterval));
-			return GpuView.interval(buffer, roi);
+			return GpuViews.crop(buffer, roi);
 		}
 	}
 }

@@ -2,14 +2,18 @@
 package clij;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import net.haesleinhuepf.clij.clearcl.ClearCLContext;
+import net.haesleinhuepf.clij.clearcl.enums.HostAccessType;
+import net.haesleinhuepf.clij.clearcl.enums.KernelAccessType;
+import net.haesleinhuepf.clij.clearcl.enums.MemAllocMode;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.BiFunction;
 
 /**
  * The {@link ClearCLBufferPool} allows to easily reuse {@link ClearCLBuffer}s.
@@ -20,27 +24,30 @@ import java.util.function.BiFunction;
  */
 class ClearCLBufferPool implements AutoCloseable {
 
-	private final BiFunction<long[], NativeTypeEnum, ClearCLBuffer> bufferConstructor;
+	private final ClearCLContext context;
 
 	private final Map<Specification, Queue<ClearCLBuffer>> unused = new ConcurrentHashMap<>();
 
-	ClearCLBufferPool(BiFunction<long[], NativeTypeEnum, ClearCLBuffer> bufferConstructor) {
-		this.bufferConstructor = bufferConstructor;
+	ClearCLBufferPool(ClearCLContext context) {
+		this.context = context;
 	}
 
-	public ClearCLBuffer create(long[] dimensions, NativeTypeEnum type) {
-		Specification key = new Specification(dimensions, type);
+	public ClearCLBuffer create(long[] dimensions, long numberOfChannels, NativeTypeEnum type) {
+		Specification key = new Specification(dimensions, numberOfChannels, type);
 		Queue<ClearCLBuffer> list = unused.get(key);
 		if (list != null) {
 			ClearCLBuffer buffer = list.poll();
 			if (buffer != null)
 				return buffer;
 		}
-		return bufferConstructor.apply(dimensions, type);
+		return context.createBuffer(MemAllocMode.Best, HostAccessType.ReadWrite,
+			KernelAccessType.ReadWrite,
+			numberOfChannels, type, dimensions);
 	}
 
 	public void release(ClearCLBuffer buffer) {
-		Specification key = new Specification(buffer.getDimensions().clone(), buffer.getNativeType());
+		Specification key = new Specification(buffer.getDimensions(), buffer.getNumberOfChannels(),
+			buffer.getNativeType());
 		Queue<ClearCLBuffer> list = unused.computeIfAbsent(key,
 			ignore -> new ConcurrentLinkedQueue<>());
 		list.add(buffer);
@@ -65,23 +72,30 @@ class ClearCLBufferPool implements AutoCloseable {
 
 		private final long[] dimensions;
 
+		private final long numberOfChannels;
+
 		private final NativeTypeEnum type;
 
-		private Specification(long[] dimensions, NativeTypeEnum type) {
+		private final int hash;
+
+		private Specification(long[] dimensions, long numberOfChannels, NativeTypeEnum type) {
+			this.dimensions = dimensions.clone();
+			this.numberOfChannels = numberOfChannels;
 			this.type = type;
-			this.dimensions = dimensions;
+			this.hash = Objects.hash(Arrays.hashCode(dimensions), numberOfChannels, type);
 		}
 
 		@Override
 		public boolean equals(Object obj) {
 			return obj instanceof Specification &&
 				Arrays.equals(dimensions, ((Specification) obj).dimensions) &&
+				numberOfChannels == ((Specification) obj).numberOfChannels &&
 				type.equals(((Specification) obj).type);
 		}
 
 		@Override
 		public int hashCode() {
-			return Arrays.hashCode(dimensions) + 31 * type.hashCode();
+			return hash;
 		}
 	}
 }

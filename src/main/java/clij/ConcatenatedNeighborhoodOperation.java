@@ -2,8 +2,10 @@
 package clij;
 
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
+import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuViews;
 import net.imglib2.trainable_segmention.utils.AutoClose;
 import net.imglib2.util.Intervals;
 
@@ -30,8 +32,8 @@ public class ConcatenatedNeighborhoodOperation implements NeighborhoodOperation 
 	@Override
 	public void convolve(GpuView input, GpuView output) {
 		try (AutoClose autoClose = new AutoClose()) {
-			List<Interval> intervals = intervals(output.interval());
-			if (!Intervals.equalDimensions(input.interval(), intervals.get(0)))
+			List<Interval> intervals = intervals(new FinalInterval(output.dimensions()));
+			if (!Intervals.equalDimensions(new FinalInterval(input.dimensions()), intervals.get(0)))
 				throw new IllegalArgumentException("Dimensions of the input image are not as expected.");
 			int n = convolutions.size();
 			List<GpuView> buffers = new ArrayList<>(n);
@@ -39,7 +41,7 @@ public class ConcatenatedNeighborhoodOperation implements NeighborhoodOperation 
 			for (int i = 1; i < n; i++) {
 				long[] dimensions = Intervals.dimensionsAsLongArray(intervals.get(i));
 				GpuImage buffer = gpu.create(dimensions, NativeTypeEnum.Float);
-				buffers.add(GpuView.wrap(buffer));
+				buffers.add(GpuViews.wrap(buffer));
 				autoClose.add(buffer);
 			}
 			buffers.add(output);

@@ -1,6 +1,7 @@
 
 package clij;
 
+import net.imglib2.Dimensions;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.converter.RealTypeConverters;
@@ -54,13 +55,13 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 
 	public static void convolve(GpuApi gpu, GpuView input, GpuImage kernel, GpuView output, int d) {
 		HashMap<String, Object> parameters = new HashMap<>();
-		parameters.put("input", input.buffer());
+		parameters.put("input", input.source());
 		parameters.put("kernelValues", kernel);
-		parameters.put("output", output.buffer());
+		parameters.put("output", output.source());
 		HashMap<String, Object> defines = new HashMap<>();
 		long[] localSizes = new long[3];
 		Arrays.fill(localSizes, 1);
-		localSizes[0] = output.interval().dimension(d);
+		localSizes[0] = output.dimensions().dimension(d);
 		defines.put("KERNEL_LENGTH", kernel.getWidth());
 		defines.put("BLOCK_SIZE", localSizes[0]);
 		setSkips(defines, "INPUT", input, d);
@@ -71,7 +72,7 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 			"output[OUTPUT_OFFSET + OUTPUT_X_SKIP * (x) + OUTPUT_Y_SKIP * (y) + OUTPUT_Z_SKIP * (z)] = v;");
 		defines.put("INPUT_READ_PIXEL(x,y,z)",
 			"input[INPUT_OFFSET + INPUT_X_SKIP * (x) + INPUT_Y_SKIP * (y) + INPUT_Z_SKIP * (z)]");
-		long[] globalSizes = getDimensions(output.interval());
+		long[] globalSizes = getDimensions(output.dimensions());
 		ArrayUtils.swap(globalSizes, 0, d);
 		gpu.execute(CLIJKernelConvolution.class, "gauss.cl", "convolve1d",
 			globalSizes, localSizes, parameters, defines);
@@ -112,10 +113,9 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 	private static void setSkips(HashMap<String, Object> defines, String prefix, GpuView view,
 		int d)
 	{
-		GpuImage buffer = view.buffer();
-		Interval interval = view.interval();
+		GpuImage buffer = view.source();
 		long[] skip = { 1, buffer.getWidth(), buffer.getWidth() * buffer.getHeight() };
-		defines.put(prefix + "_OFFSET", getOffset(interval, skip));
+		defines.put(prefix + "_OFFSET", view.offset());
 		ArrayUtils.swap(skip, 0, d);
 		defines.put(prefix + "_X_SKIP", skip[0]);
 		defines.put(prefix + "_Y_SKIP", skip[1]);
@@ -130,15 +130,15 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 		return result;
 	}
 
-	private static long[] getDimensions(Interval interval) {
+	private static long[] getDimensions(Dimensions dimensions) {
 		return new long[] {
-			getDimension(interval, 0),
-			getDimension(interval, 1),
-			getDimension(interval, 2),
+			getDimension(dimensions, 0),
+			getDimension(dimensions, 1),
+			getDimension(dimensions, 2),
 		};
 	}
 
-	private static long getDimension(Interval interval, int d) {
-		return d < interval.numDimensions() ? interval.dimension(d) : 1;
+	private static long getDimension(Dimensions dimensions, int d) {
+		return d < dimensions.numDimensions() ? dimensions.dimension(d) : 1;
 	}
 }

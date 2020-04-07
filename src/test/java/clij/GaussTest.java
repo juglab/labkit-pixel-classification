@@ -9,7 +9,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
-import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuViews;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
@@ -33,7 +33,7 @@ public class GaussTest {
 			GpuImage output = gpu.create(Intervals.dimensionsAsLongArray(targetInterval),
 				NativeTypeEnum.Float);)
 		{
-			operation.convolve(GpuView.wrap(input), GpuView.wrap(output));
+			operation.convolve(GpuViews.wrap(input), GpuViews.wrap(output));
 			RandomAccessibleInterval<FloatType> rai = gpu.pullRAI(output);
 			ImgLib2Assert.assertImageEqualsRealType(Views.zeroMin(expected), rai, 1.e-7);
 		}

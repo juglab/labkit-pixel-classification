@@ -1,8 +1,8 @@
 
 package clij;
 
-import net.imglib2.Interval;
 import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuViews;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.ValuePair;
 
@@ -61,54 +61,40 @@ public class CLIJLoopBuilder {
 	}
 
 	public CLIJLoopBuilder addInput(String variable, GpuImage image) {
-		checkValidVariableName(variable);
-		String parameterName = addImageParameter(image);
-		registerSize(variable, image.getDimensions());
-		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = PIXEL(" +
-			parameterName + ")");
-		return this;
+		return addInput(variable, GpuViews.wrap(image));
 	}
 
 	public CLIJLoopBuilder addOutput(String variable, GpuImage image) {
-		checkValidVariableName(variable);
-		String parameterName = addImageParameter(image);
-		registerSize(variable, image.getDimensions());
-		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = 0");
-		postOperation.add("PIXEL(" + parameterName + ") = " + variable);
-		return this;
+		return addOutput(variable, GpuViews.wrap(image));
 	}
 
 	public CLIJLoopBuilder addInput(String variable, GpuView image) {
-		String parameterName = addCLIJViewParameters(variable, image);
+		String parameterName = addGpuViewParameter(variable, image);
 		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = " +
-			pixelAt(parameterName, image.interval()));
+			pixelAt(parameterName, image.offset()));
 		return this;
 	}
 
 	public CLIJLoopBuilder addOutput(String variable, GpuView image) {
-		String parameterName = addCLIJViewParameters(variable, image);
+		String parameterName = addGpuViewParameter(variable, image);
 		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = 0");
-		postOperation.add(pixelAt(parameterName, image.interval()) + " = " + variable);
+		postOperation.add(pixelAt(parameterName, image.offset()) + " = " + variable);
 		return this;
 	}
 
-	private String pixelAt(String parameterName, Interval offset) {
-		return "PIXEL_OFFSET(" + parameterName + ", " + getMin(offset, 0) + ", " + getMin(offset, 1) +
-			", " + getMin(offset, 2) + ")";
+	private String pixelAt(String parameterName, long offset) {
+		return "PIXEL_OFFSET(" + parameterName + ", " + offset + ")";
 	}
 
-	private String addCLIJViewParameters(String variable, GpuView image) {
-		String parameterName = addImageParameter(image.buffer());
-		registerSize(variable, Intervals.dimensionsAsLongArray(image.interval()));
+	private String addGpuViewParameter(String variable, GpuView image) {
+		checkValidVariableName(variable);
+		String parameterName = addImageParameter(image.source());
+		registerSize(variable, Intervals.dimensionsAsLongArray(image.dimensions()));
 		return parameterName;
 	}
 
 	private void registerSize(String variable, long[] size) {
 		imageSizes.add(new ValuePair<>(variable, size));
-	}
-
-	private long getMin(Interval interval, int d) {
-		return d < interval.numDimensions() ? interval.min(d) : 0;
 	}
 
 	private String addImageParameter(GpuImage image) {

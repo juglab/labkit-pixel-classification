@@ -2,46 +2,58 @@
 package net.imglib2.trainable_segmention.clij_random_forest;
 
 import clij.GpuImage;
-import net.imglib2.FinalInterval;
-import net.imglib2.Interval;
-import net.imglib2.util.Intervals;
+import net.imglib2.Dimensions;
 
-import java.util.stream.LongStream;
-
+/**
+ * A {@link GpuView} as a crop of a {@link GpuImage}.
+ * <p>
+ * A {@link GpuView} can also be a hyperSlice of a {@link GpuImage}, this is the
+ * case if
+ * {@code gpuView.dimensions().numDimensions() < gpuView.source().getDimensions().length}.
+ * <p>
+ *
+ * @see GpuViews
+ */
 public class GpuView implements AutoCloseable {
 
-	private final GpuImage buffer;
-	private final Interval interval;
+	private final GpuImage source;
+	private final Dimensions dimensions;
+	private final long offset;
 
-	private GpuView(GpuImage buffer, Interval interval) {
-		this.buffer = buffer;
-		this.interval = interval;
+	GpuView(GpuImage source, Dimensions dimensions, long offset) {
+		this.source = source;
+		this.dimensions = dimensions;
+		this.offset = offset;
 	}
 
-	public static GpuView interval(GpuImage buffer, Interval interval) {
-		return new GpuView(buffer, interval);
+	/**
+	 * Dimensions of the view.
+	 */
+	public Dimensions dimensions() {
+		return dimensions;
 	}
 
-	public GpuImage buffer() {
-		return buffer;
+	/**
+	 * @return underlying {@link GpuImage}. This should only be used by low level
+	 *         functions.
+	 */
+	public GpuImage source() {
+		return source;
 	}
 
-	public Interval interval() {
-		return interval;
+	/**
+	 * @return The index of the pixel, in the underlying {@link GpuImage}, that is
+	 *         considered as the origin of the image.
+	 */
+	public long offset() {
+		return offset;
 	}
 
-	public static GpuView shrink(GpuImage buffer, long[] border) {
-		long[] negativeBorder = LongStream.of(border).map(x -> -x).toArray();
-		return interval(buffer, Intervals.expand(new FinalInterval(buffer.getDimensions()),
-			negativeBorder));
-	}
-
-	public static GpuView wrap(GpuImage buffer) {
-		return interval(buffer, new FinalInterval(buffer.getDimensions()));
-	}
-
+	/**
+	 * Closes the underlying {@link GpuImage}.
+	 */
 	@Override
 	public void close() {
-		buffer.close();
+		source.close();
 	}
 }

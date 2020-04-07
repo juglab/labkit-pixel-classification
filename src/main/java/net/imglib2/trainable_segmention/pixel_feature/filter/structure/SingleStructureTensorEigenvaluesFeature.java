@@ -215,7 +215,7 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 	private CLIJMultiChannelImage products(GpuApi gpu, List<GpuView> derivatives) {
 		int n = derivatives.size();
 		int numProducts = n * (n + 1) / 2;
-		long[] dimensions = Intervals.dimensionsAsLongArray(derivatives.get(0).interval());
+		long[] dimensions = Intervals.dimensionsAsLongArray(derivatives.get(0).dimensions());
 		CLIJLoopBuilder loopBuilder = CLIJLoopBuilder.gpu(gpu);
 		StringJoiner operation = new StringJoiner("; ");
 		for (int i = 0; i < derivatives.size(); i++)

@@ -50,7 +50,7 @@ public class CLIJMultiChannelImage implements AutoCloseable {
 	}
 
 	public List<GpuView> channels() {
-		return channelIntervals().stream().map(i -> GpuView.interval(buffer, i)).collect(Collectors
+		return channelIntervals().stream().map(i -> GpuViews.crop(buffer, i)).collect(Collectors
 			.toList());
 	}
 

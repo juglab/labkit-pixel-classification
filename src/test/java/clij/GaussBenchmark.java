@@ -9,7 +9,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.RandomImgs;
 import net.imglib2.trainable_segmention.Utils;
-import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuViews;
 import net.imglib2.trainable_segmention.clij_random_forest.compute_cache.ComputeCache;
 import net.imglib2.trainable_segmention.clij_random_forest.compute_cache.GaussContent;
 import net.imglib2.type.numeric.real.FloatType;
@@ -84,7 +84,7 @@ public class GaussBenchmark {
 	public RandomAccessibleInterval intermediate() {
 		try (GpuImage output = gpu.create(new long[] { 64, 64, 64 }, NativeTypeEnum.Float)) {
 			NeighborhoodOperation gauss = Gauss.gauss(gpu, 8, 8, 8);
-			gauss.convolve(GpuView.wrap(inputBuffer2), GpuView.wrap(output));
+			gauss.convolve(GpuViews.wrap(inputBuffer2), GpuViews.wrap(output));
 			return gpu.pullRAI(output);
 		}
 	}
@@ -97,16 +97,16 @@ public class GaussBenchmark {
 			GpuImage output = scope.create(64, 64, 64);
 			{
 				GpuImage kernel = scope.add(gaussKernel(8));
-				CLIJKernelConvolution.convolve(gpu, GpuView.wrap(inputBuffer2), kernel, GpuView.wrap(tmp1),
-					0);
+				CLIJKernelConvolution.convolve(gpu, GpuViews.wrap(inputBuffer2), kernel, GpuViews.wrap(
+					tmp1), 0);
 			}
 			{
 				GpuImage kernel = scope.add(gaussKernel(8));
-				CLIJKernelConvolution.convolve(gpu, GpuView.wrap(tmp1), kernel, GpuView.wrap(tmp2), 1);
+				CLIJKernelConvolution.convolve(gpu, GpuViews.wrap(tmp1), kernel, GpuViews.wrap(tmp2), 1);
 			}
 			{
 				GpuImage kernel = scope.add(gaussKernel(8));
-				CLIJKernelConvolution.convolve(gpu, GpuView.wrap(tmp2), kernel, GpuView.wrap(output), 2);
+				CLIJKernelConvolution.convolve(gpu, GpuViews.wrap(tmp2), kernel, GpuViews.wrap(output), 2);
 			}
 			return gpu.pullRAI(output);
 		}
@@ -114,9 +114,10 @@ public class GaussBenchmark {
 
 	@Benchmark
 	public RandomAccessibleInterval lowLevelGaussReuseBuffers() {
-		CLIJKernelConvolution.convolve(gpu, GpuView.wrap(inputBuffer2), kernel, GpuView.wrap(tmp1), 0);
-		CLIJKernelConvolution.convolve(gpu, GpuView.wrap(tmp1), kernel, GpuView.wrap(tmp2), 1);
-		CLIJKernelConvolution.convolve(gpu, GpuView.wrap(tmp2), kernel, GpuView.wrap(output), 2);
+		CLIJKernelConvolution.convolve(gpu, GpuViews.wrap(inputBuffer2), kernel, GpuViews.wrap(tmp1),
+			0);
+		CLIJKernelConvolution.convolve(gpu, GpuViews.wrap(tmp1), kernel, GpuViews.wrap(tmp2), 1);
+		CLIJKernelConvolution.convolve(gpu, GpuViews.wrap(tmp2), kernel, GpuViews.wrap(output), 2);
 		return gpu.pullRAI(output);
 	}
 
