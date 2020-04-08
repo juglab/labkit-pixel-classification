@@ -38,13 +38,11 @@ public class GpuSeparableOperationTest {
 			0, 1, 2, 2, 2,
 			0, 1, 2, 2, 2,
 		}, 5, 3);
-		try (
-			GpuImage in = gpu.push(input);
-			GpuImage out = gpu.create(new long[] { 5, 3 }, NativeTypeEnum.Float);)
-		{
-			GpuNeighborhoodOperation operation = GpuNeighborhoodOperations.max(gpu, new int[] { 3, 3 });
-			operation.apply(GpuViews.wrap(in), GpuViews.wrap(out));
-		}
+		GpuImage in = gpu.push(input);
+		GpuImage out = gpu.create(new long[] { 5, 3 }, NativeTypeEnum.Float);
+		GpuNeighborhoodOperation operation = GpuNeighborhoodOperations.max(gpu, new int[] { 3, 3 });
+		operation.apply(GpuViews.wrap(in), GpuViews.wrap(out));
+		ImgLib2Assert.assertImageEquals(expected, gpu.pullRAI(out));
 	}
 
 	@Test
@@ -89,14 +87,11 @@ public class GpuSeparableOperationTest {
 	private void testOpenCLKernel(Img<FloatType> inputImg, Img<FloatType> expected,
 		String kernelName)
 	{
-		try (
-			GpuImage input = gpu.push(inputImg);
-			GpuImage output = gpu.create(new long[] { 3, 2 }, NativeTypeEnum.Float))
-		{
-			GpuSeparableOperation.run(gpu, kernelName, 3, new HashMap<>(), GpuViews.wrap(input), GpuViews
-				.wrap(output), 0);
-			ImgLib2Assert.assertImageEquals(expected, gpu.pullRAI(output));
-		}
+		GpuImage input = gpu.push(inputImg);
+		GpuImage output = gpu.create(new long[] { 3, 2 }, NativeTypeEnum.Float);
+		GpuSeparableOperation.run(gpu, kernelName, 3, new HashMap<>(), GpuViews.wrap(input), GpuViews
+			.wrap(output), 0);
+		ImgLib2Assert.assertImageEquals(expected, gpu.pullRAI(output));
 	}
 
 }

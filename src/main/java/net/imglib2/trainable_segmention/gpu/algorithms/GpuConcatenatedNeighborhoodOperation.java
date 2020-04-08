@@ -8,7 +8,6 @@ import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
-import net.imglib2.trainable_segmention.utils.AutoClose;
 import net.imglib2.util.Intervals;
 
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ class GpuConcatenatedNeighborhoodOperation implements GpuNeighborhoodOperation {
 
 	@Override
 	public void apply(GpuView input, GpuView output) {
-		try (AutoClose autoClose = new AutoClose()) {
+		try (GpuApi scope = gpu.subScope()) {
 			List<Interval> intervals = intervals(new FinalInterval(output.dimensions()));
 			if (!Intervals.equalDimensions(new FinalInterval(input.dimensions()), intervals.get(0)))
 				throw new IllegalArgumentException("Dimensions of the input image are not as expected.");
@@ -44,9 +43,8 @@ class GpuConcatenatedNeighborhoodOperation implements GpuNeighborhoodOperation {
 			buffers.add(input);
 			for (int i = 1; i < n; i++) {
 				long[] dimensions = Intervals.dimensionsAsLongArray(intervals.get(i));
-				GpuImage buffer = gpu.create(dimensions, NativeTypeEnum.Float);
+				GpuImage buffer = scope.create(dimensions, NativeTypeEnum.Float);
 				buffers.add(GpuViews.wrap(buffer));
-				autoClose.add(buffer);
 			}
 			buffers.add(output);
 			for (int i = 0; i < convolutions.size(); i++) {

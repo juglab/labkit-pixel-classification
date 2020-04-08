@@ -8,6 +8,7 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.classification.CompositeInstance;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
+import net.imglib2.trainable_segmention.gpu.api.GpuScope;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import weka.core.Instance;
@@ -99,28 +100,27 @@ public class RandomForestPrediction {
 	}
 
 	public void distribution(GpuApi gpu, GpuImage features, GpuImage distribution) {
-		Img<UnsignedShortType> indices = ArrayImgs.unsignedShorts(nodeIndices, 3, numberOfNodes,
-			numberOfTrees);
-		Img<FloatType> thresholds = ArrayImgs.floats(nodeThresholds, 1, numberOfNodes, numberOfTrees);
-		Img<FloatType> probabilities = ArrayImgs.floats(leafProbabilities, numberOfClasses,
-			numberOfLeafs, numberOfTrees);
-		try (
-			GpuImage thresholdsClBuffer = gpu.push(thresholds);
-			GpuImage probabilitiesClBuffer = gpu.push(probabilities);
-			GpuImage indicesClBuffer = gpu.push(indices);)
-		{
-			GpuRandomForestKernel.randomForest(gpu, distribution, features,
+		try (GpuApi scope = gpu.subScope()) {
+			Img<UnsignedShortType> indices = ArrayImgs.unsignedShorts(nodeIndices, 3, numberOfNodes,
+				numberOfTrees);
+			Img<FloatType> thresholds = ArrayImgs.floats(nodeThresholds, 1, numberOfNodes, numberOfTrees);
+			Img<FloatType> probabilities = ArrayImgs.floats(leafProbabilities, numberOfClasses,
+				numberOfLeafs, numberOfTrees);
+			GpuImage thresholdsClBuffer = scope.push(thresholds);
+			GpuImage probabilitiesClBuffer = scope.push(probabilities);
+			GpuImage indicesClBuffer = scope.push(indices);
+			GpuRandomForestKernel.randomForest(scope, distribution, features,
 				thresholdsClBuffer, probabilitiesClBuffer, indicesClBuffer, numberOfFeatures);
 		}
 	}
 
 	public GpuImage segment(GpuApi gpu, GpuImage features) {
-		try (GpuImage distribution = gpu.create(features.getDimensions(), numberOfClasses,
-			NativeTypeEnum.Float))
-		{
-			distribution(gpu, features, distribution);
+		try (GpuApi scope = gpu.subScope()) {
+			GpuImage distribution = scope.create(features.getDimensions(), numberOfClasses,
+				NativeTypeEnum.Float);
+			distribution(scope, features, distribution);
 			GpuImage output = gpu.create(distribution.getDimensions(), NativeTypeEnum.UnsignedShort);
-			GpuRandomForestKernel.findMax(gpu, distribution, output);
+			GpuRandomForestKernel.findMax(scope, distribution, output);
 			return output;
 		}
 	}

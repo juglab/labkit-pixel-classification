@@ -8,6 +8,7 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
+import net.imglib2.trainable_segmention.gpu.api.GpuScope;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -41,12 +42,19 @@ public class GpuKernelConvolution implements GpuNeighborhoodOperation {
 
 	@Override
 	public void apply(GpuView input, GpuView output) {
-		final Img<DoubleType> kernelImage = ArrayImgs.doubles(kernel.fullKernel(), kernel.size());
-		try (GpuImage kernelBuffer = gpu.push(RealTypeConverters.convert(kernelImage,
-			new FloatType())))
-		{
-			convolve(gpu, kernelBuffer, input, output, d);
+		try (GpuApi scope = gpu.subScope()) {
+			final Img<FloatType> kernelImage = ArrayImgs.floats(floats(kernel.fullKernel()), kernel
+				.size());
+			GpuImage kernelBuffer = scope.push(kernelImage);
+			convolve(scope, kernelBuffer, input, output, d);
 		}
+	}
+
+	private float[] floats(double[] doubles) {
+		float[] floats = new float[doubles.length];
+		for (int i = 0; i < doubles.length; i++)
+			floats[i] = (float) doubles[i];
+		return floats;
 	}
 
 	static void convolve(GpuApi gpu, GpuImage kernel, GpuView input, GpuView output, int d) {
@@ -55,5 +63,4 @@ public class GpuKernelConvolution implements GpuNeighborhoodOperation {
 		GpuSeparableOperation.run(gpu, "convolve1d.cl", kernel.getWidth(), parameters, input, output,
 			d);
 	}
-
 }

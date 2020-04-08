@@ -2,7 +2,6 @@
 package net.imglib2.trainable_segmention.gpu.algorithms;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij.clearcl.ClearCLImage;
 import net.haesleinhuepf.clij.converters.implementations.RandomAccessibleIntervalToClearCLBufferConverter;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij2.CLIJ2;
@@ -18,7 +17,6 @@ import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.trainable_segmention.gpu.compute_cache.GpuComputeCache;
 import net.imglib2.trainable_segmention.gpu.compute_cache.GpuGaussContent;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Intervals;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
@@ -36,9 +34,9 @@ import preview.net.imglib2.algorithm.gauss3.Gauss3;
 
 import java.util.concurrent.TimeUnit;
 
-@Fork(0)
-@Warmup(iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+@Fork(1)
+@Warmup(iterations = 20, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 20, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @State(Scope.Benchmark)
 public class GpuGaussBenchmark {
 
@@ -54,7 +52,7 @@ public class GpuGaussBenchmark {
 	private final RandomAccessible<FloatType> input = Utils.dirac(3);
 	private final GpuComputeCache cache = new GpuComputeCache(gpu, input, new double[] { 1, 1, 1 });
 	private final GpuGaussContent content = new GpuGaussContent(cache, 8);
-	private final GpuImage kernel = gaussKernel(8);
+	private final GpuImage kernel = gaussKernel(gpu, 8);
 	private final long large = 64 + kernel.getWidth() - 1;
 	private final GpuImage inputBuffer2 = gpu.push(RandomImgs.seed(1).nextImage(new FloatType(),
 		large, large, large));
@@ -68,23 +66,16 @@ public class GpuGaussBenchmark {
 
 	@TearDown
 	public void tearDown() {
-		output.close();
-		inputBuffer.close();
-		inputBuffer2.close();
-		tmp1.close();
-		tmp2.close();
-		kernel.close();
-		cache.close();
-		gpu.close();
 		inputBuffer.close();
 		outputBuffer.close();
+		gpu.close();
 		clij2.close();
 	}
 
 	@Benchmark
 	public RandomAccessibleInterval benchmarkClij2Gauss() {
 		clij2.gaussianBlur3D(inputBuffer, outputBuffer, 8, 8, 8);
-		return clij2.pullRAI(output);
+		return clij2.pullRAI(outputBuffer);
 	}
 
 	@Benchmark
@@ -96,30 +87,31 @@ public class GpuGaussBenchmark {
 
 	@Benchmark
 	public RandomAccessibleInterval intermediate() {
-		try (GpuImage output = gpu.create(new long[] { 64, 64, 64 }, NativeTypeEnum.Float)) {
-			GpuNeighborhoodOperation gauss = GpuGauss.gauss(gpu, 8, 8, 8);
+		try (GpuApi scope = gpu.subScope()) {
+			GpuImage output = scope.create(new long[] { 64, 64, 64 }, NativeTypeEnum.Float);
+			GpuNeighborhoodOperation gauss = GpuGauss.gauss(scope, 8, 8, 8);
 			gauss.apply(GpuViews.wrap(inputBuffer2), GpuViews.wrap(output));
-			return gpu.pullRAI(output);
+			return scope.pullRAI(output);
 		}
 	}
 
 	@Benchmark
 	public RandomAccessibleInterval lowLevelGauss() {
-		try (GpuScope scope = new GpuScope(gpu)) {
-			GpuImage tmp1 = scope.create(64, large, large);
-			GpuImage tmp2 = scope.create(64, 64, large);
-			GpuImage output = scope.create(64, 64, 64);
+		try (GpuApi scope = gpu.subScope()) {
+			GpuImage tmp1 = scope.create(new long[] { 64, large, large }, NativeTypeEnum.Float);
+			GpuImage tmp2 = scope.create(new long[] { 64, (long) 64, large }, NativeTypeEnum.Float);
+			GpuImage output = scope.create(new long[] { 64, (long) 64, (long) 64 }, NativeTypeEnum.Float);
 			{
-				GpuImage kernel = scope.add(gaussKernel(8));
+				GpuImage kernel = gaussKernel(scope, 8);
 				GpuKernelConvolution.convolve(gpu, kernel, GpuViews.wrap(inputBuffer2), GpuViews.wrap(tmp1),
 					0);
 			}
 			{
-				GpuImage kernel = scope.add(gaussKernel(8));
+				GpuImage kernel = gaussKernel(scope, 8);
 				GpuKernelConvolution.convolve(gpu, kernel, GpuViews.wrap(tmp1), GpuViews.wrap(tmp2), 1);
 			}
 			{
-				GpuImage kernel = scope.add(gaussKernel(8));
+				GpuImage kernel = gaussKernel(scope, 8);
 				GpuKernelConvolution.convolve(gpu, kernel, GpuViews.wrap(tmp2), GpuViews.wrap(output), 2);
 			}
 			return gpu.pullRAI(output);
@@ -139,7 +131,7 @@ public class GpuGaussBenchmark {
 		new Runner(options).run();
 	}
 
-	private GpuImage gaussKernel(double sigma) {
+	private GpuImage gaussKernel(GpuApi gpu, double sigma) {
 		double[] fullKernel = Kernel1D.symmetric(Gauss3.halfkernels(new double[] { sigma })[0])
 			.fullKernel();
 		GpuImage buffer = gpu.create(new long[] { fullKernel.length }, NativeTypeEnum.Float);

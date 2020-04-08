@@ -29,12 +29,11 @@ public class GpuFeatureInputTest {
 		RandomAccessibleInterval<FloatType> original = ArrayImgs.floats(new float[] { 1, 2, 3, 4 }, 4,
 			1);
 		FinalInterval interval = FinalInterval.createMinSize(1, 0, 2, 1);
-		try (GpuFeatureInput featureInput = new GpuFeatureInput(gpu, original, interval, pixelSize)) {
-			featureInput.prefetchOriginal(interval);
-			RandomAccessibleInterval<FloatType> result = pull(featureInput.original(interval));
-			RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] { 2, 3 }, 2, 1);
-			ImgLib2Assert.assertImageEquals(expected, result);
-		}
+		GpuFeatureInput featureInput = new GpuFeatureInput(gpu, original, interval, pixelSize);
+		featureInput.prefetchOriginal(interval);
+		RandomAccessibleInterval<FloatType> result = pull(featureInput.original(interval));
+		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] { 2, 3 }, 2, 1);
+		ImgLib2Assert.assertImageEquals(expected, result);
 	}
 
 	@Test
@@ -43,15 +42,12 @@ public class GpuFeatureInputTest {
 		double sigma = 2;
 		Interval targetInterval = FinalInterval.createMinSize(4, 0, 1, 1);
 		Interval interval = FinalInterval.createMinSize(3, 0, 1, 1);
-		try (GpuFeatureInput featureInput = new GpuFeatureInput(gpu, original, targetInterval,
-			pixelSize))
-		{
-			featureInput.prefetchGauss(sigma, interval);
-			RandomAccessibleInterval<FloatType> result = pull(featureInput.gauss(sigma, interval));
-			RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] { (float) Utils
-				.gauss(sigma, 3, 0) }, 1, 1);
-			ImgLib2Assert.assertImageEqualsRealType(expected, result, 0.0001);
-		}
+		GpuFeatureInput featureInput = new GpuFeatureInput(gpu, original, targetInterval, pixelSize);
+		featureInput.prefetchGauss(sigma, interval);
+		RandomAccessibleInterval<FloatType> result = pull(featureInput.gauss(sigma, interval));
+		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] { (float) Utils
+			.gauss(sigma, 3, 0) }, 1, 1);
+		ImgLib2Assert.assertImageEqualsRealType(expected, result, 0.0001);
 	}
 
 	@Test
@@ -60,18 +56,15 @@ public class GpuFeatureInputTest {
 			-10, 10, 10), (x, y) -> 4 * x + 1 * y);
 		int sigma = 1;
 		FinalInterval interval = new FinalInterval(1, 1);
-		try (GpuFeatureInput featureInput = new GpuFeatureInput(gpu, original, interval, pixelSize)) {
-			featureInput.prefetchDerivative(sigma, 0, interval);
-			featureInput.prefetchDerivative(sigma, 1, interval);
-			RandomAccessibleInterval<FloatType> resultX = pull(featureInput.derivative(sigma, 0,
-				interval));
-			RandomAccessibleInterval<FloatType> resultY = pull(featureInput.derivative(sigma, 1,
-				interval));
-			ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 4 }, 1, 1), resultX,
-				0.0001);
-			ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 1 }, 1, 1), resultY,
-				0.0001);
-		}
+		GpuFeatureInput featureInput = new GpuFeatureInput(gpu, original, interval, pixelSize);
+		featureInput.prefetchDerivative(sigma, 0, interval);
+		featureInput.prefetchDerivative(sigma, 1, interval);
+		RandomAccessibleInterval<FloatType> resultX = pull(featureInput.derivative(sigma, 0, interval));
+		RandomAccessibleInterval<FloatType> resultY = pull(featureInput.derivative(sigma, 1, interval));
+		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 4 }, 1, 1), resultX,
+			0.0001);
+		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 1 }, 1, 1), resultY,
+			0.0001);
 	}
 
 	@Test
@@ -80,28 +73,27 @@ public class GpuFeatureInputTest {
 			-10, 10, 10), (x, y) -> 4 * x * x + 1 * y * y + 3 * x * y);
 		int sigma = 1;
 		FinalInterval interval = new FinalInterval(1, 1);
-		try (GpuFeatureInput featureInput = new GpuFeatureInput(gpu, original, interval, pixelSize)) {
-			featureInput.prefetchSecondDerivative(sigma, 0, 0, interval);
-			featureInput.prefetchSecondDerivative(sigma, 1, 1, interval);
-			featureInput.prefetchSecondDerivative(sigma, 0, 1, interval);
-			featureInput.prefetchSecondDerivative(sigma, 1, 0, interval);
-			RandomAccessibleInterval<FloatType> resultXX = pull(featureInput.secondDerivative(sigma, 0, 0,
-				interval));
-			RandomAccessibleInterval<FloatType> resultYY = pull(featureInput.secondDerivative(sigma, 1, 1,
-				interval));
-			RandomAccessibleInterval<FloatType> resultXY = pull(featureInput.secondDerivative(sigma, 0, 1,
-				interval));
-			RandomAccessibleInterval<FloatType> resultYX = pull(featureInput.secondDerivative(sigma, 1, 0,
-				interval));
-			ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 8 }, 1, 1), resultXX,
-				0.0001);
-			ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 2 }, 1, 1), resultYY,
-				0.0001);
-			ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 3 }, 1, 1), resultXY,
-				0.0001);
-			ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 3 }, 1, 1), resultYX,
-				0.0001);
-		}
+		GpuFeatureInput featureInput = new GpuFeatureInput(gpu, original, interval, pixelSize);
+		featureInput.prefetchSecondDerivative(sigma, 0, 0, interval);
+		featureInput.prefetchSecondDerivative(sigma, 1, 1, interval);
+		featureInput.prefetchSecondDerivative(sigma, 0, 1, interval);
+		featureInput.prefetchSecondDerivative(sigma, 1, 0, interval);
+		RandomAccessibleInterval<FloatType> resultXX = pull(featureInput.secondDerivative(sigma, 0, 0,
+			interval));
+		RandomAccessibleInterval<FloatType> resultYY = pull(featureInput.secondDerivative(sigma, 1, 1,
+			interval));
+		RandomAccessibleInterval<FloatType> resultXY = pull(featureInput.secondDerivative(sigma, 0, 1,
+			interval));
+		RandomAccessibleInterval<FloatType> resultYX = pull(featureInput.secondDerivative(sigma, 1, 0,
+			interval));
+		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 8 }, 1, 1), resultXX,
+			0.0001);
+		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 2 }, 1, 1), resultYY,
+			0.0001);
+		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 3 }, 1, 1), resultXY,
+			0.0001);
+		ImgLib2Assert.assertImageEqualsRealType(ArrayImgs.floats(new float[] { 3 }, 1, 1), resultYX,
+			0.0001);
 	}
 
 	private RandomAccessibleInterval<FloatType> pull(GpuView result) {

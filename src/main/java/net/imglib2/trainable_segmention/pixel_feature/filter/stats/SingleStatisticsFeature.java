@@ -155,20 +155,21 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 
 	@Override
 	public void apply(GpuFeatureInput input, List<GpuView> output) {
-		GpuApi gpu = input.gpuApi();
-		long[] border = globalSettings().pixelSize().stream().mapToLong(pixelSize -> (long) (radius /
-			pixelSize)).toArray();
-		Iterator<GpuView> iterator = output.iterator();
-		Interval interval = input.targetInterval();
-		GpuView original = input.original(Intervals.expand(interval, border));
-		int[] windowSize = LongStream.of(border).mapToInt(x -> (int) (1 + 2 * x)).toArray();
-		if (min) {
-			GpuNeighborhoodOperations.min(gpu, windowSize).apply(original, iterator.next());
+		try (GpuApi gpu = input.gpuApi().subScope()) {
+			long[] border = globalSettings().pixelSize().stream().mapToLong(pixelSize -> (long) (radius /
+				pixelSize)).toArray();
+			Iterator<GpuView> iterator = output.iterator();
+			Interval interval = input.targetInterval();
+			GpuView original = input.original(Intervals.expand(interval, border));
+			int[] windowSize = LongStream.of(border).mapToInt(x -> (int) (1 + 2 * x)).toArray();
+			if (min) {
+				GpuNeighborhoodOperations.min(gpu, windowSize).apply(original, iterator.next());
+			}
+			if (max) {
+				GpuNeighborhoodOperations.max(gpu, windowSize).apply(original, iterator.next());
+			}
+			calculateMeanAndVariance(gpu, windowSize, original, iterator);
 		}
-		if (max) {
-			GpuNeighborhoodOperations.max(gpu, windowSize).apply(original, iterator.next());
-		}
-		calculateMeanAndVariance(gpu, windowSize, original, iterator);
 	}
 
 	private void calculateMeanAndVariance(GpuApi gpu, int[] windowSize, GpuView original,
@@ -184,38 +185,33 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 		}
 		else {
 			GpuView variance = iterator.next();
-			try (GpuImage mean = gpu.create(Intervals.dimensionsAsLongArray(variance.dimensions()),
-				NativeTypeEnum.Float))
-			{
-				GpuNeighborhoodOperations.mean(gpu, windowSize).apply(original, GpuViews.wrap(mean));
-				calculateVariance(gpu, windowSize, original, GpuViews.wrap(mean), variance);
-			}
+			GpuImage mean = gpu.create(Intervals.dimensionsAsLongArray(variance.dimensions()),
+				NativeTypeEnum.Float);
+			GpuNeighborhoodOperations.mean(gpu, windowSize).apply(original, GpuViews.wrap(mean));
+			calculateVariance(gpu, windowSize, original, GpuViews.wrap(mean), variance);
 		}
 	}
 
 	private void calculateVariance(GpuApi gpu, int[] windowSize, GpuView original, GpuView mean,
 		GpuView variance)
 	{
-		try (
-			GpuImage squared = gpu.create(Intervals.dimensionsAsLongArray(original.dimensions()),
-				NativeTypeEnum.Float);
-			GpuImage meanOfSquared = gpu.create(Intervals.dimensionsAsLongArray(variance.dimensions()),
-				NativeTypeEnum.Float);)
-		{
-			long n = Intervals.numElements(windowSize);
-			if (n <= 1)
-				GpuPixelWiseOperation.gpu(gpu).addOutput("variance", variance).forEachPixel("variance = 0");
-			else {
-				square(gpu, original, squared);
-				GpuNeighborhoodOperations.mean(gpu, windowSize).apply(GpuViews.wrap(squared), GpuViews.wrap(
-					meanOfSquared));
-				GpuPixelWiseOperation.gpu(gpu)
-					.addInput("mean", mean)
-					.addInput("mean_of_squared", meanOfSquared)
-					.addInput("factor", (float) n / (n - 1))
-					.addOutput("variance", variance)
-					.forEachPixel("variance = (mean_of_squared - mean * mean) * factor");
-			}
+		GpuImage squared = gpu.create(Intervals.dimensionsAsLongArray(original.dimensions()),
+			NativeTypeEnum.Float);
+		GpuImage meanOfSquared = gpu.create(Intervals.dimensionsAsLongArray(variance.dimensions()),
+			NativeTypeEnum.Float);
+		long n = Intervals.numElements(windowSize);
+		if (n <= 1)
+			GpuPixelWiseOperation.gpu(gpu).addOutput("variance", variance).forEachPixel("variance = 0");
+		else {
+			square(gpu, original, squared);
+			GpuNeighborhoodOperations.mean(gpu, windowSize).apply(GpuViews.wrap(squared), GpuViews.wrap(
+				meanOfSquared));
+			GpuPixelWiseOperation.gpu(gpu)
+				.addInput("mean", mean)
+				.addInput("mean_of_squared", meanOfSquared)
+				.addInput("factor", (float) n / (n - 1))
+				.addOutput("variance", variance)
+				.forEachPixel("variance = (mean_of_squared - mean * mean) * factor");
 		}
 	}
 

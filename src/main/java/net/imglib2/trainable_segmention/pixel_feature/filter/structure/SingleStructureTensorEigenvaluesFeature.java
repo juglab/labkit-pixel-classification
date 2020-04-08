@@ -190,17 +190,16 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 
 	@Override
 	public void apply(GpuFeatureInput input, List<GpuView> output) {
-		double[] integrationSigma = globalSettings().pixelSize().stream().mapToDouble(
-			p -> integrationScale / p).toArray();
-		GpuNeighborhoodOperation integrationGauss = GpuGauss.gauss(input.gpuApi(), integrationSigma);
-		Interval border = integrationGauss.getRequiredInputInterval(input.targetInterval());
-		List<GpuView> derivatives = derivatives(input, border);
-		try (
-			GpuImage products = products(input.gpuApi(), derivatives);
-			GpuImage blurredProducts = blur(input.gpuApi(), GpuViews.channels(products), integrationGauss,
-				input.targetInterval());)
-		{
-			GpuEigenvalues.symmetric(input.gpuApi(), GpuViews.channels(blurredProducts), output);
+		try (GpuApi scope = input.gpuApi().subScope()) {
+			double[] integrationSigma = globalSettings().pixelSize().stream().mapToDouble(
+				p -> integrationScale / p).toArray();
+			GpuNeighborhoodOperation integrationGauss = GpuGauss.gauss(scope, integrationSigma);
+			Interval border = integrationGauss.getRequiredInputInterval(input.targetInterval());
+			List<GpuView> derivatives = derivatives(input, border);
+			GpuImage products = products(scope, derivatives);
+			GpuImage blurredProducts = blur(scope, GpuViews.channels(products), integrationGauss, input
+				.targetInterval());
+			GpuEigenvalues.symmetric(scope, GpuViews.channels(blurredProducts), output);
 		}
 	}
 

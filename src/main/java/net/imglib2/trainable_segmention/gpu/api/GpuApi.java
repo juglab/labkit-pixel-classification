@@ -8,41 +8,39 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Cast;
 import net.imglib2.util.Intervals;
-import net.imglib2.util.Util;
 
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class GpuApi implements AutoCloseable {
+public interface GpuApi extends AutoCloseable {
 
-	private final CLIJ2 clij;
-
-	private final ClearCLBufferPool pool;
-
-	public GpuApi(CLIJ2 clij) {
-		this.clij = clij;
-		this.pool = new ClearCLBufferPool(clij.getCLIJ().getClearCLContext());
+	static GpuApi getInstance() {
+		CLIJ2 clij = CLIJ2.getInstance();
+		clij.setKeepReferences(false);
+		return new GpuScope(new DefaultGpuApi(clij), true);
 	}
 
-	public GpuImage create(long[] dimensions, NativeTypeEnum type) {
+	GpuImage create(long[] dimensions, long numberOfChannels, NativeTypeEnum type);
+
+	GpuApi subScope();
+
+	@Override
+	void close();
+
+	default GpuImage create(long[] dimensions, NativeTypeEnum type) {
 		return create(dimensions, 1, type);
 	}
 
-	public GpuImage create(long[] dimensions, long numberOfChannels, NativeTypeEnum type) {
-		return new GpuImage(pool.create(dimensions, numberOfChannels, type), pool::release);
-	}
-
-	public GpuImage push(RandomAccessibleInterval<? extends RealType<?>> source) {
-		GpuImage target = create(Intervals.dimensionsAsLongArray(source), getNativeTypeEnum(source));
+	default GpuImage push(RandomAccessibleInterval<? extends RealType<?>> source) {
+		GpuImage target = create(Intervals.dimensionsAsLongArray(source), GpuCopy.getNativeTypeEnum(
+			source));
 		GpuCopy.copyFromTo(source, target);
 		return target;
 	}
 
-	public GpuImage pushMultiChannel(RandomAccessibleInterval<? extends RealType<?>> input) {
+	default GpuImage pushMultiChannel(RandomAccessibleInterval<? extends RealType<?>> input) {
 		long[] dimensions = Intervals.dimensionsAsLongArray(input);
 		int n = dimensions.length - 1;
 		GpuImage buffer = create(Arrays.copyOf(dimensions, n), dimensions[n], NativeTypeEnum.Float);
@@ -50,56 +48,34 @@ public class GpuApi implements AutoCloseable {
 		return buffer;
 	}
 
-	public <T extends RealType<?>> RandomAccessibleInterval<T> pullRAI(GpuImage image) {
+	default <T extends RealType<?>> RandomAccessibleInterval<T> pullRAI(GpuImage image) {
 		if (image.getNumberOfChannels() > 1)
 			return pullRAIMultiChannel(image);
-		return internalPullRai(image, image.getDimensions());
+		return Private.internalPullRai(image, image.getDimensions());
 	}
 
-	public <T extends RealType<?>> RandomAccessibleInterval<T> pullRAIMultiChannel(GpuImage image) {
-		return internalPullRai(image, RevampUtils.extend(image.getDimensions(), image
+	default <T extends RealType<?>> RandomAccessibleInterval<T> pullRAIMultiChannel(GpuImage image) {
+		return Private.internalPullRai(image, RevampUtils.extend(image.getDimensions(), image
 			.getNumberOfChannels()));
 	}
 
-	private NativeTypeEnum getNativeTypeEnum(RandomAccessibleInterval<? extends RealType> image) {
-		RealType type = Util.getTypeFromInterval(image);
-		if (type instanceof FloatType)
-			return NativeTypeEnum.Float;
-		if (type instanceof UnsignedShortType)
-			return NativeTypeEnum.UnsignedShort;
-		throw new UnsupportedOperationException();
-	}
+	void execute(Class<?> anchorClass, String kernelFile, String kernelName, long[] globalSizes,
+		long[] localSizes, HashMap<String, Object> parameters, HashMap<String, Object> defines);
 
-	private <T extends RealType<?>> RandomAccessibleInterval<T> internalPullRai(GpuImage source,
-		long[] dimensions)
-	{
-		RealType<?> type = GpuCopy.getImgLib2Type(source.getNativeType());
-		Img<T> target = Cast.unchecked(new ArrayImgFactory<>(Cast.unchecked(type)).create(dimensions));
-		GpuCopy.copyFromTo(source, target);
-		return target;
-	}
+	class Private {
 
-	@Override
-	public void close() {
-		pool.close();
-	}
-
-	public static GpuApi getInstance() {
-		CLIJ2 clij = CLIJ2.getInstance();
-		clij.setKeepReferences(false);
-		return new GpuApi(clij);
-	}
-
-	public void execute(Class<?> anchorClass, String kernelFile, String kernelName,
-		long[] globalSizes, long[] localSizes, HashMap<String, Object> parameters,
-		HashMap<String, Object> defines)
-	{
-		for (String key : parameters.keySet()) {
-			Object value = parameters.get(key);
-			if (value instanceof GpuImage)
-				parameters.put(key, ((GpuImage) value).clearCLBuffer());
+		private Private() {
+			// prevent from instantiation
 		}
-		clij.executeSubsequently(anchorClass, kernelFile, kernelName, null, globalSizes, localSizes,
-			parameters, defines, null).close();
+
+		private static <T extends RealType<?>> RandomAccessibleInterval<T> internalPullRai(
+			GpuImage source, long[] dimensions)
+		{
+			RealType<?> type = GpuCopy.getImgLib2Type(source.getNativeType());
+			Img<T> target = Cast.unchecked(new ArrayImgFactory<>(Cast.unchecked(type)).create(
+				dimensions));
+			GpuCopy.copyFromTo(source, target);
+			return target;
+		}
 	}
 }

@@ -94,7 +94,8 @@ public class FeatureCalculator {
 	public void apply(RandomAccessible<?> input, RandomAccessibleInterval<FloatType> output) {
 		if (gpu != null) {
 			Interval interval = RevampUtils.removeLastDimension(output);
-			try (GpuImage result = applyUseGpu(input, interval)) {
+			try (GpuApi scope = gpu.subScope()) {
+				GpuImage result = applyUseGpu(scope, input, interval);
 				GpuCopy.copyFromTo(result, output);
 			}
 		}
@@ -112,9 +113,11 @@ public class FeatureCalculator {
 	{
 		FinalInterval fullInterval = Intervals.addDimension(interval, 0, count() - 1);
 		if (gpu != null) {
-			GpuImage featureStack = applyUseGpu(extendedImage, interval);
-			return Views.translate(gpu.pullRAIMultiChannel(featureStack),
-				Intervals.minAsLongArray(fullInterval));
+			try (GpuApi scope = gpu.subScope()) {
+				GpuImage featureStack = applyUseGpu(scope, extendedImage, interval);
+				return Views.translate(scope.pullRAIMultiChannel(featureStack),
+					Intervals.minAsLongArray(fullInterval));
+			}
 		}
 		else {
 			Img<FloatType> image = ArrayImgs.floats(Intervals.dimensionsAsLongArray(fullInterval));
@@ -135,7 +138,7 @@ public class FeatureCalculator {
 		}
 	}
 
-	public GpuImage applyUseGpu(RandomAccessible<?> input, Interval interval) {
+	public GpuImage applyUseGpu(GpuApi gpu, RandomAccessible<?> input, Interval interval) {
 		if (interval.numDimensions() != settings().globals().numDimensions())
 			throw new IllegalArgumentException("Wrong dimension of the output interval.");
 		double[] pixelSize = settings.globals().pixelSizeAsDoubleArray();
@@ -144,7 +147,8 @@ public class FeatureCalculator {
 			NativeTypeEnum.Float);
 		List<List<GpuView>> outputs = split(GpuViews.channels(featureStack), channels.size());
 		for (int i = 0; i < channels.size(); i++) {
-			try (GpuFeatureInput in = new GpuFeatureInput(gpu, channels.get(i), interval, pixelSize)) {
+			try (GpuApi scope = gpu.subScope()) {
+				GpuFeatureInput in = new GpuFeatureInput(scope, channels.get(i), interval, pixelSize);
 				joiner.prefetch(in);
 				joiner.apply(in, outputs.get(i));
 			}

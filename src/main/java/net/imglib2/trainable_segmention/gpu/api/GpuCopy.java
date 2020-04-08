@@ -136,4 +136,15 @@ public class GpuCopy {
 			return null;
 		return ((ArrayDataAccess) access).getCurrentStorageArray();
 	}
+
+	public static NativeTypeEnum getNativeTypeEnum(
+		RandomAccessibleInterval<? extends RealType> image)
+	{
+		RealType type = Util.getTypeFromInterval(image);
+		if (type instanceof FloatType)
+			return NativeTypeEnum.Float;
+		if (type instanceof UnsignedShortType)
+			return NativeTypeEnum.UnsignedShort;
+		throw new UnsupportedOperationException();
+	}
 }

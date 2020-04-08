@@ -8,7 +8,6 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
-import net.imglib2.trainable_segmention.utils.AutoClose;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 
@@ -16,9 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-public class GpuComputeCache implements AutoCloseable {
+public class GpuComputeCache {
 
-	private final AutoClose autoClose = new AutoClose();
 	private final Map<Content, CacheEntry> map = new HashMap<>();
 	private final GpuApi gpu;
 	private final RandomAccessible<FloatType> original;
@@ -52,11 +50,6 @@ public class GpuComputeCache implements AutoCloseable {
 		if (cacheEntry == null)
 			throw new NoSuchElementException("Content was never requested: " + content);
 		return cacheEntry.get(interval);
-	}
-
-	@Override
-	public void close() {
-		autoClose.close();
 	}
 
 	public interface Content {
@@ -95,7 +88,6 @@ public class GpuComputeCache implements AutoCloseable {
 				throw new AssertionError("Interval was not prefetched.");
 			if (buffer == null) {
 				buffer = content.load(this.requestedInterval);
-				autoClose.add(buffer);
 			}
 			FinalInterval roi = Intervals.translateInverse(interval, Intervals.minAsLongArray(
 				this.requestedInterval));

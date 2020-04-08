@@ -12,7 +12,7 @@ import net.imglib2.trainable_segmention.gpu.compute_cache.GpuOriginalContent;
 import net.imglib2.trainable_segmention.gpu.compute_cache.GpuSecondDerivativeContent;
 import net.imglib2.type.numeric.real.FloatType;
 
-public class GpuFeatureInput implements AutoCloseable {
+public class GpuFeatureInput {
 
 	private final GpuApi gpu;
 
@@ -75,11 +75,6 @@ public class GpuFeatureInput implements AutoCloseable {
 			return new GpuSecondDerivativeContent(cache, gaussKey(sigma), dimensionA);
 		return new GpuDerivativeContent(cache, new GpuDerivativeContent(cache, gaussKey(sigma),
 			dimensionA), dimensionB);
-	}
-
-	@Override
-	public void close() {
-		cache.close();
 	}
 
 	public Interval targetInterval() {

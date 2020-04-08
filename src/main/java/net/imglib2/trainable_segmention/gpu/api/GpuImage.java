@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 
 public class GpuImage implements AutoCloseable {
 
-	private final ClearCLBuffer clearClBuffer;
+	private ClearCLBuffer clearClBuffer;
 
 	private final Consumer<ClearCLBuffer> onClose;
 
@@ -40,15 +40,15 @@ public class GpuImage implements AutoCloseable {
 
 	@Override
 	public void close() {
-		onClose.accept(clearClBuffer);
+		if (clearClBuffer == null)
+			return;
+		ClearCLBuffer buffer = clearClBuffer;
+		clearClBuffer = null;
+		onClose.accept(buffer);
 	}
 
 	public NativeTypeEnum getNativeType() {
 		return clearClBuffer.getNativeType();
-	}
-
-	public void writeTo(Buffer buffer, boolean blocking) {
-		clearClBuffer.writeTo(buffer, blocking);
 	}
 
 	public long getNumberOfChannels() {
