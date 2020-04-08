@@ -10,17 +10,17 @@ import java.util.HashMap;
 public class CLIJRandomForestKernel {
 
 	public static void randomForest(GpuApi gpu,
-		CLIJMultiChannelImage distributions,
-		CLIJMultiChannelImage src,
+		GpuImage distributions,
+		GpuImage src,
 		GpuImage thresholds,
 		GpuImage probabilities,
 		GpuImage indices,
 		int numberOfFeatures)
 	{
-		long[] globalSizes = src.getSpatialDimensions().clone();
+		long[] globalSizes = src.getDimensions().clone();
 		HashMap<String, Object> parameters = new HashMap<>();
-		parameters.put("src", src.asClearCLBuffer());
-		parameters.put("dst", distributions.asClearCLBuffer());
+		parameters.put("src", src);
+		parameters.put("dst", distributions);
 		parameters.put("thresholds", thresholds);
 		parameters.put("probabilities", probabilities);
 		parameters.put("indices", indices);
@@ -33,14 +33,14 @@ public class CLIJRandomForestKernel {
 	}
 
 	public static void findMax(GpuApi gpu,
-		CLIJMultiChannelImage distributions,
+		GpuImage distributions,
 		GpuImage dst)
 	{
 		long[] globalSizes = { dst.getWidth(), dst.getHeight(), dst.getDepth() };
 		HashMap<String, Object> parameters = new HashMap<>();
 		parameters.put("dst", dst);
-		parameters.put("src", distributions.asClearCLBuffer());
-		parameters.put("num_classes", (int) distributions.getNChannels());
+		parameters.put("src", distributions);
+		parameters.put("num_classes", (int) distributions.getNumberOfChannels());
 		gpu.execute(CLIJRandomForestKernel.class, "find_max.cl", "find_max", globalSizes,
 			parameters, null);
 	}

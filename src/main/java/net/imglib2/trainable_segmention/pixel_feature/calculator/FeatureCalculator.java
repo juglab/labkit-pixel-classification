@@ -2,6 +2,8 @@
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
 import clij.GpuApi;
+import clij.GpuImage;
+import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
@@ -9,9 +11,10 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.RevampUtils;
+import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJMultiChannelImage;
 import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
+import net.imglib2.trainable_segmention.clij_random_forest.GpuViews;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureJoiner;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -91,8 +94,8 @@ public class FeatureCalculator {
 	public void apply(RandomAccessible<?> input, RandomAccessibleInterval<FloatType> output) {
 		if (gpu != null) {
 			Interval interval = RevampUtils.removeLastDimension(output);
-			try (CLIJMultiChannelImage result = applyUseGpu(input, interval)) {
-				result.copyTo(output);
+			try (GpuImage result = applyUseGpu(input, interval)) {
+				CLIJCopy.copyFromTo(result, output);
 			}
 		}
 		else {
@@ -108,9 +111,11 @@ public class FeatureCalculator {
 		Interval interval)
 	{
 		FinalInterval fullInterval = Intervals.addDimension(interval, 0, count() - 1);
-		if (gpu != null)
-			return Views.translate(applyUseGpu(extendedImage, interval).asRAI(),
+		if (gpu != null) {
+			GpuImage featureStack = applyUseGpu(extendedImage, interval);
+			return Views.translate(gpu.pullRAIMultiChannel(featureStack),
 				Intervals.minAsLongArray(fullInterval));
+		}
 		else {
 			Img<FloatType> image = ArrayImgs.floats(Intervals.dimensionsAsLongArray(fullInterval));
 			IntervalView<FloatType> rai = Views.translate(image, Intervals.minAsLongArray(fullInterval));
@@ -130,14 +135,14 @@ public class FeatureCalculator {
 		}
 	}
 
-	public CLIJMultiChannelImage applyUseGpu(RandomAccessible<?> input, Interval interval) {
+	public GpuImage applyUseGpu(RandomAccessible<?> input, Interval interval) {
 		if (interval.numDimensions() != settings().globals().numDimensions())
 			throw new IllegalArgumentException("Wrong dimension of the output interval.");
 		double[] pixelSize = settings.globals().pixelSizeAsDoubleArray();
 		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
-		CLIJMultiChannelImage featureStack = new CLIJMultiChannelImage(gpu, Intervals
-			.dimensionsAsLongArray(interval), count());
-		List<List<GpuView>> outputs = split(featureStack.channels(), channels.size());
+		GpuImage featureStack = gpu.create(Intervals.dimensionsAsLongArray(interval), count(),
+			NativeTypeEnum.Float);
+		List<List<GpuView>> outputs = split(GpuViews.channels(featureStack), channels.size());
 		for (int i = 0; i < channels.size(); i++) {
 			try (CLIJFeatureInput in = new CLIJFeatureInput(gpu, channels.get(i), interval, pixelSize)) {
 				joiner.prefetch(in);

@@ -98,9 +98,7 @@ public class RandomForestPrediction {
 			distribution[k] += leafProbabilities[(tree * numberOfLeafs + leaf) * numberOfClasses + k];
 	}
 
-	public void distribution(GpuApi gpu, CLIJMultiChannelImage features,
-		CLIJMultiChannelImage distribution)
-	{
+	public void distribution(GpuApi gpu, GpuImage features, GpuImage distribution) {
 		Img<UnsignedShortType> indices = ArrayImgs.unsignedShorts(nodeIndices, 3, numberOfNodes,
 			numberOfTrees);
 		Img<FloatType> thresholds = ArrayImgs.floats(nodeThresholds, 1, numberOfNodes, numberOfTrees);
@@ -116,13 +114,12 @@ public class RandomForestPrediction {
 		}
 	}
 
-	public GpuImage segment(GpuApi gpu, CLIJMultiChannelImage features) {
-		try (CLIJMultiChannelImage distribution = new CLIJMultiChannelImage(gpu, features
-			.getSpatialDimensions(), numberOfClasses))
+	public GpuImage segment(GpuApi gpu, GpuImage features) {
+		try (GpuImage distribution = gpu.create(features.getDimensions(), numberOfClasses,
+			NativeTypeEnum.Float))
 		{
 			distribution(gpu, features, distribution);
-			GpuImage output = gpu.create(distribution.getSpatialDimensions(),
-				NativeTypeEnum.UnsignedShort);
+			GpuImage output = gpu.create(distribution.getDimensions(), NativeTypeEnum.UnsignedShort);
 			CLIJRandomForestKernel.findMax(gpu, distribution, output);
 			return output;
 		}

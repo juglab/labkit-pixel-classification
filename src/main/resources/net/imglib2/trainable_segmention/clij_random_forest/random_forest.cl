@@ -13,8 +13,8 @@ __kernel void random_forest
 )
 {
   const int x = get_global_id(0), y = get_global_id(1), z = get_global_id(2);
-  const int src_channel_skip = GET_IMAGE_WIDTH(src) * GET_IMAGE_HEIGHT(src) * GET_IMAGE_DEPTH(src) / NUMBER_OF_FEATURES;
-  const int dst_channel_skip = GET_IMAGE_WIDTH(dst) * GET_IMAGE_HEIGHT(dst) * GET_IMAGE_DEPTH(dst) / NUMBER_OF_CLASSES;
+  const int src_channel_skip = GET_IMAGE_WIDTH(src) * GET_IMAGE_HEIGHT(src) * GET_IMAGE_DEPTH(src);
+  const int dst_channel_skip = GET_IMAGE_WIDTH(dst) * GET_IMAGE_HEIGHT(dst) * GET_IMAGE_DEPTH(dst);
   const int num_trees = GET_IMAGE_DEPTH(thresholds);
   const unsigned short num_nodes = (unsigned short) GET_IMAGE_HEIGHT(thresholds);
   float results[NUMBER_OF_CLASSES];

@@ -32,7 +32,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
-import java.util.Optional;
 
 public class CLIJCopy {
 
@@ -43,18 +42,16 @@ public class CLIJCopy {
 	public static void copyFromTo(RandomAccessibleInterval<? extends RealType<?>> source,
 		GpuImage target)
 	{
-		if (!Arrays.equals(Intervals.dimensionsAsLongArray(source), target.getDimensions()))
-			throw new IllegalArgumentException("Dimensions don't match.");
+		checkEqualDimensions(source, target);
 		RealType<?> sourceType = Util.getTypeFromInterval(source);
 		RealType<?> targetType = getImgLib2Type(target.getNativeType());
 		Object array = getBackingArrayOrNull(source);
 		if (array != null && sourceType.getClass() == targetType.getClass()) {
 			target.clearCLBuffer().readFrom(wrapAsBuffer(array), true);
-			return;
 		}
 		else {
 			RandomAccessibleInterval<RealType<?>> tmp = new ArrayImgFactory<>((NativeType) targetType)
-				.create(target.getDimensions());
+				.create(source);
 			RealTypeConverters.copyFromTo(Views.zeroMin(source), tmp);
 			copyFromTo(tmp, target);
 		}
@@ -63,21 +60,33 @@ public class CLIJCopy {
 	public static void copyFromTo(GpuImage source,
 		RandomAccessibleInterval<? extends RealType<?>> target)
 	{
-		if (!Arrays.equals(source.getDimensions(), Intervals.dimensionsAsLongArray(target)))
-			throw new IllegalArgumentException("Dimensions don't match.");
+		checkEqualDimensions(target, source);
 		RealType<?> sourceType = getImgLib2Type(source.getNativeType());
 		RealType<?> targetType = Util.getTypeFromInterval(target);
 		Object array = getBackingArrayOrNull(target);
 		if (array != null && sourceType.getClass() == targetType.getClass()) {
 			source.clearCLBuffer().writeTo(wrapAsBuffer(array), true);
-			return;
 		}
 		else {
 			RandomAccessibleInterval<RealType<?>> tmp = new ArrayImgFactory<>((NativeType) sourceType)
-				.create(source.getDimensions());
+				.create(target);
 			copyFromTo(source, tmp);
 			RealTypeConverters.copyFromTo(tmp, Views.zeroMin(target));
 		}
+	}
+
+	private static void checkEqualDimensions(RandomAccessibleInterval<? extends RealType<?>> rai,
+		GpuImage gpuImage)
+	{
+		long[] a = Intervals.dimensionsAsLongArray(rai);
+		long[] b = gpuImage.getDimensions();
+		if (gpuImage.getNumberOfChannels() == 1 && Arrays.equals(a, b))
+			return;
+		b = Arrays.copyOf(b, b.length + 1);
+		b[b.length - 1] = gpuImage.getNumberOfChannels();
+		if (Arrays.equals(a, b))
+			return;
+		throw new IllegalArgumentException("Dimensions don't match.");
 	}
 
 	public static RealType<?> getImgLib2Type(NativeTypeEnum nativeType) {

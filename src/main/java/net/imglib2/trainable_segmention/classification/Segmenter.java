@@ -7,10 +7,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import clij.GpuImage;
 import clij.GpuApi;
+import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.*;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJMultiChannelImage;
 import net.imglib2.trainable_segmention.clij_random_forest.RandomForestPrediction;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
@@ -135,7 +135,7 @@ public class Segmenter {
 		RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier),
 			classNames.size(), features.count());
 		try (
-			CLIJMultiChannelImage featureStack = features.applyUseGpu(image, out);
+			GpuImage featureStack = features.applyUseGpu(image, out);
 			GpuImage segmentationBuffer = prediction.segment(gpu, featureStack))
 		{
 			CLIJCopy.copyFromTo(segmentationBuffer, out);
@@ -192,12 +192,12 @@ public class Segmenter {
 		RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier),
 			classNames.size(), features.count());
 		try (
-			CLIJMultiChannelImage featureStack = features.applyUseGpu(image, interval);
-			CLIJMultiChannelImage distribution = new CLIJMultiChannelImage(gpu, featureStack
-				.getSpatialDimensions(), features.count()))
+			GpuImage featureStack = features.applyUseGpu(image, interval);
+			GpuImage distribution = gpu.create(featureStack.getDimensions(), features.count(),
+				NativeTypeEnum.Float))
 		{
 			prediction.distribution(gpu, featureStack, distribution);
-			featureStack.copyTo(out);
+			CLIJCopy.copyFromTo(featureStack, out);
 		}
 	}
 
