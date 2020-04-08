@@ -52,7 +52,7 @@ public class GpuGaussContent implements GpuComputeCache.Content {
 		GpuApi gpu = cache.gpuApi();
 		GpuView original = cache.get(source, operation.getRequiredInputInterval(interval));
 		GpuImage output = gpu.create(Intervals.dimensionsAsLongArray(interval), NativeTypeEnum.Float);
-		operation.convolve(original, GpuViews.wrap(output));
+		operation.apply(original, GpuViews.wrap(output));
 		return output;
 	}
 

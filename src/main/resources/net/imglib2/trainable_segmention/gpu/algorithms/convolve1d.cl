@@ -1,6 +1,6 @@
 const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
 
-__kernel void convolve1d(OUTPUT_IMAGE_PARAMETER, INPUT_IMAGE_PARAMETER, __constant float* kernelValues)
+__kernel void separable_operation(OUTPUT_IMAGE_PARAMETER, INPUT_IMAGE_PARAMETER, __constant float* kernelValues)
 {
   const long x_group = get_group_id(0);
   const long x_local = get_local_id(0);

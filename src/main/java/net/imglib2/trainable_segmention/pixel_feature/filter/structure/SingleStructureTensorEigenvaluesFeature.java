@@ -240,7 +240,7 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 		GpuImage blurred = gpu.create(dimensions, products.size(), NativeTypeEnum.Float);
 		List<GpuView> blurredChannels = GpuViews.channels(blurred);
 		for (int i = 0; i < products.size(); i++) {
-			integrationGauss.convolve(products.get(i), blurredChannels.get(i));
+			integrationGauss.apply(products.get(i), blurredChannels.get(i));
 		}
 		return blurred;
 	}

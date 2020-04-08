@@ -43,7 +43,7 @@ public class GpuConcatenatedNeighborhoodOperationTest {
 			1, 1));
 		Interval expectedInterval = Intervals.createMinMax(-2, -2, 2, 2);
 		ImgLib2Assert.assertIntervalEquals(expectedInterval, inputInterval);
-		concatenation.convolve(input, output);
+		concatenation.apply(input, output);
 		RandomAccessibleInterval<FloatType> rai = gpu.pullRAI(output.source());
 		ToString.print(rai);
 	}

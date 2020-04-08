@@ -1,8 +1,11 @@
 
 package net.imglib2.trainable_segmention.gpu.algorithms;
 
+import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import net.haesleinhuepf.clij.clearcl.ClearCLImage;
 import net.haesleinhuepf.clij.converters.implementations.RandomAccessibleIntervalToClearCLBufferConverter;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
+import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
@@ -15,6 +18,7 @@ import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.trainable_segmention.gpu.compute_cache.GpuComputeCache;
 import net.imglib2.trainable_segmention.gpu.compute_cache.GpuGaussContent;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Intervals;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
@@ -39,11 +43,14 @@ import java.util.concurrent.TimeUnit;
 public class GpuGaussBenchmark {
 
 	private final GpuApi gpu = GpuApi.getInstance();
-
+	private final CLIJ2 clij2 = CLIJ2.getInstance();
+	private final long[] dimessions = { 64, 64, 64 };
 	private final FinalInterval interval = new FinalInterval(64, 64, 64);
-	private final GpuImage inputBuffer = gpu.push(RandomImgs.seed(1).nextImage(new FloatType(),
-		interval));
-	private final GpuImage output = gpu.create(new long[] { 64, 64, 64 }, NativeTypeEnum.Float);
+
+	private final ClearCLBuffer inputBuffer = clij2.push(RandomImgs.seed(1).nextImage(new FloatType(),
+		dimessions));
+	private final ClearCLBuffer outputBuffer = clij2.create(dimessions);
+	private final GpuImage output = gpu.create(dimessions, NativeTypeEnum.Float);
 	private final RandomAccessible<FloatType> input = Utils.dirac(3);
 	private final GpuComputeCache cache = new GpuComputeCache(gpu, input, new double[] { 1, 1, 1 });
 	private final GpuGaussContent content = new GpuGaussContent(cache, 8);
@@ -69,12 +76,15 @@ public class GpuGaussBenchmark {
 		kernel.close();
 		cache.close();
 		gpu.close();
+		inputBuffer.close();
+		outputBuffer.close();
+		clij2.close();
 	}
 
 	@Benchmark
 	public RandomAccessibleInterval benchmarkClij2Gauss() {
-		gpu.gaussianBlur3D(inputBuffer, output, 8, 8, 8);
-		return gpu.pullRAI(output);
+		clij2.gaussianBlur3D(inputBuffer, outputBuffer, 8, 8, 8);
+		return clij2.pullRAI(output);
 	}
 
 	@Benchmark
@@ -88,7 +98,7 @@ public class GpuGaussBenchmark {
 	public RandomAccessibleInterval intermediate() {
 		try (GpuImage output = gpu.create(new long[] { 64, 64, 64 }, NativeTypeEnum.Float)) {
 			GpuNeighborhoodOperation gauss = GpuGauss.gauss(gpu, 8, 8, 8);
-			gauss.convolve(GpuViews.wrap(inputBuffer2), GpuViews.wrap(output));
+			gauss.apply(GpuViews.wrap(inputBuffer2), GpuViews.wrap(output));
 			return gpu.pullRAI(output);
 		}
 	}
@@ -101,16 +111,16 @@ public class GpuGaussBenchmark {
 			GpuImage output = scope.create(64, 64, 64);
 			{
 				GpuImage kernel = scope.add(gaussKernel(8));
-				GpuKernelConvolution.convolve(gpu, GpuViews.wrap(inputBuffer2), kernel, GpuViews.wrap(tmp1),
+				GpuKernelConvolution.convolve(gpu, kernel, GpuViews.wrap(inputBuffer2), GpuViews.wrap(tmp1),
 					0);
 			}
 			{
 				GpuImage kernel = scope.add(gaussKernel(8));
-				GpuKernelConvolution.convolve(gpu, GpuViews.wrap(tmp1), kernel, GpuViews.wrap(tmp2), 1);
+				GpuKernelConvolution.convolve(gpu, kernel, GpuViews.wrap(tmp1), GpuViews.wrap(tmp2), 1);
 			}
 			{
 				GpuImage kernel = scope.add(gaussKernel(8));
-				GpuKernelConvolution.convolve(gpu, GpuViews.wrap(tmp2), kernel, GpuViews.wrap(output), 2);
+				GpuKernelConvolution.convolve(gpu, kernel, GpuViews.wrap(tmp2), GpuViews.wrap(output), 2);
 			}
 			return gpu.pullRAI(output);
 		}
@@ -118,9 +128,9 @@ public class GpuGaussBenchmark {
 
 	@Benchmark
 	public RandomAccessibleInterval lowLevelGaussReuseBuffers() {
-		GpuKernelConvolution.convolve(gpu, GpuViews.wrap(inputBuffer2), kernel, GpuViews.wrap(tmp1), 0);
-		GpuKernelConvolution.convolve(gpu, GpuViews.wrap(tmp1), kernel, GpuViews.wrap(tmp2), 1);
-		GpuKernelConvolution.convolve(gpu, GpuViews.wrap(tmp2), kernel, GpuViews.wrap(output), 2);
+		GpuKernelConvolution.convolve(gpu, kernel, GpuViews.wrap(inputBuffer2), GpuViews.wrap(tmp1), 0);
+		GpuKernelConvolution.convolve(gpu, kernel, GpuViews.wrap(tmp1), GpuViews.wrap(tmp2), 1);
+		GpuKernelConvolution.convolve(gpu, kernel, GpuViews.wrap(tmp2), GpuViews.wrap(output), 2);
 		return gpu.pullRAI(output);
 	}
 

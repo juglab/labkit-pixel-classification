@@ -28,7 +28,7 @@ public class GpuRandomForestKernel {
 		constants.put("NUMBER_OF_CLASSES", probabilities.getWidth());
 		constants.put("NUMBER_OF_FEATURES", numberOfFeatures);
 		constants.put("INDICES_SIZE", Intervals.numElements(indices.getDimensions()));
-		gpu.execute(GpuRandomForestKernel.class, "random_forest.cl", "random_forest", globalSizes,
+		gpu.execute(GpuRandomForestKernel.class, "random_forest.cl", "random_forest", globalSizes, null,
 			parameters, constants);
 	}
 
@@ -41,7 +41,7 @@ public class GpuRandomForestKernel {
 		parameters.put("dst", dst);
 		parameters.put("src", distributions);
 		parameters.put("num_classes", (int) distributions.getNumberOfChannels());
-		gpu.execute(GpuRandomForestKernel.class, "find_max.cl", "find_max", globalSizes,
+		gpu.execute(GpuRandomForestKernel.class, "find_max.cl", "find_max", globalSizes, null,
 			parameters, null);
 	}
 }

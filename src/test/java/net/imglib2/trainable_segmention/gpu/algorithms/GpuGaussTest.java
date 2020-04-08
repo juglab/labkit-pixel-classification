@@ -38,7 +38,7 @@ public class GpuGaussTest {
 			GpuImage output = gpu.create(Intervals.dimensionsAsLongArray(targetInterval),
 				NativeTypeEnum.Float);)
 		{
-			operation.convolve(GpuViews.wrap(input), GpuViews.wrap(output));
+			operation.apply(GpuViews.wrap(input), GpuViews.wrap(output));
 			RandomAccessibleInterval<FloatType> rai = gpu.pullRAI(output);
 			ImgLib2Assert.assertImageEqualsRealType(Views.zeroMin(expected), rai, 1.e-7);
 		}

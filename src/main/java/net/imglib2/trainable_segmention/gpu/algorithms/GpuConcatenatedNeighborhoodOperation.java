@@ -19,9 +19,11 @@ class GpuConcatenatedNeighborhoodOperation implements GpuNeighborhoodOperation {
 
 	private final GpuApi gpu;
 
-	private final List<GpuKernelConvolution> convolutions;
+	private final List<? extends GpuNeighborhoodOperation> convolutions;
 
-	public GpuConcatenatedNeighborhoodOperation(GpuApi gpu, List<GpuKernelConvolution> convolutions) {
+	public GpuConcatenatedNeighborhoodOperation(GpuApi gpu,
+		List<? extends GpuNeighborhoodOperation> convolutions)
+	{
 		this.gpu = gpu;
 		this.convolutions = convolutions;
 	}
@@ -32,7 +34,7 @@ class GpuConcatenatedNeighborhoodOperation implements GpuNeighborhoodOperation {
 	}
 
 	@Override
-	public void convolve(GpuView input, GpuView output) {
+	public void apply(GpuView input, GpuView output) {
 		try (AutoClose autoClose = new AutoClose()) {
 			List<Interval> intervals = intervals(new FinalInterval(output.dimensions()));
 			if (!Intervals.equalDimensions(new FinalInterval(input.dimensions()), intervals.get(0)))
@@ -48,8 +50,8 @@ class GpuConcatenatedNeighborhoodOperation implements GpuNeighborhoodOperation {
 			}
 			buffers.add(output);
 			for (int i = 0; i < convolutions.size(); i++) {
-				GpuKernelConvolution convolution = convolutions.get(i);
-				convolution.convolve(buffers.get(i), buffers.get(i + 1));
+				GpuNeighborhoodOperation convolution = convolutions.get(i);
+				convolution.apply(buffers.get(i), buffers.get(i + 1));
 			}
 		}
 	}
@@ -60,7 +62,7 @@ class GpuConcatenatedNeighborhoodOperation implements GpuNeighborhoodOperation {
 		intervals.add(outputInterval);
 		Interval t = outputInterval;
 		for (int i = n - 1; i >= 0; i--) {
-			GpuKernelConvolution convolution = convolutions.get(i);
+			GpuNeighborhoodOperation convolution = convolutions.get(i);
 			t = convolution.getRequiredInputInterval(t);
 			intervals.add(t);
 		}

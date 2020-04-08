@@ -8,5 +8,5 @@ public interface GpuNeighborhoodOperation {
 
 	Interval getRequiredInputInterval(Interval targetInterval);
 
-	void convolve(GpuView input, GpuView output);
+	void apply(GpuView input, GpuView output);
 }

@@ -124,8 +124,8 @@ public class GpuPixelWiseOperation {
 		defines.put("PARAMETER", concatenate(", ", parameterDefinition));
 		defines.put("OPERATION", concatenate("; ", preOperation, Collections.singletonList(operation),
 			postOperation));
-		gpu.execute(GpuPixelWiseOperation.class, "pixelwise_operation.cl", "operation",
-			dims, parameterValues, defines);
+		gpu.execute(GpuPixelWiseOperation.class, "pixelwise_operation.cl", "operation", dims, null,
+			parameterValues, defines);
 	}
 
 	@SafeVarargs
