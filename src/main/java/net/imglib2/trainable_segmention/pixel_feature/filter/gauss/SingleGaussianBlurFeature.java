@@ -3,9 +3,9 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.gauss;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
-import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
+import net.imglib2.trainable_segmention.gpu.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.gpu.api.GpuView;
+import net.imglib2.trainable_segmention.gpu.api.CLIJCopy;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;

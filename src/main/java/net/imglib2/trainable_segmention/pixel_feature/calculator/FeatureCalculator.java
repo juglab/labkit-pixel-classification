@@ -1,8 +1,8 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
-import clij.GpuApi;
-import clij.GpuImage;
+import net.imglib2.trainable_segmention.gpu.api.GpuApi;
+import net.imglib2.trainable_segmention.gpu.api.GpuImage;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
@@ -11,10 +11,10 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.RevampUtils;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJCopy;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
-import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
-import net.imglib2.trainable_segmention.clij_random_forest.GpuViews;
+import net.imglib2.trainable_segmention.gpu.api.CLIJCopy;
+import net.imglib2.trainable_segmention.gpu.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.gpu.api.GpuView;
+import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureJoiner;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;

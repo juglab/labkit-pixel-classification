@@ -1,20 +1,20 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.structure;
 
-import clij.CLIJEigenvalues;
-import clij.CLIJLoopBuilder;
-import clij.Gauss;
-import clij.GpuImage;
-import clij.NeighborhoodOperation;
-import clij.GpuApi;
+import net.imglib2.trainable_segmention.gpu.algorithms.CLIJEigenvalues;
+import net.imglib2.trainable_segmention.gpu.api.CLIJLoopBuilder;
+import net.imglib2.trainable_segmention.gpu.algorithms.Gauss;
+import net.imglib2.trainable_segmention.gpu.api.GpuImage;
+import net.imglib2.trainable_segmention.gpu.algorithms.NeighborhoodOperation;
+import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.linalg.eigen.EigenValues;
-import net.imglib2.trainable_segmention.clij_random_forest.CLIJFeatureInput;
-import net.imglib2.trainable_segmention.clij_random_forest.GpuView;
-import net.imglib2.trainable_segmention.clij_random_forest.GpuViews;
+import net.imglib2.trainable_segmention.gpu.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.gpu.api.GpuView;
+import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
