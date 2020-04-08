@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmention.gpu.algorithms;
+package net.imglib2.trainable_segmention.gpu.api;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
@@ -17,6 +17,9 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
+/**
+ * Test {@link GpuApi}.
+ */
 public class GpuApiTest {
 
 	private final GpuApi gpu = new GpuApi(CLIJ2.getInstance());

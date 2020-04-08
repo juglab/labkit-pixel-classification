@@ -5,34 +5,35 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
-import net.imglib2.trainable_segmention.gpu.compute_cache.ComputeCache;
-import net.imglib2.trainable_segmention.gpu.compute_cache.DerivativeContent;
-import net.imglib2.trainable_segmention.gpu.compute_cache.GaussContent;
-import net.imglib2.trainable_segmention.gpu.compute_cache.OriginalContent;
-import net.imglib2.trainable_segmention.gpu.compute_cache.SecondDerivativeContent;
+import net.imglib2.trainable_segmention.gpu.compute_cache.GpuComputeCache;
+import net.imglib2.trainable_segmention.gpu.compute_cache.GpuDerivativeContent;
+import net.imglib2.trainable_segmention.gpu.compute_cache.GpuGaussContent;
+import net.imglib2.trainable_segmention.gpu.compute_cache.GpuOriginalContent;
+import net.imglib2.trainable_segmention.gpu.compute_cache.GpuSecondDerivativeContent;
 import net.imglib2.type.numeric.real.FloatType;
 
-public class CLIJFeatureInput implements AutoCloseable {
+public class GpuFeatureInput implements AutoCloseable {
 
 	private final GpuApi gpu;
+
 	private final Interval targetInterval;
 
-	private final ComputeCache cache;
+	private final GpuComputeCache cache;
 
-	public CLIJFeatureInput(GpuApi gpu, RandomAccessible<FloatType> original, Interval targetInterval,
+	public GpuFeatureInput(GpuApi gpu, RandomAccessible<FloatType> original, Interval targetInterval,
 		double[] pixelSize)
 	{
 		this.gpu = gpu;
 		this.targetInterval = targetInterval;
-		this.cache = new ComputeCache(gpu, original, pixelSize);
+		this.cache = new GpuComputeCache(gpu, original, pixelSize);
 	}
 
 	public void prefetchOriginal(Interval interval) {
-		cache.request(new OriginalContent(cache), interval);
+		cache.request(new GpuOriginalContent(cache), interval);
 	}
 
 	public GpuView original(Interval interval) {
-		return cache.get(new OriginalContent(cache), interval);
+		return cache.get(new GpuOriginalContent(cache), interval);
 	}
 
 	public void prefetchGauss(double sigma, Interval interval) {
@@ -44,11 +45,11 @@ public class CLIJFeatureInput implements AutoCloseable {
 	}
 
 	public void prefetchDerivative(double sigma, int dimension, Interval interval) {
-		cache.request(new DerivativeContent(cache, gaussKey(sigma), dimension), interval);
+		cache.request(new GpuDerivativeContent(cache, gaussKey(sigma), dimension), interval);
 	}
 
 	public GpuView derivative(double sigma, int dimension, Interval interval) {
-		return cache.get(new DerivativeContent(cache, gaussKey(sigma), dimension), interval);
+		return cache.get(new GpuDerivativeContent(cache, gaussKey(sigma), dimension), interval);
 	}
 
 	public void prefetchSecondDerivative(double sigma, int dimensionA, int dimensionB,
@@ -61,17 +62,19 @@ public class CLIJFeatureInput implements AutoCloseable {
 		return cache.get(secondDerivativeKey(sigma, dimensionA, dimensionB), interval);
 	}
 
-	private GaussContent gaussKey(double sigma) {
-		return new GaussContent(cache, sigma);
+	private GpuGaussContent gaussKey(double sigma) {
+		return new GpuGaussContent(cache, sigma);
 	}
 
-	private ComputeCache.Content secondDerivativeKey(double sigma, int dimensionA, int dimensionB) {
+	private GpuComputeCache.Content secondDerivativeKey(double sigma, int dimensionA,
+		int dimensionB)
+	{
 		if (dimensionA > dimensionB)
 			return secondDerivativeKey(sigma, dimensionB, dimensionA);
 		if (dimensionA == dimensionB)
-			return new SecondDerivativeContent(cache, gaussKey(sigma), dimensionA);
-		return new DerivativeContent(cache, new DerivativeContent(cache, gaussKey(sigma), dimensionA),
-			dimensionB);
+			return new GpuSecondDerivativeContent(cache, gaussKey(sigma), dimensionA);
+		return new GpuDerivativeContent(cache, new GpuDerivativeContent(cache, gaussKey(sigma),
+			dimensionA), dimensionB);
 	}
 
 	@Override

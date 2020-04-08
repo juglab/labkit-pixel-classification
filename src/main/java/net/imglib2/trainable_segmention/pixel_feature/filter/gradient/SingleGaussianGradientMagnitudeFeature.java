@@ -1,11 +1,11 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.gradient;
 
-import net.imglib2.trainable_segmention.gpu.api.CLIJLoopBuilder;
+import net.imglib2.trainable_segmention.gpu.api.GpuPixelWiseOperation;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
-import net.imglib2.trainable_segmention.gpu.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
@@ -83,16 +83,16 @@ public class SingleGaussianGradientMagnitudeFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void prefetch(CLIJFeatureInput input) {
+	public void prefetch(GpuFeatureInput input) {
 		for (int d = 0; d < globalSettings().numDimensions(); d++)
 			input.prefetchDerivative(sigma, d, input.targetInterval());
 	}
 
 	@Override
-	public void apply(CLIJFeatureInput input, List<GpuView> output) {
+	public void apply(GpuFeatureInput input, List<GpuView> output) {
 		boolean is3d = globalSettings().numDimensions() == 3;
 		GpuApi gpu = input.gpuApi();
-		CLIJLoopBuilder loopBuilder = CLIJLoopBuilder.gpu(gpu);
+		GpuPixelWiseOperation loopBuilder = GpuPixelWiseOperation.gpu(gpu);
 		loopBuilder.addInput("dx", input.derivative(sigma, 0, input.targetInterval()));
 		loopBuilder.addInput("dy", input.derivative(sigma, 1, input.targetInterval()));
 		if (is3d)

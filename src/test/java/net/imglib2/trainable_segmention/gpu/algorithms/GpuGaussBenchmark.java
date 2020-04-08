@@ -12,8 +12,8 @@ import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
-import net.imglib2.trainable_segmention.gpu.compute_cache.ComputeCache;
-import net.imglib2.trainable_segmention.gpu.compute_cache.GaussContent;
+import net.imglib2.trainable_segmention.gpu.compute_cache.GpuComputeCache;
+import net.imglib2.trainable_segmention.gpu.compute_cache.GpuGaussContent;
 import net.imglib2.type.numeric.real.FloatType;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @State(Scope.Benchmark)
-public class GaussBenchmark {
+public class GpuGaussBenchmark {
 
 	private final GpuApi gpu = GpuApi.getInstance();
 
@@ -45,8 +45,8 @@ public class GaussBenchmark {
 		interval));
 	private final GpuImage output = gpu.create(new long[] { 64, 64, 64 }, NativeTypeEnum.Float);
 	private final RandomAccessible<FloatType> input = Utils.dirac(3);
-	private final ComputeCache cache = new ComputeCache(gpu, input, new double[] { 1, 1, 1 });
-	private final GaussContent content = new GaussContent(cache, 8);
+	private final GpuComputeCache cache = new GpuComputeCache(gpu, input, new double[] { 1, 1, 1 });
+	private final GpuGaussContent content = new GpuGaussContent(cache, 8);
 	private final GpuImage kernel = gaussKernel(8);
 	private final long large = 64 + kernel.getWidth() - 1;
 	private final GpuImage inputBuffer2 = gpu.push(RandomImgs.seed(1).nextImage(new FloatType(),
@@ -67,6 +67,8 @@ public class GaussBenchmark {
 		tmp1.close();
 		tmp2.close();
 		kernel.close();
+		cache.close();
+		gpu.close();
 	}
 
 	@Benchmark
@@ -85,7 +87,7 @@ public class GaussBenchmark {
 	@Benchmark
 	public RandomAccessibleInterval intermediate() {
 		try (GpuImage output = gpu.create(new long[] { 64, 64, 64 }, NativeTypeEnum.Float)) {
-			NeighborhoodOperation gauss = Gauss.gauss(gpu, 8, 8, 8);
+			GpuNeighborhoodOperation gauss = GpuGauss.gauss(gpu, 8, 8, 8);
 			gauss.convolve(GpuViews.wrap(inputBuffer2), GpuViews.wrap(output));
 			return gpu.pullRAI(output);
 		}
@@ -99,16 +101,16 @@ public class GaussBenchmark {
 			GpuImage output = scope.create(64, 64, 64);
 			{
 				GpuImage kernel = scope.add(gaussKernel(8));
-				CLIJKernelConvolution.convolve(gpu, GpuViews.wrap(inputBuffer2), kernel, GpuViews.wrap(
-					tmp1), 0);
+				GpuKernelConvolution.convolve(gpu, GpuViews.wrap(inputBuffer2), kernel, GpuViews.wrap(tmp1),
+					0);
 			}
 			{
 				GpuImage kernel = scope.add(gaussKernel(8));
-				CLIJKernelConvolution.convolve(gpu, GpuViews.wrap(tmp1), kernel, GpuViews.wrap(tmp2), 1);
+				GpuKernelConvolution.convolve(gpu, GpuViews.wrap(tmp1), kernel, GpuViews.wrap(tmp2), 1);
 			}
 			{
 				GpuImage kernel = scope.add(gaussKernel(8));
-				CLIJKernelConvolution.convolve(gpu, GpuViews.wrap(tmp2), kernel, GpuViews.wrap(output), 2);
+				GpuKernelConvolution.convolve(gpu, GpuViews.wrap(tmp2), kernel, GpuViews.wrap(output), 2);
 			}
 			return gpu.pullRAI(output);
 		}
@@ -116,15 +118,14 @@ public class GaussBenchmark {
 
 	@Benchmark
 	public RandomAccessibleInterval lowLevelGaussReuseBuffers() {
-		CLIJKernelConvolution.convolve(gpu, GpuViews.wrap(inputBuffer2), kernel, GpuViews.wrap(tmp1),
-			0);
-		CLIJKernelConvolution.convolve(gpu, GpuViews.wrap(tmp1), kernel, GpuViews.wrap(tmp2), 1);
-		CLIJKernelConvolution.convolve(gpu, GpuViews.wrap(tmp2), kernel, GpuViews.wrap(output), 2);
+		GpuKernelConvolution.convolve(gpu, GpuViews.wrap(inputBuffer2), kernel, GpuViews.wrap(tmp1), 0);
+		GpuKernelConvolution.convolve(gpu, GpuViews.wrap(tmp1), kernel, GpuViews.wrap(tmp2), 1);
+		GpuKernelConvolution.convolve(gpu, GpuViews.wrap(tmp2), kernel, GpuViews.wrap(output), 2);
 		return gpu.pullRAI(output);
 	}
 
 	public static void main(String... args) throws RunnerException {
-		Options options = new OptionsBuilder().include(GaussBenchmark.class.getSimpleName()).build();
+		Options options = new OptionsBuilder().include(GpuGaussBenchmark.class.getSimpleName()).build();
 		new Runner(options).run();
 	}
 

@@ -38,7 +38,7 @@ public class GpuApi implements AutoCloseable {
 
 	public GpuImage push(RandomAccessibleInterval<? extends RealType<?>> source) {
 		GpuImage target = create(Intervals.dimensionsAsLongArray(source), getNativeTypeEnum(source));
-		CLIJCopy.copyFromTo(source, target);
+		GpuCopy.copyFromTo(source, target);
 		return target;
 	}
 
@@ -46,7 +46,7 @@ public class GpuApi implements AutoCloseable {
 		long[] dimensions = Intervals.dimensionsAsLongArray(input);
 		int n = dimensions.length - 1;
 		GpuImage buffer = create(Arrays.copyOf(dimensions, n), dimensions[n], NativeTypeEnum.Float);
-		CLIJCopy.copyFromTo(input, buffer);
+		GpuCopy.copyFromTo(input, buffer);
 		return buffer;
 	}
 
@@ -73,9 +73,9 @@ public class GpuApi implements AutoCloseable {
 	private <T extends RealType<?>> RandomAccessibleInterval<T> internalPullRai(GpuImage source,
 		long[] dimensions)
 	{
-		RealType<?> type = CLIJCopy.getImgLib2Type(source.getNativeType());
+		RealType<?> type = GpuCopy.getImgLib2Type(source.getNativeType());
 		Img<T> target = Cast.unchecked(new ArrayImgFactory<>(Cast.unchecked(type)).create(dimensions));
-		CLIJCopy.copyFromTo(source, target);
+		GpuCopy.copyFromTo(source, target);
 		return target;
 	}
 

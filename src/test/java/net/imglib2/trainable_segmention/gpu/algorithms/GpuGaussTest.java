@@ -9,18 +9,19 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
-import net.imglib2.trainable_segmention.gpu.algorithms.Gauss;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
-import net.imglib2.trainable_segmention.gpu.algorithms.NeighborhoodOperation;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import org.junit.Test;
 import preview.net.imglib2.algorithm.gauss3.Gauss3;
 
-public class GaussTest {
+/**
+ * Tests {@link GpuGauss}.
+ */
+public class GpuGaussTest {
 
 	@Test
 	public void test() {
@@ -30,7 +31,7 @@ public class GaussTest {
 			-2, -2, -2, 2, 2, 2), new FloatType());
 		Gauss3.gauss(2, dirac, expected);
 		Interval targetInterval = new FinalInterval(expected);
-		NeighborhoodOperation operation = Gauss.gauss(gpu, 2, 2, 2);
+		GpuNeighborhoodOperation operation = GpuGauss.gauss(gpu, 2, 2, 2);
 		Interval inputInterval = operation.getRequiredInputInterval(targetInterval);
 		try (
 			GpuImage input = gpu.push(Views.interval(dirac, inputInterval));

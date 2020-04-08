@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-public class ComputeCache implements AutoCloseable {
+public class GpuComputeCache implements AutoCloseable {
 
 	private final AutoClose autoClose = new AutoClose();
 	private final Map<Content, CacheEntry> map = new HashMap<>();
@@ -24,7 +24,7 @@ public class ComputeCache implements AutoCloseable {
 	private final RandomAccessible<FloatType> original;
 	private final double[] pixelSize;
 
-	public ComputeCache(GpuApi gpu, RandomAccessible<FloatType> original, double[] pixelSize) {
+	public GpuComputeCache(GpuApi gpu, RandomAccessible<FloatType> original, double[] pixelSize) {
 		this.gpu = gpu;
 		this.original = original;
 		this.pixelSize = pixelSize;

@@ -2,7 +2,7 @@
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmention.gpu.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.type.numeric.real.FloatType;
@@ -48,12 +48,12 @@ public abstract class AbstractGroupFeatureOp extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void prefetch(CLIJFeatureInput input) {
+	public void prefetch(GpuFeatureInput input) {
 		featureGroup.prefetch(input);
 	}
 
 	@Override
-	public void apply(CLIJFeatureInput input, List<GpuView> output) {
+	public void apply(GpuFeatureInput input, List<GpuView> output) {
 		featureGroup.apply(input, output);
 	}
 }

@@ -7,7 +7,7 @@ import net.imglib2.util.Intervals;
 
 import java.util.HashMap;
 
-public class CLIJRandomForestKernel {
+public class GpuRandomForestKernel {
 
 	public static void randomForest(GpuApi gpu,
 		GpuImage distributions,
@@ -28,7 +28,7 @@ public class CLIJRandomForestKernel {
 		constants.put("NUMBER_OF_CLASSES", probabilities.getWidth());
 		constants.put("NUMBER_OF_FEATURES", numberOfFeatures);
 		constants.put("INDICES_SIZE", Intervals.numElements(indices.getDimensions()));
-		gpu.execute(CLIJRandomForestKernel.class, "random_forest.cl", "random_forest", globalSizes,
+		gpu.execute(GpuRandomForestKernel.class, "random_forest.cl", "random_forest", globalSizes,
 			parameters, constants);
 	}
 
@@ -41,7 +41,7 @@ public class CLIJRandomForestKernel {
 		parameters.put("dst", dst);
 		parameters.put("src", distributions);
 		parameters.put("num_classes", (int) distributions.getNumberOfChannels());
-		gpu.execute(CLIJRandomForestKernel.class, "find_max.cl", "find_max", globalSizes,
+		gpu.execute(GpuRandomForestKernel.class, "find_max.cl", "find_max", globalSizes,
 			parameters, null);
 	}
 }

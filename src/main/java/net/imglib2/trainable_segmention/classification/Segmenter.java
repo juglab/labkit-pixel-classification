@@ -10,7 +10,7 @@ import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.*;
 import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.trainable_segmention.gpu.api.CLIJCopy;
+import net.imglib2.trainable_segmention.gpu.api.GpuCopy;
 import net.imglib2.trainable_segmention.gpu.random_forest.RandomForestPrediction;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
@@ -138,7 +138,7 @@ public class Segmenter {
 			GpuImage featureStack = features.applyUseGpu(image, out);
 			GpuImage segmentationBuffer = prediction.segment(gpu, featureStack))
 		{
-			CLIJCopy.copyFromTo(segmentationBuffer, out);
+			GpuCopy.copyFromTo(segmentationBuffer, out);
 		}
 	}
 
@@ -197,7 +197,7 @@ public class Segmenter {
 				NativeTypeEnum.Float))
 		{
 			prediction.distribution(gpu, featureStack, distribution);
-			CLIJCopy.copyFromTo(featureStack, out);
+			GpuCopy.copyFromTo(featureStack, out);
 		}
 	}
 

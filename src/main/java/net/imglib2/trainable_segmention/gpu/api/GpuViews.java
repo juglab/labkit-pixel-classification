@@ -47,7 +47,7 @@ public class GpuViews {
 	public static GpuImage asGpuImage(GpuApi gpu, GpuView view) {
 		GpuImage buffer = gpu.create(Intervals.dimensionsAsLongArray(view.dimensions()),
 			NativeTypeEnum.Float);
-		CLIJCopy.copy(gpu, view, wrap(buffer));
+		GpuCopy.copyFromTo(gpu, view, wrap(buffer));
 		return buffer;
 	}
 

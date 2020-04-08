@@ -13,10 +13,10 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 /**
- * {@link CLIJLoopBuilder} provides a simple way to execute pixel wise
+ * {@link GpuPixelWiseOperation} provides a simple way to execute pixel wise
  * operations on images using CLIJ.
  */
-public class CLIJLoopBuilder {
+public class GpuPixelWiseOperation {
 
 	private List<String> COORDINATE_VARIABLE_NAMES = Arrays.asList("coordinate_x", "coordinate_y",
 		"coordinate_z");
@@ -30,50 +30,50 @@ public class CLIJLoopBuilder {
 	private final Map<GpuImage, String> images = new HashMap<>();
 	private final List<ValuePair<String, long[]>> imageSizes = new ArrayList<>();
 
-	private CLIJLoopBuilder(GpuApi gpu) {
+	private GpuPixelWiseOperation(GpuApi gpu) {
 		this.gpu = gpu;
 	}
 
-	public static CLIJLoopBuilder gpu(GpuApi gpu) {
-		return new CLIJLoopBuilder(gpu);
+	public static GpuPixelWiseOperation gpu(GpuApi gpu) {
+		return new GpuPixelWiseOperation(gpu);
 	}
 
-	public CLIJLoopBuilder addInput(String variable, int image) {
+	public GpuPixelWiseOperation addInput(String variable, int image) {
 		addParameter("int", variable, image);
 		return this;
 	}
 
-	public CLIJLoopBuilder addInput(String variable, long image) {
+	public GpuPixelWiseOperation addInput(String variable, long image) {
 		addParameter("long", variable, image);
 		return this;
 	}
 
-	public CLIJLoopBuilder addInput(String variable, float image) {
+	public GpuPixelWiseOperation addInput(String variable, float image) {
 		addParameter("float", variable, image);
 		return this;
 	}
 
-	public CLIJLoopBuilder addInput(String variable, double image) {
+	public GpuPixelWiseOperation addInput(String variable, double image) {
 		addParameter("double", variable, image);
 		return this;
 	}
 
-	public CLIJLoopBuilder addInput(String variable, GpuImage image) {
+	public GpuPixelWiseOperation addInput(String variable, GpuImage image) {
 		return addInput(variable, GpuViews.wrap(image));
 	}
 
-	public CLIJLoopBuilder addOutput(String variable, GpuImage image) {
+	public GpuPixelWiseOperation addOutput(String variable, GpuImage image) {
 		return addOutput(variable, GpuViews.wrap(image));
 	}
 
-	public CLIJLoopBuilder addInput(String variable, GpuView image) {
+	public GpuPixelWiseOperation addInput(String variable, GpuView image) {
 		String parameterName = addGpuViewParameter(variable, image);
 		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = " +
 			pixelAt(parameterName, image.offset()));
 		return this;
 	}
 
-	public CLIJLoopBuilder addOutput(String variable, GpuView image) {
+	public GpuPixelWiseOperation addOutput(String variable, GpuView image) {
 		String parameterName = addGpuViewParameter(variable, image);
 		preOperation.add("IMAGE_" + parameterName + "_PIXEL_TYPE " + variable + " = 0");
 		postOperation.add(pixelAt(parameterName, image.offset()) + " = " + variable);
@@ -124,7 +124,7 @@ public class CLIJLoopBuilder {
 		defines.put("PARAMETER", concatenate(", ", parameterDefinition));
 		defines.put("OPERATION", concatenate("; ", preOperation, Collections.singletonList(operation),
 			postOperation));
-		gpu.execute(CLIJLoopBuilder.class, "binary_operation.cl", "operation",
+		gpu.execute(GpuPixelWiseOperation.class, "pixelwise_operation.cl", "operation",
 			dims, parameterValues, defines);
 	}
 

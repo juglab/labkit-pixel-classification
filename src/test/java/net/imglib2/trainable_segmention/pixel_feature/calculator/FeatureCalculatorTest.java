@@ -1,12 +1,12 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
-import net.imglib2.trainable_segmention.gpu.api.CLIJLoopBuilder;
+import net.imglib2.trainable_segmention.gpu.api.GpuPixelWiseOperation;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.Utils;
-import net.imglib2.trainable_segmention.gpu.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
@@ -97,14 +97,14 @@ public class FeatureCalculatorTest {
 		}
 
 		@Override
-		public void prefetch(CLIJFeatureInput input) {
+		public void prefetch(GpuFeatureInput input) {
 			input.prefetchOriginal(input.targetInterval());
 		}
 
 		@Override
-		public void apply(CLIJFeatureInput input, List<GpuView> output) {
+		public void apply(GpuFeatureInput input, List<GpuView> output) {
 			GpuView image = input.original(input.targetInterval());
-			CLIJLoopBuilder.gpu(input.gpuApi())
+			GpuPixelWiseOperation.gpu(input.gpuApi())
 				.addInput("a", image)
 				.addInput("b", (float) value)
 				.addOutput("c", output.get(0)).forEachPixel("c = a + b");

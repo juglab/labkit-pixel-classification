@@ -8,13 +8,13 @@ import preview.net.imglib2.algorithm.gauss3.Gauss3;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Gauss {
+public class GpuGauss {
 
-	public static NeighborhoodOperation gauss(GpuApi gpu, double... sigmas) {
-		final List<CLIJKernelConvolution> convolutions = new ArrayList<>();
+	public static GpuNeighborhoodOperation gauss(GpuApi gpu, double... sigmas) {
+		final List<GpuKernelConvolution> convolutions = new ArrayList<>();
 		for (int d = 0; d < sigmas.length; d++)
-			convolutions.add(new CLIJKernelConvolution(gpu, gaussKernel(sigmas[d]), d));
-		return new ConcatenatedNeighborhoodOperation(gpu, convolutions);
+			convolutions.add(new GpuKernelConvolution(gpu, gaussKernel(sigmas[d]), d));
+		return GpuNeighborhoodOperations.concat(gpu, convolutions);
 	}
 
 	private static Kernel1D gaussKernel(double sigma) {

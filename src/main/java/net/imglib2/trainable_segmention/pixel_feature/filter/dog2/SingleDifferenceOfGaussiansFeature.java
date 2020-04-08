@@ -1,11 +1,11 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.dog2;
 
-import net.imglib2.trainable_segmention.gpu.api.CLIJLoopBuilder;
+import net.imglib2.trainable_segmention.gpu.api.GpuPixelWiseOperation;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
-import net.imglib2.trainable_segmention.gpu.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
@@ -58,20 +58,20 @@ public class SingleDifferenceOfGaussiansFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void prefetch(CLIJFeatureInput input) {
+	public void prefetch(GpuFeatureInput input) {
 		input.prefetchGauss(sigma1, input.targetInterval());
 		input.prefetchGauss(sigma2, input.targetInterval());
 	}
 
 	@Override
-	public void apply(CLIJFeatureInput input, List<GpuView> output) {
+	public void apply(GpuFeatureInput input, List<GpuView> output) {
 		GpuView gauss1 = input.gauss(sigma1, input.targetInterval());
 		GpuView gauss2 = input.gauss(sigma2, input.targetInterval());
 		subtract(input.gpuApi(), gauss1, gauss2, output.get(0));
 	}
 
 	private void subtract(GpuApi gpu, GpuView minuend, GpuView subtrahend, GpuView result) {
-		CLIJLoopBuilder.gpu(gpu)
+		GpuPixelWiseOperation.gpu(gpu)
 			.addInput("a", minuend)
 			.addInput("b", subtrahend)
 			.addOutput("r", result)

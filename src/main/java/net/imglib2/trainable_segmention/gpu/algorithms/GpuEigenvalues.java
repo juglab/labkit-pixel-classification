@@ -1,13 +1,13 @@
 
 package net.imglib2.trainable_segmention.gpu.algorithms;
 
-import net.imglib2.trainable_segmention.gpu.api.CLIJLoopBuilder;
+import net.imglib2.trainable_segmention.gpu.api.GpuPixelWiseOperation;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 
 import java.util.List;
 
-public class CLIJEigenvalues {
+public class GpuEigenvalues {
 
 	public static void symmetric(GpuApi gpu, List<GpuView> matrix, List<GpuView> eigenvalues) {
 		if (matrix.size() == 3 && eigenvalues.size() == 2)
@@ -32,7 +32,7 @@ public class CLIJEigenvalues {
 	public static void symmetric2d(GpuApi gpu, GpuView xx, GpuView xy, GpuView yy,
 		GpuView eigenvalue1, GpuView eigenvalue2)
 	{
-		CLIJLoopBuilder.gpu(gpu)
+		GpuPixelWiseOperation.gpu(gpu)
 			.addInput("s_xx", xx)
 			.addInput("s_xy", xy)
 			.addInput("s_yy", yy)
@@ -55,7 +55,7 @@ public class CLIJEigenvalues {
 		GpuView yz, GpuView zz, GpuView eigenvalue1, GpuView eigenvalue2, GpuView eigenvalue3)
 	{
 
-		CLIJLoopBuilder.gpu(gpu)
+		GpuPixelWiseOperation.gpu(gpu)
 			.addInput("s_xx", xx)
 			.addInput("s_xy", xy)
 			.addInput("s_xz", xz)

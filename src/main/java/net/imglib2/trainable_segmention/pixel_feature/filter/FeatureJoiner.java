@@ -2,7 +2,7 @@
 package net.imglib2.trainable_segmention.pixel_feature.filter;
 
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmention.gpu.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
@@ -53,12 +53,12 @@ public class FeatureJoiner {
 		genericApply(output, (featureOp, o) -> featureOp.apply(input, o));
 	}
 
-	public void prefetch(CLIJFeatureInput input) {
+	public void prefetch(GpuFeatureInput input) {
 		for (FeatureOp feature : features)
 			feature.prefetch(input);
 	}
 
-	public void apply(CLIJFeatureInput input, List<GpuView> output) {
+	public void apply(GpuFeatureInput input, List<GpuView> output) {
 		genericApply(output, (featureOp, o) -> featureOp.apply(input, o));
 	}
 

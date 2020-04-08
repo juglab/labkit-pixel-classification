@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmention.gpu;
+package net.imglib2.trainable_segmention.gpu.random_forest;
 
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.RandomAccessibleInterval;
@@ -8,7 +8,7 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
-import net.imglib2.trainable_segmention.gpu.random_forest.CLIJRandomForestKernel;
+import net.imglib2.trainable_segmention.gpu.random_forest.GpuRandomForestKernel;
 import net.imglib2.trainable_segmention.utils.ToString;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
@@ -18,7 +18,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CLIJRandomForestKernelTest {
+/**
+ * Test {@link GpuRandomForestKernel}
+ */
+public class GpuRandomForestKernelTest {
 
 	private static GpuApi gpu;
 
@@ -69,7 +72,7 @@ public class CLIJRandomForestKernelTest {
 			0, 0, 0
 		}, 3, numberOfNodes, numberOfTrees);
 
-		CLIJRandomForestKernel.randomForest(gpu,
+		GpuRandomForestKernel.randomForest(gpu,
 			distributions,
 			gpu.pushMultiChannel(src),
 			gpu.push(thresholds),
@@ -104,7 +107,7 @@ public class CLIJRandomForestKernelTest {
 			-3, -3, -2, -1
 		}, 2, 2, 2, 3);
 		GpuImage outputBuffer = gpu.create(new long[] { 2, 2, 2 }, NativeTypeEnum.UnsignedShort);
-		CLIJRandomForestKernel.findMax(gpu, gpu.pushMultiChannel(input), outputBuffer);
+		GpuRandomForestKernel.findMax(gpu, gpu.pushMultiChannel(input), outputBuffer);
 		RandomAccessibleInterval<? extends RealType<?>> result = gpu.pullRAI(outputBuffer);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] {
 			2, 0, 1, 2,
@@ -123,7 +126,7 @@ public class CLIJRandomForestKernelTest {
 			-2, -1,
 		}, 2, 2, 2);
 		GpuImage outputBuffer = gpu.create(new long[] { 2, 2 }, NativeTypeEnum.UnsignedShort);
-		CLIJRandomForestKernel.findMax(gpu, gpu.pushMultiChannel(input), outputBuffer);
+		GpuRandomForestKernel.findMax(gpu, gpu.pushMultiChannel(input), outputBuffer);
 		RandomAccessibleInterval<? extends RealType<?>> result = gpu.pullRAI(outputBuffer);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] {
 			1, 0,

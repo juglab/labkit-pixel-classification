@@ -1,7 +1,7 @@
 
 package net.imglib2.trainable_segmention.gpu.compute_cache;
 
-import net.imglib2.trainable_segmention.gpu.api.CLIJLoopBuilder;
+import net.imglib2.trainable_segmention.gpu.api.GpuPixelWiseOperation;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
@@ -13,13 +13,13 @@ import net.imglib2.util.Intervals;
 
 import java.util.Objects;
 
-public class SecondDerivativeContent implements ComputeCache.Content {
+public class GpuSecondDerivativeContent implements GpuComputeCache.Content {
 
-	private final ComputeCache cache;
-	private final ComputeCache.Content input;
+	private final GpuComputeCache cache;
+	private final GpuComputeCache.Content input;
 	private final int d;
 
-	public SecondDerivativeContent(ComputeCache cache, ComputeCache.Content input, int d) {
+	public GpuSecondDerivativeContent(GpuComputeCache cache, GpuComputeCache.Content input, int d) {
 		this.cache = cache;
 		this.input = input;
 		this.d = d;
@@ -32,9 +32,9 @@ public class SecondDerivativeContent implements ComputeCache.Content {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof SecondDerivativeContent &&
-			input.equals(((SecondDerivativeContent) obj).input) &&
-			d == ((SecondDerivativeContent) obj).d;
+		return obj instanceof GpuSecondDerivativeContent &&
+			input.equals(((GpuSecondDerivativeContent) obj).input) &&
+			d == ((GpuSecondDerivativeContent) obj).d;
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class SecondDerivativeContent implements ComputeCache.Content {
 		GpuView front = GpuViews.crop(source, Intervals.translate(centerInterval, 1, d));
 		GpuView back = GpuViews.crop(source, Intervals.translate(centerInterval, -1, d));
 		GpuImage result = gpu.create(Intervals.dimensionsAsLongArray(interval), NativeTypeEnum.Float);
-		CLIJLoopBuilder.gpu(gpu)
+		GpuPixelWiseOperation.gpu(gpu)
 			.addInput("f", front)
 			.addInput("b", back)
 			.addInput("c", center)

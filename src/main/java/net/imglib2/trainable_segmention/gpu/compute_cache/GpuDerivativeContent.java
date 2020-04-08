@@ -1,7 +1,7 @@
 
 package net.imglib2.trainable_segmention.gpu.compute_cache;
 
-import net.imglib2.trainable_segmention.gpu.api.CLIJLoopBuilder;
+import net.imglib2.trainable_segmention.gpu.api.GpuPixelWiseOperation;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
@@ -13,13 +13,13 @@ import net.imglib2.util.Intervals;
 
 import java.util.Objects;
 
-public class DerivativeContent implements ComputeCache.Content {
+public class GpuDerivativeContent implements GpuComputeCache.Content {
 
-	private final ComputeCache cache;
-	private final ComputeCache.Content input;
+	private final GpuComputeCache cache;
+	private final GpuComputeCache.Content input;
 	private final int d;
 
-	public DerivativeContent(ComputeCache cache, ComputeCache.Content input, int d) {
+	public GpuDerivativeContent(GpuComputeCache cache, GpuComputeCache.Content input, int d) {
 		this.cache = cache;
 		this.input = input;
 		this.d = d;
@@ -32,9 +32,9 @@ public class DerivativeContent implements ComputeCache.Content {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof DerivativeContent &&
-			input.equals(((DerivativeContent) obj).input) &&
-			d == ((DerivativeContent) obj).d;
+		return obj instanceof GpuDerivativeContent &&
+			input.equals(((GpuDerivativeContent) obj).input) &&
+			d == ((GpuDerivativeContent) obj).d;
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class DerivativeContent implements ComputeCache.Content {
 		GpuView front = GpuViews.crop(source, Intervals.translate(center, 1, d));
 		GpuView back = GpuViews.crop(source, Intervals.translate(center, -1, d));
 		GpuImage result = gpu.create(Intervals.dimensionsAsLongArray(center), NativeTypeEnum.Float);
-		CLIJLoopBuilder.gpu(gpu)
+		GpuPixelWiseOperation.gpu(gpu)
 			.addInput("f", front)
 			.addInput("b", back)
 			.addInput("factor", 0.5 / pixelSize[d])

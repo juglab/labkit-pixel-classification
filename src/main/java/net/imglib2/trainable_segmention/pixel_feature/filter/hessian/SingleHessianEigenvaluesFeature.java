@@ -1,12 +1,12 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.hessian;
 
-import net.imglib2.trainable_segmention.gpu.algorithms.CLIJEigenvalues;
+import net.imglib2.trainable_segmention.gpu.algorithms.GpuEigenvalues;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.linalg.eigen.EigenValues;
 import net.imglib2.trainable_segmention.RevampUtils;
-import net.imglib2.trainable_segmention.gpu.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
@@ -95,7 +95,7 @@ public class SingleHessianEigenvaluesFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void prefetch(CLIJFeatureInput input) {
+	public void prefetch(GpuFeatureInput input) {
 		final Interval interval = input.targetInterval();
 		final int n = interval.numDimensions();
 		for (int d1 = 0; d1 < n; d1++)
@@ -104,7 +104,7 @@ public class SingleHessianEigenvaluesFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void apply(CLIJFeatureInput input, List<GpuView> output) {
+	public void apply(GpuFeatureInput input, List<GpuView> output) {
 		final Interval interval = input.targetInterval();
 		final int n = interval.numDimensions();
 		final List<GpuView> derivatives = new ArrayList<>();
@@ -112,6 +112,6 @@ public class SingleHessianEigenvaluesFeature extends AbstractFeatureOp {
 			for (int d2 = d1; d2 < n; d2++)
 				derivatives.add(input.secondDerivative(sigma, d1, d2, interval));
 		List<GpuView> eigenvalues = new ArrayList<>(output);
-		CLIJEigenvalues.symmetric(input.gpuApi(), derivatives, eigenvalues);
+		GpuEigenvalues.symmetric(input.gpuApi(), derivatives, eigenvalues);
 	}
 }

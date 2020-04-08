@@ -9,11 +9,11 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.StopWatch;
 import net.imglib2.view.Views;
 
-public class OriginalContent implements ComputeCache.Content {
+public class GpuOriginalContent implements GpuComputeCache.Content {
 
-	private final ComputeCache cache;
+	private final GpuComputeCache cache;
 
-	public OriginalContent(ComputeCache cache) {
+	public GpuOriginalContent(GpuComputeCache cache) {
 		this.cache = cache;
 	}
 
@@ -24,7 +24,7 @@ public class OriginalContent implements ComputeCache.Content {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof OriginalContent;
+		return obj instanceof GpuOriginalContent;
 	}
 
 	@Override

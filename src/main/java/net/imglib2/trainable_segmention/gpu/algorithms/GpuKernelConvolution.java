@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class CLIJKernelConvolution implements NeighborhoodOperation {
+public class GpuKernelConvolution implements GpuNeighborhoodOperation {
 
 	private final GpuApi gpu;
 
@@ -30,7 +30,7 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 
 	private final int d;
 
-	public CLIJKernelConvolution(GpuApi gpu, Kernel1D kernel, int d) {
+	public GpuKernelConvolution(GpuApi gpu, Kernel1D kernel, int d) {
 		this.gpu = gpu;
 		this.kernel = kernel;
 		this.d = d;
@@ -76,7 +76,7 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 			"input[INPUT_OFFSET + INPUT_X_SKIP * (x) + INPUT_Y_SKIP * (y) + INPUT_Z_SKIP * (z)]");
 		long[] globalSizes = getDimensions(output.dimensions());
 		ArrayUtils.swap(globalSizes, 0, d);
-		gpu.execute(CLIJKernelConvolution.class, "gauss.cl", "convolve1d",
+		gpu.execute(GpuKernelConvolution.class, "gauss.cl", "convolve1d",
 			globalSizes, localSizes, parameters, defines);
 	}
 
@@ -102,7 +102,7 @@ public class CLIJKernelConvolution implements NeighborhoodOperation {
 				",0)).x");
 		long[] globalSizes = output.getDimensions();
 		ArrayUtils.swap(globalSizes, 0, d);
-		gpu.execute(CLIJKernelConvolution.class, "gauss.cl", "convolve1d",
+		gpu.execute(GpuKernelConvolution.class, "gauss.cl", "convolve1d",
 			globalSizes, localSizes, parameters, defines);
 	}
 

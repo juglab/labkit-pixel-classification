@@ -1,8 +1,8 @@
 
 package net.imglib2.trainable_segmention.gpu.compute_cache;
 
-import net.imglib2.trainable_segmention.gpu.algorithms.Gauss;
-import net.imglib2.trainable_segmention.gpu.algorithms.NeighborhoodOperation;
+import net.imglib2.trainable_segmention.gpu.algorithms.GpuGauss;
+import net.imglib2.trainable_segmention.gpu.algorithms.GpuNeighborhoodOperation;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
@@ -13,21 +13,21 @@ import net.imglib2.util.Intervals;
 
 import java.util.stream.DoubleStream;
 
-public class GaussContent implements ComputeCache.Content {
+public class GpuGaussContent implements GpuComputeCache.Content {
 
-	private final ComputeCache cache;
+	private final GpuComputeCache cache;
 
 	private final double sigma;
 
-	private final OriginalContent source;
+	private final GpuOriginalContent source;
 
-	private final NeighborhoodOperation operation;
+	private final GpuNeighborhoodOperation operation;
 
-	public GaussContent(ComputeCache cache, double sigma) {
+	public GpuGaussContent(GpuComputeCache cache, double sigma) {
 		this.cache = cache;
 		this.sigma = sigma;
-		this.source = new OriginalContent(cache);
-		this.operation = Gauss.gauss(cache.gpuApi(), sigmas(cache.pixelSize()));
+		this.source = new GpuOriginalContent(cache);
+		this.operation = GpuGauss.gauss(cache.gpuApi(), sigmas(cache.pixelSize()));
 	}
 
 	@Override
@@ -37,9 +37,9 @@ public class GaussContent implements ComputeCache.Content {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof GaussContent &&
-			source.equals(((GaussContent) obj).source) &&
-			sigma == ((GaussContent) obj).sigma;
+		return obj instanceof GpuGaussContent &&
+			source.equals(((GpuGaussContent) obj).source) &&
+			sigma == ((GpuGaussContent) obj).sigma;
 	}
 
 	@Override

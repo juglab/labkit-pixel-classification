@@ -16,7 +16,10 @@ import net.imglib2.util.Intervals;
 import org.junit.After;
 import org.junit.Test;
 
-public class CLIJFeatureInputTest {
+/**
+ * Test {@link GpuFeatureInput}.
+ */
+public class GpuFeatureInputTest {
 
 	private final GpuApi gpu = GpuApi.getInstance();
 	private final double[] pixelSize = new double[] { 1, 1 };
@@ -26,7 +29,7 @@ public class CLIJFeatureInputTest {
 		RandomAccessibleInterval<FloatType> original = ArrayImgs.floats(new float[] { 1, 2, 3, 4 }, 4,
 			1);
 		FinalInterval interval = FinalInterval.createMinSize(1, 0, 2, 1);
-		try (CLIJFeatureInput featureInput = new CLIJFeatureInput(gpu, original, interval, pixelSize)) {
+		try (GpuFeatureInput featureInput = new GpuFeatureInput(gpu, original, interval, pixelSize)) {
 			featureInput.prefetchOriginal(interval);
 			RandomAccessibleInterval<FloatType> result = pull(featureInput.original(interval));
 			RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] { 2, 3 }, 2, 1);
@@ -40,7 +43,7 @@ public class CLIJFeatureInputTest {
 		double sigma = 2;
 		Interval targetInterval = FinalInterval.createMinSize(4, 0, 1, 1);
 		Interval interval = FinalInterval.createMinSize(3, 0, 1, 1);
-		try (CLIJFeatureInput featureInput = new CLIJFeatureInput(gpu, original, targetInterval,
+		try (GpuFeatureInput featureInput = new GpuFeatureInput(gpu, original, targetInterval,
 			pixelSize))
 		{
 			featureInput.prefetchGauss(sigma, interval);
@@ -57,7 +60,7 @@ public class CLIJFeatureInputTest {
 			-10, 10, 10), (x, y) -> 4 * x + 1 * y);
 		int sigma = 1;
 		FinalInterval interval = new FinalInterval(1, 1);
-		try (CLIJFeatureInput featureInput = new CLIJFeatureInput(gpu, original, interval, pixelSize)) {
+		try (GpuFeatureInput featureInput = new GpuFeatureInput(gpu, original, interval, pixelSize)) {
 			featureInput.prefetchDerivative(sigma, 0, interval);
 			featureInput.prefetchDerivative(sigma, 1, interval);
 			RandomAccessibleInterval<FloatType> resultX = pull(featureInput.derivative(sigma, 0,
@@ -77,7 +80,7 @@ public class CLIJFeatureInputTest {
 			-10, 10, 10), (x, y) -> 4 * x * x + 1 * y * y + 3 * x * y);
 		int sigma = 1;
 		FinalInterval interval = new FinalInterval(1, 1);
-		try (CLIJFeatureInput featureInput = new CLIJFeatureInput(gpu, original, interval, pixelSize)) {
+		try (GpuFeatureInput featureInput = new GpuFeatureInput(gpu, original, interval, pixelSize)) {
 			featureInput.prefetchSecondDerivative(sigma, 0, 0, interval);
 			featureInput.prefetchSecondDerivative(sigma, 1, 1, interval);
 			featureInput.prefetchSecondDerivative(sigma, 0, 1, interval);

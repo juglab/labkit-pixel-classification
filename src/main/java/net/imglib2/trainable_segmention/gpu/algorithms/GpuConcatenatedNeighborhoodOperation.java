@@ -15,13 +15,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ConcatenatedNeighborhoodOperation implements NeighborhoodOperation {
+class GpuConcatenatedNeighborhoodOperation implements GpuNeighborhoodOperation {
 
 	private final GpuApi gpu;
 
-	private final List<CLIJKernelConvolution> convolutions;
+	private final List<GpuKernelConvolution> convolutions;
 
-	public ConcatenatedNeighborhoodOperation(GpuApi gpu, List<CLIJKernelConvolution> convolutions) {
+	public GpuConcatenatedNeighborhoodOperation(GpuApi gpu, List<GpuKernelConvolution> convolutions) {
 		this.gpu = gpu;
 		this.convolutions = convolutions;
 	}
@@ -48,7 +48,7 @@ public class ConcatenatedNeighborhoodOperation implements NeighborhoodOperation 
 			}
 			buffers.add(output);
 			for (int i = 0; i < convolutions.size(); i++) {
-				CLIJKernelConvolution convolution = convolutions.get(i);
+				GpuKernelConvolution convolution = convolutions.get(i);
 				convolution.convolve(buffers.get(i), buffers.get(i + 1));
 			}
 		}
@@ -60,7 +60,7 @@ public class ConcatenatedNeighborhoodOperation implements NeighborhoodOperation 
 		intervals.add(outputInterval);
 		Interval t = outputInterval;
 		for (int i = n - 1; i >= 0; i--) {
-			CLIJKernelConvolution convolution = convolutions.get(i);
+			GpuKernelConvolution convolution = convolutions.get(i);
 			t = convolution.getRequiredInputInterval(t);
 			intervals.add(t);
 		}

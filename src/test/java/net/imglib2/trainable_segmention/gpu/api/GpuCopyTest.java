@@ -11,9 +11,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests {@link CLIJCopy}
+ * Tests {@link GpuCopy}
  */
-public class CLIJCopyTest {
+public class GpuCopyTest {
 
 	private GpuApi gpu;
 
@@ -33,7 +33,7 @@ public class CLIJCopyTest {
 		GpuImage destination = gpu.push(ArrayImgs.floats(new float[9], 3, 3));
 		GpuView sourceView = GpuViews.crop(source, Intervals.createMinSize(0, 1, 2, 2));
 		GpuView destinationView = GpuViews.crop(destination, Intervals.createMinSize(1, 0, 2, 2));
-		CLIJCopy.copy(gpu, sourceView, destinationView);
+		GpuCopy.copyFromTo(gpu, sourceView, destinationView);
 		RandomAccessibleInterval<FloatType> result = gpu.pullRAI(destination);
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] { 0, 4, 5, 0, 7, 8,
 			0, 0, 0 }, 3, 3);
@@ -44,6 +44,6 @@ public class CLIJCopyTest {
 	public void testCopyToRai() {
 		GpuImage source = gpu.push(ArrayImgs.floats(new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 3, 3));
 		RandomAccessibleInterval<FloatType> target = ArrayImgs.floats(3, 3);
-		CLIJCopy.copyFromTo(source, target);
+		GpuCopy.copyFromTo(source, target);
 	}
 }

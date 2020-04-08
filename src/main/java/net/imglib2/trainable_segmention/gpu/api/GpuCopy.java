@@ -30,10 +30,12 @@ import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
 
-public class CLIJCopy {
+public class GpuCopy {
 
-	public static void copy(GpuApi gpu, GpuView src, GpuView dst) {
-		CLIJLoopBuilder.gpu(gpu).addInput("s", src).addOutput("d", dst).forEachPixel("d = s");
+	public static void copyFromTo(GpuApi gpu, GpuView src, GpuView dst) {
+		GpuPixelWiseOperation.gpu(gpu)
+			.addInput("s", src)
+			.addOutput("d", dst).forEachPixel("d = s");
 	}
 
 	public static void copyFromTo(RandomAccessibleInterval<? extends RealType<?>> source,

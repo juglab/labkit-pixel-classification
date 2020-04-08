@@ -1,12 +1,8 @@
 
-package net.imglib2.trainable_segmention.gpu;
+package net.imglib2.trainable_segmention.gpu.api;
 
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.FinalInterval;
-import net.imglib2.trainable_segmention.gpu.api.GpuApi;
-import net.imglib2.trainable_segmention.gpu.api.GpuImage;
-import net.imglib2.trainable_segmention.gpu.api.GpuView;
-import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.util.Intervals;
 import org.junit.After;
 import org.junit.Test;
@@ -20,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests {@link GpuViews}.
  */
-public class GpuViewTest {
+public class GpuViewsTest {
 
 	private final GpuApi gpu = GpuApi.getInstance();
 

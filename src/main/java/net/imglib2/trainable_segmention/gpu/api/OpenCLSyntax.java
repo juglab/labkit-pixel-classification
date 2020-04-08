@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-public class OpenCLSyntax {
+class OpenCLSyntax {
 
 	private final static Predicate<String> IDENTIFIER_PATTERN =
 		Pattern.compile("\\A[_a-zA-Z][_a-zA-Z0-9]*\\z").asPredicate();

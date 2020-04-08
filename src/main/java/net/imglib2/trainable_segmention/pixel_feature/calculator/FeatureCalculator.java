@@ -11,8 +11,8 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.RevampUtils;
-import net.imglib2.trainable_segmention.gpu.api.CLIJCopy;
-import net.imglib2.trainable_segmention.gpu.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.gpu.api.GpuCopy;
+import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
@@ -95,7 +95,7 @@ public class FeatureCalculator {
 		if (gpu != null) {
 			Interval interval = RevampUtils.removeLastDimension(output);
 			try (GpuImage result = applyUseGpu(input, interval)) {
-				CLIJCopy.copyFromTo(result, output);
+				GpuCopy.copyFromTo(result, output);
 			}
 		}
 		else {
@@ -144,7 +144,7 @@ public class FeatureCalculator {
 			NativeTypeEnum.Float);
 		List<List<GpuView>> outputs = split(GpuViews.channels(featureStack), channels.size());
 		for (int i = 0; i < channels.size(); i++) {
-			try (CLIJFeatureInput in = new CLIJFeatureInput(gpu, channels.get(i), interval, pixelSize)) {
+			try (GpuFeatureInput in = new GpuFeatureInput(gpu, channels.get(i), interval, pixelSize)) {
 				joiner.prefetch(in);
 				joiner.apply(in, outputs.get(i));
 			}

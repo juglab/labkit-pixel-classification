@@ -7,8 +7,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmention.gpu.algorithms.CLIJEigenvalues;
-import net.imglib2.trainable_segmention.gpu.api.CLIJLoopBuilder;
+import net.imglib2.trainable_segmention.gpu.api.GpuPixelWiseOperation;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
@@ -26,7 +25,7 @@ import java.util.Random;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-public class CLIJEigenvaluesTest {
+public class GpuEigenvaluesTest {
 
 	GpuApi gpu = GpuApi.getInstance();
 	AutoClose autoClose = new AutoClose();
@@ -40,7 +39,7 @@ public class CLIJEigenvaluesTest {
 			GpuView eigenvalue1 = image(0);
 			GpuView eigenvalue2 = image(0))
 		{
-			CLIJEigenvalues.symmetric2d(gpu, xx, xy, yy, eigenvalue1, eigenvalue2);
+			GpuEigenvalues.symmetric2d(gpu, xx, xy, yy, eigenvalue1, eigenvalue2);
 			assertEquals(2 + Math.sqrt(5), getValue(eigenvalue1), 0.0001);
 			assertEquals(2 - Math.sqrt(5), getValue(eigenvalue2), 0.0001);
 		}
@@ -59,7 +58,7 @@ public class CLIJEigenvaluesTest {
 			GpuView eigenvalue2 = image(0);
 			GpuView eigenvalue3 = image(0))
 		{
-			CLIJEigenvalues.symmetric3d(gpu, xx, xy, xz, yy, yz, zz, eigenvalue1, eigenvalue2,
+			GpuEigenvalues.symmetric3d(gpu, xx, xy, xz, yy, yz, zz, eigenvalue1, eigenvalue2,
 				eigenvalue3);
 			assertEquals(11.345, getValue(eigenvalue1), 0.001);
 			assertEquals(0.171, getValue(eigenvalue2), 0.001);
@@ -80,7 +79,7 @@ public class CLIJEigenvaluesTest {
 			GpuImage x1 = gpu.create(dims, NativeTypeEnum.Float);
 			GpuImage x2 = gpu.create(dims, NativeTypeEnum.Float);)
 		{
-			CLIJLoopBuilder.gpu(gpu)
+			GpuPixelWiseOperation.gpu(gpu)
 				.addInput("b0", b0)
 				.addInput("b1", b1)
 				.addInput("b2", b2)
@@ -121,7 +120,7 @@ public class CLIJEigenvaluesTest {
 			GpuView e1 = GpuViews.crop(resultBuffer, Intervals.createMinSize(0, 0, 1, n));
 			GpuView e2 = GpuViews.crop(resultBuffer, Intervals.createMinSize(1, 0, 1, n));
 			GpuView e3 = GpuViews.crop(resultBuffer, Intervals.createMinSize(2, 0, 1, n));
-			CLIJEigenvalues.symmetric3d(gpu, yy, zero, zero, xx, zero, zz, e3, e2, e1);
+			GpuEigenvalues.symmetric3d(gpu, yy, zero, zero, xx, zero, zz, e3, e2, e1);
 			RandomAccessibleInterval<FloatType> result = gpu.pullRAI(resultBuffer);
 			ImgLib2Assert.assertImageEqualsRealType(expected, result, 0);
 		}

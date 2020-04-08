@@ -7,8 +7,6 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmention.gpu.algorithms.CLIJKernelConvolution;
-import net.imglib2.trainable_segmention.gpu.algorithms.ConcatenatedNeighborhoodOperation;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
@@ -21,9 +19,9 @@ import preview.net.imglib2.algorithm.convolution.kernel.Kernel1D;
 import java.util.Arrays;
 
 /**
- * Tests {@link ConcatenatedNeighborhoodOperation}.
+ * Tests {@link GpuConcatenatedNeighborhoodOperation}.
  */
-public class ConcatenatedNeighborhoodOperationTest {
+public class GpuConcatenatedNeighborhoodOperationTest {
 
 	@Test
 	public void test() {
@@ -37,12 +35,10 @@ public class ConcatenatedNeighborhoodOperationTest {
 		}, 5, 5);
 		GpuView input = GpuViews.wrap(gpu.push(dirac));
 		GpuView output = GpuViews.wrap(gpu.create(new long[] { 3, 3 }, NativeTypeEnum.Float));
-		CLIJKernelConvolution a = new CLIJKernelConvolution(gpu, Kernel1D.centralAsymmetric(1, 0, -1),
-			0);
-		CLIJKernelConvolution b = new CLIJKernelConvolution(gpu, Kernel1D.centralAsymmetric(1, 2, 1),
-			1);
-		ConcatenatedNeighborhoodOperation concatenation = new ConcatenatedNeighborhoodOperation(gpu,
-			Arrays.asList(a, b));
+		GpuKernelConvolution a = new GpuKernelConvolution(gpu, Kernel1D.centralAsymmetric(1, 0, -1), 0);
+		GpuKernelConvolution b = new GpuKernelConvolution(gpu, Kernel1D.centralAsymmetric(1, 2, 1), 1);
+		GpuNeighborhoodOperation concatenation = GpuNeighborhoodOperations.concat(gpu, Arrays.asList(a,
+			b));
 		Interval inputInterval = concatenation.getRequiredInputInterval(Intervals.createMinMax(-1, -1,
 			1, 1));
 		Interval expectedInterval = Intervals.createMinMax(-2, -2, 2, 2);

@@ -1,7 +1,7 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.stats;
 
-import net.imglib2.trainable_segmention.gpu.api.CLIJLoopBuilder;
+import net.imglib2.trainable_segmention.gpu.api.GpuPixelWiseOperation;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
@@ -11,8 +11,8 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.trainable_segmention.gpu.api.CLIJCopy;
-import net.imglib2.trainable_segmention.gpu.CLIJFeatureInput;
+import net.imglib2.trainable_segmention.gpu.api.GpuCopy;
+import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
@@ -144,14 +144,14 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 	}
 
 	@Override
-	public void prefetch(CLIJFeatureInput input) {
+	public void prefetch(GpuFeatureInput input) {
 		long[] border = globalSettings().pixelSize().stream()
 			.mapToLong(pixelSize -> (long) (radius / pixelSize)).toArray();
 		input.prefetchOriginal(Intervals.expand(input.targetInterval(), border));
 	}
 
 	@Override
-	public void apply(CLIJFeatureInput input, List<GpuView> output) {
+	public void apply(GpuFeatureInput input, List<GpuView> output) {
 		GpuApi gpu = input.gpuApi();
 		long[] border = globalSettings().pixelSize().stream().mapToLong(pixelSize -> (long) (radius /
 			pixelSize)).toArray();
@@ -164,11 +164,11 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 		{
 			if (min) {
 				min(gpu, inputBuffer, tmp, border);
-				CLIJCopy.copy(gpu, GpuViews.shrink(tmp, border), iterator.next());
+				GpuCopy.copyFromTo(gpu, GpuViews.shrink(tmp, border), iterator.next());
 			}
 			if (max) {
 				max(gpu, inputBuffer, tmp, border);
-				CLIJCopy.copy(gpu, GpuViews.shrink(tmp, border), iterator.next());
+				GpuCopy.copyFromTo(gpu, GpuViews.shrink(tmp, border), iterator.next());
 			}
 			calculateMeanAndVariance(gpu, border, iterator, inputBuffer, tmp);
 		}
@@ -195,7 +195,7 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 			return;
 		calculateMean(gpu, inputBuffer, tmp, border);
 		if (mean)
-			CLIJCopy.copy(gpu, GpuViews.shrink(tmp, border), iterator.next());
+			GpuCopy.copyFromTo(gpu, GpuViews.shrink(tmp, border), iterator.next());
 		if (variance)
 			calculateVariance(gpu, border, inputBuffer, tmp, iterator.next());
 	}
@@ -218,9 +218,9 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 			calculateMean(gpu, squared, meanOfSquared, border);
 			long n = LongStream.of(border).map(b -> 2 * b + 1).reduce(1, (a, b) -> a * b);
 			if (n == 1)
-				CLIJLoopBuilder.gpu(gpu).addOutput("variance", variance).forEachPixel("variance = 0");
+				GpuPixelWiseOperation.gpu(gpu).addOutput("variance", variance).forEachPixel("variance = 0");
 			else {
-				CLIJLoopBuilder.gpu(gpu)
+				GpuPixelWiseOperation.gpu(gpu)
 					.addInput("mean", GpuViews.shrink(mean, border))
 					.addInput("mean_of_squared", GpuViews.shrink(meanOfSquared, border))
 					.addInput("factor", (float) n / (n - 1))
@@ -231,7 +231,7 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 	}
 
 	private void square(GpuApi gpu, GpuImage inputBuffer, GpuImage tmp2) {
-		CLIJLoopBuilder.gpu(gpu).addInput("a", inputBuffer).addOutput("b", tmp2)
+		GpuPixelWiseOperation.gpu(gpu).addInput("a", inputBuffer).addOutput("b", tmp2)
 			.forEachPixel("b = a * a");
 	}
 }
