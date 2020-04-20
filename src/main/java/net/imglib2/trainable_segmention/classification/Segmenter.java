@@ -11,6 +11,7 @@ import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.*;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.trainable_segmention.gpu.api.GpuCopy;
+import net.imglib2.trainable_segmention.gpu.api.GpuPool;
 import net.imglib2.trainable_segmention.gpu.random_forest.RandomForestPrediction;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
@@ -50,7 +51,7 @@ public class Segmenter {
 
 	private weka.classifiers.Classifier classifier;
 
-	private GpuApi gpu = null;
+	private boolean useGpu = false;
 
 	private Segmenter(List<String> classNames, FeatureCalculator features,
 		Classifier classifier)
@@ -67,8 +68,8 @@ public class Segmenter {
 	}
 
 	public void setUseGpu(boolean useGpu) {
-		this.gpu = useGpu ? GpuApi.getInstance() : null;
-		features().setGpu(gpu);
+		this.useGpu = useGpu;
+		features.setUseGpu(useGpu);
 	}
 
 	public FeatureCalculator features() {
@@ -107,7 +108,7 @@ public class Segmenter {
 	{
 		Objects.requireNonNull(out);
 		Objects.requireNonNull(image);
-		if (gpu != null)
+		if (useGpu)
 			segmentGpu(image, out);
 		else
 			segmentCpu(image, out);
@@ -132,7 +133,7 @@ public class Segmenter {
 	private void segmentGpu(RandomAccessible<?> image,
 		RandomAccessibleInterval<? extends IntegerType<?>> out)
 	{
-		try (GpuApi scope = gpu.subScope()) {
+		try (GpuApi scope = GpuPool.borrowGpu()) {
 			RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier),
 				classNames.size(), features.count());
 			GpuImage featureStack = features.applyUseGpu(scope, image, out);
@@ -158,7 +159,7 @@ public class Segmenter {
 	{
 		Objects.requireNonNull(out);
 		Objects.requireNonNull(image);
-		if (gpu != null)
+		if (useGpu)
 			predictGpu(out, image);
 		else
 			predictCpu(out, image);
@@ -190,7 +191,7 @@ public class Segmenter {
 		Interval interval = RevampUtils.removeLastDimension(out);
 		RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier),
 			classNames.size(), features.count());
-		try (GpuApi scope = gpu.subScope()) {
+		try (GpuApi scope = GpuPool.borrowGpu()) {
 			GpuImage featureStack = features.applyUseGpu(scope, image, interval);
 			GpuImage distribution = scope.create(featureStack.getDimensions(), features.count(),
 				NativeTypeEnum.Float);

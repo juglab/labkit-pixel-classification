@@ -13,6 +13,7 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.gpu.api.GpuCopy;
 import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
+import net.imglib2.trainable_segmention.gpu.api.GpuPool;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
@@ -43,7 +44,7 @@ public class FeatureCalculator {
 
 	private final InputPreprocessor preprocessor;
 
-	private GpuApi gpu = null;
+	private boolean useGpu = false;
 
 	public FeatureCalculator(Context context, FeatureSettings settings) {
 		this.settings = settings;
@@ -85,16 +86,16 @@ public class FeatureCalculator {
 	}
 
 	public void setUseGpu(boolean useGpu) {
-		this.gpu = useGpu ? GpuApi.getInstance() : null;
+		this.useGpu = useGpu;
 	}
 
 	/**
 	 * TODO what channel order? XYZC
 	 */
 	public void apply(RandomAccessible<?> input, RandomAccessibleInterval<FloatType> output) {
-		if (gpu != null) {
+		if (useGpu) {
 			Interval interval = RevampUtils.removeLastDimension(output);
-			try (GpuApi scope = gpu.subScope()) {
+			try (GpuApi scope = GpuPool.borrowGpu()) {
 				GpuImage result = applyUseGpu(scope, input, interval);
 				GpuCopy.copyFromTo(result, output);
 			}
@@ -112,8 +113,8 @@ public class FeatureCalculator {
 		Interval interval)
 	{
 		FinalInterval fullInterval = Intervals.addDimension(interval, 0, count() - 1);
-		if (gpu != null) {
-			try (GpuApi scope = gpu.subScope()) {
+		if (useGpu) {
+			try (GpuApi scope = GpuPool.borrowGpu()) {
 				GpuImage featureStack = applyUseGpu(scope, extendedImage, interval);
 				return Views.translate(scope.pullRAIMultiChannel(featureStack),
 					Intervals.minAsLongArray(fullInterval));
@@ -180,10 +181,6 @@ public class FeatureCalculator {
 	private static <T> List<T> filterByIndexPredicate(List<T> in, IntPredicate predicate) {
 		return IntStream.range(0, in.size()).filter(predicate).mapToObj(in::get).collect(Collectors
 			.toList());
-	}
-
-	public void setGpu(GpuApi gpu) {
-		this.gpu = gpu;
 	}
 
 	public static class Builder extends GlobalSettings.AbstractBuilder<Builder> {

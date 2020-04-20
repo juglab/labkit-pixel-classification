@@ -4,7 +4,6 @@ package net.imglib2.trainable_segmention.gpu.api;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 
-import java.nio.Buffer;
 import java.util.function.Consumer;
 
 public class GpuImage implements AutoCloseable {
