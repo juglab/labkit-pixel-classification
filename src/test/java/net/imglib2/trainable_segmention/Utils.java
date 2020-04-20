@@ -11,10 +11,12 @@ import net.imagej.ImageJ;
 import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.OpService;
 import net.imglib2.*;
+import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.Img;
+import net.imglib2.img.cell.CellGrid;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
@@ -26,6 +28,7 @@ import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.ConstantUtils;
@@ -37,12 +40,17 @@ import net.imglib2.view.Views;
 import org.scijava.Context;
 import org.scijava.script.ScriptService;
 import preview.net.imglib2.loops.LoopBuilder;
+import preview.net.imglib2.parallel.Parallelization;
+import preview.net.imglib2.parallel.TaskExecutor;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.DoubleBinaryOperator;
 
 import static junit.framework.TestCase.assertEquals;
@@ -84,6 +92,9 @@ public class Utils {
 	}
 
 	public static ImagePlus loadImagePlusFromResource(final String path) {
+		ImagePlus image = new ImagePlus(path);
+		if (image.getWidth() != 0)
+			return image;
 		final URL url = Utils.class.getResource("/" + path);
 		if (url == null)
 			throw new NoSuchElementException("file: " + path);
@@ -334,5 +345,31 @@ public class Utils {
 	public static Img<ARGBType> loadImageARGBType(String pathOrURL) {
 		return ImageJFunctions.wrapRGBA(new ImagePlus(
 			pathOrURL));
+	}
+
+	public static void populateCellImg(CachedCellImg<UnsignedShortType, ?> segmentation) {
+		TaskExecutor executor = Parallelization.getTaskExecutor();
+		List<Point> cellCenters = getCellCenters(segmentation.getCellGrid());
+		AtomicInteger counter = new AtomicInteger();
+		executor.forEach(cellCenters, cellCenter -> {
+			RandomAccess<UnsignedShortType> ra = segmentation.randomAccess();
+			ra.setPosition(cellCenter);
+			ra.get();
+			System.out.println("step " + counter.incrementAndGet() + "/" + cellCenters.size());
+		});
+	}
+
+	private static List<Point> getCellCenters(CellGrid grid) {
+		List<Point> cells = new ArrayList<>();
+		long numCells = Intervals.numElements(grid.getGridDimensions());
+		for (int i = 0; i < numCells; i++) {
+			long[] cellMin = new long[3];
+			int[] cellDims = new int[3];
+			grid.getCellDimensions(i, cellMin, cellDims);
+			for (int d = 0; d < cellMin.length; d++)
+				cellMin[d] += cellDims[d] / 2;
+			cells.add(new Point(cellMin));
+		}
+		return cells;
 	}
 }
