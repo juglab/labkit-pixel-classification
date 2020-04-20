@@ -3,7 +3,7 @@ package net.imglib2.trainable_segmention.gpu.api;
 
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.converter.RealTypeConverters;
+import preview.net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
