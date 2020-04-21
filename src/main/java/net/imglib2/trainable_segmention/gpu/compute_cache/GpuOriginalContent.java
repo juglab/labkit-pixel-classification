@@ -36,9 +36,7 @@ public class GpuOriginalContent implements GpuComputeCache.Content {
 	public GpuImage load(Interval interval) {
 		GpuApi gpu = cache.gpuApi();
 		RandomAccessible<FloatType> original = cache.original();
-		StopWatch watch = StopWatch.createAndStart();
 		GpuImage push = gpu.push(Views.interval(original, interval));
-		System.out.println("Time copying: " + watch);
 		return push;
 	}
 }
