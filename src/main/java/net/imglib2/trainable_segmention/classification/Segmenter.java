@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
@@ -53,6 +54,8 @@ public class Segmenter {
 
 	private boolean useGpu = false;
 
+	private long[] fixedOutputSize;
+
 	private Segmenter(List<String> classNames, FeatureCalculator features,
 		Classifier classifier)
 	{
@@ -70,6 +73,10 @@ public class Segmenter {
 	public void setUseGpu(boolean useGpu) {
 		this.useGpu = useGpu;
 		features.setUseGpu(useGpu);
+	}
+
+	public void setFixedOutputSize(long... cellSize) {
+		this.fixedOutputSize = cellSize;
 	}
 
 	public FeatureCalculator features() {
@@ -136,9 +143,9 @@ public class Segmenter {
 		try (GpuApi scope = GpuPool.borrowGpu()) {
 			RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier),
 				classNames.size(), features.count());
-			GpuImage featureStack = features.applyUseGpu(scope, image, out);
+			GpuImage featureStack = features.applyUseGpu(scope, image, ensureOutputSize(out));
 			GpuImage segmentationBuffer = prediction.segment(scope, featureStack);
-			GpuCopy.copyFromTo(segmentationBuffer, out);
+			copyFromTo(scope, segmentationBuffer, out);
 		}
 	}
 
@@ -192,11 +199,11 @@ public class Segmenter {
 		RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier),
 			classNames.size(), features.count());
 		try (GpuApi scope = GpuPool.borrowGpu()) {
-			GpuImage featureStack = features.applyUseGpu(scope, image, interval);
+			GpuImage featureStack = features.applyUseGpu(scope, image, ensureOutputSize(interval));
 			GpuImage distribution = scope.create(featureStack.getDimensions(), features.count(),
 				NativeTypeEnum.Float);
 			prediction.distribution(scope, featureStack, distribution);
-			GpuCopy.copyFromTo(featureStack, out);
+			copyFromTo(scope, featureStack, out);
 		}
 	}
 
@@ -261,4 +268,38 @@ public class Segmenter {
 		Stream<Attribute> classAttribute = Stream.of(new Attribute("class", classNames));
 		return Stream.concat(featureAttributes, classAttribute).collect(Collectors.toList());
 	}
+
+	private FinalInterval ensureOutputSize(Interval outputInterval) {
+		if (fixedOutputSize != null) {
+			checkOutputSize(outputInterval);
+			return FinalInterval.createMinSize(Intervals.minAsLongArray(outputInterval), fixedOutputSize);
+		}
+		else
+			return new FinalInterval(outputInterval);
+	}
+
+	private void checkOutputSize(Interval outputInterval) {
+		long[] outputSize = Intervals.dimensionsAsLongArray(outputInterval);
+		if (fixedOutputSize.length != outputInterval.numDimensions())
+			throw new IllegalArgumentException(
+				"The dimensionality of the cell size and output image don't match.");
+		for (int d = 0; d < fixedOutputSize.length; d++)
+			if (outputSize[d] > fixedOutputSize[d])
+				throw new IllegalArgumentException("The output size is bigger than the fixed output size.");
+	}
+
+	private void copyFromTo(GpuApi scope, GpuImage source,
+		RandomAccessibleInterval<? extends RealType<?>> target)
+	{
+		// NB: Allows source to be bigger than target. Only copies the relevant part.
+		if (Arrays.equals(source.getDimensions(), Intervals.dimensionsAsLongArray(target)))
+			GpuCopy.copyFromTo(source, target);
+		else {
+			RandomAccessibleInterval<? extends RealType<?>> result = scope.pullRAI(source);
+			RandomAccessibleInterval<? extends RealType<?>> croppedResult = Views.interval(result, Views
+				.zeroMin(target));
+			RealTypeConverters.copyFromTo(croppedResult, Views.zeroMin(target));
+		}
+	}
+
 }
