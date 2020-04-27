@@ -80,6 +80,7 @@
 		<license.copyrightOwners>Matthias Arzt</license.copyrightOwners>
 		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
+		<clij2_.verson>0.27.2</clij2_.verson>
 	</properties>
 
 	<repositories>
@@ -88,21 +89,32 @@
 			<id>scijava.public</id>
 			<url>https://maven.scijava.org/content/groups/public</url>
 		</repository>
+		<!-- TODO: get clij on maven.scijava.org -->
+		<repository>
+			<id>clij</id>
+			<url>http://dl.bintray.com/haesleinhuepf/clij</url>
+		</repository>
 	</repositories>
 
 	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>net.revelc.code.formatter</groupId>
-					<artifactId>formatter-maven-plugin</artifactId>
-					<version>${formatter-maven-plugin.version}</version>
-					<configuration>
-						<configFile>coding-style.xml</configFile>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>net.revelc.code.formatter</groupId>
+				<artifactId>formatter-maven-plugin</artifactId>
+				<version>${formatter-maven-plugin.version}</version>
+				<configuration>
+					<configFile>coding-style.xml</configFile>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire-plugin.version}</version>
+				<configuration>
+					<argLine>-Xmx2G</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
 	<dependencies>
@@ -150,6 +162,21 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>Trainable_Segmentation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.haesleinhuepf</groupId>
+			<artifactId>clij2_</artifactId>
+			<version>${clij2_.verson}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>net.imagej</groupId>
+					<artifactId>imagej-legacy</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.android.tools</groupId>
+					<artifactId>dx</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- TODO: replace dependency to Trainable_Segmentation with fastRandomForest
 		<dependency>

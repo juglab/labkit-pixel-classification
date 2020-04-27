@@ -43,6 +43,10 @@ public class Segmenter {
 
 	private final List<String> classNames;
 
+	public Classifier getClassifier() {
+		return classifier;
+	}
+
 	private weka.classifiers.Classifier classifier;
 
 	private boolean isTrained = false;
@@ -191,7 +195,7 @@ public class Segmenter {
 
 	// -- Helper methods --
 
-	private Attribute[] attributesAsArray() {
+	public Attribute[] attributesAsArray() {
 		List<Attribute> attributes = attributes();
 		return attributes.toArray(new Attribute[attributes.size()]);
 	}
