@@ -3,6 +3,7 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.dog2;
 
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -12,16 +13,11 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(Parameterized.class)
+@RunWith(CpuGpuRunner.class)
 public class DifferenceOfGaussiansFeatureTest {
 
 	public DifferenceOfGaussiansFeatureTest(boolean useGpu) {
 		this.useGpu = useGpu;
-	}
-
-	@Parameterized.Parameters(name = "useGpu = {0}")
-	public static List<Boolean> data() {
-		return Arrays.asList(false, true);
 	}
 
 	private final boolean useGpu;

@@ -7,6 +7,7 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
@@ -19,16 +20,11 @@ import java.util.List;
 /**
  * Tests {@link IdendityFeature}.
  */
-@RunWith(Parameterized.class)
+@RunWith(CpuGpuRunner.class)
 public class IdentityFeatureTest {
 
 	public IdentityFeatureTest(boolean useGpu) {
 		this.calculator.setUseGpu(useGpu);
-	}
-
-	@Parameterized.Parameters(name = "useGpu = {0}")
-	public static List<Boolean> data() {
-		return Arrays.asList(false, true);
 	}
 
 	private final FeatureCalculator calculator = FeatureCalculator.default2d()

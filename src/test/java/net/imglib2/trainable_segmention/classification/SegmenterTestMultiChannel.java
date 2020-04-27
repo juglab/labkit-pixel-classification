@@ -16,6 +16,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -29,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 
 public class SegmenterTestMultiChannel {
 
-	private Context context = new Context();
+	private Context context = SingletonContext.getInstance();
 
 	private Img<UnsignedByteType> trainingImage = ArrayImgs.unsignedBytes(new byte[] {
 		1, 0,

@@ -12,6 +12,7 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
@@ -31,7 +32,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class FeatureStack3DTest {
 
-	private Context context = new Context();
+	private Context context = SingletonContext.getInstance();
 	private OpService ops = context.service(OpService.class);
 
 	private Img<FloatType> img = initSample();

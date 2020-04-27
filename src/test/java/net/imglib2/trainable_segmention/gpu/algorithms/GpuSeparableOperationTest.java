@@ -5,24 +5,15 @@ import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmention.gpu.api.GpuApi;
+import net.imglib2.trainable_segmention.gpu.api.AbstractGpuTest;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
-import net.imglib2.trainable_segmention.utils.ToString;
 import net.imglib2.type.numeric.real.FloatType;
-import org.junit.After;
 import org.junit.Test;
 
 import java.util.HashMap;
 
-public class GpuSeparableOperationTest {
-
-	private final GpuApi gpu = GpuApi.getInstance();
-
-	@After
-	public void after() {
-		gpu.close();
-	}
+public class GpuSeparableOperationTest extends AbstractGpuTest {
 
 	@Test
 	public void test() {

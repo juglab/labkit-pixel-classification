@@ -8,7 +8,9 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.Utils;
+import net.imglib2.trainable_segmention.gpu.api.AbstractGpuTest;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
+import net.imglib2.trainable_segmention.gpu.api.GpuPool;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.type.numeric.real.FloatType;
@@ -19,9 +21,8 @@ import org.junit.Test;
 /**
  * Test {@link GpuFeatureInput}.
  */
-public class GpuFeatureInputTest {
+public class GpuFeatureInputTest extends AbstractGpuTest {
 
-	private final GpuApi gpu = GpuApi.getInstance();
 	private final double[] pixelSize = new double[] { 1, 1 };
 
 	@Test
@@ -98,10 +99,5 @@ public class GpuFeatureInputTest {
 
 	private RandomAccessibleInterval<FloatType> pull(GpuView result) {
 		return gpu.pullRAI(GpuViews.asGpuImage(gpu, result));
-	}
-
-	@After
-	public void after() {
-		gpu.close();
 	}
 }

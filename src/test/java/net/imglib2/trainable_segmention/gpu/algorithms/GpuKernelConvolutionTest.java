@@ -8,20 +8,23 @@ import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.test.ImgLib2Assert;
+import net.imglib2.trainable_segmention.gpu.api.AbstractGpuTest;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
+import net.imglib2.trainable_segmention.gpu.api.GpuPool;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
-import net.imglib2.trainable_segmention.utils.ToString;
 import net.imglib2.type.numeric.real.FloatType;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Tests {@link GpuKernelConvolution}.
  */
-public class GpuKernelConvolutionTest {
-
-	GpuApi gpu = GpuApi.getInstance();
+public class GpuKernelConvolutionTest extends AbstractGpuTest {
 
 	@Test
 	public void test() {
@@ -44,7 +47,6 @@ public class GpuKernelConvolutionTest {
 		{
 			GpuSeparableOperation.convolve(gpu, kernel, input, 1, output, 0);
 			RandomAccessibleInterval actual = gpu.pullRAI(output);
-			ToString.print(actual);
 			ImgLib2Assert.assertImageEqualsRealType(img1D(0.5f, 0, -0.5f), actual, 0);
 		}
 	}

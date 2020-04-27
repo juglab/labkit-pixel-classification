@@ -16,6 +16,7 @@ import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -38,17 +39,12 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests {@link SingleStructureTensorEigenvaluesFeature}.
  */
-@RunWith(Parameterized.class)
+@RunWith(CpuGpuRunner.class)
 public class SingleStructureTensorEigenvaluesFeatureTest {
 
 	public SingleStructureTensorEigenvaluesFeatureTest(boolean useGpu) {
 		calculator2d.setUseGpu(useGpu);
 		calculator3d.setUseGpu(useGpu);
-	}
-
-	@Parameterized.Parameters(name = "useGpu = {0}")
-	public static List<Boolean> data() {
-		return Arrays.asList(false, true);
 	}
 
 	private final double sigma = 2.0;

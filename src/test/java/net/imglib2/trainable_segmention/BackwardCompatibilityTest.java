@@ -12,6 +12,7 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.classification.Segmenter;
 import net.imglib2.trainable_segmention.gson.GsonUtils;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -32,7 +33,7 @@ import static org.junit.Assert.fail;
  */
 public class BackwardCompatibilityTest {
 
-	private final Context context = new Context();
+	private final Context context = SingletonContext.getInstance();
 
 	@Test
 	public void testSaved2dClassifier() {

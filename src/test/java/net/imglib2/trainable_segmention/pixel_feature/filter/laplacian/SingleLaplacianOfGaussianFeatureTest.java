@@ -6,6 +6,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
@@ -17,16 +18,11 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(Parameterized.class)
+@RunWith(CpuGpuRunner.class)
 public class SingleLaplacianOfGaussianFeatureTest {
 
 	public SingleLaplacianOfGaussianFeatureTest(boolean useGpu) {
 		this.calculator.setUseGpu(useGpu);
-	}
-
-	@Parameterized.Parameters(name = "useGpu = {0}")
-	public static List<Boolean> data() {
-		return Arrays.asList(false, true);
 	}
 
 	private final double sigma = 3.0;

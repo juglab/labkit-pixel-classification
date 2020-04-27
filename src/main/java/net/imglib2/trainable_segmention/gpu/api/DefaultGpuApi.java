@@ -2,6 +2,9 @@
 package net.imglib2.trainable_segmention.gpu.api;
 
 import net.haesleinhuepf.clij.CLIJ;
+import net.haesleinhuepf.clij.clearcl.ClearCL;
+import net.haesleinhuepf.clij.clearcl.ClearCLDevice;
+import net.haesleinhuepf.clij.clearcl.backend.jocl.ClearCLBackendJOCL;
 import net.haesleinhuepf.clij.clearcl.exceptions.OpenCLException;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij2.CLIJ2;
@@ -27,6 +30,17 @@ public class DefaultGpuApi implements GpuApi {
 
 	public static synchronized CLIJ2 createCLIJ2(String openClDeviceName) {
 		return new CLIJ2(new CLIJ(openClDeviceName));
+	}
+
+	public static boolean isDeviceAvailable(String openClDeviceName) {
+		try (ClearCL clearCL = new ClearCL(new ClearCLBackendJOCL())) {
+			for (ClearCLDevice device : clearCL.getAllDevices()) {
+				if (openClDeviceName == null || device.getName().contains(openClDeviceName)) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	@Override

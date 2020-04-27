@@ -13,19 +13,7 @@ import org.junit.Test;
 /**
  * Tests {@link GpuCopy}
  */
-public class GpuCopyTest {
-
-	private GpuApi gpu;
-
-	@Before
-	public void before() {
-		gpu = GpuApi.getInstance();
-	}
-
-	@After
-	public void after() {
-		gpu.close();
-	}
+public class GpuCopyTest extends AbstractGpuTest {
 
 	@Test
 	public void testCopy() {

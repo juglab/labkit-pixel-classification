@@ -16,14 +16,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests {@link GpuViews}.
  */
-public class GpuViewsTest {
-
-	private final GpuApi gpu = GpuApi.getInstance();
-
-	@After
-	public void after() {
-		gpu.close();
-	}
+public class GpuViewsTest extends AbstractGpuTest {
 
 	@Test
 	public void testWrap() {

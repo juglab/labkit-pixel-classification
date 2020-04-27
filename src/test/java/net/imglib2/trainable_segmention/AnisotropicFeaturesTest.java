@@ -11,6 +11,8 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -28,21 +30,16 @@ import java.util.List;
 
 import static org.junit.Assume.assumeFalse;
 
-@RunWith(Parameterized.class)
+@RunWith(CpuGpuRunner.class)
 public class AnisotropicFeaturesTest {
 
 	public AnisotropicFeaturesTest(boolean useGpu) {
 		this.useGpu = useGpu;
 	}
 
-	@Parameterized.Parameters(name = "useGpu = {0}")
-	public static List<Boolean> data() {
-		return Arrays.asList(false, true);
-	}
-
 	private final boolean useGpu;
 
-	private static Context context = new Context();
+	private final Context context = SingletonContext.getInstance();
 
 	@Test
 	public void testGradient() {

@@ -12,6 +12,7 @@ import net.imglib2.trainable_segmention.classification.Trainer;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -50,7 +51,7 @@ public class SegmentationBenchmark {
 	private static final String labelingFileName =
 		"drosophila_3d_labeling.tif";
 
-	private final Context context = new Context();
+	private final Context context = SingletonContext.getInstance();
 
 	private final RandomAccessibleInterval<FloatType> image = Utils.loadImageFloatType(imageFilename);
 
