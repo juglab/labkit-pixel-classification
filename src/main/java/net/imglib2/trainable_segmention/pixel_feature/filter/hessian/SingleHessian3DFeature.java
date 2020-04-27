@@ -9,7 +9,6 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.algorithm.gradient.PartialDerivative;
-import net.imglib2.img.Img;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -68,7 +67,7 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 		Interval firstDerivativeInterval = Intervals.expand(secondDerivativeInterval, 1);
 		Interval blurredInterval = Intervals.expand(firstDerivativeInterval, 1);
 
-		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(ops(), image, blurredInterval,
+		RandomAccessibleInterval<FloatType> blurred = RevampUtils.gauss(image, blurredInterval,
 			sigmas);
 		RandomAccessibleInterval<FloatType> dx = derive(blurred, firstDerivativeInterval, 0);
 		RandomAccessibleInterval<FloatType> dy = derive(blurred, firstDerivativeInterval, 1);
@@ -91,8 +90,8 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 		RandomAccessibleInterval<FloatType> dy,
 		RandomAccessibleInterval<FloatType> dz)
 	{
-		Img<FloatType> secondDerivatives = ops().create().img(RevampUtils.appendDimensionToInterval(
-			secondDerivativeInterval, 0, 5), new FloatType());
+		RandomAccessibleInterval<FloatType> secondDerivatives = RevampUtils.createImage(
+			RevampUtils.appendDimensionToInterval(secondDerivativeInterval, 0, 5), new FloatType());
 		List<RandomAccessibleInterval<FloatType>> slices = RevampUtils.slices(secondDerivatives);
 		PartialDerivative.gradientCentralDifference(dx, slices.get(0), 0);
 		PartialDerivative.gradientCentralDifference(dx, slices.get(1), 1);
@@ -108,7 +107,7 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 	private RandomAccessibleInterval<FloatType> derive(RandomAccessible<FloatType> source,
 		Interval interval, int dimension)
 	{
-		Img<FloatType> target = ops().create().img(interval, new FloatType());
+		RandomAccessibleInterval<FloatType> target = RevampUtils.createImage(interval, new FloatType());
 		PartialDerivative.gradientCentralDifference(source, target, dimension);
 		return target;
 	}

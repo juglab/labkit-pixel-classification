@@ -1,10 +1,20 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.structure;
 
+import net.imglib2.trainable_segmention.gpu.algorithms.GpuEigenvalues;
+import net.imglib2.trainable_segmention.gpu.api.GpuPixelWiseOperation;
+import net.imglib2.trainable_segmention.gpu.algorithms.GpuGauss;
+import net.imglib2.trainable_segmention.gpu.api.GpuImage;
+import net.imglib2.trainable_segmention.gpu.algorithms.GpuNeighborhoodOperation;
+import net.imglib2.trainable_segmention.gpu.api.GpuApi;
+import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.linalg.eigen.EigenValues;
+import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
+import net.imglib2.trainable_segmention.gpu.api.GpuView;
+import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
@@ -14,7 +24,6 @@ import preview.net.imglib2.algorithm.convolution.Convolution;
 import preview.net.imglib2.algorithm.convolution.kernel.Kernel1D;
 import preview.net.imglib2.algorithm.convolution.kernel.SeparableKernelConvolution;
 import preview.net.imglib2.algorithm.gauss3.Gauss3;
-import net.imglib2.img.Img;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
@@ -27,10 +36,14 @@ import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import org.scijava.plugin.Parameter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 @Plugin(type = FeatureOp.class, label = "structure tensor eigenvalues")
 public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
@@ -86,7 +99,7 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 	{
 		Interval interval = RevampUtils.removeLastDimension(derivatives);
 		Interval outputInterval = Intervals.addDimension(interval, 0, getNumberOfProducts() - 1);
-		RandomAccessibleInterval<DoubleType> output = ops().create().img(outputInterval,
+		RandomAccessibleInterval<DoubleType> output = RevampUtils.createImage(outputInterval,
 			new DoubleType());
 		LoopBuilder.setImages(Views.collapseReal(derivatives), Views.collapseReal(output)).forEachPixel(
 			getProductPerPixelAction());
@@ -96,15 +109,16 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 	private RandomAccessibleInterval<DoubleType> derivatives(FeatureInput input,
 		Interval derivativeInterval)
 	{
-		RandomAccessibleInterval<DoubleType> gauss = ops().create().img(Intervals.expand(
-			derivativeInterval, 1));
+		RandomAccessibleInterval<DoubleType> gauss = RevampUtils.createImage(
+			Intervals.expand(derivativeInterval, 1), new DoubleType());
 		List<Double> pixelSize = globalSettings().pixelSize();
 		double[] sigmas = pixelSize.stream().mapToDouble(p -> sigma / p).toArray();
 		RandomAccessible<FloatType> original = input.original();
 		Gauss3.gauss(sigmas, original, gauss);
 		int n = derivativeInterval.numDimensions();
-		Img<DoubleType> tmp = ops().create().img(RevampUtils.appendDimensionToInterval(
-			derivativeInterval, 0, n - 1), new DoubleType());
+		RandomAccessibleInterval<DoubleType> tmp = RevampUtils.createImage(RevampUtils
+			.appendDimensionToInterval(
+				derivativeInterval, 0, n - 1), new DoubleType());
 		for (int i = 0; i < n; i++)
 			derive(gauss, Views.hyperSlice(tmp, n, i), i, pixelSize.get(i));
 		return tmp;
@@ -157,5 +171,76 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 		o.get(0).setReal(x * x);
 		o.get(1).setReal(x * y);
 		o.get(2).setReal(y * y);
+	}
+
+	// -- CLIJ implementation --
+
+	@Override
+	public void prefetch(GpuFeatureInput input) {
+		double[] integrationSigma = globalSettings().pixelSize().stream().mapToDouble(
+			p -> integrationScale / p).toArray();
+		double[] gaussSigma = globalSettings().pixelSize().stream().mapToDouble(p -> sigma / p)
+			.toArray();
+		long[] border = DoubleStream.of(integrationSigma).mapToLong(sigma -> (long) (4 * sigma))
+			.toArray();
+		Interval derivativeInterval = Intervals.expand(input.targetInterval(), border);
+		for (int d = 0; d < globalSettings().numDimensions(); d++)
+			input.prefetchDerivative(gaussSigma[d], d, derivativeInterval);
+	}
+
+	@Override
+	public void apply(GpuFeatureInput input, List<GpuView> output) {
+		try (GpuApi scope = input.gpuApi().subScope()) {
+			double[] integrationSigma = globalSettings().pixelSize().stream().mapToDouble(
+				p -> integrationScale / p).toArray();
+			GpuNeighborhoodOperation integrationGauss = GpuGauss.gauss(scope, integrationSigma);
+			Interval border = integrationGauss.getRequiredInputInterval(input.targetInterval());
+			List<GpuView> derivatives = derivatives(input, border);
+			GpuImage products = products(scope, derivatives);
+			GpuImage blurredProducts = blur(scope, GpuViews.channels(products), integrationGauss, input
+				.targetInterval());
+			GpuEigenvalues.symmetric(scope, GpuViews.channels(blurredProducts), output);
+		}
+	}
+
+	private List<GpuView> derivatives(GpuFeatureInput input, Interval derivativeInterval) {
+		double[] gaussSigma = globalSettings().pixelSize().stream().mapToDouble(p -> sigma / p)
+			.toArray();
+		int n = globalSettings().numDimensions();
+		List<GpuView> derivatives = new ArrayList<>(3);
+		for (int d = 0; d < n; d++)
+			derivatives.add(input.derivative(gaussSigma[d], d, derivativeInterval));
+		return derivatives;
+	}
+
+	private GpuImage products(GpuApi gpu, List<GpuView> derivatives) {
+		int n = derivatives.size();
+		int numProducts = n * (n + 1) / 2;
+		long[] dimensions = Intervals.dimensionsAsLongArray(derivatives.get(0).dimensions());
+		GpuPixelWiseOperation loopBuilder = GpuPixelWiseOperation.gpu(gpu);
+		StringJoiner operation = new StringJoiner("; ");
+		for (int i = 0; i < derivatives.size(); i++)
+			loopBuilder.addInput("derivative" + i, derivatives.get(i));
+		GpuImage products = gpu.create(dimensions, numProducts, NativeTypeEnum.Float);
+		Iterator<GpuView> iterator = GpuViews.channels(products).iterator();
+		for (int i = 0; i < derivatives.size(); i++)
+			for (int j = i; j < derivatives.size(); j++) {
+				loopBuilder.addOutput("product" + i + j, iterator.next());
+				operation.add("product" + i + j + " = derivative" + i + " * derivative" + j);
+			}
+		loopBuilder.forEachPixel(operation.toString());
+		return products;
+	}
+
+	private GpuImage blur(GpuApi gpu, List<GpuView> products,
+		GpuNeighborhoodOperation integrationGauss, Interval targertInteval)
+	{
+		long[] dimensions = Intervals.dimensionsAsLongArray(targertInteval);
+		GpuImage blurred = gpu.create(dimensions, products.size(), NativeTypeEnum.Float);
+		List<GpuView> blurredChannels = GpuViews.channels(blurred);
+		for (int i = 0; i < products.size(); i++) {
+			integrationGauss.apply(products.get(i), blurredChannels.get(i));
+		}
+		return blurred;
 	}
 }

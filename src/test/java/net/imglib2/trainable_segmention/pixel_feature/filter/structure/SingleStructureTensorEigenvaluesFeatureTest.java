@@ -13,10 +13,10 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -24,6 +24,8 @@ import net.imglib2.util.Localizables;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import trainableSegmentation.ImageScience;
 
 import java.util.ArrayList;
@@ -37,7 +39,13 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests {@link SingleStructureTensorEigenvaluesFeature}.
  */
+@RunWith(CpuGpuRunner.class)
 public class SingleStructureTensorEigenvaluesFeatureTest {
+
+	public SingleStructureTensorEigenvaluesFeatureTest(boolean useGpu) {
+		calculator2d.setUseGpu(useGpu);
+		calculator3d.setUseGpu(useGpu);
+	}
 
 	private final double sigma = 2.0;
 	private final double integrationScale = 5.0;
@@ -62,7 +70,7 @@ public class SingleStructureTensorEigenvaluesFeatureTest {
 			1));
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] { 14, 0, 0 }, 1, 1,
 			1, 3);
-		ImgLib2Assert.assertImageEqualsRealType(expected, result, 0.000001);
+		ImgLib2Assert.assertImageEqualsRealType(expected, result, 0.00001);
 	}
 
 	@Test
@@ -86,7 +94,7 @@ public class SingleStructureTensorEigenvaluesFeatureTest {
 		RandomAccessible<FloatType> input = Converters.convert(positions, converter, new FloatType());
 		RandomAccessibleInterval<FloatType> result = calculator2d.apply(input, new FinalInterval(1, 1));
 		RandomAccessibleInterval<FloatType> expected = ArrayImgs.floats(new float[] { 5, 0 }, 1, 1, 2);
-		ImgLib2Assert.assertImageEqualsRealType(expected, result, 0.000001);
+		ImgLib2Assert.assertImageEqualsRealType(expected, result, 0.00001);
 	}
 
 	@Test
@@ -104,10 +112,11 @@ public class SingleStructureTensorEigenvaluesFeatureTest {
 		Views.interval(image, new FinalInterval(50, 50, 50)).forEach(FloatType::setOne);
 		Interval target = Intervals.createMinSize(40, 40, 40, 0, 20, 20, 20, 3);
 		IntervalView<FloatType> output = createImage(target);
-		calculator3d.apply(image, RevampUtils.slices(output));
-		RandomAccessibleInterval<FloatType> result2 = asRAI(ImageScience.computeEigenimages(sigma,
-			integrationScale, asImagePlusXYZ(image)));
-		Utils.assertImagesEqual(40, output, Views.interval(result2, target));
+		calculator3d.apply(Views.extendBorder(image), output);
+		RandomAccessibleInterval<FloatType> result2 = UsingImagePlus.asRAI(ImageScience
+			.computeEigenimages(sigma,
+				integrationScale, UsingImagePlus.asImagePlusXYZ(image)));
+		Utils.assertImagesEqual(39, Views.interval(result2, target), output);
 		// ImageScience calculates derivatives with slightly to low intensity.
 		// The PSNR is much better, when results are normalized to compensate the
 		// differently scaled intensities.
@@ -136,19 +145,22 @@ public class SingleStructureTensorEigenvaluesFeatureTest {
 		return value * value;
 	}
 
-	private ImagePlus asImagePlusXYZ(Img<FloatType> image) {
-		ImagePlus imp = ImageJFunctions.wrap(image, "").duplicate();
-		imp.setStack(imp.getStack(), 1, imp.getStack().size(), 1);
-		return imp;
-	}
-
-	private RandomAccessibleInterval<FloatType> asRAI(ArrayList<ImagePlus> result) {
-		return Views.stack(result.stream().map(ImageJFunctions::wrapFloat).collect(Collectors
-			.toList()));
-	}
-
 	private static IntervalView<FloatType> createImage(Interval target) {
 		return Views.translate(ArrayImgs.floats(Intervals.dimensionsAsLongArray(target)), Intervals
 			.minAsLongArray(target));
+	}
+
+	private static class UsingImagePlus {
+
+		private static ImagePlus asImagePlusXYZ(Img<FloatType> image) {
+			ImagePlus imp = ImageJFunctions.wrap(image, "").duplicate();
+			imp.setStack(imp.getStack(), 1, imp.getStack().size(), 1);
+			return imp;
+		}
+
+		private static RandomAccessibleInterval<FloatType> asRAI(ArrayList<ImagePlus> result) {
+			return Views.stack(result.stream().map(ImageJFunctions::wrapFloat).collect(Collectors
+				.toList()));
+		}
 	}
 }

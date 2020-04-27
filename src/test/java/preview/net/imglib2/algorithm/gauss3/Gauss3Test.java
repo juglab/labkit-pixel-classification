@@ -20,7 +20,6 @@ import net.imglib2.util.Intervals;
 import net.imglib2.util.Localizables;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
-import org.junit.Ignore;
 import org.junit.Test;
 import preview.net.imglib2.algorithm.convolution.fast_gauss.FastGauss;
 import preview.net.imglib2.algorithm.convolution.kernel.Kernel1D;

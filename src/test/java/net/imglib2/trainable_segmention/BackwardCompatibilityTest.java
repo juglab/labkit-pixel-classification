@@ -2,7 +2,6 @@
 package net.imglib2.trainable_segmention;
 
 import ij.IJ;
-import net.imagej.ops.OpService;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
@@ -13,6 +12,7 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.trainable_segmention.classification.Segmenter;
 import net.imglib2.trainable_segmention.gson.GsonUtils;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -33,7 +33,7 @@ import static org.junit.Assert.fail;
  */
 public class BackwardCompatibilityTest {
 
-	private final OpService ops = new Context().service(OpService.class);
+	private final Context context = SingletonContext.getInstance();
 
 	@Test
 	public void testSaved2dClassifier() {
@@ -85,7 +85,7 @@ public class BackwardCompatibilityTest {
 	private Segmenter openSegmenter(String folder) {
 		InputStream inputStream = BackwardCompatibilityTest.class.getResourceAsStream("/" + folder +
 			"test.classifier");
-		return Segmenter.fromJson(ops, GsonUtils.read(inputStream));
+		return Segmenter.fromJson(context, GsonUtils.read(inputStream));
 	}
 
 	private void save2dTestImage() {

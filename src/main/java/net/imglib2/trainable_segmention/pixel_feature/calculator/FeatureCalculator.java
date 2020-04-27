@@ -1,13 +1,21 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.calculator;
 
-import net.imagej.ops.OpEnvironment;
-import net.imagej.ops.OpService;
+import net.imglib2.trainable_segmention.gpu.api.GpuApi;
+import net.imglib2.trainable_segmention.gpu.api.GpuImage;
+import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
+import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.RevampUtils;
+import net.imglib2.trainable_segmention.gpu.api.GpuCopy;
+import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
+import net.imglib2.trainable_segmention.gpu.api.GpuPool;
+import net.imglib2.trainable_segmention.gpu.api.GpuView;
+import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureJoiner;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -15,7 +23,10 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Intervals;
+import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import org.scijava.Context;
 
@@ -34,10 +45,12 @@ public class FeatureCalculator {
 
 	private final InputPreprocessor preprocessor;
 
-	public FeatureCalculator(OpEnvironment ops, FeatureSettings settings) {
+	private boolean useGpu = false;
+
+	public FeatureCalculator(Context context, FeatureSettings settings) {
 		this.settings = settings;
 		List<FeatureOp> featureOps = settings.features().stream()
-			.map(x -> x.newInstance(ops, settings.globals())).collect(Collectors.toList());
+			.map(x -> x.newInstance(context, settings.globals())).collect(Collectors.toList());
 		this.joiner = new FeatureJoiner(featureOps);
 		this.preprocessor = initPreprocessor(settings.globals().channelSetting());
 	}
@@ -57,10 +70,6 @@ public class FeatureCalculator {
 			.channelSetting());
 	}
 
-	public OpEnvironment ops() {
-		return joiner.ops();
-	}
-
 	public FeatureSettings settings() {
 		return settings;
 	}
@@ -77,16 +86,23 @@ public class FeatureCalculator {
 		return prepend(settings.globals().channelSetting().channels(), joiner.attributeLabels());
 	}
 
+	public void setUseGpu(boolean useGpu) {
+		this.useGpu = useGpu;
+	}
+
 	/**
 	 * TODO what channel order? XYZC
 	 */
-	public void apply(RandomAccessible<?> input, List<RandomAccessibleInterval<FloatType>> output) {
-		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
-		List<List<RandomAccessibleInterval<FloatType>>> outputs = split(output, channels.size());
-		double[] pixelSize = settings.globals().pixelSizeAsDoubleArray();
-		for (int i = 0; i < channels.size(); i++) {
-			FeatureInput in = new FeatureInput(channels.get(i), outputs.get(i).get(0), pixelSize);
-			joiner.apply(in, outputs.get(i));
+	public void apply(RandomAccessible<?> input, RandomAccessibleInterval<FloatType> output) {
+		if (useGpu) {
+			Interval interval = RevampUtils.removeLastDimension(output);
+			try (GpuApi scope = GpuPool.borrowGpu()) {
+				GpuImage result = applyUseGpu(scope, input, interval);
+				GpuCopy.copyFromTo(result, output);
+			}
+		}
+		else {
+			applyUseCpu(input, output);
 		}
 	}
 
@@ -97,12 +113,49 @@ public class FeatureCalculator {
 	public RandomAccessibleInterval<FloatType> apply(RandomAccessible<?> extendedImage,
 		Interval interval)
 	{
+		FinalInterval fullInterval = Intervals.addDimension(interval, 0, count() - 1);
+		if (useGpu) {
+			try (GpuApi scope = GpuPool.borrowGpu()) {
+				GpuImage featureStack = applyUseGpu(scope, extendedImage, interval);
+				return Views.translate(scope.pullRAIMultiChannel(featureStack),
+					Intervals.minAsLongArray(fullInterval));
+			}
+		}
+		else {
+			Img<FloatType> image = ArrayImgs.floats(Intervals.dimensionsAsLongArray(fullInterval));
+			IntervalView<FloatType> rai = Views.translate(image, Intervals.minAsLongArray(fullInterval));
+			applyUseCpu(extendedImage, rai);
+			return rai;
+		}
+	}
+
+	private void applyUseCpu(RandomAccessible<?> input, RandomAccessibleInterval<FloatType> output) {
+		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
+		List<List<RandomAccessibleInterval<FloatType>>> outputs = split(RevampUtils.slices(output),
+			channels.size());
+		double[] pixelSize = settings.globals().pixelSizeAsDoubleArray();
+		for (int i = 0; i < channels.size(); i++) {
+			FeatureInput in = new FeatureInput(channels.get(i), outputs.get(i).get(0), pixelSize);
+			joiner.apply(in, outputs.get(i));
+		}
+	}
+
+	public GpuImage applyUseGpu(GpuApi gpu, RandomAccessible<?> input, Interval interval) {
 		if (interval.numDimensions() != settings().globals().numDimensions())
 			throw new IllegalArgumentException("Wrong dimension of the output interval.");
-		Img<FloatType> result = ops().create().img(RevampUtils.appendDimensionToInterval(interval, 0,
-			count() - 1), new FloatType());
-		apply(extendedImage, RevampUtils.slices(result));
-		return result;
+		double[] pixelSize = settings.globals().pixelSizeAsDoubleArray();
+		List<RandomAccessible<FloatType>> channels = preprocessor.getChannels(input);
+		GpuImage featureStack = gpu.create(Intervals.dimensionsAsLongArray(interval), count(),
+			NativeTypeEnum.Float);
+		List<List<GpuView>> outputs = split(GpuViews.channels(featureStack), channels.size());
+		for (int i = 0; i < channels.size(); i++) {
+			try (GpuApi scope = gpu.subScope()) {
+				GpuFeatureInput in = new GpuFeatureInput(scope, channels.get(i), interval, pixelSize);
+				joiner.prefetch(in);
+				joiner.apply(in, outputs.get(i));
+			}
+		}
+		return featureStack;
 	}
 
 	public Interval outputIntervalFromInput(RandomAccessibleInterval<?> image) {
@@ -133,14 +186,16 @@ public class FeatureCalculator {
 
 	public static class Builder extends GlobalSettings.AbstractBuilder<Builder> {
 
-		private OpEnvironment ops;
+		private Context context;
 
 		private final List<FeatureSetting> features = new ArrayList<>();
 
-		private Builder() {}
+		private Builder() {
+			super();
+		}
 
-		public Builder ops(OpEnvironment ops) {
-			this.ops = ops;
+		public Builder context(Context context) {
+			this.context = context;
 			return this;
 		}
 
@@ -160,11 +215,11 @@ public class FeatureCalculator {
 		}
 
 		public FeatureCalculator build() {
-			if (ops == null)
-				ops = new Context().service(OpService.class);
+			if (context == null)
+				context = SingletonContext.getInstance();
 			GlobalSettings globalSettings = buildGlobalSettings();
 			FeatureSettings featureSettings = new FeatureSettings(globalSettings, features);
-			return new FeatureCalculator(ops, featureSettings);
+			return new FeatureCalculator(context, featureSettings);
 		}
 	}
 }

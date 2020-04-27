@@ -10,19 +10,29 @@ import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assume.assumeFalse;
+
 /**
  * @author Matthias Arzt
  */
+@RunWith(CpuGpuRunner.class)
 public class BorderEffectsTest {
+
+	public BorderEffectsTest(boolean useGpu) {
+		this.useGpu = useGpu;
+	}
+
+	private final boolean useGpu;
 
 	private Interval bigInterval = new FinalInterval(new long[] { 0, 0 }, new long[] { 150, 150 });
 
@@ -31,8 +41,8 @@ public class BorderEffectsTest {
 	private final Img<FloatType> fullImage = ImageJFunctions.convertFloat(Utils.loadImage(
 		"bridge.png"));
 
-	private RandomAccessibleInterval<FloatType> image = RevampUtils.copy(Utils.ops(), Views.interval(
-		fullImage, bigInterval));
+	private RandomAccessibleInterval<FloatType> image = RevampUtils.copy(Views.interval(fullImage,
+		bigInterval));
 
 	@Test
 	public void testGauss() {
@@ -44,8 +54,10 @@ public class BorderEffectsTest {
 		testFeature(GroupedFeatures.hessian());
 	}
 
+	@Deprecated
 	@Test
 	public void testGabor() {
+		assumeFalse(useGpu);
 		testFeature(GroupedFeatures.gabor());
 	}
 
@@ -62,6 +74,7 @@ public class BorderEffectsTest {
 	@Deprecated
 	@Test
 	public void testLipschitz() {
+		assumeFalse(useGpu);
 		testFeature(GroupedFeatures.lipschitz(50));
 	}
 
@@ -71,21 +84,15 @@ public class BorderEffectsTest {
 	}
 
 	public void testFeature(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
-			.asList(feature));
-		FeatureCalculator group = new FeatureCalculator(Utils.ops(), featureSettings);
-		RandomAccessibleInterval<FloatType> expected = calculateExpected(group);
-		RandomAccessibleInterval<FloatType> result = calculateResult(group);
+		FeatureCalculator calculator = FeatureCalculator.default2d().addFeature(feature).build();
+		calculator.setUseGpu(useGpu);
+		RandomAccessibleInterval<FloatType> expected = calculateExpected(calculator);
+		RandomAccessibleInterval<FloatType> result = calculateResult(calculator);
 		Utils.assertImagesEqual(120.0, result, expected);
 	}
 
 	public RandomAccessibleInterval<FloatType> calculateResult(FeatureCalculator feature) {
-		Interval featureInterval = RevampUtils.appendDimensionToInterval(interval, 0, feature.count() -
-			1);
-		RandomAccessibleInterval<FloatType> result = Utils.ops().create().img(featureInterval,
-			new FloatType());
-		feature.apply(image, RevampUtils.slices(result));
-		return result;
+		return feature.apply(Views.extendBorder(image), interval);
 	}
 
 	public RandomAccessibleInterval<FloatType> calculateExpected(FeatureCalculator feature) {

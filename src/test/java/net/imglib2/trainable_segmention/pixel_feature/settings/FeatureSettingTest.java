@@ -1,11 +1,11 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.settings;
 
-import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmention.Utils;
+import net.imglib2.trainable_segmention.gson.GsonUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
 import org.scijava.module.Module;
@@ -62,7 +62,8 @@ public class FeatureSettingTest {
 		FeatureSetting fs = FeatureSetting.fromClass(TestFeature.class);
 		double sigma = 4.2;
 		fs.setParameter("sigma", sigma);
-		TestFeature f = (TestFeature) fs.newInstance(Utils.ops(), GlobalSettings.default2d().build());
+		TestFeature f = (TestFeature) fs.newInstance(SingletonContext.getInstance(), GlobalSettings
+			.default2d().build());
 		assertTrue(f.isInitialized());
 		assertEquals(sigma, f.sigma(), 0.001);
 	}
@@ -82,6 +83,22 @@ public class FeatureSettingTest {
 		boolean equalHashes = fs1.hashCode() == fs2.hashCode();
 		assertTrue(equal);
 		assertTrue(equalHashes);
+	}
+
+	@Test
+	public void testToJson() {
+		FeatureSetting fs = new FeatureSetting(TestFeature.class, "sigma", 7.0);
+		String json = GsonUtils.toString(fs.toJsonTree());
+		String expected = "{\"class\":\"" + TestFeature.class.getName() + "\",\"sigma\":7.0}";
+		assertEquals(expected, json);
+	}
+
+	@Test
+	public void testFromJson() {
+		String json = "{\"class\":\"" + TestFeature.class.getName() + "\",\"sigma\":7.0}";
+		FeatureSetting fs = FeatureSetting.fromJson(GsonUtils.fromString(json));
+		FeatureSetting expected = new FeatureSetting(TestFeature.class, "sigma", 7.0);
+		assertEquals(fs, expected);
 	}
 
 	public static class TestFeature extends AbstractFeatureOp {

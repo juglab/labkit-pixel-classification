@@ -11,19 +11,24 @@ import net.imagej.ImageJ;
 import net.imagej.ops.OpEnvironment;
 import net.imagej.ops.OpService;
 import net.imglib2.*;
+import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.Img;
+import net.imglib2.img.cell.CellGrid;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.trainable_segmention.utils.DoubleTernaryOperator;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.ConstantUtils;
@@ -31,16 +36,21 @@ import net.imglib2.util.Intervals;
 import net.imglib2.util.Localizables;
 import net.imglib2.util.Pair;
 import net.imglib2.util.Util;
-import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 import org.scijava.Context;
 import org.scijava.script.ScriptService;
 import preview.net.imglib2.loops.LoopBuilder;
+import preview.net.imglib2.parallel.Parallelization;
+import preview.net.imglib2.parallel.TaskExecutor;
 
+import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.DoubleBinaryOperator;
 
 import static junit.framework.TestCase.assertEquals;
@@ -51,13 +61,6 @@ import static org.junit.Assert.fail;
  * @author Matthias Arzt
  */
 public class Utils {
-
-	private static final OpEnvironment ops = new Context(OpService.class, ScriptService.class)
-		.service(OpService.class);
-
-	public static OpEnvironment ops() {
-		return ops;
-	}
 
 	public static void assertImagesEqual(ImagePlus expected, ImagePlus actual) {
 		assertTrue(diffImagePlus(expected, actual) == 0);
@@ -89,6 +92,9 @@ public class Utils {
 	}
 
 	public static ImagePlus loadImagePlusFromResource(final String path) {
+		ImagePlus image = new ImagePlus(path);
+		if (image.getWidth() != 0)
+			return image;
 		final URL url = Utils.class.getResource("/" + path);
 		if (url == null)
 			throw new NoSuchElementException("file: " + path);
@@ -106,15 +112,6 @@ public class Utils {
 			final RandomAccessibleInterval<? extends A> b)
 	{
 		ImgLib2Assert.assertImageEquals(a, b);
-	}
-
-	public static <A extends Type<A>> void assertIntervalEquals(
-		Interval expected,
-		Interval actual)
-	{
-		if (!Intervals.equals(expected, actual))
-			fail("Intervals differ, expected = " + showInterval(expected) + ", actual = " + showInterval(
-				actual));
 	}
 
 	public static void assertImagesEqual(final ImagePlus expected,
@@ -139,7 +136,7 @@ public class Utils {
 	public static <T extends NumericType<T>> void showDifference(
 		RandomAccessibleInterval<T> expectedImage, RandomAccessibleInterval<T> resultImage)
 	{
-		assertIntervalEquals(expectedImage, resultImage);
+		ImgLib2Assert.assertIntervalEquals(expectedImage, resultImage);
 		ImagePlus window = ImageJFunctions.show(tile(expectedImage, resultImage, subtract(expectedImage,
 			resultImage)));
 		try {
@@ -174,6 +171,8 @@ public class Utils {
 	}
 
 	public static ImagePlus loadImage(String s) {
+		if (new File(s).exists())
+			return new ImagePlus(s);
 		return Utils.loadImagePlusFromResource(s);
 	}
 
@@ -260,12 +259,6 @@ public class Utils {
 			fail("Actual PSNR is lower than expected. Actual: " + psnr + " Expected: " + expectedPsnr);
 	}
 
-	public static Img<FloatType> copy(Img<FloatType> input) {
-		Img<FloatType> result = ops().create().img(input);
-		ops().copy().iterableInterval(result, input);
-		return result;
-	}
-
 	public static <T extends NumericType<T>> RandomAccessibleInterval<T> subtract(
 		RandomAccessibleInterval<T> expected, RandomAccessibleInterval<T> result)
 	{
@@ -302,9 +295,17 @@ public class Utils {
 		LoopBuilder.setImages(src, target).multiThreaded().forEachPixel((i, o) -> o.set(i));
 	}
 
+	public static double gauss(double sigma, double x) {
+		double factor = 1 / Math.sqrt(2 * Math.PI * square(sigma));
+		return factor * Math.exp(-0.5 / square(sigma) * square(x));
+	}
+
 	public static double gauss(double sigma, double x, double y) {
-		return 1 / (2 * Math.PI * square(sigma)) * Math.exp(-0.5 / square(sigma) * (square(x) + square(
-			y)));
+		return gauss(sigma, x) * gauss(sigma, y);
+	}
+
+	public static double gauss(double sigma, double x, double y, double z) {
+		return gauss(sigma, x) * gauss(sigma, y) * gauss(sigma, z);
 	}
 
 	public static double square(double x) {
@@ -321,9 +322,54 @@ public class Utils {
 		return Converters.convert(positions, converter, new FloatType());
 	}
 
+	public static RandomAccessibleInterval<FloatType> create3dImage(Interval interval,
+		DoubleTernaryOperator function)
+	{
+		RandomAccessibleInterval<Localizable> positions = Views.interval(Localizables.randomAccessible(
+			3), interval);
+		Converter<Localizable, FloatType> converter = (i, o) -> o.setReal(function.applyAsDouble(i
+			.getDoublePosition(0), i.getDoublePosition(1), i.getDoublePosition(2)));
+		return Converters.convert(positions, converter, new FloatType());
+	}
+
 	public static RandomAccessible<FloatType> dirac2d() {
+		return dirac(2);
+	}
+
+	public static RandomAccessible<FloatType> dirac(int n) {
 		RandomAccessibleInterval<FloatType> floats = ConstantUtils.constantRandomAccessibleInterval(
-			new FloatType(1), new FinalInterval(1, 1));
+			new FloatType(1), new FinalInterval(new long[n], new long[n]));
 		return Views.extendZero(floats);
+	}
+
+	public static Img<ARGBType> loadImageARGBType(String pathOrURL) {
+		return ImageJFunctions.wrapRGBA(new ImagePlus(
+			pathOrURL));
+	}
+
+	public static void populateCellImg(CachedCellImg<UnsignedShortType, ?> segmentation) {
+		TaskExecutor executor = Parallelization.getTaskExecutor();
+		List<Point> cellCenters = getCellCenters(segmentation.getCellGrid());
+		AtomicInteger counter = new AtomicInteger();
+		executor.forEach(cellCenters, cellCenter -> {
+			RandomAccess<UnsignedShortType> ra = segmentation.randomAccess();
+			ra.setPosition(cellCenter);
+			ra.get();
+			System.out.println("step " + counter.incrementAndGet() + "/" + cellCenters.size());
+		});
+	}
+
+	private static List<Point> getCellCenters(CellGrid grid) {
+		List<Point> cells = new ArrayList<>();
+		long numCells = Intervals.numElements(grid.getGridDimensions());
+		for (int i = 0; i < numCells; i++) {
+			long[] cellMin = new long[3];
+			int[] cellDims = new int[3];
+			grid.getCellDimensions(i, cellMin, cellDims);
+			for (int d = 0; d < cellMin.length; d++)
+				cellMin[d] += cellDims[d] / 2;
+			cells.add(new Point(cellMin));
+		}
+		return cells;
 	}
 }

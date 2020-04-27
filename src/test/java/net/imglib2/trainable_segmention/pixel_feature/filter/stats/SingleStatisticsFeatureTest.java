@@ -1,29 +1,32 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.stats;
 
-import net.imagej.ops.OpEnvironment;
-import net.imagej.ops.OpService;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
-import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
-import org.scijava.Context;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(CpuGpuRunner.class)
 public class SingleStatisticsFeatureTest {
+
+	public SingleStatisticsFeatureTest(boolean useGpu) {
+		this.calculator.setUseGpu(useGpu);
+		this.useGpu = useGpu;
+	}
+
+	private final boolean useGpu;
 
 	FeatureCalculator calculator = FeatureCalculator.default2d()
 		.addFeature(SingleFeatures.statistics(1))
@@ -57,10 +60,10 @@ public class SingleStatisticsFeatureTest {
 			1 / 9f, 2 / 8f, 2 / 8f, 1 / 9f,
 			1 / 9f, 2 / 8f, 2 / 8f, 1 / 9f
 		}, 4, 3);
-		calculator.apply(Views.extendBorder(input), RevampUtils.slices(output));
-		ImgLib2Assert.assertImageEquals(Views.stack(expectedMin, expectedMax, expectedMean,
+		calculator.apply(Views.extendBorder(input), output);
+		ImgLib2Assert.assertImageEqualsRealType(Views.stack(expectedMin, expectedMax, expectedMean,
 			expectedVariance),
-			output);
+			output, 1.e-6);
 	}
 
 	@Test
@@ -76,9 +79,9 @@ public class SingleStatisticsFeatureTest {
 
 	@Test
 	public void testRadius0() {
-		OpEnvironment ops = new Context().service(OpService.class);
-		FeatureSetting featureSetting = SingleFeatures.statistics(0);
-		FeatureOp feature = featureSetting.newInstance(ops, GlobalSettings.default2d().build());
+		FeatureCalculator calculator = FeatureCalculator.default2d().addFeature(SingleFeatures
+			.statistics(0)).build();
+		calculator.setUseGpu(useGpu);
 		Img<FloatType> input = ArrayImgs.floats(new float[] {
 			0, 0, 0, 0,
 			0, 1, -1, 0,
@@ -89,7 +92,7 @@ public class SingleStatisticsFeatureTest {
 		Img<FloatType> expectedMax = input;
 		Img<FloatType> expectedMean = input;
 		Img<FloatType> expectedVariance = ArrayImgs.floats(4, 3);
-		feature.apply(input, RevampUtils.slices(output));
+		calculator.apply(Views.extendBorder(input), output);
 		ImgLib2Assert.assertImageEquals(Views.stack(expectedMin, expectedMax, expectedMean,
 			expectedVariance),
 			output);
@@ -97,11 +100,11 @@ public class SingleStatisticsFeatureTest {
 
 	@Test
 	public void testAnisotropic() {
-		OpEnvironment ops = new Context().service(OpService.class);
 		FeatureCalculator calculator = FeatureCalculator.default2d()
 			.pixelSize(1, 2)
 			.addFeature(SingleFeatures.max(1))
 			.build();
+		calculator.setUseGpu(useGpu);
 		Img<FloatType> input = ArrayImgs.floats(new float[] {
 			0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0,
@@ -117,8 +120,7 @@ public class SingleStatisticsFeatureTest {
 			0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0
 		}, 5, 5);
-		calculator.apply(Views.extendBorder(input), RevampUtils.slices(output));
+		calculator.apply(Views.extendBorder(input), output);
 		ImgLib2Assert.assertImageEquals(Views.stack(expectedMax), output);
-
 	}
 }

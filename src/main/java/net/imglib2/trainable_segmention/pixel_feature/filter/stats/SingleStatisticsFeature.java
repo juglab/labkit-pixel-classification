@@ -1,11 +1,22 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.stats;
 
+import net.imglib2.trainable_segmention.gpu.algorithms.GpuNeighborhoodOperation;
+import net.imglib2.trainable_segmention.gpu.algorithms.GpuNeighborhoodOperations;
+import net.imglib2.trainable_segmention.gpu.api.GpuPixelWiseOperation;
+import net.imglib2.trainable_segmention.gpu.api.GpuImage;
+import net.imglib2.trainable_segmention.gpu.api.GpuApi;
+import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
+import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.trainable_segmention.gpu.api.GpuCopy;
+import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
+import net.imglib2.trainable_segmention.gpu.api.GpuView;
+import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -21,7 +32,8 @@ import preview.net.imglib2.loops.LoopBuilder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 @Plugin(type = FeatureOp.class, label = "statistic filters")
 public class SingleStatisticsFeature extends AbstractFeatureOp {
@@ -132,5 +144,79 @@ public class SingleStatisticsFeature extends AbstractFeatureOp {
 
 	private float square(float value) {
 		return value * value;
+	}
+
+	@Override
+	public void prefetch(GpuFeatureInput input) {
+		long[] border = globalSettings().pixelSize().stream()
+			.mapToLong(pixelSize -> (long) (radius / pixelSize)).toArray();
+		input.prefetchOriginal(Intervals.expand(input.targetInterval(), border));
+	}
+
+	@Override
+	public void apply(GpuFeatureInput input, List<GpuView> output) {
+		try (GpuApi gpu = input.gpuApi().subScope()) {
+			long[] border = globalSettings().pixelSize().stream().mapToLong(pixelSize -> (long) (radius /
+				pixelSize)).toArray();
+			Iterator<GpuView> iterator = output.iterator();
+			Interval interval = input.targetInterval();
+			GpuView original = input.original(Intervals.expand(interval, border));
+			int[] windowSize = LongStream.of(border).mapToInt(x -> (int) (1 + 2 * x)).toArray();
+			if (min) {
+				GpuNeighborhoodOperations.min(gpu, windowSize).apply(original, iterator.next());
+			}
+			if (max) {
+				GpuNeighborhoodOperations.max(gpu, windowSize).apply(original, iterator.next());
+			}
+			calculateMeanAndVariance(gpu, windowSize, original, iterator);
+		}
+	}
+
+	private void calculateMeanAndVariance(GpuApi gpu, int[] windowSize, GpuView original,
+		Iterator<GpuView> iterator)
+	{
+		if (!mean && !variance)
+			return;
+		if (mean) {
+			GpuView mean = iterator.next();
+			GpuNeighborhoodOperations.mean(gpu, windowSize).apply(original, mean);
+			if (variance)
+				calculateVariance(gpu, windowSize, original, mean, iterator.next());
+		}
+		else {
+			GpuView variance = iterator.next();
+			GpuImage mean = gpu.create(Intervals.dimensionsAsLongArray(variance.dimensions()),
+				NativeTypeEnum.Float);
+			GpuNeighborhoodOperations.mean(gpu, windowSize).apply(original, GpuViews.wrap(mean));
+			calculateVariance(gpu, windowSize, original, GpuViews.wrap(mean), variance);
+		}
+	}
+
+	private void calculateVariance(GpuApi gpu, int[] windowSize, GpuView original, GpuView mean,
+		GpuView variance)
+	{
+		GpuImage squared = gpu.create(Intervals.dimensionsAsLongArray(original.dimensions()),
+			NativeTypeEnum.Float);
+		GpuImage meanOfSquared = gpu.create(Intervals.dimensionsAsLongArray(variance.dimensions()),
+			NativeTypeEnum.Float);
+		long n = Intervals.numElements(windowSize);
+		if (n <= 1)
+			GpuPixelWiseOperation.gpu(gpu).addOutput("variance", variance).forEachPixel("variance = 0");
+		else {
+			square(gpu, original, squared);
+			GpuNeighborhoodOperations.mean(gpu, windowSize).apply(GpuViews.wrap(squared), GpuViews.wrap(
+				meanOfSquared));
+			GpuPixelWiseOperation.gpu(gpu)
+				.addInput("mean", mean)
+				.addInput("mean_of_squared", meanOfSquared)
+				.addInput("factor", (float) n / (n - 1))
+				.addOutput("variance", variance)
+				.forEachPixel("variance = (mean_of_squared - mean * mean) * factor");
+		}
+	}
+
+	private void square(GpuApi gpu, GpuView inputBuffer, GpuImage tmp2) {
+		GpuPixelWiseOperation.gpu(gpu).addInput("a", inputBuffer).addOutput("b", tmp2)
+			.forEachPixel("b = a * a");
 	}
 }

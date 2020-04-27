@@ -5,6 +5,7 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
+import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -62,7 +63,8 @@ public class SingleLipschitzFeature extends AbstractFeatureOp {
 		RandomAccessible<FloatType> original = in.original();
 		double[] pixelSize = globalSettings().pixelSizeAsDoubleArray();
 		Interval expandedInterval = Intervals.expand(out, scaledBorder(pixelSize, out));
-		Img<FloatType> tmp = ops().create().img(expandedInterval, new FloatType());
+		RandomAccessibleInterval<FloatType> tmp = RevampUtils.createImage(expandedInterval,
+			new FloatType());
 		copy(original, tmp);
 		ConeMorphology.performConeOperation(ConeMorphology.Operation.DILATION, tmp, scaledSlope(
 			pixelSize));

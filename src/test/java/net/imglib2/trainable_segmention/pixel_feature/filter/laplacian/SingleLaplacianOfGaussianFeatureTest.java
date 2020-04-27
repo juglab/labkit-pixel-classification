@@ -6,16 +6,24 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.Views;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(CpuGpuRunner.class)
 public class SingleLaplacianOfGaussianFeatureTest {
+
+	public SingleLaplacianOfGaussianFeatureTest(boolean useGpu) {
+		this.calculator.setUseGpu(useGpu);
+	}
 
 	private final double sigma = 3.0;
 
@@ -27,7 +35,7 @@ public class SingleLaplacianOfGaussianFeatureTest {
 	public void testApply() {
 		RandomAccessible<FloatType> input = Utils.dirac2d();
 		RandomAccessibleInterval<FloatType> output = ArrayImgs.floats(10, 10);
-		calculator.apply(input, Collections.singletonList(output));
+		calculator.apply(input, Views.addDimension(output, 0, 0));
 		RandomAccessibleInterval<FloatType> expected = Utils.create2dImage(output,
 			(x, y) -> laplacianOfGaussian(sigma, x, y));
 		Utils.assertImagesEqual(40, expected, output);

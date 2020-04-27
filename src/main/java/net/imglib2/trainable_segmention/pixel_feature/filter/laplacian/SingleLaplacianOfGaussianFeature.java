@@ -1,8 +1,12 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.laplacian;
 
+import net.imglib2.trainable_segmention.gpu.api.GpuPixelWiseOperation;
+import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.RevampUtils;
+import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
+import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -53,5 +57,25 @@ public class SingleLaplacianOfGaussianFeature extends AbstractFeatureOp {
 			sum += d.get(i).getRealDouble();
 		}
 		return sum;
+	}
+
+	@Override
+	public void prefetch(GpuFeatureInput input) {
+		for (int d = 0; d < globalSettings().numDimensions(); d++)
+			input.prefetchSecondDerivative(sigma, d, d, input.targetInterval());
+	}
+
+	@Override
+	public void apply(GpuFeatureInput input, List<GpuView> output) {
+		boolean is3d = globalSettings().numDimensions() == 3;
+		GpuApi gpu = input.gpuApi();
+		GpuPixelWiseOperation loopBuilder = GpuPixelWiseOperation.gpu(gpu);
+		loopBuilder.addInput("dxx", input.secondDerivative(sigma, 0, 0, input.targetInterval()));
+		loopBuilder.addInput("dyy", input.secondDerivative(sigma, 1, 1, input.targetInterval()));
+		if (is3d)
+			loopBuilder.addInput("dzz", input.secondDerivative(sigma, 2, 2, input.targetInterval()));
+		loopBuilder.addOutput("output", output.get(0));
+		String operation = is3d ? "output = dxx + dyy + dzz" : "output = dxx + dyy";
+		loopBuilder.forEachPixel(operation);
 	}
 }

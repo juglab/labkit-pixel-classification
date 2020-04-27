@@ -5,7 +5,6 @@ import net.imagej.ops.OpEnvironment;
 import net.imglib2.*;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.algorithm.fft2.FFTConvolution;
-import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
@@ -17,11 +16,11 @@ import net.imglib2.view.Views;
 import net.imglib2.view.composite.GenericComposite;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import preview.net.imglib2.loops.LoopBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 /**
  * @deprecated
@@ -49,7 +48,7 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 	@Parameter
 	private boolean legacyNormalize = false;
 
-	private List<Img<FloatType>> kernels;
+	private List<RandomAccessibleInterval<FloatType>> kernels;
 
 	@Override
 	public void initialize() {
@@ -80,7 +79,8 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 		return globals.numDimensions() == 2;
 	}
 
-	private List<Img<FloatType>> initGaborKernels(double sigma, double gamma, double psi,
+	private List<RandomAccessibleInterval<FloatType>> initGaborKernels(double sigma, double gamma,
+		double psi,
 		double frequency, int nAngles)
 	{
 		// Apply aspect ratio to the Gaussian curves
@@ -99,7 +99,7 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 		final int middleX = Math.round(filterSizeX / 2);
 		final int middleY = Math.round(filterSizeY / 2);
 
-		List<Img<FloatType>> kernels = new ArrayList<>();
+		List<RandomAccessibleInterval<FloatType>> kernels = new ArrayList<>();
 
 		final double rotationAngle = Math.PI / nAngles;
 
@@ -107,17 +107,19 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 			middleX, middleX });
 		for (int i = 0; i < nAngles; i++) {
 			final double theta = rotationAngle * i;
-			Img<FloatType> kernel = ops().create().img(interval, new FloatType());
+			RandomAccessibleInterval<FloatType> kernel = RevampUtils.createImage(interval,
+				new FloatType());
 			garborKernel(kernel, psi, frequency, sigma_x, sigma_y, theta);
 			kernels.add(kernel);
 		}
 		return kernels;
 	}
 
-	private static void garborKernel(Img<FloatType> kernel, double psi, double frequency,
+	private static void garborKernel(RandomAccessibleInterval<FloatType> kernel, double psi,
+		double frequency,
 		double sigma_x, double sigma_y, double theta)
 	{
-		Cursor<FloatType> cursor = kernel.cursor();
+		Cursor<FloatType> cursor = Views.iterable(kernel).cursor();
 		final double filterSizeX = kernel.max(0) - kernel.min(0) + 1;
 		final double sigma_x2 = sigma_x * sigma_x;
 		final double sigma_y2 = sigma_y * sigma_y;
@@ -134,19 +136,20 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 		}
 	}
 
-	private void gaborProcessChannel(List<Img<FloatType>> kernels,
+	private void gaborProcessChannel(List<RandomAccessibleInterval<FloatType>> kernels,
 		RandomAccessible<FloatType> channel, RandomAccessibleInterval<FloatType> max,
 		RandomAccessibleInterval<FloatType> min)
 	{
 		Interval interval = min;
-		Img<FloatType> stack = ops().create().img(RevampUtils.appendDimensionToInterval(interval, 0,
-			kernels.size() - 1), new FloatType());
+		RandomAccessibleInterval<FloatType> stack = RevampUtils.createImage(RevampUtils
+			.appendDimensionToInterval(interval, 0,
+				kernels.size() - 1), new FloatType());
 		// Apply kernels
 		FFTConvolution<FloatType> fftConvolution = new FFTConvolution<>(channel, interval, kernels.get(
 			0), (Interval) kernels.get(0), new ArrayImgFactory<>());
 		fftConvolution.setKeepImgFFT(true);
 		for (int i = 0; i < kernels.size(); i++) {
-			Img<FloatType> kernel = kernels.get(i);
+			RandomAccessibleInterval<FloatType> kernel = kernels.get(i);
 			RandomAccessibleInterval<FloatType> slice = Views.hyperSlice(stack, 2, i);
 			fftConvolution.setKernel(kernel);
 			fftConvolution.setOutput(slice);
@@ -158,20 +161,14 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 		maxAndMinProjection(stack, max, min);
 	}
 
-	private static void maxAndMinProjection(Img<FloatType> stack,
+	private static void maxAndMinProjection(RandomAccessibleInterval<FloatType> stack,
 		RandomAccessibleInterval<FloatType> max, RandomAccessibleInterval<FloatType> min)
 	{
 		RandomAccessibleInterval<? extends GenericComposite<FloatType>> collapsed = Views.collapse(
 			stack);
 		long size = stack.max(2) - stack.min(2) + 1;
-		map(collapsed, max, (in, out) -> out.set(max(in, size)));
-		map(collapsed, min, (in, out) -> out.set(min(in, size)));
-	}
-
-	private static <I, O> void map(RandomAccessible<I> in, RandomAccessibleInterval<O> out,
-		BiConsumer<I, O> operation)
-	{
-		Views.interval(Views.pair(in, out), out).forEach(p -> operation.accept(p.getA(), p.getB()));
+		LoopBuilder.setImages(collapsed, max).forEachPixel((in, out) -> out.set(max(in, size)));
+		LoopBuilder.setImages(collapsed, min).forEachPixel((in, out) -> out.set(min(in, size)));
 	}
 
 	private static float max(GenericComposite<FloatType> in, long size) {

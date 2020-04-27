@@ -3,6 +3,9 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.gauss;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.loops.LoopBuilder;
+import net.imglib2.trainable_segmention.gpu.GpuFeatureInput;
+import net.imglib2.trainable_segmention.gpu.api.GpuView;
+import net.imglib2.trainable_segmention.gpu.api.GpuCopy;
 import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -36,5 +39,15 @@ public class SingleGaussianBlurFeature extends AbstractFeatureOp {
 	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
 		LoopBuilder.setImages(input.gauss(sigma), output.get(0)).forEachPixel((i, o) -> o.setReal(i
 			.getRealFloat()));
+	}
+
+	@Override
+	public void prefetch(GpuFeatureInput input) {
+		input.prefetchGauss(sigma, input.targetInterval());
+	}
+
+	@Override
+	public void apply(GpuFeatureInput input, List<GpuView> output) {
+		GpuCopy.copyFromTo(input.gpuApi(), input.gauss(sigma, input.targetInterval()), output.get(0));
 	}
 }

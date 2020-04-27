@@ -2,13 +2,12 @@
 package net.imglib2.trainable_segmention.classification;
 
 import com.google.gson.JsonElement;
-import net.imagej.ops.OpEnvironment;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
@@ -17,12 +16,17 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import net.imglib2.trainable_segmention.Utils;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.scijava.Context;
 import weka.classifiers.meta.RandomCommittee;
 
 import java.io.IOException;
@@ -30,23 +34,32 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Tests {@link Segmenter}
  *
  * @author Matthias Arzt
  */
+@RunWith(CpuGpuRunner.class)
 public class SegmenterTest {
+
+	public final boolean useGpu;
+
+	public SegmenterTest(boolean useGpu) {
+		this.useGpu = useGpu;
+	}
 
 	private Img<FloatType> img = ImageJFunctions.convertFloat(Utils.loadImage("nuclei.tif"));
 
 	private LabelRegions<String> labeling = loadLabeling("nucleiLabeling.tif");
 
-	private final OpEnvironment ops = Utils.ops();
+	private final Context context = SingletonContext.getInstance();
 
 	@Test
 	public void testClassification() {
 		Segmenter segmenter = trainClassifier();
+		segmenter.setUseGpu(useGpu);
 		RandomAccessibleInterval<? extends IntegerType<?>> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());
 	}
@@ -58,7 +71,7 @@ public class SegmenterTest {
 			.build();
 		FeatureSettings featureSettings = new FeatureSettings(globals, SingleFeatures.identity(),
 			GroupedFeatures.gauss());
-		return Trainer.train(ops, img, labeling, featureSettings);
+		return Trainer.train(context, img, labeling, featureSettings);
 	}
 
 	private void checkExpected(RandomAccessibleInterval<? extends IntegerType<?>> result,
@@ -80,7 +93,7 @@ public class SegmenterTest {
 		// store
 		JsonElement json = segmenter.toJsonTree();
 		// load
-		Segmenter segmenter2 = Segmenter.fromJson(ops, json);
+		Segmenter segmenter2 = Segmenter.fromJson(context, json);
 		// test
 		RandomAccessibleInterval<? extends IntegerType<?>> result = segmenter.segment(img);
 		RandomAccessibleInterval<? extends IntegerType<?>> result2 = segmenter2.segment(img);
@@ -89,16 +102,18 @@ public class SegmenterTest {
 
 	@Test
 	public void testDifferentWekaClassifiers() {
+		assumeFalse(useGpu);
 		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(),
 			SingleFeatures.identity(), new FeatureSetting(GaussFeature.class));
-		Segmenter segmenter = Trainer.train(ops, img, labeling, featureSettings, new RandomCommittee());
+		Segmenter segmenter = Trainer.train(context, img, labeling, featureSettings,
+			new RandomCommittee());
 		RandomAccessibleInterval<? extends IntegerType<?>> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());
 	}
 
 	private static LabelRegions<String> loadLabeling(String file) {
 		Img<? extends IntegerType<?>> img = ImageJFunctions.wrapByte(Utils.loadImage(file));
-		final ImgLabeling<String, IntType> labeling = new ImgLabeling<>(Utils.ops().create().img(img,
+		final ImgLabeling<String, IntType> labeling = new ImgLabeling<>(RevampUtils.createImage(img,
 			new IntType()));
 		Views.interval(Views.pair(img, labeling), labeling).forEach(p -> {
 			int value = p.getA().getInteger();

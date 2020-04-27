@@ -1,10 +1,11 @@
 
-package net.imglib2.trainable_segmention;
+package net.imglib2.trainable_segmention.utils;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.IntArray;
+import net.imglib2.trainable_segmention.utils.ToString;
 import net.imglib2.type.numeric.integer.IntType;
 import org.junit.Test;
 

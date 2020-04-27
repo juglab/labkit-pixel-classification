@@ -1,7 +1,6 @@
 
 package net.imglib2.trainable_segmention;
 
-import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
@@ -10,11 +9,10 @@ import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.roi.labeling.LabelingType;
 import net.imglib2.trainable_segmention.classification.Segmenter;
 import net.imglib2.trainable_segmention.classification.Trainer;
-import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
-import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -53,7 +51,7 @@ public class SegmentationBenchmark {
 	private static final String labelingFileName =
 		"drosophila_3d_labeling.tif";
 
-	private final OpService ops = new Context().service(OpService.class);
+	private final Context context = SingletonContext.getInstance();
 
 	private final RandomAccessibleInterval<FloatType> image = Utils.loadImageFloatType(imageFilename);
 
@@ -68,12 +66,12 @@ public class SegmentationBenchmark {
 			GroupedFeatures.differenceOfGaussians(),
 			GroupedFeatures.hessian(),
 			GroupedFeatures.gradient());
-		return Parallelization.runSingleThreaded(() -> Trainer.train(ops, image, labelRegions,
+		return Parallelization.runSingleThreaded(() -> Trainer.train(context, image, labelRegions,
 			featureSettings));
 	}
 
 	@Benchmark
-	public Img<UnsignedByteType> benchmarkSegment() {
+	public Object benchmarkSegment() {
 		return Parallelization.runSingleThreaded(() -> segmenter.segment(image));
 	}
 

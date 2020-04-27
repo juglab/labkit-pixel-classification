@@ -1,24 +1,19 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz;
 
-import net.imagej.ops.OpService;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.trainable_segmention.ToString;
 import net.imglib2.trainable_segmention.Utils;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
-import org.scijava.Context;
 import preview.net.imglib2.loops.LoopBuilder;
 
-import java.util.Collections;
 import java.util.function.DoubleBinaryOperator;
 
 @Deprecated
@@ -27,10 +22,11 @@ public class SingleLipschitzFeatureTest {
 	@Test
 	public void test() {
 		Img<FloatType> image = dirac();
-		FeatureOp feature = SingleFeatures.lipschitz(0.1, 0).newInstance(new Context().service(
-			OpService.class), GlobalSettings.default2d().build());
 		Img<FloatType> result = ArrayImgs.floats(5, 5);
-		feature.apply(image, Collections.singletonList(result));
+		FeatureCalculator calculator = FeatureCalculator.default2d()
+			.addFeature(SingleFeatures.lipschitz(0.1, 0))
+			.build();
+		calculator.apply(image, Views.addDimension(result, 0, 0));
 		LoopBuilder.setImages(result).forEachPixel(x -> x.sub(new FloatType(255)));
 		Img<FloatType> expected = createImage((x, y) -> (x == 2) && (y == 2) ? 0 : -1 + 0.1 * Math.sqrt(
 			Math.pow(x - 2, 2) + Math.pow(y - 2, 2)));

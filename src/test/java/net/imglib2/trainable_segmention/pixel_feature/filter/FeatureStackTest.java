@@ -42,16 +42,19 @@ import static org.junit.Assert.assertEquals;
  */
 public class FeatureStackTest {
 
-	private static ImagePlus bridgeImage = Utils.loadImage("nuclei.tif");
+	private final ImagePlus bridgeImage = Utils.loadImage("nuclei.tif");
 
-	private static Img<FloatType> bridgeImg = ImagePlusAdapter.convertFloat(bridgeImage);
+	private final Img<FloatType> bridgeImg = ImagePlusAdapter.convertFloat(bridgeImage);
 
 	public static RandomAccessibleInterval<FloatType> createStack(
 		RandomAccessibleInterval<FloatType> image, FeatureSetting feature)
 	{
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
-			.asList(SingleFeatures.identity(), feature));
-		return new FeatureCalculator(Utils.ops(), featureSettings).apply(image);
+		FeatureCalculator calculator = FeatureCalculator.default2d()
+			.sigmaRange(1.0, 16.0)
+			.addFeature(SingleFeatures.identity())
+			.addFeature(feature)
+			.build();
+		return calculator.apply(image);
 	}
 
 	@Test
@@ -66,6 +69,7 @@ public class FeatureStackTest {
 		return image;
 	}
 
+	@Deprecated
 	@Test
 	public void testGaussStack() {
 		testFeatureIgnoreAttributes(40, FeatureStack.GAUSSIAN, new FeatureSetting(GaussFeature.class));
@@ -94,16 +98,19 @@ public class FeatureStackTest {
 		return oldAttributes(getFeatureStack(bridgeImage, getEnabledFeatures(featureConstant)));
 	}
 
-	public static List<String> oldAttributes(FeatureStack stack) {
+	static List<String> oldAttributes(FeatureStack stack) {
 		Instances instances = stack.createInstances(new ArrayList<>(Arrays.asList("class1", "class2")));
 		return IntStream.range(0, instances.classIndex()).mapToObj(i -> instances.attribute(i).name())
 			.collect(Collectors.toList());
 	}
 
-	public static List<String> getAttributeLabels(FeatureSetting feature) {
-		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(), Arrays
-			.asList(SingleFeatures.identity(), feature));
-		return new FeatureCalculator(Utils.ops(), featureSettings).attributeLabels();
+	private static List<String> getAttributeLabels(FeatureSetting feature) {
+		FeatureCalculator calculator = FeatureCalculator.default2d()
+			.sigmaRange(1.0, 16.0)
+			.addFeature(SingleFeatures.identity())
+			.addFeature(feature)
+			.build();
+		return calculator.attributeLabels();
 	}
 
 	@Deprecated
@@ -124,6 +131,7 @@ public class FeatureStackTest {
 		testFeature(40, FeatureStack.SOBEL, new FeatureSetting(SobelGradientFeature.class));
 	}
 
+	@Deprecated
 	@Test
 	public void testLipschitz() {
 		testFeature(40, FeatureStack.LIPSCHITZ, GroupedFeatures.lipschitz(0));
@@ -155,24 +163,28 @@ public class FeatureStackTest {
 		return new ImagePlus("Square with centered dot", processor);
 	}
 
+	@Deprecated
 	@Test
 	public void testMaximum() {
 		testFeature(27, FeatureStack.MAXIMUM, new FeatureSetting(SphereShapedFeature.class, "operation",
 			SingleSphereShapedFeature.MAX));
 	}
 
+	@Deprecated
 	@Test
 	public void testMinimum() {
 		testFeature(30, FeatureStack.MINIMUM, new FeatureSetting(SphereShapedFeature.class, "operation",
 			SingleSphereShapedFeature.MIN));
 	}
 
+	@Deprecated
 	@Test
 	public void testMean() {
 		testFeature(40, FeatureStack.MEAN, new FeatureSetting(SphereShapedFeature.class, "operation",
 			SingleSphereShapedFeature.MEAN));
 	}
 
+	@Deprecated
 	@Test
 	public void testVariance() {
 		testFeature(30, FeatureStack.VARIANCE, new FeatureSetting(SphereShapedFeature.class,
@@ -180,12 +192,14 @@ public class FeatureStackTest {
 			SingleSphereShapedFeature.VARIANCE));
 	}
 
+	@Deprecated
 	@Test
 	public void testMedian() {
 		testFeature(30, FeatureStack.MEDIAN, new FeatureSetting(SphereShapedFeature.class, "operation",
 			SingleSphereShapedFeature.MEDIAN));
 	}
 
+	@Deprecated
 	@Test
 	public void testGabor() {
 		testFeature(30, FeatureStack.GABOR, GroupedFeatures.legacyGabor());
