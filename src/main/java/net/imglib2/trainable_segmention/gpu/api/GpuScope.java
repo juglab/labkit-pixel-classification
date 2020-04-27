@@ -11,7 +11,7 @@ public class GpuScope implements GpuApi {
 
 	private final Scope scope = new Scope();
 
-	private final GpuApi parent;
+	final GpuApi parent;
 
 	public GpuScope(GpuApi parent, AutoCloseable onClose) {
 		this.parent = parent;

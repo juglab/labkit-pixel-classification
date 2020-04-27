@@ -3,6 +3,7 @@ package net.imglib2.trainable_segmention.gui;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.util.ValuePair;
 import org.junit.Test;
 import org.scijava.Context;
@@ -18,7 +19,7 @@ import static org.junit.Assert.fail;
 
 public class FeatureFilterTest {
 
-	private static final Context context = new Context();
+	private static final Context context = SingletonContext.getInstance();
 
 	private static final Collection<Class<? extends FeatureOp>> only3d = Arrays.asList(
 		net.imglib2.trainable_segmention.pixel_feature.filter.hessian.Hessian3DFeature.class,

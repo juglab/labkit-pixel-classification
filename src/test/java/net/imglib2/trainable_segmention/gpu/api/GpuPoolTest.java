@@ -1,41 +1,46 @@
 
 package net.imglib2.trainable_segmention.gpu.api;
 
-import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
+/**
+ * Test {@link GpuPool}.
+ */
 public class GpuPoolTest {
 
 	@Test
-	public void testSameBuffer() {
-		ClearCLBuffer a;
-		ClearCLBuffer b;
+	public void testGpuAptReuse() {
+		assumeTrue(GpuPool.isGpuAvailable());
+		GpuApi a;
+		GpuApi b;
 		try (GpuApi gpu = GpuPool.borrowGpu()) {
-			a = gpu.create(new long[] { 10, 10 }, NativeTypeEnum.Float).clearCLBuffer();
+			a = ((GpuScope) gpu).parent;
 		}
 		try (GpuApi gpu = GpuPool.borrowGpu()) {
-			b = gpu.create(new long[] { 10, 10 }, NativeTypeEnum.Float).clearCLBuffer();
+			b = ((GpuScope) gpu).parent;
 		}
 		assertSame(a, b);
 	}
 
 	@Test
-	public void testDifferentBuffer() throws InterruptedException {
-		ClearCLBuffer a;
-		ClearCLBuffer b;
+	public void testGpuApiTimeout() throws InterruptedException {
+		assumeTrue(GpuPool.isGpuAvailable());
+		GpuApi a;
+		GpuApi b;
 		try (GpuApi gpu = GpuPool.borrowGpu()) {
-			a = gpu.create(new long[] { 10, 10 }, NativeTypeEnum.Float).clearCLBuffer();
+			a = ((GpuScope) gpu).parent;
 		}
 
-		// Not using the GPU for 10 seconds should close all buffers
-		Thread.sleep(10000);
+		// Not using the GPU for 3 seconds should close all buffers
+		Thread.sleep(3000);
 
 		try (GpuApi gpu = GpuPool.borrowGpu()) {
-			b = gpu.create(new long[] { 10, 10 }, NativeTypeEnum.Float).clearCLBuffer();
+			b = ((GpuScope) gpu).parent;
 		}
 		assertNotSame(a, b);
 	}

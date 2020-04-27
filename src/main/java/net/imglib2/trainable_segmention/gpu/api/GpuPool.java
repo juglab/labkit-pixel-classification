@@ -15,9 +15,15 @@ public class GpuPool {
 
 	private final GenericObjectPool<DefaultGpuApi> pool;
 
-	private static final GpuPool POOL = new GpuPool();
+	private static final GpuPool POOL = initializePool();
+
+	private static GpuPool initializePool() {
+		return DefaultGpuApi.isDeviceAvailable(OPEN_CL_DEVICE_NAME) ? new GpuPool() : null;
+	}
 
 	public static GpuApi borrowGpu() {
+		if (!isGpuAvailable())
+			throw new IllegalStateException("No OpenCL device is available. " + OPEN_CL_DEVICE_NAME);
 		return POOL.gpu();
 	}
 
@@ -42,6 +48,10 @@ public class GpuPool {
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static boolean isGpuAvailable() {
+		return POOL != null;
 	}
 
 	private static class MyObjectFactory implements PooledObjectFactory<DefaultGpuApi> {

@@ -2,6 +2,8 @@
 package net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz;
 
 import net.imglib2.Cursor;
+import net.imglib2.RandomAccessible;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmention.Utils;

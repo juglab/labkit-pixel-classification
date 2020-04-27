@@ -8,6 +8,7 @@ import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
@@ -21,17 +22,12 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(Parameterized.class)
+@RunWith(CpuGpuRunner.class)
 public class SingleDifferenceOfGaussiansFeatureTest {
 
 	public SingleDifferenceOfGaussiansFeatureTest(boolean useGpu) {
 		this.calculator.setUseGpu(useGpu);
 		this.calculator3d.setUseGpu(useGpu);
-	}
-
-	@Parameterized.Parameters(name = "useGpu = {0}")
-	public static List<Boolean> data() {
-		return Arrays.asList(false, true);
 	}
 
 	private double sigma1 = 2.0;

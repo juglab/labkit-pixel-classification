@@ -6,10 +6,10 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
+import net.imglib2.trainable_segmention.gpu.api.AbstractGpuTest;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
-import net.imglib2.trainable_segmention.gpu.random_forest.GpuRandomForestKernel;
-import net.imglib2.trainable_segmention.utils.ToString;
+import net.imglib2.trainable_segmention.gpu.api.GpuPool;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -21,19 +21,7 @@ import org.junit.Test;
 /**
  * Test {@link GpuRandomForestKernel}
  */
-public class GpuRandomForestKernelTest {
-
-	private static GpuApi gpu;
-
-	@Before
-	public void before() {
-		gpu = GpuApi.getInstance();
-	}
-
-	@After
-	public void after() {
-		gpu.close();
-	}
+public class GpuRandomForestKernelTest extends AbstractGpuTest {
 
 	@Test
 	public void testRandomForest() {
@@ -88,10 +76,7 @@ public class GpuRandomForestKernelTest {
 			0.6f, 0.25f, 0.5f,
 			0.5f, 0.25f, 0.6f
 		}, 3, 1, 2, 2);
-		ToString.print(result);
 		ImgLib2Assert.assertImageEqualsRealType(expected, result, 0.00001);
-		Views.iterable(result).forEach(System.out::println);
-
 	}
 
 	@Test

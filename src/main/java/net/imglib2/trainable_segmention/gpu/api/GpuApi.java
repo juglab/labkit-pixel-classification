@@ -16,10 +16,6 @@ import java.util.function.Supplier;
 
 public interface GpuApi extends AutoCloseable {
 
-	static GpuApi getInstance() {
-		return GpuPool.borrowGpu();
-	}
-
 	GpuImage create(long[] dimensions, long numberOfChannels, NativeTypeEnum type);
 
 	GpuApi subScope();

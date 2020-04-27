@@ -16,6 +16,8 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import net.imglib2.trainable_segmention.Utils;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -39,25 +41,20 @@ import static org.junit.Assume.assumeFalse;
  *
  * @author Matthias Arzt
  */
-@RunWith(Parameterized.class)
+@RunWith(CpuGpuRunner.class)
 public class SegmenterTest {
+
+	public final boolean useGpu;
 
 	public SegmenterTest(boolean useGpu) {
 		this.useGpu = useGpu;
 	}
 
-	@Parameterized.Parameters(name = "useGpu = {0}")
-	public static List<Boolean> data() {
-		return Arrays.asList(false, true);
-	}
-
-	private final boolean useGpu;
-
 	private Img<FloatType> img = ImageJFunctions.convertFloat(Utils.loadImage("nuclei.tif"));
 
 	private LabelRegions<String> labeling = loadLabeling("nucleiLabeling.tif");
 
-	private final Context context = new Context();
+	private final Context context = SingletonContext.getInstance();
 
 	@Test
 	public void testClassification() {

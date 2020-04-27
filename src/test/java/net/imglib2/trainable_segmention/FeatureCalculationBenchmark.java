@@ -8,6 +8,7 @@ import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.real.FloatType;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -41,7 +42,7 @@ public class FeatureCalculationBenchmark {
 	private static final String labelingFileName =
 		"drosophila_3d_labeling.tif";
 
-	private final Context context = new Context();
+	private final Context context = SingletonContext.getInstance();
 
 	private final RandomAccessibleInterval<FloatType> image = Utils.loadImageFloatType(imageFilename);
 

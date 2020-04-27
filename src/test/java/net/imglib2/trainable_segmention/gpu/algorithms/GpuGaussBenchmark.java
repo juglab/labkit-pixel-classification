@@ -13,6 +13,7 @@ import net.imglib2.test.RandomImgs;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
+import net.imglib2.trainable_segmention.gpu.api.GpuPool;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.trainable_segmention.gpu.compute_cache.GpuComputeCache;
 import net.imglib2.trainable_segmention.gpu.compute_cache.GpuGaussContent;
@@ -40,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 public class GpuGaussBenchmark {
 
-	private final GpuApi gpu = GpuApi.getInstance();
+	private final GpuApi gpu = GpuPool.borrowGpu();
 	private final CLIJ2 clij2 = CLIJ2.getInstance();
 	private final long[] dimessions = { 64, 64, 64 };
 	private final FinalInterval interval = new FinalInterval(64, 64, 64);

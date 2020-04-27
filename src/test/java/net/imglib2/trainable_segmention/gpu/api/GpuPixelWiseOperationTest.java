@@ -9,14 +9,13 @@ import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
+import org.junit.After;
 import org.junit.Test;
 
 /**
  * Tests {@link GpuPixelWiseOperation}.
  */
-public class GpuPixelWiseOperationTest {
-
-	private final GpuApi gpu = GpuApi.getInstance();
+public class GpuPixelWiseOperationTest extends AbstractGpuTest {
 
 	@Test
 	public void testAdd() {
@@ -152,8 +151,8 @@ public class GpuPixelWiseOperationTest {
 
 	@Test
 	public void testCLIJViewOutput() {
-		GpuView a = GpuViews.crop(gpu.create(new long[] { 2, 2 }, NativeTypeEnum.Float), Intervals
-			.createMinSize(1, 1, 1, 1));
+		GpuImage image = gpu.push(ArrayImgs.floats(new float[] { 0, 0, 0, 0 }, 2, 2));
+		GpuView a = GpuViews.crop(image, Intervals.createMinSize(1, 1, 1, 1));
 		GpuPixelWiseOperation.gpu(gpu)
 			.addOutput("a", a)
 			.forEachPixel("a = 42");

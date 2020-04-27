@@ -10,6 +10,7 @@ import net.imglib2.img.Img;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.classification.Segmenter;
 import net.imglib2.trainable_segmention.gson.GsonUtils;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -19,7 +20,7 @@ import org.scijava.Context;
 
 public class ParallelSegmentationTask implements Runnable {
 
-	private static final Context context = new Context();
+	private static final Context context = SingletonContext.getInstance();
 
 	private static final RandomAccessibleInterval<FloatType> image =
 		Utils.loadImageFloatType("https://imagej.net/images/t1-head.zip");

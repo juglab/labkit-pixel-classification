@@ -7,10 +7,9 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmention.gpu.api.GpuApi;
+import net.imglib2.trainable_segmention.gpu.api.AbstractGpuTest;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
-import net.imglib2.trainable_segmention.utils.ToString;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import org.junit.Test;
@@ -21,11 +20,10 @@ import java.util.Arrays;
 /**
  * Tests {@link GpuConcatenatedNeighborhoodOperation}.
  */
-public class GpuConcatenatedNeighborhoodOperationTest {
+public class GpuConcatenatedNeighborhoodOperationTest extends AbstractGpuTest {
 
 	@Test
 	public void test() {
-		GpuApi gpu = GpuApi.getInstance();
 		Img<FloatType> dirac = ArrayImgs.floats(new float[] {
 			0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0,
@@ -44,7 +42,12 @@ public class GpuConcatenatedNeighborhoodOperationTest {
 		Interval expectedInterval = Intervals.createMinMax(-2, -2, 2, 2);
 		ImgLib2Assert.assertIntervalEquals(expectedInterval, inputInterval);
 		concatenation.apply(input, output);
-		RandomAccessibleInterval<FloatType> rai = gpu.pullRAI(output.source());
-		ToString.print(rai);
+		RandomAccessibleInterval<FloatType> result = gpu.pullRAI(output.source());
+		Img<FloatType> expected = ArrayImgs.floats(new float[] {
+			-1, 0, 1,
+			-2, 0, 2,
+			-1, 0, 1
+		}, 3, 3);
+		ImgLib2Assert.assertImageEquals(expected, result);
 	}
 }

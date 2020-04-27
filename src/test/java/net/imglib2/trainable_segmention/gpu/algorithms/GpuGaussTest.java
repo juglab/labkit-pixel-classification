@@ -9,8 +9,10 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
+import net.imglib2.trainable_segmention.gpu.api.AbstractGpuTest;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
+import net.imglib2.trainable_segmention.gpu.api.GpuPool;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
@@ -18,14 +20,15 @@ import net.imglib2.view.Views;
 import org.junit.Test;
 import preview.net.imglib2.algorithm.gauss3.Gauss3;
 
+import static org.junit.Assume.assumeTrue;
+
 /**
  * Tests {@link GpuGauss}.
  */
-public class GpuGaussTest {
+public class GpuGaussTest extends AbstractGpuTest {
 
 	@Test
 	public void test() {
-		GpuApi gpu = GpuApi.getInstance();
 		RandomAccessible<FloatType> dirac = Utils.dirac(3);
 		RandomAccessibleInterval<FloatType> expected = RevampUtils.createImage(Intervals.createMinMax(
 			-2, -2, -2, 2, 2, 2), new FloatType());

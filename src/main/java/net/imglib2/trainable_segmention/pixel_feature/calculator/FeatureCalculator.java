@@ -23,6 +23,7 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.trainable_segmention.utils.SingletonContext;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
@@ -215,7 +216,7 @@ public class FeatureCalculator {
 
 		public FeatureCalculator build() {
 			if (context == null)
-				context = new Context();
+				context = SingletonContext.getInstance();
 			GlobalSettings globalSettings = buildGlobalSettings();
 			FeatureSettings featureSettings = new FeatureSettings(globalSettings, features);
 			return new FeatureCalculator(context, featureSettings);

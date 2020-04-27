@@ -11,22 +11,32 @@ import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 /**
- * Test {@link GpuApi}.
+ * Test {@link DefaultGpuApi}.
  */
-public class GpuApiTest {
+public class DefaultGpuApiTest {
 
-	private final GpuApi gpu = GpuApi.getInstance();
+	private GpuApi gpu;
+
+	@Before
+	public void before() {
+		assumeTrue(DefaultGpuApi.isDeviceAvailable(null));
+		gpu = new DefaultGpuApi(null);
+	}
 
 	@After
 	public void after() {
-		gpu.close();
+		if(gpu != null)
+			gpu.close();
 	}
 
 	@Test
@@ -57,19 +67,21 @@ public class GpuApiTest {
 	public void testPushAndPull() {
 		RandomAccessibleInterval<FloatType> image = ArrayImgs.floats(new float[] { 1, 2, 3, 4, 5, 6 },
 			2, 3);
-		GpuImage gpuImage = gpu.push(image);
-		RandomAccessibleInterval<FloatType> result = gpu.pullRAI(gpuImage);
-		ImgLib2Assert.assertImageEquals(image, result);
+		try (GpuImage gpuImage = gpu.push(image)) {
+			RandomAccessibleInterval<FloatType> result = gpu.pullRAI(gpuImage);
+			ImgLib2Assert.assertImageEquals(image, result);
+		}
 	}
 
 	@Test
 	public void testPushAndPullMultiChannel() {
 		RandomAccessibleInterval<FloatType> image = ArrayImgs.floats(new float[] { 1, 2, 3, 4, 5, 6 },
 			2, 1, 3);
-		GpuImage gpuImage = gpu.pushMultiChannel(image);
-		assertArrayEquals(new long[] { 2, 1 }, gpuImage.getDimensions());
-		assertEquals(3, gpuImage.getNumberOfChannels());
-		RandomAccessibleInterval<FloatType> result = gpu.pullRAIMultiChannel(gpuImage);
-		ImgLib2Assert.assertImageEquals(image, result);
+		try (GpuImage gpuImage = gpu.pushMultiChannel(image)) {
+			assertArrayEquals(new long[] { 2, 1 }, gpuImage.getDimensions());
+			assertEquals(3, gpuImage.getNumberOfChannels());
+			RandomAccessibleInterval<FloatType> result = gpu.pullRAIMultiChannel(gpuImage);
+			ImgLib2Assert.assertImageEquals(image, result);
+		}
 	}
 }

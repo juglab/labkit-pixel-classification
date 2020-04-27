@@ -10,6 +10,7 @@ import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.trainable_segmention.Utils;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
@@ -24,16 +25,11 @@ import static org.junit.Assume.assumeFalse;
 /**
  * @author Matthias Arzt
  */
-@RunWith(Parameterized.class)
+@RunWith(CpuGpuRunner.class)
 public class BorderEffectsTest {
 
 	public BorderEffectsTest(boolean useGpu) {
 		this.useGpu = useGpu;
-	}
-
-	@Parameterized.Parameters(name = "useGpu = {0}")
-	public static List<Boolean> data() {
-		return Arrays.asList(false, true);
 	}
 
 	private final boolean useGpu;

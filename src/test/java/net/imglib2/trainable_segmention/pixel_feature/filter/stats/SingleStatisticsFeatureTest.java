@@ -6,6 +6,7 @@ import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmention.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
+import net.imglib2.trainable_segmention.utils.CpuGpuRunner;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
@@ -17,17 +18,12 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(Parameterized.class)
+@RunWith(CpuGpuRunner.class)
 public class SingleStatisticsFeatureTest {
 
 	public SingleStatisticsFeatureTest(boolean useGpu) {
 		this.calculator.setUseGpu(useGpu);
 		this.useGpu = useGpu;
-	}
-
-	@Parameterized.Parameters(name = "useGpu = {0}")
-	public static List<Boolean> data() {
-		return Arrays.asList(false, true);
 	}
 
 	private final boolean useGpu;
@@ -126,6 +122,5 @@ public class SingleStatisticsFeatureTest {
 		}, 5, 5);
 		calculator.apply(Views.extendBorder(input), output);
 		ImgLib2Assert.assertImageEquals(Views.stack(expectedMax), output);
-
 	}
 }

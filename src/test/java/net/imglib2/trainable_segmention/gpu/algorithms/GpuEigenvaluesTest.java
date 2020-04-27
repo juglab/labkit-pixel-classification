@@ -7,16 +7,18 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
+import net.imglib2.trainable_segmention.gpu.api.AbstractGpuTest;
 import net.imglib2.trainable_segmention.gpu.api.GpuPixelWiseOperation;
 import net.imglib2.trainable_segmention.gpu.api.GpuApi;
 import net.imglib2.trainable_segmention.gpu.api.GpuImage;
+import net.imglib2.trainable_segmention.gpu.api.GpuPool;
 import net.imglib2.trainable_segmention.gpu.api.GpuView;
 import net.imglib2.trainable_segmention.gpu.api.GpuViews;
-import net.imglib2.trainable_segmention.utils.Scope;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -24,10 +26,9 @@ import java.util.Random;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
 
-public class GpuEigenvaluesTest {
-
-	GpuApi gpu = GpuApi.getInstance();
+public class GpuEigenvaluesTest extends AbstractGpuTest {
 
 	@Test
 	public void testCalculate2d() {
@@ -124,10 +125,5 @@ public class GpuEigenvaluesTest {
 	private float getValue(GpuImage buffer) {
 		RandomAccessibleInterval<FloatType> rai = gpu.pullRAI(buffer);
 		return Views.iterable(rai).firstElement().getRealFloat();
-	}
-
-	@After
-	public void after() {
-		gpu.close();
 	}
 }
