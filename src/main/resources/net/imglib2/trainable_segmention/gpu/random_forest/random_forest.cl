@@ -2,28 +2,24 @@ __constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_T
 
 #define PIXEL(image, x, y, z) image[((z) * GET_IMAGE_HEIGHT(image) + (y)) * GET_IMAGE_WIDTH(image) + (x)]
 #define IMAGE_TYPE(a) IMAGE_ ## a ## _TYPE a
+#define GET_IMAGE_VOLUME(image) (GET_IMAGE_WIDTH(image) * GET_IMAGE_HEIGHT(image) * GET_IMAGE_DEPTH(image))
 
 __kernel void random_forest
 (
   IMAGE_TYPE(dst),
   IMAGE_TYPE(src),
-  IMAGE_TYPE(thresholds),
-  IMAGE_TYPE(probabilities),
-  IMAGE_TYPE(indices)
+  CONSTANT_OR_GLOBAL float *thresholds,
+  __global float *probabilities,
+  CONSTANT_OR_GLOBAL short *indices
 )
 {
   const int x = get_global_id(0), y = get_global_id(1), z = get_global_id(2);
-  const int src_channel_skip = GET_IMAGE_WIDTH(src) * GET_IMAGE_HEIGHT(src) * GET_IMAGE_DEPTH(src);
-  const int dst_channel_skip = GET_IMAGE_WIDTH(dst) * GET_IMAGE_HEIGHT(dst) * GET_IMAGE_DEPTH(dst);
+  const int src_channel_skip = GET_IMAGE_VOLUME(src);
+  const int dst_channel_skip = GET_IMAGE_VOLUME(dst);
   const int num_trees = GET_IMAGE_DEPTH(thresholds);
   const unsigned short num_nodes = (unsigned short) GET_IMAGE_HEIGHT(thresholds);
   float results[NUMBER_OF_CLASSES];
   float features[NUMBER_OF_FEATURES];
-  __local unsigned short indices_local[INDICES_SIZE];
-  __local float thresholds_local[INDICES_SIZE / 3];
-  event_t event = async_work_group_copy(indices_local, indices, INDICES_SIZE, 0);
-  async_work_group_copy(thresholds_local, thresholds, INDICES_SIZE / 3, event);
-  wait_group_events(1, &event);
 
   // zero probabilities
   for(int i = 0; i < NUMBER_OF_CLASSES; i++) {
@@ -38,11 +34,11 @@ __kernel void random_forest
   for(int tree = 0; tree < num_trees; tree++) {
     unsigned short nodeIndex = 0;
     while(nodeIndex < num_nodes) {
-      const unsigned short attributeIndex = indices_local[(tree * GET_IMAGE_HEIGHT(indices) + nodeIndex) * 3];
+      const unsigned short attributeIndex = PIXEL(indices, 0, nodeIndex, tree);
       const float attributeValue = features[attributeIndex];
-      const float threshold = thresholds_local[tree * GET_IMAGE_HEIGHT(thresholds) + nodeIndex];
+      const float threshold = PIXEL(thresholds, 0, nodeIndex, tree);
       const int smaller = (int) (attributeValue >= threshold) + 1;
-      nodeIndex = indices_local[(tree * GET_IMAGE_HEIGHT(indices) + nodeIndex) * 3 + smaller];
+      nodeIndex = PIXEL(indices, smaller, nodeIndex, tree);
     }
     const unsigned short leafIndex = nodeIndex - num_nodes;
     for(int i = 0; i < NUMBER_OF_CLASSES; i++) {
