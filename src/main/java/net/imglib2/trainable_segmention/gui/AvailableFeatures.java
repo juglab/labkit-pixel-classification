@@ -17,16 +17,14 @@ public class AvailableFeatures {
 		// prevent from instantiation
 	}
 
-	public static List<FeatureInfo> getValidFeatures(
-		Context context, GlobalSettings globals)
+	public static List<FeatureInfo> getFeatures(
+		Context context)
 	{
 		List<FeatureInfo> list = new ArrayList<>();
 		List<PluginInfo<FeatureOp>> pluginInfos = context.service(PluginService.class).getPluginsOfType(
 			FeatureOp.class);
 		for (PluginInfo<FeatureOp> pluginInfo : pluginInfos) {
 			try {
-				if (!isValid(pluginInfo, globals))
-					continue;
 				list.add(new FeatureInfo(pluginInfo));
 			}
 			catch (InstantiableException e) {
@@ -34,13 +32,5 @@ public class AvailableFeatures {
 			}
 		}
 		return list;
-	}
-
-
-	private static boolean isValid(PluginInfo<FeatureOp> pluginInfo, GlobalSettings globals)
-			throws InstantiableException
-	{
-		FeatureOp op = pluginInfo.createInstance();
-		return op.checkGlobalSettings(globals);
 	}
 }

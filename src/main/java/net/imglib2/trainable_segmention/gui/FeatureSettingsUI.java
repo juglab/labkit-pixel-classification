@@ -1,7 +1,6 @@
 
 package net.imglib2.trainable_segmention.gui;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -20,10 +19,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.UIManager;
 import javax.swing.WindowConstants;
-import javax.swing.plaf.ColorUIResource;
 
+import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
+import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import org.scijava.Context;
 
 import net.imglib2.trainable_segmention.pixel_feature.settings.ChannelSetting;
@@ -38,18 +37,15 @@ import net.miginfocom.swing.MigLayout;
  */
 public class FeatureSettingsUI extends JPanel {
 
-	private static final long serialVersionUID = 1L;
-
 	private GlobalsPanel globalsPanel;
 
 	private FiltersPanel filtersPanel;
 
 	public FeatureSettingsUI( Context context, FeatureSettings fs ) {
-		setLayout( new MigLayout( "insets 0", "[grow]", "[][grow][]" ) );
-		setBackground(Color.WHITE);
+		setLayout( new MigLayout( "insets 0", "[grow]", "[][grow]" ) );
 		globalsPanel = new GlobalsPanel( fs.globals() );
 		add( globalsPanel, "wrap" );
-		filtersPanel = new FiltersPanel( context, fs, globalsPanel);
+		filtersPanel = new FiltersPanel( context, fs );
 		add( new JScrollPane( filtersPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), "split 2, grow" );
 	}
 
@@ -60,13 +56,9 @@ public class FeatureSettingsUI extends JPanel {
 
 	public static Optional< FeatureSettings > show( Context context, FeatureSettings fg ) {
 		FeatureSettingsUI featureSettingsGui = new FeatureSettingsUI( context, fg );
-		return featureSettingsGui.showInternal();
-	}
-
-	private Optional< FeatureSettings > showInternal() {
-		boolean ok = showResizeableOkCancelDialog( "Select Pixel Features", this );
+		boolean ok = showResizeableOkCancelDialog( "Select Pixel Features", featureSettingsGui);
 		if ( ok ) {
-			FeatureSettings features = get();
+			FeatureSettings features = featureSettingsGui.get();
 			return Optional.of( features );
 		}
 		return Optional.empty();
@@ -74,9 +66,6 @@ public class FeatureSettingsUI extends JPanel {
 
 	private static boolean showResizeableOkCancelDialog( String title, JPanel content ) {
 		JDialog dialog = new JDialog( ( Frame ) null, title, true );
-		dialog.setBackground( Color.WHITE );
-		UIManager.put("OptionPane.background",new ColorUIResource(255,255,255));
-		UIManager.put("Panel.background",new ColorUIResource(255,255,255));
 		JOptionPane optionPane = new JOptionPane( content, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION );
 		dialog.setContentPane( optionPane );
 		dialog.setResizable( true );
@@ -94,23 +83,20 @@ public class FeatureSettingsUI extends JPanel {
 	}
 
 	public static void main( String... args ) {
-		FeatureSettingsUI.show( new Context(), new FeatureSettings( GlobalSettings.default2d().build() ) );
+		FeatureSettingsUI.show( new Context(), new FeatureSettings( GlobalSettings.default2d().build(),
+				SingleFeatures.identity(), SingleFeatures.differenceOfGaussians(3, 4.5),
+				GroupedFeatures.hessian()) );
 	}
 
 	public class GlobalsPanel extends JPanel {
 
-		private static final long serialVersionUID = 1L;
-
 		private final ChannelSetting channelSetting;
 		private final JComboBox< String > dimensionsField;
 		private final JFormattedTextField sigmasField;
-		
-		private int dims = 2;
 
 		public GlobalsPanel( GlobalSettings globalSettings ) {
 			channelSetting = globalSettings.channelSetting();
 			setLayout( new MigLayout( "insets 0", "[]20pt[150pt]", "[][][]" ) );
-			setBackground(Color.WHITE);
 			add( new JLabel( "Dimensions:" ));
 			dimensionsField = new JComboBox<>( new String[] { "2D", "3D" } );
 			dimensionsField.setSelectedItem( globalSettings.numDimensions() + "D" );
@@ -129,22 +115,11 @@ public class FeatureSettingsUI extends JPanel {
 		}
 
 		private void dimensionsChanged( ActionEvent e ) {
-			int newDims = dimensionsField.getSelectedIndex() + 2;
-			boolean increased = false;
-			if (dims == newDims )
-				return;
-			if (dims < newDims) {
-				increased = true;
-			}
-			dims = newDims;
-
-			filtersPanel.checkFeatures( get(), increased);
+			filtersPanel.setGlobalSetting( get() );
 		}
 	}
 	
 	private static class ListOfDoubleFormatter extends JFormattedTextField.AbstractFormatter {
-
-		private static final long serialVersionUID = 1L;
 
 		@Override
 		public Object stringToValue( String text ) throws ParseException {

@@ -27,7 +27,6 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 
 public class ParametersRow extends JPanel {
 
-	private static final long serialVersionUID = 1L;
 	private static final ImageIcon DOT_ICON = IconResources.getIcon( "dot_icon_16px.png" );
 	private static final ImageIcon RM_ICON = IconResources.getIcon( "minus_icon_16px.png" );
 	private static final ImageIcon PARAMS_ICON = IconResources.getIcon( "params_icon_16px.png" );
@@ -44,7 +43,6 @@ public class ParametersRow extends JPanel {
 		this.globalSettings = globalSettings;
 		this.featureSetting = featureSetting;
 		setLayout( new BorderLayout() );
-		setBackground( Color.WHITE );
 		initUI();
 	}
 
@@ -52,15 +50,13 @@ public class ParametersRow extends JPanel {
 
 		JPanel cbPanel = new JPanel();
 		cbPanel.setLayout( new FlowLayout( FlowLayout.LEFT ) );
-		cbPanel.setBackground( Color.WHITE );
-		cbPanel.add( Box.createHorizontalStrut( 15 ) );
+		cbPanel.add( Box.createHorizontalStrut( 50 ) );
 		
 		paramsLabel = new JLabel( paramsString(), DOT_ICON, SwingConstants.LEFT );
 		cbPanel.add( paramsLabel, BorderLayout.WEST );
 		add( cbPanel, BorderLayout.WEST );
 
 		JPanel btnPanel = new JPanel();
-		btnPanel.setBackground( Color.WHITE );
 		btnPanel.setLayout( new FlowLayout( FlowLayout.LEFT ) );
 
 		JButton rmButton = new JButton( RM_ICON );

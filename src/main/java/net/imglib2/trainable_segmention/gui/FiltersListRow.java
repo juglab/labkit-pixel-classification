@@ -24,7 +24,6 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 
 public class FiltersListRow extends JPanel {
 
-	private static final long serialVersionUID = 1L;
 	private static final ImageIcon INFO_ICON = IconResources.getIcon( "info_icon_16px.png" );
 	private static final ImageIcon DUP_ICON = IconResources.getIcon( "plus_icon_16px.png" );
 	private static final ImageIcon RM_ICON = IconResources.getIcon( "minus_icon_16px.png" );
@@ -45,7 +44,6 @@ public class FiltersListRow extends JPanel {
 		this.isParametrized = ! featureSetting.parameters().isEmpty();
 		setLayout( new BorderLayout() );
 		setBorder(new EmptyBorder(1,0,1,0));
-		setBackground(Color.WHITE);
 		initUI();
 	}
 
@@ -59,7 +57,6 @@ public class FiltersListRow extends JPanel {
 		add( nameLabel, BorderLayout.CENTER );
 
 		JPanel btnPanel = new JPanel();
-		btnPanel.setBackground(Color.WHITE);
 		btnPanel.setLayout( new FlowLayout( FlowLayout.LEFT ) );
 
 		editButton = new JLabel( PARAMS_ICON );

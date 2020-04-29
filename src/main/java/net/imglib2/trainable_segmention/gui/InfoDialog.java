@@ -21,7 +21,6 @@ import net.miginfocom.swing.MigLayout;
 
 public class InfoDialog extends JDialog {
 
-	private static final long serialVersionUID = 1L;
 	private final String OS = System.getProperty( "os.name" ).toLowerCase();
 	private JPanel panel;
 
