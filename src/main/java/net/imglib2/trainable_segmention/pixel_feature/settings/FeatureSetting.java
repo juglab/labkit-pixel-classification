@@ -8,8 +8,8 @@ import com.google.gson.JsonPrimitive;
 import net.imagej.ops.OpInfo;
 import net.imagej.ops.OpService;
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import net.imglib2.util.Cast;
 import org.scijava.Context;
-import org.scijava.command.Command;
 import org.scijava.command.CommandInfo;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleException;
@@ -17,7 +17,13 @@ import org.scijava.module.ModuleItem;
 import org.scijava.service.SciJavaService;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -174,8 +180,8 @@ public class FeatureSetting {
 			this.parameterValues.equals(fs.parameterValues);
 	}
 
-	public Class<? extends Command> pluginClass() {
-		return this.commandInfo.getPluginClass();
+	public Class<? extends FeatureOp> pluginClass() {
+		return Cast.unchecked(this.commandInfo.getPluginClass());
 	}
 
 	@Override
