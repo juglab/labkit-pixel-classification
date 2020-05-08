@@ -1,7 +1,6 @@
 package net.imglib2.trainable_segmention.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -14,16 +13,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import org.scijava.AbstractContextual;
 import org.scijava.Context;
+
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleCanceledException;
 import org.scijava.module.ModuleException;
 import org.scijava.ui.swing.widget.SwingInputHarvester;
-import org.scijava.widget.InputHarvester;
-
-import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 
 public class ParametersRow extends JPanel {
 
@@ -31,16 +27,14 @@ public class ParametersRow extends JPanel {
 	private static final ImageIcon RM_ICON = IconResources.getIcon( "minus_icon_16px.png" );
 	private static final ImageIcon PARAMS_ICON = IconResources.getIcon( "params_icon_16px.png" );
 
-	private GlobalSettings globalSettings;
 	private Context context;
 	private FeatureSetting featureSetting;
 
 	
 	private JLabel paramsLabel;
 
-	public ParametersRow( Context context, GlobalSettings globalSettings, FeatureSetting featureSetting) {
+	public ParametersRow(Context context, FeatureSetting featureSetting) {
 		this.context = context;
-		this.globalSettings = globalSettings;
 		this.featureSetting = featureSetting;
 		setLayout( new BorderLayout() );
 		initUI();
@@ -82,7 +76,7 @@ public class ParametersRow extends JPanel {
 	}
 
 	private void editParameters( ActionEvent e ) {
-		featureSetting = new FeatureSettingsDialog( context ).show( featureSetting, globalSettings );
+		featureSetting = showParametersDialog( context, featureSetting);
 		update();
 		validate();
 		repaint();
@@ -112,26 +106,18 @@ public class ParametersRow extends JPanel {
 		return featureSetting;
 	}
 
-	static class FeatureSettingsDialog extends AbstractContextual {
-
-		@SuppressWarnings( "rawtypes" )
-		private final InputHarvester harvester;
-
-		FeatureSettingsDialog( Context context ) {
-			harvester = new SwingInputHarvester();
-			context.inject( harvester );
-		}
-
-		FeatureSetting show( FeatureSetting op, GlobalSettings globalSetting ) {
-			try {
-				Module module = op.asModule( globalSetting );
-				harvester.harvest( module );
-				return FeatureSetting.fromModule( module );
-			} catch ( ModuleCanceledException e ) {
-				return op;
-			} catch ( ModuleException e ) {
-				throw new RuntimeException( e.getMessage() );
-			}
+	public static FeatureSetting showParametersDialog( Context context, FeatureSetting op ) {
+		SwingInputHarvester harvester = new SwingInputHarvester();
+		context.inject( harvester );
+		try {
+			Module module = op.asModule( null );
+			harvester.harvest( module );
+			return FeatureSetting.fromModule( module );
+		} catch ( ModuleCanceledException e ) {
+			return op;
+		} catch ( ModuleException e ) {
+			throw new RuntimeException( e );
 		}
 	}
+
 }

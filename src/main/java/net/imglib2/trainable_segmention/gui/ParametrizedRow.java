@@ -10,9 +10,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.*;
 
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import org.scijava.Context;
 
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
@@ -23,17 +25,16 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 	private static final ImageIcon DUP_ICON = IconResources.getIcon( "plus_icon_16px.png" );
 	private static final ImageIcon INFO_ICON = IconResources.getIcon( "info_icon_16px.png" );
 
-	private GlobalSettings globalSettings;
 	private Context context;
 
-	private FeatureSetting featureSetting;
+	private FeatureInfo featureInfo;
+
 	private JCheckBox checkbox;
 	private GridBagConstraints gbc;
 
-	public ParametrizedRow( Context context, GlobalSettings globalSettings, FeatureSetting featureSetting ) {
+	public ParametrizedRow( Context context, FeatureInfo featureInfo, FeatureSettings featureSettings) {
 		this.context = context;
-		this.globalSettings = globalSettings;
-		this.featureSetting = featureSetting;
+		this.featureInfo = featureInfo;
 		setLayout( new GridBagLayout());
 		gbc = new GridBagConstraints();
 		gbc.anchor = GridBagConstraints.NORTHWEST;
@@ -41,16 +42,23 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.weightx = 1.0;
 		gbc.weighty = 1.0;
-		initUI();
-		setGlobalSettings(globalSettings);
+		initUI(featureInfo, filterRelevantFeatureSettings(featureInfo, featureSettings));
+		setGlobalSettings(featureSettings.globals());
 	}
 
-	private void initUI() {
+	private List<FeatureSetting> filterRelevantFeatureSettings(FeatureInfo featureInfo, FeatureSettings featureSettings) {
+		return featureSettings.features().stream()
+				.filter(f -> featureInfo.pluginClass().equals(f.pluginClass()))
+				.collect(Collectors.toList());
+	}
+
+	private void initUI(FeatureInfo featureInfo, List<FeatureSetting> featureSettings) {
 		JPanel titleRow = new JPanel();
 		titleRow.setLayout( new BorderLayout() );
 		titleRow.add( Box.createHorizontalStrut(30), BorderLayout.WEST );
 
-		checkbox = new JCheckBox( featureSetting.getName() );
+		checkbox = new JCheckBox( featureInfo.getName() );
+		checkbox.setSelected(!featureSettings.isEmpty());
 		checkbox.addActionListener( this::checkForParameterRow );
 		titleRow.add( checkbox, BorderLayout.CENTER );
 
@@ -58,7 +66,8 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 		titleRow.add( btnPanel, BorderLayout.EAST );
 		add( titleRow, gbc);
 		gbc.gridy = GridBagConstraints.RELATIVE;
-		add( new ParametersRow( context, globalSettings, featureSetting), gbc );
+		for(FeatureSetting featureSetting : featureSettings)
+			add( new ParametersRow( context, featureSetting), gbc );
 	}
 
 	private JPanel createButtonPanel() {
@@ -88,17 +97,14 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 	}
 
 	private void duplicate( ActionEvent e ) {
-		add( new ParametersRow( context, globalSettings, FeatureSetting.copy( featureSetting )), gbc );
+		add( new ParametersRow( context, new FeatureSetting(featureInfo.pluginClass())), gbc );
 		revalidate();
 		repaint();
 	}
 	
 	private void checkForParameterRow (ActionEvent e) {
-		if (getComponents().length == 1) {
-			add( new ParametersRow( context, globalSettings, featureSetting), gbc );
-			revalidate();
-			repaint();
-		}
+		if (checkbox.isSelected() && getComponents().length == 1)
+			duplicate(null);
 	}
 
 	@Override
@@ -106,6 +112,8 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 		super.remove( c );
 		revalidate();
 		repaint();
+		if(getComponents().length == 1)
+			checkbox.setSelected(false);
 	}
 	
 	@Override
@@ -125,8 +133,7 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 	@Override
 	public void setGlobalSettings(GlobalSettings globalSettings) {
 		try {
-			this.globalSettings = globalSettings;
-			boolean isValid = featureSetting.pluginClass().newInstance().checkGlobalSettings(globalSettings);
+			boolean isValid = featureInfo.pluginClass().newInstance().checkGlobalSettings(globalSettings);
 			enableRecursively(this, isValid);
 		} catch (InstantiationException | IllegalAccessException ignored) {}
 	}

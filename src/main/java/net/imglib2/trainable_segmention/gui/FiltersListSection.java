@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import org.scijava.Context;
 
 
@@ -20,21 +21,21 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
  */
 public class FiltersListSection extends AccordionSection {
 
-	private List<FeatureSetting> featureSettings;
+	private List<FeatureInfo> featureInfos;
 	private final JPanel titlePanel;
 	private final JPanel expandablePanel;
 
 	/**
 	 */
-	public FiltersListSection(String title, Context context, GlobalSettings gs, List<FeatureSetting> featureSettings, boolean isExpanded) {
+	public FiltersListSection(String title, Context context, FeatureSettings featureSettings, List<FeatureInfo> featureInfos, boolean isExpanded) {
 		super(isExpanded);
-		this.featureSettings = featureSettings;
-		setLayout( new BoxLayout(this, BoxLayout.Y_AXIS) );
+		this.featureInfos = featureInfos;
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
 		titlePanel = createTitlePanel(title);
-		add(titlePanel, BorderLayout.NORTH );
-		expandablePanel = createExpandablePanel(context, gs);
-		add( expandablePanel, BorderLayout.CENTER );
+		add(titlePanel, BorderLayout.NORTH);
+		expandablePanel = createExpandablePanel(context, featureSettings);
+		add(expandablePanel, BorderLayout.CENTER);
 	}
 
 	private JPanel createTitlePanel(String title) {
@@ -49,20 +50,18 @@ public class FiltersListSection extends AccordionSection {
 		JLabel titleComponent = new JLabel(title);
 		Font f = titleComponent.getFont();
 		titleComponent.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
-		titleComponent.setBorder( new CompoundBorder( BorderFactory.createEmptyBorder( 2, 8, 2, 2 ), titleComponent.getBorder() ) );
+		titleComponent.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(2, 8, 2, 2), titleComponent.getBorder()));
 		return titleComponent;
 	}
 
-	private JPanel createExpandablePanel(Context context, GlobalSettings gs) {
+	private JPanel createExpandablePanel(Context context, FeatureSettings featureSettings) {
 		JPanel expandablePanel = new JPanel();
-		expandablePanel.setLayout( new BoxLayout(expandablePanel, BoxLayout.Y_AXIS) );
-		for (FeatureSetting fs: featureSettings) {
-			if (fs.parameters().isEmpty())
-			{
-				expandablePanel.add( new NonParametrizedRow(gs, fs) );
-			} else {
-				expandablePanel.add( new ParametrizedRow(context, gs, fs) );
-			}
+		expandablePanel.setLayout(new BoxLayout(expandablePanel, BoxLayout.Y_AXIS));
+		for (FeatureInfo featureInfo : featureInfos) {
+			JPanel row = (featureInfo.hasParameters()) ?
+					new ParametrizedRow(context, featureInfo, featureSettings) :
+					new NonParametrizedRow(featureInfo, featureSettings);
+			expandablePanel.add(row);
 		}
 		return expandablePanel;
 	}
@@ -77,13 +76,12 @@ public class FiltersListSection extends AccordionSection {
 		return titlePanel.getPreferredSize().height + expandablePanel.getPreferredSize().height;
 	}
 
-	public List<FeatureSetting> getSelectedFeatureSettings()
-	{
+	public List<FeatureSetting> getSelectedFeatureSettings() {
 		List<FeatureSetting> selected = new ArrayList<>();
 		Component[] children = expandablePanel.getComponents();
 		for (Component child : children) {
 			if (child instanceof SelectableRow)
-				selected.addAll( ((SelectableRow)child).getSelectedFeatureSettings());
+				selected.addAll(((SelectableRow) child).getSelectedFeatureSettings());
 		}
 		return selected;
 	}
@@ -92,7 +90,7 @@ public class FiltersListSection extends AccordionSection {
 		Component[] children = expandablePanel.getComponents();
 		for (Component child : children) {
 			if (child instanceof SelectableRow)
-				((SelectableRow)child).setGlobalSettings(globalSettings);
+				((SelectableRow) child).setGlobalSettings(globalSettings);
 		}
 	}
 }

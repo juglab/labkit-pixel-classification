@@ -6,6 +6,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmention.RevampUtils;
 import net.imglib2.type.numeric.real.FloatType;
+import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
 /**
@@ -31,5 +32,9 @@ public abstract class AbstractFeatureOp
 	@Override
 	public GlobalSettings globalSettings() {
 		return globalSettings;
+	}
+
+	public Context context() {
+		return ops().context();
 	}
 }

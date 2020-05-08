@@ -8,27 +8,33 @@ import java.util.List;
 import javax.swing.*;
 
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 
 public class NonParametrizedRow extends JPanel implements SelectableRow {
 
 	private static final ImageIcon INFO_ICON = IconResources.getIcon( "info_icon_16px.png" );
 
-	private FeatureSetting featureSetting;
+	private FeatureInfo featureInfo;
 
 	private JCheckBox checkbox;
 
-	public NonParametrizedRow(GlobalSettings gs, FeatureSetting featureSetting) {
-		this.featureSetting = featureSetting;
-		initUI();
-		setGlobalSettings(gs);
+	public NonParametrizedRow(FeatureInfo featureInfo, FeatureSettings featureSettings) {
+		this.featureInfo = featureInfo;
+		initUI(isSelected(featureInfo, featureSettings));
+		setGlobalSettings(featureSettings.globals());
 	}
 
-	private void initUI() {
+	private static boolean isSelected(FeatureInfo featureInfo, FeatureSettings featureSettings) {
+		return featureSettings.features().stream().anyMatch(f -> featureInfo.pluginClass().equals(f.pluginClass()));
+	}
+
+	private void initUI(boolean selected) {
 
 		setLayout( new BorderLayout() );
 		add(Box.createHorizontalStrut(30), BorderLayout.WEST );
-		checkbox = new JCheckBox(featureSetting.getName() );
+		checkbox = new JCheckBox( featureInfo.getName() );
+		checkbox.setSelected(selected);
 		add( checkbox, BorderLayout.CENTER );
 
 		JPanel btnPanel = new JPanel();
@@ -58,14 +64,14 @@ public class NonParametrizedRow extends JPanel implements SelectableRow {
 	public List< FeatureSetting > getSelectedFeatureSettings() {
 		List<FeatureSetting> selected = new ArrayList<>();
 		if (checkbox.isSelected())
-			selected.add(featureSetting);
+			selected.add(new FeatureSetting(featureInfo.pluginClass()));
 		return selected;
 	}
 
 	@Override
 	public void setGlobalSettings(GlobalSettings globalSettings) {
 		try {
-			boolean isValid = featureSetting.pluginClass().newInstance().checkGlobalSettings(globalSettings);
+			boolean isValid = featureInfo.pluginClass().newInstance().checkGlobalSettings(globalSettings);
 			enableRecursively(this, isValid);
 		} catch (InstantiationException | IllegalAccessException ignored) {}
 	}

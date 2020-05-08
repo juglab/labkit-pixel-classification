@@ -9,5 +9,5 @@ public interface SelectableRow {
 
 	public List<FeatureSetting> getSelectedFeatureSettings();
 
-	void setGlobalSettings(GlobalSettings globalSettings);
+	void setGlobalSettings(GlobalSettings featureInfo);
 }

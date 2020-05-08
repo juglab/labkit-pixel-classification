@@ -21,6 +21,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
 
+import net.imglib2.trainable_segmention.gson.GsonUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.GroupedFeatures;
 import net.imglib2.trainable_segmention.pixel_feature.filter.SingleFeatures;
 import org.scijava.Context;
@@ -41,11 +42,11 @@ public class FeatureSettingsUI extends JPanel {
 
 	private FiltersPanel filtersPanel;
 
-	public FeatureSettingsUI( Context context, FeatureSettings fs ) {
+	public FeatureSettingsUI( Context context, FeatureSettings featureSettings ) {
 		setLayout( new MigLayout( "insets 0", "[grow]", "[][grow]" ) );
-		globalsPanel = new GlobalsPanel( fs.globals() );
+		globalsPanel = new GlobalsPanel( featureSettings.globals() );
 		add( globalsPanel, "wrap" );
-		filtersPanel = new FiltersPanel( context, fs );
+		filtersPanel = new FiltersPanel( context, featureSettings );
 		add( new JScrollPane( filtersPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), "split 2, grow" );
 	}
 
@@ -54,11 +55,11 @@ public class FeatureSettingsUI extends JPanel {
 	}
 
 
-	public static Optional< FeatureSettings > show( Context context, FeatureSettings fg ) {
-		FeatureSettingsUI featureSettingsGui = new FeatureSettingsUI( context, fg );
-		boolean ok = showResizeableOkCancelDialog( "Select Pixel Features", featureSettingsGui);
+	public static Optional< FeatureSettings > show( Context context, FeatureSettings featureSettings ) {
+		FeatureSettingsUI ui = new FeatureSettingsUI( context, featureSettings );
+		boolean ok = showResizeableOkCancelDialog( "Select Pixel Features", ui);
 		if ( ok ) {
-			FeatureSettings features = featureSettingsGui.get();
+			FeatureSettings features = ui.get();
 			return Optional.of( features );
 		}
 		return Optional.empty();
@@ -83,9 +84,12 @@ public class FeatureSettingsUI extends JPanel {
 	}
 
 	public static void main( String... args ) {
-		FeatureSettingsUI.show( new Context(), new FeatureSettings( GlobalSettings.default2d().build(),
-				SingleFeatures.identity(), SingleFeatures.differenceOfGaussians(3, 4.5),
-				GroupedFeatures.hessian()) );
+		FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default2d().build(),
+				SingleFeatures.identity(),
+				SingleFeatures.differenceOfGaussians(3, 4.5),
+				GroupedFeatures.hessian());
+		Optional<FeatureSettings> result = FeatureSettingsUI.show(new Context(), featureSettings);
+		System.out.println(result.map(f -> GsonUtils.toString(f.toJson())));
 	}
 
 	public class GlobalsPanel extends JPanel {
@@ -96,7 +100,7 @@ public class FeatureSettingsUI extends JPanel {
 
 		public GlobalsPanel( GlobalSettings globalSettings ) {
 			channelSetting = globalSettings.channelSetting();
-			setLayout( new MigLayout( "insets 0", "[]20pt[150pt]", "[][][]" ) );
+			setLayout( new MigLayout( "insets 0", "[]20pt[200pt]", "[][][]" ) );
 			add( new JLabel( "Dimensions:" ));
 			dimensionsField = new JComboBox<>( new String[] { "2D", "3D" } );
 			dimensionsField.setSelectedItem( globalSettings.numDimensions() + "D" );

@@ -1,6 +1,5 @@
 package net.imglib2.trainable_segmention.gui;
 
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -38,34 +37,32 @@ public class FiltersPanel extends JPanel {
 			StructureTensorEigenvaluesFeature.class,
 			StatisticsFeature.class));
 
-	private List<FeatureSetting> deprecatedFilters;
-	private List<FeatureSetting> basicFilters;
-	private List<FeatureSetting> advancedFilters;
+	private List<FeatureInfo> deprecatedFilters;
+	private List<FeatureInfo> basicFilters;
+	private List<FeatureInfo> advancedFilters;
 	private List<FiltersListSection> sections;
-	private GlobalSettings globalSettings;
 	private Context context;
 
 	public FiltersPanel(Context context, FeatureSettings fs) {
 		this.context = context;
-		this.globalSettings = fs.globals();
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		initUI();
+		initUI(fs);
 	}
 
-	private void initUI() {
+	private void initUI(FeatureSettings fs) {
 		populateFeatureSettingArrays();
 		sections = new ArrayList<>();
 		AccordionPanel accordion = new AccordionPanel();
-		FiltersListSection basic = new FiltersListSection("Basic Filters", context, globalSettings, basicFilters, true);
-		sections.add(basic);
-		accordion.addSection(basic);
-		FiltersListSection advanced = new FiltersListSection("Advanced Filters", context, globalSettings, this.advancedFilters, false);
-		sections.add(advanced);
-		accordion.addSection(advanced);
-		FiltersListSection deprecated = new FiltersListSection("Deprecated Filters", context, globalSettings, this.deprecatedFilters, false);
-		sections.add(deprecated);
-		accordion.addSection(deprecated);
+		accordion.addSection(newSection(fs, "Basic Filters", basicFilters, true));
+		accordion.addSection(newSection(fs, "Advanced Filters", advancedFilters, false));
+		accordion.addSection(newSection(fs, "Deprecated Filters", deprecatedFilters, false));
 		add(accordion);
+	}
+
+	private FiltersListSection newSection(FeatureSettings fs, String title, List<FeatureInfo> basicFilters, boolean isExpanded) {
+		FiltersListSection basic = new FiltersListSection(title, context, fs, basicFilters, isExpanded);
+		sections.add(basic);
+		return basic;
 	}
 
 	private void populateFeatureSettingArrays() {
@@ -73,15 +70,14 @@ public class FiltersPanel extends JPanel {
 		basicFilters = new ArrayList<>();
 		advancedFilters = new ArrayList<>();
 		deprecatedFilters = new ArrayList<>();
-		featureInfos.sort(Comparator.comparing(FeatureInfo::label));
+		featureInfos.sort(Comparator.comparing(FeatureInfo::getName));
 		for (FeatureInfo featureInfo : featureInfos) {
-			FeatureSetting fs = FeatureSetting.fromClass(featureInfo.clazz());
 			if (featureInfo.isDeprecated())
-				deprecatedFilters.add(fs);
-			else if (isBasic(featureInfo.clazz()))
-				basicFilters.add(fs);
+				deprecatedFilters.add(featureInfo);
+			else if (isBasic(featureInfo.pluginClass()))
+				basicFilters.add(featureInfo);
 			else
-				advancedFilters.add(fs);
+				advancedFilters.add(featureInfo);
 		}
 	}
 
@@ -91,16 +87,11 @@ public class FiltersPanel extends JPanel {
 
 	public List<FeatureSetting> getSelectedFeatureSettings() {
 		List<FeatureSetting> selected = new ArrayList<>();
-		Component[] children = getComponents();
-		for (Component child : children) {
-			if (child instanceof FiltersListSection)
-				selected.addAll(((FiltersListSection) child).getSelectedFeatureSettings());
-		}
+		for (FiltersListSection section : sections) selected.addAll(section.getSelectedFeatureSettings());
 		return selected;
 	}
 
 	public void setGlobalSetting(GlobalSettings globalSettings) {
-		this.globalSettings = globalSettings;
-		sections.forEach(section -> section.setGlobalSettings(this.globalSettings));
+		sections.forEach(section -> section.setGlobalSettings(globalSettings));
 	}
 }

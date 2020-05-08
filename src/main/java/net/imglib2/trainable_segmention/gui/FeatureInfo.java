@@ -1,6 +1,7 @@
 package net.imglib2.trainable_segmention.gui;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import org.scijava.InstantiableException;
 import org.scijava.plugin.PluginInfo;
 
@@ -10,18 +11,24 @@ public class FeatureInfo {
 
 	private final String label;
 	private final Class<? extends FeatureOp> clazz;
+	private final boolean hasParameters;
 
 	public FeatureInfo(PluginInfo<FeatureOp> pluginInfo) throws InstantiableException {
 		this.label = getLabel(pluginInfo);
 		this.clazz = pluginInfo.loadClass();
+		this.hasParameters = !new FeatureSetting(clazz).parameters().isEmpty();
 	}
 
-	public String label() {
+	public String getName() {
 		return label;
 	}
 
-	public Class<? extends FeatureOp> clazz() {
+	public Class<? extends FeatureOp> pluginClass() {
 		return clazz;
+	}
+
+	public boolean hasParameters() {
+		return hasParameters;
 	}
 
 	public boolean isDeprecated() {
