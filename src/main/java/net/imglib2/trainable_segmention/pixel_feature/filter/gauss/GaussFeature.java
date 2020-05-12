@@ -1,8 +1,8 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.gauss;
 
-import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractSigmaGroupFeatureOp;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractSigmaGroupFeatureOp;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
 import org.scijava.plugin.Plugin;
 
 /**

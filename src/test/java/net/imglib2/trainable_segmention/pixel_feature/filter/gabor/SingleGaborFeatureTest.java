@@ -3,10 +3,10 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.gabor;
 
 import ij.ImagePlus;
 import net.imagej.ops.OpService;
-import net.imglib2.trainable_segmention.Utils;
+import net.imglib2.trainable_segmentation.Utils;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.trainable_segmention.utils.SingletonContext;
+import net.imglib2.trainable_segmentation.utils.SingletonContext;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
 

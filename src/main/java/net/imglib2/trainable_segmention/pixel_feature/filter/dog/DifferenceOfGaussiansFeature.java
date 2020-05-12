@@ -2,9 +2,9 @@
 package net.imglib2.trainable_segmention.pixel_feature.filter.dog;
 
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureInput;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Pair;

@@ -1,9 +1,9 @@
 
 package net.imglib2.trainable_segmention.pixel_feature.filter.hessian;
 
-import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractSigmaGroupFeatureOp;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
-import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractSigmaGroupFeatureOp;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
 import org.scijava.plugin.Plugin;
 
 /**

@@ -3,10 +3,10 @@ package net.imglib2.trainable_segmention.pixel_feature.filter.gradient;
 
 import net.imglib2.RandomAccessibleInterval;
 import preview.net.imglib2.loops.LoopBuilder;
-import net.imglib2.trainable_segmention.RevampUtils;
-import net.imglib2.trainable_segmention.pixel_feature.filter.AbstractFeatureOp;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
-import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureInput;
+import net.imglib2.trainable_segmentation.RevampUtils;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractFeatureOp;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureInput;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.scijava.plugin.Parameter;
