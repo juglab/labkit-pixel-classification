@@ -5,7 +5,7 @@ import net.imglib2.util.Cast;
 import weka.core.Instance;
 
 /**
- * Wraps around a {@link hr.irb.fastRandomForest.FastRandomTree} and exposes all
+ * Wraps around a hr.irb.fastRandomForest.FastRandomTree and exposes all
  * the parameters (threshold, children and classification probabilities).
  * <p>
  * Java reflection is used to extract the parameter from the weka fast random
