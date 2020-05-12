@@ -45,9 +45,11 @@ public class GpuRandomForestKernelBenchmark {
 
 	private static final GpuApi gpu = GpuPool.borrowGpu();
 	private static final Segmenter segmenter = initializeSegmenter();
-	private static final RandomForestPrediction prediction = new RandomForestPrediction((FastRandomForest) segmenter.getClassifier(), numberOfClasses, numberOfFeatures);
+	private static final RandomForestPrediction prediction = new RandomForestPrediction(
+		(FastRandomForest) segmenter.getClassifier(), numberOfClasses, numberOfFeatures);
 	private static final GpuImage features = initializeFeatures(gpu);
-	private static final GpuImage distribution = gpu.create(features.getDimensions(), numberOfClasses, NativeTypeEnum.Float);
+	private static final GpuImage distribution = gpu.create(features.getDimensions(), numberOfClasses,
+		NativeTypeEnum.Float);
 
 	@TearDown
 	public void tearDown() {
@@ -62,17 +64,21 @@ public class GpuRandomForestKernelBenchmark {
 
 	private static Segmenter initializeSegmenter() {
 		Context context = new Context();
-		JsonElement read = GsonUtils.read(GpuRandomForestKernelBenchmark.class.getResource("/clij/t1-head.classifier").getFile());
+		JsonElement read = GsonUtils.read(GpuRandomForestKernelBenchmark.class.getResource(
+			"/clij/t1-head.classifier").getFile());
 		return Segmenter.fromJson(context, read);
 	}
 
 	private static GpuImage initializeFeatures(GpuApi gpu) {
-		RandomAccessibleInterval<FloatType> input = Utils.loadImageFloatType("https://imagej.net/images/t1-head.zip");
-		return segmenter.features().applyUseGpu(gpu, Views.extendBorder(input), new FinalInterval(100, 100, 100));
+		RandomAccessibleInterval<FloatType> input = Utils.loadImageFloatType(
+			"https://imagej.net/images/t1-head.zip");
+		return segmenter.features().applyUseGpu(gpu, Views.extendBorder(input), new FinalInterval(100,
+			100, 100));
 	}
 
 	public static void main(String... args) throws RunnerException {
-		Options options = new OptionsBuilder().include(GpuRandomForestKernelBenchmark.class.getSimpleName()).build();
+		Options options = new OptionsBuilder().include(GpuRandomForestKernelBenchmark.class
+			.getSimpleName()).build();
 		new Runner(options).run();
 	}
 

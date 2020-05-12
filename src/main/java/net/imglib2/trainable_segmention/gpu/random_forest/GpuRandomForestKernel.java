@@ -37,7 +37,8 @@ public class GpuRandomForestKernel {
 	}
 
 	private static String appropriateMemory(GpuImage thresholds, GpuImage indices) {
-		long requiredConstantMemory = thresholds.clearCLBuffer().getSizeInBytes() + indices.clearCLBuffer().getSizeInBytes();
+		long requiredConstantMemory = thresholds.clearCLBuffer().getSizeInBytes() + indices
+			.clearCLBuffer().getSizeInBytes();
 		boolean fitsConstantMemory = requiredConstantMemory < ASSUMED_CONSTANT_MEMORY_SIZE;
 		return fitsConstantMemory ? "__constant" : "__global";
 	}

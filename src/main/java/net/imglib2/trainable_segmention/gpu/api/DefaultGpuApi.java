@@ -41,7 +41,7 @@ public class DefaultGpuApi implements GpuApi {
 			}
 			return false;
 		}
-		catch(Throwable e) {
+		catch (Throwable e) {
 			return false;
 		}
 	}

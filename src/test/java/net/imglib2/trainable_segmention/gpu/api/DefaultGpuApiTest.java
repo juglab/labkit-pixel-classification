@@ -35,7 +35,7 @@ public class DefaultGpuApiTest {
 
 	@After
 	public void after() {
-		if(gpu != null)
+		if (gpu != null)
 			gpu.close();
 	}
 
