@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.gui;
 
 import javax.swing.*;
@@ -6,8 +7,8 @@ import java.awt.event.ActionEvent;
 
 public abstract class AccordionSection extends JPanel {
 
-	private static final ImageIcon EXPANDED_ICON = IconResources.getIcon( "arrow_down_48px.png" );
-	private static final ImageIcon COLLAPSED_ICON = IconResources.getIcon( "arrow_right_48px.png" );
+	private static final ImageIcon EXPANDED_ICON = IconResources.getIcon("arrow_down_48px.png");
+	private static final ImageIcon COLLAPSED_ICON = IconResources.getIcon("arrow_right_48px.png");
 	private static final int MIN_COMPONENT_WIDTH = 200;
 	private static final int PREFERRED_COMPONENT_WIDTH = 500;
 	private final JButton iconButton;
@@ -20,12 +21,12 @@ public abstract class AccordionSection extends JPanel {
 
 	@Override
 	public Dimension getMinimumSize() {
-		return new Dimension( MIN_COMPONENT_WIDTH, currentHeight());
+		return new Dimension(MIN_COMPONENT_WIDTH, currentHeight());
 	}
 
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension( PREFERRED_COMPONENT_WIDTH, currentHeight());
+		return new Dimension(PREFERRED_COMPONENT_WIDTH, currentHeight());
 	}
 
 	@Override

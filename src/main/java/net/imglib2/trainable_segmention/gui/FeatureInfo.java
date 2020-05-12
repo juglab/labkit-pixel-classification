@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.gui;
 
 import net.imglib2.trainable_segmention.pixel_feature.filter.FeatureOp;
@@ -36,11 +37,12 @@ public class FeatureInfo {
 	}
 
 	private static boolean isDeprecated(Class<? extends FeatureOp> aClass) {
-		for(Annotation annotation : aClass.getAnnotations())
-			if(Deprecated.class.equals(annotation.annotationType()))
+		for (Annotation annotation : aClass.getAnnotations())
+			if (Deprecated.class.equals(annotation.annotationType()))
 				return true;
 		return false;
 	}
+
 	private static String getLabel(PluginInfo<FeatureOp> pluginInfo) throws InstantiableException {
 		String label = pluginInfo.getLabel();
 		return label.isEmpty() ? pluginInfo.loadClass().getSimpleName() : label;

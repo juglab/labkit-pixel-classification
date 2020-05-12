@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.gui;
 
 import java.awt.image.BufferedImage;
@@ -15,45 +16,48 @@ public class IconResources {
 
 	private static final IconResources instance = new IconResources();
 
-	private static final BufferedImage backupImage = new BufferedImage( 24, 24, BufferedImage.TYPE_INT_ARGB );
-	
-	private static final ImageIcon backupIcon = new ImageIcon( backupImage );
+	private static final BufferedImage backupImage = new BufferedImage(24, 24,
+		BufferedImage.TYPE_INT_ARGB);
 
-	public static URL getResource( String name ) {
-		return instance.getResourceImpl( name );
+	private static final ImageIcon backupIcon = new ImageIcon(backupImage);
+
+	public static URL getResource(String name) {
+		return instance.getResourceImpl(name);
 	}
 
-	public static ImageIcon getIcon( String name ) {
-		return instance.getIconImpl( name );
+	public static ImageIcon getIcon(String name) {
+		return instance.getIconImpl(name);
 	}
 
-	public static BufferedImage getImage( String name ) {
-		return instance.getImageImpl( name );
+	public static BufferedImage getImage(String name) {
+		return instance.getImageImpl(name);
 	}
 
-	private BufferedImage getImageImpl( String name ) {
+	private BufferedImage getImageImpl(String name) {
 		try {
-			return ImageIO.read( getResource( name ) );
-		} catch ( IOException e ) {
-			//Fail gracefully
+			return ImageIO.read(getResource(name));
+		}
+		catch (IOException e) {
+			// Fail gracefully
 			return backupImage;
 		}
 	}
 
-	private URL getResourceImpl( String name ) {
-		return ClassLoader.getSystemResource( name );
+	private URL getResourceImpl(String name) {
+		return ClassLoader.getSystemResource(name);
 	}
 
-	private ImageIcon getIconImpl( String name ) {
-		ImageIcon icon = map.get( name );
-		if ( icon == null ) {
+	private ImageIcon getIconImpl(String name) {
+		ImageIcon icon = map.get(name);
+		if (icon == null) {
 			try {
-				icon = new ImageIcon( getResourceImpl( name ) );
-			} catch ( NullPointerException npe ) {
-				//Fail gracefully
+				icon = new ImageIcon(getResourceImpl(name));
+			}
+			catch (NullPointerException npe) {
+				// Fail gracefully
 				icon = backupIcon;
 			}
-			map.put( name, icon );
+			map.put(name, icon);
 		}
 		return icon;
 	}

@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.gui;
 
 import java.util.ArrayList;
@@ -28,14 +29,14 @@ import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
 public class FiltersPanel extends JPanel {
 
 	private static final Set<Class<?>> BASIC_FILTERS = new HashSet<>(Arrays.asList(
-			IdendityFeature.class,
-			GaussianBlurFeature.class,
-			DifferenceOfGaussiansFeature.class,
-			GaussianGradientMagnitudeFeature.class,
-			LaplacianOfGaussianFeature.class,
-			HessianEigenvaluesFeature.class,
-			StructureTensorEigenvaluesFeature.class,
-			StatisticsFeature.class));
+		IdendityFeature.class,
+		GaussianBlurFeature.class,
+		DifferenceOfGaussiansFeature.class,
+		GaussianGradientMagnitudeFeature.class,
+		LaplacianOfGaussianFeature.class,
+		HessianEigenvaluesFeature.class,
+		StructureTensorEigenvaluesFeature.class,
+		StatisticsFeature.class));
 
 	private List<FeatureInfo> deprecatedFilters;
 	private List<FeatureInfo> basicFilters;
@@ -59,7 +60,9 @@ public class FiltersPanel extends JPanel {
 		add(accordion);
 	}
 
-	private FiltersListSection newSection(FeatureSettings fs, String title, List<FeatureInfo> basicFilters, boolean isExpanded) {
+	private FiltersListSection newSection(FeatureSettings fs, String title,
+		List<FeatureInfo> basicFilters, boolean isExpanded)
+	{
 		FiltersListSection basic = new FiltersListSection(title, context, fs, basicFilters, isExpanded);
 		sections.add(basic);
 		return basic;
@@ -87,7 +90,8 @@ public class FiltersPanel extends JPanel {
 
 	public List<FeatureSetting> getSelectedFeatureSettings() {
 		List<FeatureSetting> selected = new ArrayList<>();
-		for (FiltersListSection section : sections) selected.addAll(section.getSelectedFeatureSettings());
+		for (FiltersListSection section : sections)
+			selected.addAll(section.getSelectedFeatureSettings());
 		return selected;
 	}
 

@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmention.gui;
 
 import java.awt.BorderLayout;
@@ -11,7 +12,6 @@ import javax.swing.border.CompoundBorder;
 
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSettings;
 import org.scijava.Context;
-
 
 import net.imglib2.trainable_segmention.pixel_feature.settings.FeatureSetting;
 import net.imglib2.trainable_segmention.pixel_feature.settings.GlobalSettings;
@@ -27,7 +27,9 @@ public class FiltersListSection extends AccordionSection {
 
 	/**
 	 */
-	public FiltersListSection(String title, Context context, FeatureSettings featureSettings, List<FeatureInfo> featureInfos, boolean isExpanded) {
+	public FiltersListSection(String title, Context context, FeatureSettings featureSettings,
+		List<FeatureInfo> featureInfos, boolean isExpanded)
+	{
 		super(isExpanded);
 		this.featureInfos = featureInfos;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -50,7 +52,8 @@ public class FiltersListSection extends AccordionSection {
 		JLabel titleComponent = new JLabel(title);
 		Font f = titleComponent.getFont();
 		titleComponent.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
-		titleComponent.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(2, 8, 2, 2), titleComponent.getBorder()));
+		titleComponent.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(2, 8, 2, 2),
+			titleComponent.getBorder()));
 		return titleComponent;
 	}
 
@@ -58,9 +61,8 @@ public class FiltersListSection extends AccordionSection {
 		JPanel expandablePanel = new JPanel();
 		expandablePanel.setLayout(new BoxLayout(expandablePanel, BoxLayout.Y_AXIS));
 		for (FeatureInfo featureInfo : featureInfos) {
-			JPanel row = (featureInfo.hasParameters()) ?
-					new ParametrizedRow(context, featureInfo, featureSettings) :
-					new NonParametrizedRow(featureInfo, featureSettings);
+			JPanel row = (featureInfo.hasParameters()) ? new ParametrizedRow(context, featureInfo,
+				featureSettings) : new NonParametrizedRow(featureInfo, featureSettings);
 			expandablePanel.add(row);
 		}
 		return expandablePanel;
