@@ -59,8 +59,8 @@ public class LineConvolution<T> implements Convolution<T> {
 		final long[] dim = Intervals.dimensionsAsLongArray(target);
 		dim[direction] = 1;
 
-		RandomAccessibleInterval<Localizable> positions = new Localizables().randomAccessibleInterval(
-			new FinalInterval(dim));
+		RandomAccessibleInterval<Localizable> positions = Views.interval(Localizables.randomAccessible(
+			dim.length), new FinalInterval(dim));
 		LoopBuilder.setImages(positions).multiThreaded().forEachChunk(
 			chunk -> {
 
