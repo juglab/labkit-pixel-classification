@@ -83,14 +83,12 @@ final class FastCursorLoops {
 	 * will return a LongConsumer that is functionally equivalent to:
 	 * 
 	 * <pre>
-	 * 
-	 * {
-	 * 	&#64;code
+	 * {@code
 	 *
-	 * 	LongConsumer loop = n -> {
-	 * 		for (long i = 0; i < n; i++)
-	 * 			biConsumer.accept(cursorA.next(), cursorB.next());
-	 * 	};
+	 * LongConsumer loop = n -> {
+	 *     for (long i = 0; i < n; i++)
+	 *         biConsumer.accept(cursorA.next(), cursorB.next());
+	 * };
 	 * }
 	 * </pre>
 	 * 
