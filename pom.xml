@@ -80,7 +80,8 @@
 		<license.copyrightOwners>Matthias Arzt</license.copyrightOwners>
 		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
-		<clij2_.verson>0.27.3</clij2_.verson>
+		<clij2_.version>0.27.3</clij2_.version>
+		<clij-core.version>1.5.8</clij-core.version>
 	</properties>
 
 	<repositories>
@@ -153,7 +154,7 @@
 		<dependency>
 			<groupId>net.haesleinhuepf</groupId>
 			<artifactId>clij2_</artifactId>
-			<version>${clij2_.verson}</version>
+			<version>${clij2_.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.imagej</groupId>
@@ -164,6 +165,11 @@
 					<artifactId>dx</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>net.haesleinhuepf</groupId>
+			<artifactId>clij-core</artifactId>
+			<version>${clij-core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
