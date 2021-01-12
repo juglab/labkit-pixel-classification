@@ -27,7 +27,8 @@ public class ChannelSettingTest {
 	@Test
 	public void testToString() {
 		testToString("SINGLE", ChannelSetting.SINGLE);
-		testToString("RGB", ChannelSetting.RGB);
+		testToString("RGB8", ChannelSetting.RGB);
+		testToString("RGB", ChannelSetting.DEPRECATED_RGB);
 		testToString("MULTIPLE_42", ChannelSetting.multiple(42));
 	}
 
@@ -52,6 +53,7 @@ public class ChannelSettingTest {
 	@Test
 	public void testValueOf() {
 		testValueOf(ChannelSetting.RGB);
+		testValueOf(ChannelSetting.DEPRECATED_RGB);
 		testValueOf(ChannelSetting.SINGLE);
 		testValueOf(ChannelSetting.multiple(42));
 	}
@@ -70,7 +72,7 @@ public class ChannelSettingTest {
 
 	@Test
 	public void testFromJson() {
-		ChannelSetting result = new Gson().fromJson("\"RGB\"", ChannelSetting.class);
+		ChannelSetting result = new Gson().fromJson("\"RGB8\"", ChannelSetting.class);
 		assertEquals(ChannelSetting.RGB, result);
 	}
 }

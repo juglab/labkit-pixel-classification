@@ -62,6 +62,8 @@ public class FeatureCalculator {
 	private InputPreprocessor initPreprocessor(ChannelSetting channelSetting) {
 		if (ChannelSetting.RGB.equals(channelSetting))
 			return new ColorInputPreprocessor(settings.globals());
+		if (ChannelSetting.DEPRECATED_RGB.equals(channelSetting))
+			return new DeprecatedColorInputPreprocessor(settings.globals());
 		if (ChannelSetting.SINGLE.equals(channelSetting))
 			return new GrayInputPreprocessor(settings.globals());
 		if (channelSetting.isMultiple())

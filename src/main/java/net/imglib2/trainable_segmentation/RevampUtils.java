@@ -6,10 +6,7 @@ import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.outofbounds.OutOfBoundsBorderFactory;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -27,19 +24,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 /**
  * @author Matthias Arzt
  */
 public class RevampUtils {
-
-	private static final float[] SOBEL_FILTER_X_VALUES = { 1f, 2f, 1f, 0f, 0f, 0f, -1f, -2f, -1f };
-	private static final RandomAccessibleInterval<FloatType> SOBEL_FILTER_X = ArrayImgs.floats(
-		SOBEL_FILTER_X_VALUES, 3, 3);
-	private static final float[] SOBEL_FILTER_Y_VALUES = { 1f, 0f, -1f, 2f, 0f, -2f, 1f, 0f, -1f };
-	private static final RandomAccessibleInterval<FloatType> SOBEL_FILTER_Y = ArrayImgs.floats(
-		SOBEL_FILTER_Y_VALUES, 3, 3);
 
 	public static <T> List<RandomAccessibleInterval<T>> slices(RandomAccessibleInterval<T> output) {
 		int axis = output.numDimensions() - 1;
@@ -218,27 +207,6 @@ public class RevampUtils {
 		return new DenseInstance(1.0, values);
 	}
 
-	public static List<RandomAccessible<FloatType>> splitChannels(RandomAccessible<ARGBType> image) {
-		return convertersStream().map(x -> Converters.convert(image, x, new FloatType())).collect(
-			Collectors.toList());
-	}
-
-	public static List<RandomAccessibleInterval<FloatType>> splitChannels(
-		RandomAccessibleInterval<ARGBType> image)
-	{
-		return convertersStream().map(x -> Converters.convert(image, x, new FloatType())).collect(
-			Collectors.toList());
-	}
-
-	private static Stream<Converter<ARGBType, FloatType>> convertersStream() {
-		return Stream.<IntToIntFunction> of(ARGBType::red, ARGBType::green, ARGBType::blue).map(
-			RevampUtils::converter);
-	}
-
-	private static Converter<ARGBType, FloatType> converter(IntToIntFunction f) {
-		return (in, out) -> out.set(((float) f.apply(in.get())) / 255.f);
-	}
-
 	public static <T> T uncheckedCast(Object input) {
 		@SuppressWarnings("unchecked")
 		T result = (T) input;
@@ -266,11 +234,6 @@ public class RevampUtils {
 	public interface SupplierWithException<R> {
 
 		R get() throws Exception;
-	}
-
-	private interface IntToIntFunction {
-
-		int apply(int value);
 	}
 
 	public static Interval intervalRemoveDimension(Interval interval) {
