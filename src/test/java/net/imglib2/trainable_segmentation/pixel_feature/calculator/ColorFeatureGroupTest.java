@@ -2,6 +2,7 @@
 package net.imglib2.trainable_segmentation.pixel_feature.calculator;
 
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
@@ -70,21 +71,23 @@ public class ColorFeatureGroupTest {
 
 	@Test
 	public void testSplitChannels() {
-		Img< ARGBType > image = ArrayImgs.argbs(new int[] { 0xaabbcc }, 1, 1);
-		List< RandomAccessibleInterval< FloatType > > result = splitChannels(image);
-		ImgLib2Assert.assertImageEquals(ArrayImgs.floats(new float[]{0xaa}, 1, 1), result.get(0));
-		ImgLib2Assert.assertImageEquals(ArrayImgs.floats(new float[]{0xbb}, 1, 1), result.get(1));
-		ImgLib2Assert.assertImageEquals(ArrayImgs.floats(new float[]{0xcc}, 1, 1), result.get(2));
+		Img<ARGBType> image = ArrayImgs.argbs(new int[] { 0xaabbcc }, 1, 1);
+		List<RandomAccessibleInterval<FloatType>> result = splitChannels(image);
+		ImgLib2Assert.assertImageEquals(ArrayImgs.floats(new float[] { 0xaa }, 1, 1), result.get(0));
+		ImgLib2Assert.assertImageEquals(ArrayImgs.floats(new float[] { 0xbb }, 1, 1), result.get(1));
+		ImgLib2Assert.assertImageEquals(ArrayImgs.floats(new float[] { 0xcc }, 1, 1), result.get(2));
 	}
 
 	public static List<RandomAccessibleInterval<FloatType>> splitChannels(
-			RandomAccessibleInterval<ARGBType> image)
+		RandomAccessibleInterval<ARGBType> image)
 	{
+		Converter<ARGBType, FloatType> r = (in, out) -> out.setReal(ARGBType.red(in.get()));
+		Converter<ARGBType, FloatType> g = (in, out) -> out.setReal(ARGBType.green(in.get()));
+		Converter<ARGBType, FloatType> b = (in, out) -> out.setReal(ARGBType.blue(in.get()));
 		return Arrays.asList(
-				Converters.convert(image, (in, out) -> out.setReal(ARGBType.red(in.get())), new FloatType()),
-				Converters.convert(image, (in, out) -> out.setReal(ARGBType.green(in.get())), new FloatType()),
-				Converters.convert(image, (in, out) -> out.setReal(ARGBType.blue(in.get())), new FloatType())
-		);
+			Converters.convert(image, r, new FloatType()),
+			Converters.convert(image, g, new FloatType()),
+			Converters.convert(image, b, new FloatType()));
 	}
 
 }

@@ -15,8 +15,10 @@ import java.util.stream.IntStream;
 @JsonAdapter(ChannelSettingJsonAdapter.class)
 public class ChannelSetting {
 
-	public static final ChannelSetting DEPRECATED_RGB = new ChannelSetting("RGB", false, "red", "green", "blue");
-	public static final ChannelSetting RGB = new ChannelSetting("RGB8", false, "red", "green", "blue");
+	public static final ChannelSetting DEPRECATED_RGB = new ChannelSetting("RGB", false,
+		"red", "green", "blue");
+	public static final ChannelSetting RGB = new ChannelSetting("RGB8", false,
+		"red", "green", "blue");
 	public static final ChannelSetting SINGLE = new ChannelSetting("SINGLE", false, "");
 
 	public static ChannelSetting multiple(int n) {

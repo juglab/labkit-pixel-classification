@@ -46,10 +46,9 @@ public class ColorInputPreprocessor implements InputPreprocessor {
 			throw new IllegalArgumentException("Input image must have " + globals.numDimensions() +
 				" dimensions.");
 		return Arrays.asList(
-				Converters.convert(image, (in, out) -> out.set(ARGBType.red(in.get())), new FloatType()),
-				Converters.convert(image, (in, out) -> out.set(ARGBType.green(in.get())), new FloatType()),
-				Converters.convert(image, (in, out) -> out.set(ARGBType.blue(in.get())), new FloatType())
-		);
+			Converters.convert(image, (in, out) -> out.set(ARGBType.red(in.get())), new FloatType()),
+			Converters.convert(image, (in, out) -> out.set(ARGBType.green(in.get())), new FloatType()),
+			Converters.convert(image, (in, out) -> out.set(ARGBType.blue(in.get())), new FloatType()));
 	}
 
 	protected List<RandomAccessible<FloatType>> processRealType(RandomAccessible<FloatType> image) {
@@ -59,10 +58,9 @@ public class ColorInputPreprocessor implements InputPreprocessor {
 			throw new IllegalArgumentException("Input image must have " + globals.numDimensions() +
 				" dimensions plus one color channel.");
 		return Arrays.asList(
-				Views.hyperSlice(image, colorAxis, 0),
-				Views.hyperSlice(image, colorAxis, 1),
-				Views.hyperSlice(image, colorAxis, 2)
-		);
+			Views.hyperSlice(image, colorAxis, 0),
+			Views.hyperSlice(image, colorAxis, 1),
+			Views.hyperSlice(image, colorAxis, 2));
 	}
 
 	@Override
