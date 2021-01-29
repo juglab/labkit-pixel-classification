@@ -15,7 +15,7 @@ class ReflectionUtils {
 		// prevent from being instantiated.
 	}
 
-	public static Object getPrivateField(Object object, String fieldName) {
+	public static <T> T getPrivateField(Object object, String fieldName, Class<T> type) {
 		try {
 			Class<?> clazz = object.getClass();
 			Field field = getField(clazz, fieldName);

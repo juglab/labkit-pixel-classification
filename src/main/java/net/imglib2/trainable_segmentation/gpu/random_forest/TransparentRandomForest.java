@@ -26,18 +26,20 @@ public class TransparentRandomForest {
 	}
 
 	private static List<TransparentRandomTree> initTrees(FastRandomForest original) {
-		Object bagger = ReflectionUtils.getPrivateField(original, "m_bagger");
-		Object[] trees = Cast.unchecked(ReflectionUtils.getPrivateField(bagger, "m_Classifiers"));
+		// NB: Type of bagger is hr.irb.fastRandomForest.FastRfBagging
+		Object bagger = ReflectionUtils.getPrivateField(original, "m_bagger", Object.class);
+		// NB: Type of trees is hr.irb.fastRandomForest.FastRandomTree
+		Object[] trees = ReflectionUtils.getPrivateField(bagger, "m_Classifiers", Object[].class);
 		return Collections.unmodifiableList(Stream.of(trees).map(TransparentRandomTree::new).collect(
 			Collectors.toList()));
 	}
 
 	public List<TransparentRandomTree> trees() {
-		return Cast.unchecked(trees);
+		return trees;
 	}
 
-	public double[] distributionForInstance(Instance instance) {
-		double[] result = new double[2];
+	public double[] distributionForInstance(Instance instance, int numberOfClasses) {
+		double[] result = new double[numberOfClasses];
 		for (TransparentRandomTree tree : trees)
 			ArrayUtils.add(tree.distributionForInstance(instance), result);
 		return ArrayUtils.normalize(result);

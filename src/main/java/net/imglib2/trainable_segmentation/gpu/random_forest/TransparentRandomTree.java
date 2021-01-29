@@ -1,7 +1,6 @@
 
 package net.imglib2.trainable_segmentation.gpu.random_forest;
 
-import net.imglib2.util.Cast;
 import weka.core.Instance;
 
 /**
@@ -23,21 +22,24 @@ public class TransparentRandomTree {
 
 	private final double[] classProbabilities;
 
-	public TransparentRandomTree(Object original) {
-		this.attribute = Cast.<Integer> unchecked(ReflectionUtils.getPrivateField(original,
-			"m_Attribute"));
+	/**
+	 * @param fastRandomTree is expected to be of type
+	 *          hr.irb.fastRandomForest.FastRandomTree
+	 */
+	public TransparentRandomTree(Object fastRandomTree) {
+		this.attribute = ReflectionUtils.getPrivateField(fastRandomTree, "m_Attribute", Integer.class);
 		if (isLeaf()) {
 			this.threshold = Double.NaN;
 			this.smallerChild = null;
 			this.biggerChilld = null;
-			this.classProbabilities = Cast.unchecked(ReflectionUtils.getPrivateField(original,
-				"m_ClassProbs"));
+			this.classProbabilities = ReflectionUtils.getPrivateField(fastRandomTree, "m_ClassProbs",
+				double[].class);
 		}
 		else {
-			this.threshold = Cast.<Double> unchecked(ReflectionUtils.getPrivateField(original,
-				"m_SplitPoint"));
-			Object[] sucessors = Cast.unchecked(ReflectionUtils.getPrivateField(original,
-				"m_Successors"));
+			this.threshold = ReflectionUtils.getPrivateField(fastRandomTree, "m_SplitPoint",
+				Double.class);
+			Object[] sucessors = ReflectionUtils.getPrivateField(fastRandomTree, "m_Successors",
+				Object[].class);
 			this.smallerChild = new TransparentRandomTree(sucessors[0]);
 			this.biggerChilld = new TransparentRandomTree(sucessors[1]);
 			this.classProbabilities = null;
