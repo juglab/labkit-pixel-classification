@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import net.imglib2.converter.RealTypeConverters;
+import hr.irb.fastRandomForest.FastRandomForest;
 import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
 import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
@@ -28,7 +28,6 @@ import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import org.scijava.Context;
-import preview.net.imglib2.loops.LoopBuilder;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -119,16 +118,9 @@ public class Segmenter {
 		RandomAccessibleInterval<? extends IntegerType<?>> out)
 	{
 		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
-		LoopBuilder.setImages(Views.collapseReal(featureValues), out).multiThreaded().forEachChunk(
-			chunk -> {
-				CompositeInstance compositeInstance = new CompositeInstance(null, attributesAsArray());
-				chunk.forEachPixel((input, output) -> {
-					compositeInstance.setSource(input);
-					RevampUtils.wrapException(() -> output.setInteger((int) classifier.classifyInstance(
-						compositeInstance)));
-				});
-				return null;
-			});
+		RandomForestPrediction forest = new RandomForestPrediction((FastRandomForest) classifier,
+			classNames.size(), features.count());
+		forest.segment(featureValues, out);
 	}
 
 	private void segmentGpu(RandomAccessible<?> image,
@@ -171,19 +163,9 @@ public class Segmenter {
 	{
 		Interval interval = RevampUtils.removeLastDimension(out);
 		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, interval);
-		LoopBuilder.setImages(Views.collapseReal(featureValues), Views.collapse(out)).multiThreaded()
-			.forEachChunk(
-				chunk -> {
-					CompositeInstance compositeInstance = new CompositeInstance(null, attributesAsArray());
-					chunk.forEachPixel((input, output) -> {
-						compositeInstance.setSource(input);
-						double[] result = RevampUtils.wrapException(() -> classifier.distributionForInstance(
-							compositeInstance));
-						for (int i = 0, n = result.length; i < n; i++)
-							output.get(i).setReal(result[i]);
-					});
-					return null;
-				});
+		RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier),
+			classNames.size(), features.count());
+		prediction.distribution(featureValues, out);
 	}
 
 	private void predictGpu(RandomAccessibleInterval<? extends RealType<?>> out,
@@ -251,11 +233,6 @@ public class Segmenter {
 	}
 
 	// -- Helper methods --
-
-	private Attribute[] attributesAsArray() {
-		List<Attribute> attributes = attributes();
-		return attributes.toArray(new Attribute[attributes.size()]);
-	}
 
 	private List<Attribute> attributes() {
 		Stream<Attribute> featureAttributes = features.attributeLabels().stream().map(Attribute::new);

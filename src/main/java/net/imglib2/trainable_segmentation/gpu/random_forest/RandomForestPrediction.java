@@ -3,16 +3,23 @@ package net.imglib2.trainable_segmentation.gpu.random_forest;
 
 import hr.irb.fastRandomForest.FastRandomForest;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
+import net.imglib2.Interval;
+import net.imglib2.RandomAccess;
+import net.imglib2.RandomAccessible;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.trainable_segmentation.classification.CompositeInstance;
 import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
 import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
-import net.imglib2.trainable_segmentation.gpu.api.GpuScope;
+import net.imglib2.type.numeric.IntegerType;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
-import weka.core.Instance;
+import net.imglib2.util.Intervals;
+import preview.net.imglib2.loops.LoopUtils;
+import preview.net.imglib2.loops.SyncedPositionables;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -74,31 +81,6 @@ public class RandomForestPrediction {
 		return (short) (index >= 0 ? index : numberOfNodes - 1 - index);
 	}
 
-	public int classifyInstance(CompositeInstance instance) {
-		return ArrayUtils.findMax(distributionForInstance(instance));
-	}
-
-	public double[] distributionForInstance(Instance instance) {
-		double[] distribution = new double[numberOfClasses];
-		for (int tree = 0; tree < numberOfTrees; tree++) {
-			addDistributionForTree(instance, tree, distribution);
-		}
-		return ArrayUtils.normalize(distribution);
-	}
-
-	private void addDistributionForTree(Instance instance, int tree, double[] distribution) {
-		int node = 0;
-		while (node < numberOfNodes) {
-			int attributeIndex = nodeIndices[(tree * numberOfNodes + node) * 3];
-			double attributeValue = instance.value(attributeIndex);
-			int b = attributeValue < nodeThresholds[(tree * numberOfNodes) + node] ? 1 : 2;
-			node = nodeIndices[(tree * numberOfNodes + node) * 3 + b];
-		}
-		int leaf = node - numberOfNodes;
-		for (int k = 0; k < numberOfClasses; k++)
-			distribution[k] += leafProbabilities[(tree * numberOfLeafs + leaf) * numberOfClasses + k];
-	}
-
 	public void distribution(GpuApi gpu, GpuImage features, GpuImage distribution) {
 		try (GpuApi scope = gpu.subScope()) {
 			Img<UnsignedShortType> indices = ArrayImgs.unsignedShorts(nodeIndices, 3, numberOfNodes,
@@ -123,5 +105,76 @@ public class RandomForestPrediction {
 			GpuRandomForestKernel.findMax(scope, distribution, output);
 			return output;
 		}
+	}
+
+	public void segment(RandomAccessibleInterval<FloatType> features,
+		RandomAccessibleInterval<? extends IntegerType<?>> out)
+	{
+		RandomAccess<FloatType> ra = features.randomAccess();
+		ra.setPosition(Intervals.minAsLongArray(features));
+		RandomAccess<? extends IntegerType<?>> o = out.randomAccess();
+		o.setPosition(Intervals.minAsLongArray(out));
+		int d = features.numDimensions() - 1;
+		float[] attr = new float[numberOfFeatures];
+		float[] distribution = new float[numberOfClasses];
+		LoopUtils.createIntervalLoop(SyncedPositionables.create(ra, o), out, () -> {
+			for (int i = 0; i < attr.length; i++) {
+				ra.setPosition(i, d);
+				attr[i] = ra.get().getRealFloat();
+			}
+			distributionForInstance(attr, distribution);
+			o.get().setInteger(ArrayUtils.findMax(distribution));
+		}).run();
+	}
+
+	private void distributionForInstance(float[] attr,
+		float[] distribution)
+	{
+		Arrays.fill(distribution, 0);
+		for (int tree = 0; tree < numberOfTrees; tree++) {
+			addDistributionForTree(attr, tree, distribution);
+		}
+		ArrayUtils.normalize(distribution);
+	}
+
+	private void addDistributionForTree(float[] attr, int tree, float[] distribution) {
+		int node = 0;
+		while (node < numberOfNodes) {
+			int nodeOffset = tree * numberOfNodes + node;
+			int attributeIndex = nodeIndices[nodeOffset * 3];
+			float attributeValue = attr[attributeIndex];
+			int b = attributeValue < nodeThresholds[nodeOffset] ? 1 : 2;
+			node = nodeIndices[nodeOffset * 3 + b];
+		}
+		int leaf = node - numberOfNodes;
+		int leafOffset = (tree * numberOfLeafs + leaf) * numberOfClasses;
+		for (int k = 0; k < numberOfClasses; k++)
+			distribution[k] += leafProbabilities[leafOffset + k];
+	}
+
+	public void distribution(RandomAccessibleInterval<FloatType> features,
+		RandomAccessibleInterval<? extends RealType<?>> out)
+	{
+		RandomAccess<FloatType> ra = features.randomAccess();
+		ra.setPosition(Intervals.minAsLongArray(features));
+		RandomAccess<? extends RealType<?>> o = out.randomAccess();
+		o.setPosition(Intervals.minAsLongArray(out));
+		int d = features.numDimensions() - 1;
+		int d_out = out.numDimensions() - 1;
+		float[] attr = new float[numberOfFeatures];
+		float[] distribution = new float[numberOfClasses];
+		Interval interval = Intervals.hyperSlice(out, d_out);
+		LoopUtils.createIntervalLoop(SyncedPositionables.create(ra, o), interval, () -> {
+			for (int i = 0; i < attr.length; i++) {
+				ra.setPosition(i, d);
+				attr[i] = ra.get().getRealFloat();
+			}
+			distributionForInstance(attr, distribution);
+			for (int i = 0; i < distribution.length; i++) {
+				o.setPosition(i, d_out);
+				o.get().setReal(distribution[i]);
+			}
+		}).run();
+
 	}
 }

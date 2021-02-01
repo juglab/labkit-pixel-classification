@@ -23,6 +23,7 @@ import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.scijava.Context;
@@ -99,6 +100,7 @@ public class SegmenterTest {
 		Utils.<IntegerType> assertImagesEqual(result, result2);
 	}
 
+	@Ignore("Only fast random forest is supported")
 	@Test
 	public void testDifferentWekaClassifiers() {
 		assumeFalse(useGpu);
