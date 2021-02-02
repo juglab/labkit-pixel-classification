@@ -38,8 +38,8 @@ import preview.net.imglib2.parallel.Parallelization;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
-@Warmup(iterations = 0, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 2, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 15, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Fork(0)
