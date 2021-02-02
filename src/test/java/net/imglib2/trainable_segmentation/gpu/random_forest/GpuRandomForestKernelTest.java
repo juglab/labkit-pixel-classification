@@ -7,15 +7,10 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmentation.gpu.api.AbstractGpuTest;
-import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
 import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
-import net.imglib2.trainable_segmentation.gpu.api.GpuPool;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.view.Views;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -53,10 +48,10 @@ public class GpuRandomForestKernelTest extends AbstractGpuTest {
 			0, 0
 		}, numberOfClasses, numberOfLeafs, numberOfTrees);
 		Img<UnsignedShortType> indices = ArrayImgs.unsignedShorts(new short[] {
-			0, 2, 1,
-			0, 3, 4,
+			0, Short.MIN_VALUE, 1,
+			0, Short.MIN_VALUE + 1, Short.MIN_VALUE + 2,
 
-			0, 2, 3,
+			0, Short.MIN_VALUE, Short.MIN_VALUE + 1,
 			0, 0, 0
 		}, 3, numberOfNodes, numberOfTrees);
 

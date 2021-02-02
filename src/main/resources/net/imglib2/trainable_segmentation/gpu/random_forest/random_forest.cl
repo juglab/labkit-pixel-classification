@@ -17,7 +17,6 @@ __kernel void random_forest
   const int src_channel_skip = GET_IMAGE_VOLUME(src);
   const int dst_channel_skip = GET_IMAGE_VOLUME(dst);
   const int num_trees = GET_IMAGE_DEPTH(thresholds);
-  const unsigned short num_nodes = (unsigned short) GET_IMAGE_HEIGHT(thresholds);
   float results[NUMBER_OF_CLASSES];
   float features[NUMBER_OF_FEATURES];
 
@@ -33,14 +32,14 @@ __kernel void random_forest
   // run random forest
   for(int tree = 0; tree < num_trees; tree++) {
     unsigned short nodeIndex = 0;
-    while(nodeIndex < num_nodes) {
+    while(nodeIndex < 0x8000) {
       const unsigned short attributeIndex = PIXEL(indices, 0, nodeIndex, tree);
       const float attributeValue = features[attributeIndex];
       const float threshold = PIXEL(thresholds, 0, nodeIndex, tree);
       const int smaller = (int) (attributeValue >= threshold) + 1;
       nodeIndex = PIXEL(indices, smaller, nodeIndex, tree);
     }
-    const unsigned short leafIndex = nodeIndex - num_nodes;
+    const unsigned short leafIndex = nodeIndex - 0x8000;
     for(int i = 0; i < NUMBER_OF_CLASSES; i++) {
       results[i] += probabilities[(tree * GET_IMAGE_HEIGHT(probabilities) + leafIndex) * NUMBER_OF_CLASSES + i];
     }

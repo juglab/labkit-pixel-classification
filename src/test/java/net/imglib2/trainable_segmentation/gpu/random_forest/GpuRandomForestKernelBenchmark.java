@@ -8,15 +8,11 @@ import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmentation.Utils;
 import net.imglib2.trainable_segmentation.classification.Segmenter;
-import net.imglib2.trainable_segmentation.gpu.GpuFeatureInput;
 import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
-import net.imglib2.trainable_segmentation.gpu.api.GpuCopy;
 import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
 import net.imglib2.trainable_segmentation.gpu.api.GpuPool;
-import net.imglib2.trainable_segmentation.gpu.api.GpuViews;
 import net.imglib2.trainable_segmentation.gson.GsonUtils;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -46,7 +42,7 @@ public class GpuRandomForestKernelBenchmark {
 	private static final GpuApi gpu = GpuPool.borrowGpu();
 	private static final Segmenter segmenter = initializeSegmenter();
 	private static final RandomForestPrediction prediction = new RandomForestPrediction(
-		(FastRandomForest) segmenter.getClassifier(), numberOfClasses, numberOfFeatures);
+		(FastRandomForest) segmenter.getClassifier(), numberOfFeatures);
 	private static final GpuImage features = initializeFeatures(gpu);
 	private static final GpuImage distribution = gpu.create(features.getDimensions(), numberOfClasses,
 		NativeTypeEnum.Float);
