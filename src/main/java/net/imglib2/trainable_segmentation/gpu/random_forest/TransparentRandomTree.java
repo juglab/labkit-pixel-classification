@@ -91,4 +91,11 @@ public class TransparentRandomTree {
 	public boolean isLeaf() {
 		return attribute == -1;
 	}
+
+	public int numberOfClasses() {
+		if (isLeaf())
+			return classProbabilities.length;
+		else
+			return smallerChild.numberOfClasses();
+	}
 }

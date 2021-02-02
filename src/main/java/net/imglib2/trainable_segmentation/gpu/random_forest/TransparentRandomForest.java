@@ -38,6 +38,10 @@ public class TransparentRandomForest {
 		return trees;
 	}
 
+	public int numberOfClasses() {
+		return trees.get(0).numberOfClasses();
+	}
+
 	public double[] distributionForInstance(Instance instance, int numberOfClasses) {
 		double[] result = new double[numberOfClasses];
 		for (TransparentRandomTree tree : trees)
