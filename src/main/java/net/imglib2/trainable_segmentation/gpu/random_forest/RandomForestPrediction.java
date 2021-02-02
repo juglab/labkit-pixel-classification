@@ -57,8 +57,8 @@ public class RandomForestPrediction {
 		this.numberOfClasses = forest.numberOfClasses();
 		this.numberOfFeatures = numberOfFeatures;
 		this.numberOfTrees = trees.size();
-		this.numberOfNodes = trees.stream().mapToInt(x -> x.numberOfNodes).max().getAsInt();
-		this.numberOfLeafs = trees.stream().mapToInt(x -> x.numberOfLeafs).max().getAsInt();
+		this.numberOfNodes = trees.stream().mapToInt(x -> x.numberOfNodes).max().orElse(0);
+		this.numberOfLeafs = trees.stream().mapToInt(x -> x.numberOfLeafs).max().orElse(0);
 		this.nodeIndices = new short[numberOfTrees * numberOfNodes * 3];
 		this.nodeThresholds = new float[numberOfTrees * numberOfNodes];
 		this.leafProbabilities = new float[numberOfTrees * numberOfLeafs * numberOfClasses];

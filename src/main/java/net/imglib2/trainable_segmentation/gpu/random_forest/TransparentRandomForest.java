@@ -28,6 +28,8 @@ public class TransparentRandomForest {
 	private static List<TransparentRandomTree> initTrees(FastRandomForest original) {
 		// NB: Type of bagger is hr.irb.fastRandomForest.FastRfBagging
 		Object bagger = ReflectionUtils.getPrivateField(original, "m_bagger", Object.class);
+		if (bagger == null)
+			return Collections.emptyList();
 		// NB: Type of trees is hr.irb.fastRandomForest.FastRandomTree
 		Object[] trees = ReflectionUtils.getPrivateField(bagger, "m_Classifiers", Object[].class);
 		return Collections.unmodifiableList(Stream.of(trees).map(TransparentRandomTree::new).collect(
@@ -39,7 +41,7 @@ public class TransparentRandomForest {
 	}
 
 	public int numberOfClasses() {
-		return trees.get(0).numberOfClasses();
+		return trees.isEmpty() ? 0 : trees.get(0).numberOfClasses();
 	}
 
 	public double[] distributionForInstance(Instance instance, int numberOfClasses) {

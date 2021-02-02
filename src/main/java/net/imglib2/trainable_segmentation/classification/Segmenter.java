@@ -45,11 +45,9 @@ public class Segmenter {
 
 	private final List<String> classNames;
 
-	public Classifier getClassifier() {
-		return classifier;
-	}
+	private final weka.classifiers.Classifier classifier;
 
-	private weka.classifiers.Classifier classifier;
+	private RandomForestPrediction predicition;
 
 	private boolean useGpu = false;
 
@@ -59,12 +57,18 @@ public class Segmenter {
 		this.classNames = Collections.unmodifiableList(classNames);
 		this.features = Objects.requireNonNull(features);
 		this.classifier = Objects.requireNonNull(classifier);
+		this.predicition = new RandomForestPrediction(Cast.unchecked(classifier),
+			features.count());
 	}
 
 	public Segmenter(Context context, List<String> classNames, FeatureSettings features,
 		Classifier classifier)
 	{
 		this(classNames, new FeatureCalculator(context, features), classifier);
+	}
+
+	public Classifier getClassifier() {
+		return classifier;
 	}
 
 	public void setUseGpu(boolean useGpu) {
@@ -229,6 +233,7 @@ public class Segmenter {
 		@Override
 		public void train() {
 			RevampUtils.wrapException(() -> classifier.buildClassifier(instances));
+			predicition = new RandomForestPrediction(Cast.unchecked(classifier), features.count());
 		}
 	}
 
