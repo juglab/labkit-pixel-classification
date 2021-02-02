@@ -67,6 +67,7 @@ final class FastCursorLoops {
 		new ClassCopyProvider<>(FiveCursorLoop.class, LongConsumer.class),
 		new ClassCopyProvider<>(SixCursorLoop.class, LongConsumer.class));
 
+	//@formatter:off
 	/**
 	 * For example.: Given a BiConsumer and two Cursors:
 	 * 
@@ -103,6 +104,7 @@ final class FastCursorLoops {
 	 * @throws IllegalArgumentException if the number of cursor does not fit the
 	 *           given consumer.
 	 */
+	//@formatter:on
 	public static LongConsumer createLoop(final Object action,
 		final List<? extends Cursor<?>> cursors)
 	{
