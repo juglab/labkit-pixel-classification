@@ -5,7 +5,6 @@ import hr.irb.fastRandomForest.FastRandomForest;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
-import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
@@ -66,8 +65,8 @@ public class RandomForestPrediction {
 			RandomTreePrediction tree = trees.get(j);
 			for (int i = 0; i < tree.numberOfNodes; i++) {
 				nodeIndices[(j * numberOfNodes + i) * 3] = (short) tree.attributeIndicies[i];
-				nodeIndices[(j * numberOfNodes + i) * 3 + 1] = encodeLeaf(tree.smallerChild[i]);
-				nodeIndices[(j * numberOfNodes + i) * 3 + 2] = encodeLeaf(tree.biggerChild[i]);
+				nodeIndices[(j * numberOfNodes + i) * 3 + 1] = (short) tree.smallerChild[i];
+				nodeIndices[(j * numberOfNodes + i) * 3 + 2] = (short) tree.biggerChild[i];
 				nodeThresholds[j * numberOfNodes + i] = (float) tree.threshold[i];
 			}
 			for (int i = 0; i < tree.numberOfLeafs; i++)
@@ -75,10 +74,6 @@ public class RandomForestPrediction {
 					leafProbabilities[(j * numberOfLeafs + i) * numberOfClasses + k] =
 						(float) tree.classProbabilities[i][k];
 		}
-	}
-
-	private short encodeLeaf(int index) {
-		return (short) (index >= 0 ? index : numberOfNodes - 1 - index);
 	}
 
 	public void distribution(GpuApi gpu, GpuImage features, GpuImage distribution) {
@@ -139,14 +134,14 @@ public class RandomForestPrediction {
 
 	private void addDistributionForTree(float[] attr, int tree, float[] distribution) {
 		int node = 0;
-		while (node < numberOfNodes) {
+		while (node >= 0) {
 			int nodeOffset = tree * numberOfNodes + node;
 			int attributeIndex = nodeIndices[nodeOffset * 3];
 			float attributeValue = attr[attributeIndex];
 			int b = attributeValue < nodeThresholds[nodeOffset] ? 1 : 2;
 			node = nodeIndices[nodeOffset * 3 + b];
 		}
-		int leaf = node - numberOfNodes;
+		int leaf = node - Short.MIN_VALUE;
 		int leafOffset = (tree * numberOfLeafs + leaf) * numberOfClasses;
 		for (int k = 0; k < numberOfClasses; k++)
 			distribution[k] += leafProbabilities[leafOffset + k];

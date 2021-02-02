@@ -21,8 +21,8 @@ public class RandomTreePrediction {
 			this.numberOfNodes = 1;
 			this.attributeIndicies = new int[] { 0 };
 			this.threshold = new double[] { 0.0 };
-			this.smallerChild = new int[] { -1 };
-			this.biggerChild = new int[] { -1 };
+			this.smallerChild = new int[] { Short.MIN_VALUE };
+			this.biggerChild = new int[] { Short.MIN_VALUE };
 			this.classProbabilities = new double[][] { tree.classProbabilities() };
 		}
 		else {
@@ -65,7 +65,7 @@ public class RandomTreePrediction {
 		if (i >= classProbabilities.length)
 			throw new AssertionError();
 		classProbabilities[i] = node.classProbabilities();
-		return -1 - i;
+		return i + Short.MIN_VALUE;
 	}
 
 	public double[] distributionForInstance(Instance instance) {
@@ -76,7 +76,7 @@ public class RandomTreePrediction {
 			nodeIndex = (attributeValue < threshold[nodeIndex]) ? smallerChild[nodeIndex]
 				: biggerChild[nodeIndex];
 		}
-		int leafIndex = -1 - nodeIndex;
+		int leafIndex = nodeIndex - Short.MIN_VALUE;
 		return classProbabilities[leafIndex];
 	}
 }
