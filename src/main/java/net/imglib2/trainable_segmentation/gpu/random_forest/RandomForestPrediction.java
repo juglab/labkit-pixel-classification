@@ -3,8 +3,6 @@ package net.imglib2.trainable_segmentation.gpu.random_forest;
 
 import hr.irb.fastRandomForest.FastRandomForest;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.imglib2.Interval;
-import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
@@ -14,9 +12,9 @@ import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Intervals;
-import preview.net.imglib2.loops.LoopUtils;
-import preview.net.imglib2.loops.SyncedPositionables;
+import net.imglib2.view.Views;
+import net.imglib2.view.composite.Composite;
+import preview.net.imglib2.loops.LoopBuilder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -142,21 +140,16 @@ public class RandomForestPrediction {
 	public void segment(RandomAccessibleInterval<FloatType> featureStack,
 		RandomAccessibleInterval<? extends IntegerType<?>> out)
 	{
-		RandomAccess<FloatType> ra = featureStack.randomAccess();
-		ra.setPosition(Intervals.minAsLongArray(featureStack));
-		RandomAccess<? extends IntegerType<?>> o = out.randomAccess();
-		o.setPosition(Intervals.minAsLongArray(out));
-		int d = featureStack.numDimensions() - 1;
-		float[] attr = new float[numberOfFeatures];
-		float[] distribution = new float[numberOfClasses];
-		LoopUtils.createIntervalLoop(SyncedPositionables.create(ra, o), out, () -> {
-			for (int i = 0; i < attr.length; i++) {
-				ra.setPosition(i, d);
-				attr[i] = ra.get().getRealFloat();
-			}
-			distributionForInstance(attr, distribution);
-			o.get().setInteger(ArrayUtils.findMax(distribution));
-		}).run();
+		LoopBuilder.setImages(Views.collapse(featureStack), out).forEachChunk(chunk -> {
+			float[] features = new float[numberOfFeatures];
+			float[] probabilities = new float[numberOfClasses];
+			chunk.forEachPixel((featureVector, classIndex) -> {
+				copyFromTo(featureVector, features);
+				distributionForInstance(features, probabilities);
+				classIndex.setInteger(ArrayUtils.findMax(probabilities));
+			});
+			return null;
+		});
 	}
 
 	/**
@@ -171,27 +164,26 @@ public class RandomForestPrediction {
 	public void distribution(RandomAccessibleInterval<FloatType> featureStack,
 		RandomAccessibleInterval<? extends RealType<?>> out)
 	{
-		RandomAccess<FloatType> ra = featureStack.randomAccess();
-		ra.setPosition(Intervals.minAsLongArray(featureStack));
-		RandomAccess<? extends RealType<?>> o = out.randomAccess();
-		o.setPosition(Intervals.minAsLongArray(out));
-		int d = featureStack.numDimensions() - 1;
-		int d_out = out.numDimensions() - 1;
-		float[] attr = new float[numberOfFeatures];
-		float[] distribution = new float[numberOfClasses];
-		Interval interval = Intervals.hyperSlice(out, d_out);
-		LoopUtils.createIntervalLoop(SyncedPositionables.create(ra, o), interval, () -> {
-			for (int i = 0; i < attr.length; i++) {
-				ra.setPosition(i, d);
-				attr[i] = ra.get().getRealFloat();
-			}
-			distributionForInstance(attr, distribution);
-			for (int i = 0; i < distribution.length; i++) {
-				o.setPosition(i, d_out);
-				o.get().setReal(distribution[i]);
-			}
-		}).run();
+		LoopBuilder.setImages(Views.collapse(featureStack), Views.collapse(out)).forEachChunk(chunk -> {
+			float[] features = new float[numberOfFeatures];
+			float[] probabilities = new float[numberOfClasses];
+			chunk.forEachPixel((featureVector, probabilityVector) -> {
+				copyFromTo(featureVector, features);
+				distributionForInstance(features, probabilities);
+				copyFromTo(probabilities, probabilityVector);
+			});
+			return null;
+		});
+	}
 
+	private static void copyFromTo(Composite<FloatType> input, float[] output) {
+		for (int i = 0, len = output.length; i < len; i++)
+			output[i] = input.get(i).getRealFloat();
+	}
+
+	private static void copyFromTo(float[] input, Composite<? extends RealType<?>> output) {
+		for (int i = 0, len = input.length; i < len; i++)
+			output.get(i).setReal(input[i]);
 	}
 
 	/**
