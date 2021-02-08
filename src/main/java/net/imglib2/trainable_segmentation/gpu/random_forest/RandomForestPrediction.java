@@ -8,12 +8,10 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
 import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
-import net.imglib2.trainable_segmentation.utils.views.CollapseView;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.StopWatch;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import preview.net.imglib2.loops.LoopBuilder;
@@ -142,16 +140,16 @@ public class RandomForestPrediction {
 	public void segment(RandomAccessibleInterval<FloatType> featureStack,
 		RandomAccessibleInterval<? extends IntegerType<?>> out)
 	{
-		StopWatch watch = StopWatch.createAndStart();
-		LoopBuilder.setImages(CollapseView.collapseVector(featureStack), out).forEachChunk(chunk -> {
+		LoopBuilder.setImages(Views.collapse(featureStack), out).forEachChunk(chunk -> {
+			float[] features = new float[numberOfFeatures];
 			float[] probabilities = new float[numberOfClasses];
 			chunk.forEachPixel((featureVector, classIndex) -> {
-				distributionForInstance(featureVector.get(), probabilities);
+				copyFromTo(featureVector, features);
+				distributionForInstance(features, probabilities);
 				classIndex.setInteger(ArrayUtils.findMax(probabilities));
 			});
 			return null;
 		});
-		System.out.println("segment runtime " + watch);
 	}
 
 	/**
