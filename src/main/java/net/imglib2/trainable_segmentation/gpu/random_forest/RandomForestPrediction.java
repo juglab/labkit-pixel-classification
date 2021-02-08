@@ -8,10 +8,12 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
 import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
+import net.imglib2.trainable_segmentation.utils.views.FastViews;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.StopWatch;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import preview.net.imglib2.loops.LoopBuilder;
@@ -140,7 +142,8 @@ public class RandomForestPrediction {
 	public void segment(RandomAccessibleInterval<FloatType> featureStack,
 		RandomAccessibleInterval<? extends IntegerType<?>> out)
 	{
-		LoopBuilder.setImages(Views.collapse(featureStack), out).forEachChunk(chunk -> {
+		StopWatch watch = StopWatch.createAndStart();
+		LoopBuilder.setImages(FastViews.collapse(featureStack), out).forEachChunk(chunk -> {
 			float[] features = new float[numberOfFeatures];
 			float[] probabilities = new float[numberOfClasses];
 			chunk.forEachPixel((featureVector, classIndex) -> {
@@ -150,6 +153,7 @@ public class RandomForestPrediction {
 			});
 			return null;
 		});
+		System.out.println("segment runtime " + watch);
 	}
 
 	/**
@@ -164,7 +168,7 @@ public class RandomForestPrediction {
 	public void distribution(RandomAccessibleInterval<FloatType> featureStack,
 		RandomAccessibleInterval<? extends RealType<?>> out)
 	{
-		LoopBuilder.setImages(Views.collapse(featureStack), Views.collapse(out)).forEachChunk(chunk -> {
+		LoopBuilder.setImages(FastViews.collapse(featureStack), FastViews.collapse(out)).forEachChunk(chunk -> {
 			float[] features = new float[numberOfFeatures];
 			float[] probabilities = new float[numberOfClasses];
 			chunk.forEachPixel((featureVector, probabilityVector) -> {
