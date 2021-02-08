@@ -2,18 +2,19 @@
 package net.imglib2.trainable_segmentation;
 
 import net.imglib2.*;
+import net.imglib2.RandomAccess;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.trainable_segmentation.utils.views.FastViews;
+import net.imglib2.trainable_segmentation.utils.views.SimpleRAI;
+import net.imglib2.trainable_segmentation.utils.views.VectorRandomAccess;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Cast;
 import net.imglib2.util.Intervals;
-import net.imglib2.view.StackView;
 import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import preview.net.imglib2.algorithm.convolution.kernel.Kernel1D;
@@ -223,8 +224,10 @@ public class RevampUtils {
 	public static <T> RandomAccessibleInterval<Composite<T>> vectorizeStack(
 		List<RandomAccessibleInterval<T>> derivatives)
 	{
-		return Cast.unchecked(FastViews.collapse(Views.stack(
-			StackView.StackAccessMode.MOVE_ALL_SLICE_ACCESSES, derivatives)));
+		RandomAccess<T>[] randomAccesses = Cast.unchecked(new RandomAccess[derivatives.size()]);
+		for (int i = 0; i < randomAccesses.length; i++)
+			randomAccesses[i] = derivatives.get(i).randomAccess();
+		return SimpleRAI.create(VectorRandomAccess.create(randomAccesses), new FinalInterval(derivatives.get(0)));
 	}
 
 	public interface RunnableWithException {

@@ -75,7 +75,7 @@ public class SegmentationBenchmark {
 		return Parallelization.runSingleThreaded(() -> segmenter.segment(image));
 	}
 
-	@Benchmark
+//		@Benchmark
 	public Segmenter benchmarkTrain() {
 		return trainSegmenter();
 	}
