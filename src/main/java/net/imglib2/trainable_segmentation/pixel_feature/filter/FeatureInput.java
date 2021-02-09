@@ -16,6 +16,7 @@ import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
+import preview.net.imglib2.converter.RealTypeConverters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,7 +73,10 @@ public class FeatureInput {
 
 	private RandomAccessibleInterval<DoubleType> calculateGauss(double sigma) {
 		final RandomAccessibleInterval<DoubleType> result = create(Intervals.expand(target, 2));
-		Gauss3.gauss(scaledSigmas(sigma), (RandomAccessible) original, result);
+		if(sigma == 0)
+			RealTypeConverters.copyFromTo(original, result);
+		else
+			Gauss3.gauss(scaledSigmas(sigma), (RandomAccessible) original, result);
 		return result;
 	}
 
