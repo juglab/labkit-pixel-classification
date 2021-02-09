@@ -215,12 +215,6 @@ public class RevampUtils {
 	}
 
 	public static <T> RandomAccessibleInterval<Composite<T>> vectorizeStack(
-		RandomAccessibleInterval<T>... derivatives)
-	{
-		return vectorizeStack(Arrays.asList(derivatives));
-	}
-
-	public static <T> RandomAccessibleInterval<Composite<T>> vectorizeStack(
 		List<RandomAccessibleInterval<T>> derivatives)
 	{
 		return Cast.unchecked(FastViews.collapse(Views.stack(
