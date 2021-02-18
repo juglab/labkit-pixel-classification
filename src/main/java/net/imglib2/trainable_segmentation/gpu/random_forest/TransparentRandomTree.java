@@ -92,6 +92,11 @@ public class TransparentRandomTree {
 		return attribute == -1;
 	}
 
+	public int height() {
+		return isLeaf() ? 0 :
+			1 + Math.max(smallerChild().height(), biggerChild().height());
+	}
+
 	public int numberOfClasses() {
 		if (isLeaf())
 			return classProbabilities.length;

@@ -50,6 +50,8 @@ public class RandomForestPrediction {
 
 	private final float[] leafProbabilities;
 
+	private final RFPrediction rfPrediction;
+
 	public RandomForestPrediction(FastRandomForest classifier, int numberOfFeatures) {
 		TransparentRandomForest forest = new TransparentRandomForest(classifier);
 		List<RandomTreePrediction> trees = forest.trees().stream().map(RandomTreePrediction::new)
@@ -75,6 +77,7 @@ public class RandomForestPrediction {
 					leafProbabilities[(j * numberOfLeafs + i) * numberOfClasses + k] =
 						(float) tree.classProbabilities[i][k];
 		}
+		rfPrediction = new RFPrediction(forest, numberOfFeatures);
 	}
 
 	public int numberOfClasses() {
@@ -147,7 +150,7 @@ public class RandomForestPrediction {
 			float[] probabilities = new float[numberOfClasses];
 			chunk.forEachPixel((featureVector, classIndex) -> {
 				copyFromTo(featureVector, features);
-				distributionForInstance(features, probabilities);
+				rfPrediction.distributionForInstance(features, probabilities);
 				classIndex.setInteger(ArrayUtils.findMax(probabilities));
 			});
 			return null;
@@ -171,7 +174,7 @@ public class RandomForestPrediction {
 			float[] probabilities = new float[numberOfClasses];
 			chunk.forEachPixel((featureVector, probabilityVector) -> {
 				copyFromTo(featureVector, features);
-				distributionForInstance(features, probabilities);
+				rfPrediction.distributionForInstance(features, probabilities);
 				copyFromTo(probabilities, probabilityVector);
 			});
 			return null;
