@@ -11,6 +11,7 @@ import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalcul
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSettings;
+import net.imglib2.trainable_segmentation.utils.views.FastViews;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
@@ -65,8 +66,8 @@ public class Trainer {
 	}
 
 	public void trainLabeledImage(RandomAccessibleInterval<?> image, LabelRegions<?> labeling) {
-		RandomAccessible<? extends GenericComposite<FloatType>> featureStack = Views.collapse(features
-			.apply(image));
+		RandomAccessible<Composite<FloatType>> featureStack = FastViews
+				.collapse(features.apply(image));
 		trainLabeledFeatures(featureStack, labeling);
 	}
 

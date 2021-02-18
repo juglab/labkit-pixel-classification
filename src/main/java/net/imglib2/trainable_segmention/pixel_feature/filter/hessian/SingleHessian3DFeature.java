@@ -11,6 +11,7 @@ import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
 import net.imglib2.algorithm.gradient.PartialDerivative;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.hessian.EigenValuesSymmetric3D;
 import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
+import net.imglib2.trainable_segmentation.utils.views.FastViews;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
@@ -73,7 +74,7 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 		RandomAccessibleInterval<FloatType> dx = derive(blurred, firstDerivativeInterval, 0);
 		RandomAccessibleInterval<FloatType> dy = derive(blurred, firstDerivativeInterval, 1);
 		RandomAccessibleInterval<FloatType> dz = derive(blurred, firstDerivativeInterval, 2);
-		RandomAccessibleInterval<RealComposite<FloatType>> secondDerivatives =
+		RandomAccessibleInterval<Composite<FloatType>> secondDerivatives =
 			calculateSecondDerivatives(secondDerivativeInterval, dx, dy, dz);
 
 		RandomAccessibleInterval<Composite<FloatType>> eigenValues = RevampUtils.vectorizeStack(output);
@@ -85,7 +86,7 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 			LoopBuilder.setImages(secondDerivatives, eigenValues).forEachPixel(ev::compute);
 	}
 
-	private RandomAccessibleInterval<RealComposite<FloatType>> calculateSecondDerivatives(
+	private RandomAccessibleInterval<Composite<FloatType>> calculateSecondDerivatives(
 		Interval secondDerivativeInterval,
 		RandomAccessibleInterval<FloatType> dx,
 		RandomAccessibleInterval<FloatType> dy,
@@ -100,7 +101,7 @@ public class SingleHessian3DFeature extends AbstractFeatureOp {
 		PartialDerivative.gradientCentralDifference(dy, slices.get(3), 1);
 		PartialDerivative.gradientCentralDifference(dy, slices.get(4), 2);
 		PartialDerivative.gradientCentralDifference(dz, slices.get(5), 2);
-		return Views.collapseReal(secondDerivatives);
+		return FastViews.collapse(secondDerivatives);
 	}
 
 	// -- Helper methods --
