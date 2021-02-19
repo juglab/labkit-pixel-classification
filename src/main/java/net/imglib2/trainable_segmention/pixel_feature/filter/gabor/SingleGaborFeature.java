@@ -10,9 +10,11 @@ import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractFeatureOp
 import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
+import net.imglib2.trainable_segmentation.utils.views.FastViews;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
+import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.GenericComposite;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -164,21 +166,20 @@ public class SingleGaborFeature extends AbstractFeatureOp {
 	private static void maxAndMinProjection(RandomAccessibleInterval<FloatType> stack,
 		RandomAccessibleInterval<FloatType> max, RandomAccessibleInterval<FloatType> min)
 	{
-		RandomAccessibleInterval<? extends GenericComposite<FloatType>> collapsed = Views.collapse(
-			stack);
+		RandomAccessibleInterval<Composite<FloatType> > collapsed = FastViews.collapse(stack);
 		long size = stack.max(2) - stack.min(2) + 1;
 		LoopBuilder.setImages(collapsed, max).forEachPixel((in, out) -> out.set(max(in, size)));
 		LoopBuilder.setImages(collapsed, min).forEachPixel((in, out) -> out.set(min(in, size)));
 	}
 
-	private static float max(GenericComposite<FloatType> in, long size) {
+	private static float max(Composite< FloatType > in, long size) {
 		float max = Float.NEGATIVE_INFINITY;
 		for (int i = 0; i < size; i++)
 			max = Math.max(max, in.get(i).get());
 		return max;
 	}
 
-	private static float min(GenericComposite<FloatType> in, long size) {
+	private static float min(Composite< FloatType > in, long size) {
 		float min = Float.POSITIVE_INFINITY;
 		for (int i = 0; i < size; i++)
 			min = Math.min(min, in.get(i).get());

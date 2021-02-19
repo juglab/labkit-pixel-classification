@@ -17,6 +17,7 @@ import net.imglib2.trainable_segmentation.pixel_feature.settings.ChannelSetting;
 import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
 import net.imglib2.trainable_segmentation.utils.SingletonContext;
+import net.imglib2.trainable_segmentation.utils.views.FastViews;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -80,7 +81,7 @@ public class SegmenterTestMultiChannel {
 			trainingImage);
 		ImgLib2Assert.assertIntervalEquals(new FinalInterval(2, 2, 2), result);
 		RandomAccessibleInterval<ByteType> segmentation = Converters.convert(
-			Views.collapse(result),
+			FastViews.collapse(result),
 			(in, out) -> out.setInteger(in.get(0).getRealFloat() > in.get(1).getRealFloat() ? 0 : 1),
 			new ByteType());
 		Utils.assertImagesEqual(ArrayImgs.bytes(new byte[] { 1, 1, 0, 1 }, 2, 2), segmentation);

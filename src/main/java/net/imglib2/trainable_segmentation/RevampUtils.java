@@ -6,6 +6,7 @@ import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.trainable_segmentation.utils.views.FastViews;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.RealType;
@@ -214,15 +215,9 @@ public class RevampUtils {
 	}
 
 	public static <T> RandomAccessibleInterval<Composite<T>> vectorizeStack(
-		RandomAccessibleInterval<T>... derivatives)
-	{
-		return vectorizeStack(Arrays.asList(derivatives));
-	}
-
-	public static <T> RandomAccessibleInterval<Composite<T>> vectorizeStack(
 		List<RandomAccessibleInterval<T>> derivatives)
 	{
-		return Cast.unchecked(Views.collapse(Views.stack(
+		return Cast.unchecked(FastViews.collapse(Views.stack(
 			StackView.StackAccessMode.MOVE_ALL_SLICE_ACCESSES, derivatives)));
 	}
 

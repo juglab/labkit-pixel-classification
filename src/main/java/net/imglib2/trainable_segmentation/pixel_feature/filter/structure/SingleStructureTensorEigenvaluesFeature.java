@@ -16,6 +16,7 @@ import net.imglib2.trainable_segmentation.gpu.GpuFeatureInput;
 import net.imglib2.trainable_segmentation.gpu.api.GpuView;
 import net.imglib2.trainable_segmentation.gpu.api.GpuViews;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
+import net.imglib2.trainable_segmentation.utils.views.FastViews;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.composite.RealComposite;
@@ -79,7 +80,7 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 		convolution.process(products, blurredProducts);
 		EigenValues<DoubleType, FloatType> eigenvalueComputer = globalSettings().numDimensions() == 3
 			? new EigenValuesSymmetric3D() : EigenValues.symmetric2D();
-		LoopBuilder.setImages(Views.collapse(blurredProducts), RevampUtils.vectorizeStack(output))
+		LoopBuilder.setImages(FastViews.collapse(blurredProducts), RevampUtils.vectorizeStack(output))
 			.forEachPixel(eigenvalueComputer::compute);
 	}
 
@@ -101,7 +102,7 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 		Interval outputInterval = Intervals.addDimension(interval, 0, getNumberOfProducts() - 1);
 		RandomAccessibleInterval<DoubleType> output = RevampUtils.createImage(outputInterval,
 			new DoubleType());
-		LoopBuilder.setImages(Views.collapseReal(derivatives), Views.collapseReal(output)).forEachPixel(
+		LoopBuilder.setImages(FastViews.collapse(derivatives), FastViews.collapse(output)).forEachPixel(
 			getProductPerPixelAction());
 		return output;
 	}
@@ -148,7 +149,7 @@ public class SingleStructureTensorEigenvaluesFeature extends AbstractFeatureOp {
 		return globalSettings().numDimensions() == 3 ? 6 : 3;
 	}
 
-	private BiConsumer<RealComposite<DoubleType>, RealComposite<DoubleType>>
+	private BiConsumer<Composite<DoubleType>, Composite<DoubleType>>
 		getProductPerPixelAction()
 	{
 		return globalSettings().numDimensions() == 3

@@ -4,8 +4,6 @@ package net.imglib2.trainable_segmentation.pixel_feature.filter.hessian;
 import net.imglib2.trainable_segmentation.gpu.algorithms.GpuEigenvalues;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.algorithm.linalg.eigen.EigenValues;
-import net.imglib2.trainable_segmentation.RevampUtils;
 import net.imglib2.trainable_segmentation.gpu.GpuFeatureInput;
 import net.imglib2.trainable_segmentation.gpu.api.GpuView;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractFeatureOp;
@@ -14,7 +12,6 @@ import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.view.composite.Composite;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import preview.net.imglib2.loops.LoopBuilder;
@@ -81,17 +78,13 @@ public class SingleHessianEigenvaluesFeature extends AbstractFeatureOp {
 	}
 
 	private void apply3d(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
-		RandomAccessibleInterval<DoubleType> dxx = input.derivedGauss(sigma, 2, 0, 0);
-		RandomAccessibleInterval<DoubleType> dxy = input.derivedGauss(sigma, 1, 1, 0);
-		RandomAccessibleInterval<DoubleType> dxz = input.derivedGauss(sigma, 1, 0, 1);
-		RandomAccessibleInterval<DoubleType> dyy = input.derivedGauss(sigma, 0, 2, 0);
-		RandomAccessibleInterval<DoubleType> dyz = input.derivedGauss(sigma, 0, 1, 1);
-		RandomAccessibleInterval<DoubleType> dzz = input.derivedGauss(sigma, 0, 0, 2);
-		RandomAccessibleInterval<Composite<DoubleType>> derivative = RevampUtils.vectorizeStack(dxx,
-			dxy, dxz, dyy, dyz, dzz);
-		RandomAccessibleInterval<Composite<FloatType>> eigenvalues = RevampUtils.vectorizeStack(output);
-		EigenValues<DoubleType, FloatType> calculator = new EigenValuesSymmetric3D<>();
-		LoopBuilder.setImages(derivative, eigenvalues).forEachPixel(calculator::compute);
+		RandomAccessibleInterval< DoubleType > a11 = input.derivedGauss(sigma, 2, 0, 0);
+		RandomAccessibleInterval< DoubleType > a12 = input.derivedGauss(sigma, 1, 1, 0);
+		RandomAccessibleInterval< DoubleType > a13 = input.derivedGauss(sigma, 1, 0, 1);
+		RandomAccessibleInterval< DoubleType > a22 = input.derivedGauss(sigma, 0, 2, 0);
+		RandomAccessibleInterval< DoubleType > a23 = input.derivedGauss(sigma, 0, 1, 1);
+		RandomAccessibleInterval< DoubleType > a33 = input.derivedGauss(sigma, 0, 0, 2);
+		EigenValuesSymmetric3D.calc(a11, a12, a13, a22, a23, a33, output);
 	}
 
 	@Override
