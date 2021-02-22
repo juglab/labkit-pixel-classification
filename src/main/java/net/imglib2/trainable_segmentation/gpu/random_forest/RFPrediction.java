@@ -11,9 +11,21 @@ import hr.irb.fastRandomForest.FastRandomForest;
 
 class RFPrediction {
 
+	private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
+	private static final int COMPACT_STORAGE_MIN_HEIGHT = 4;
+
 	/*
 	The random forest is encoded in the following attributes[], thresholds[],
 	and probabilities[] arrays.
+
+	Trees are ordered by height. So first all trees of height 1 are put into the
+	arrays, then height 2, etc. There are two modes of encoding trees:
+	"expanded" and "compact". The COMPRESSED_STORAGE_MIN_HEIGHT constant defines
+	at which tree height to switch over to the "compact" storage scheme.
+
+	Expanded Storage:
+	-----------------
 
 	Trees are "flattened out" to full binary trees of their respective height.
 	For a tree of height h, space for 2^h-1 internal nodes is allocated in
@@ -47,13 +59,36 @@ class RFPrediction {
 
 	See generic_distributionForInstance() for the "simple" version without
 	special cases.
+
+	Compact Storage:
+	-----------------
+
+	For the "compact" scheme, the attributes[] array stores also node indices.
+	Only internal tree nodes are stored. Each node takes up 3 attributes[]
+	slots. For node i, attributes[3*i] and thresholds[i] are the index of the
+	attribute to select and the threshold to compare it with. If the attribute
+	is smaller than the the threshold go to the left child, otherwise go to the
+	right child. The index of the left child node is stored at
+	attributes[3*i+1], the index of the right child node is stored at
+	attributes[3*i+2].
+
+	If the left (or right) child is a leaf, instead of a node index,
+	attributes[3*i+1] (or attributes[3*i+2]) contains the starting index of the
+	leaf respective probabilities. To distinguish the leaf case, starting indices
+	are stored as negative numbers (i+Short.MIN_VALUE
+
+	Additionally, before the attributes[] entries of each tree there are two
+	entries containing the number of nodes and number of leafs probability slots
+	for the tree.
+
+	For accumulating leaf probabilities there are again special case
+	implementations for 2 classes and 3 classes.
 	*/
 
 	private final short[] attributes;
 	private final float[] thresholds;
 	private final float[] probabilities;
 
-	private final int numFeatures;
 	private final int numClasses;
 
 	/**
@@ -72,7 +107,6 @@ class RFPrediction {
 		final int numberOfFeatures)
 	{
 		numClasses = forest.numberOfClasses();
-		numFeatures = numberOfFeatures;
 
 		final Map<Integer, List<TransparentRandomTree>> treesByHeight =
 			new HashMap<>();
@@ -86,42 +120,83 @@ class RFPrediction {
 		final int maxHeight =
 			heights.length == 0 ? 0 : heights[heights.length - 1];
 		numTreesOfHeight = new int[maxHeight];
-		int totalDataSize = 0;
-		int totalProbSize = 0;
+		long attributesSize = 0;
+		long thresholdsSize = 0;
+		long probabilitiesSize = 0;
 		for (int i = 0; i < numTreesOfHeight.length; ++i) {
-			numTreesOfHeight[i] =
-				treesByHeight.getOrDefault(i + 1, Collections.emptyList())
-					.size();
-			final int numLeafs = 2 << i;
-			final int numNonLeafs = numLeafs - 1;
-			totalDataSize += numNonLeafs * numTreesOfHeight[i];
-			totalProbSize += numLeafs * numClasses * numTreesOfHeight[i];
+			final List<TransparentRandomTree> trees =
+				treesByHeight.getOrDefault(i + 1, Collections.emptyList());
+			numTreesOfHeight[i] = trees.size();
+			final int height = i + 1;
+			if (height < COMPACT_STORAGE_MIN_HEIGHT) {
+				final long numTrees = trees.size();
+				final int numLeafs = 1 << height;
+				final int numNonLeafs = numLeafs - 1;
+				attributesSize += numNonLeafs * numTrees;
+				thresholdsSize += numNonLeafs * numTrees;
+				probabilitiesSize += numLeafs * numClasses * numTrees;
+			}
+			else {
+				for (final TransparentRandomTree tree : trees) {
+					final int numNodes = tree.numberOfNodes();
+					final int numLeafs = tree.numberOfLeafs();
+					final int numNonLeafs = numNodes - numLeafs;
+					attributesSize += 2 + 3 * numNonLeafs;
+					thresholdsSize += numNonLeafs;
+					probabilitiesSize += numLeafs * numClasses;
+				}
+			}
 		}
 
-		attributes = new short[totalDataSize];
-		thresholds = new float[totalDataSize];
-		probabilities = new float[totalProbSize];
+		if (attributesSize > MAX_ARRAY_SIZE ||
+			probabilitiesSize > MAX_ARRAY_SIZE)
+			throw new IllegalArgumentException(
+				"forest is too big to represent in " +
+					RFPrediction.class.getSimpleName());
 
-		int dataBase = 0;
-		int probBase = 0;
+		attributes = new short[(int) attributesSize];
+		thresholds = new float[(int) thresholdsSize];
+		probabilities = new float[(int) probabilitiesSize];
+
+		int attributesBase = 0;
+		int thresholdsBase = 0;
+		int probabilitiesBase = 0;
+		final int[] j = new int[1];
 		for (final int height : heights) {
-			final int depth = height - 1;
-			final int numLeafs = 2 << depth;
-			final int numNonLeafs = numLeafs - 1;
-			final int dataSize = numNonLeafs;
-			final int probSize = numLeafs * numClasses;
 			final List<TransparentRandomTree> trees = treesByHeight.get(height);
-			for (final TransparentRandomTree tree : trees) {
-				write(tree, 0, 0, 0, height - 1, dataBase, probBase);
-				dataBase += dataSize;
-				probBase += probSize;
+			if (height < COMPACT_STORAGE_MIN_HEIGHT) {
+				final int depth = height - 1;
+				final int numLeafs = 2 << depth;
+				final int numNonLeafs = numLeafs - 1;
+				final int dataSize = numNonLeafs;
+				final int probSize = numLeafs * numClasses;
+				for (final TransparentRandomTree tree : trees) {
+					write(tree, 0, 0, 0, height - 1, attributesBase,
+						probabilitiesBase);
+					attributesBase += dataSize;
+					thresholdsBase += dataSize;
+					probabilitiesBase += probSize;
+				}
+			}
+			else {
+				for (final TransparentRandomTree tree : trees) {
+					j[0] = 0;
+					final int size =
+						write_compact(tree, 0, j, attributesBase + 2,
+							thresholdsBase, probabilitiesBase);
+					attributes[attributesBase] = (short) size;
+					attributes[attributesBase + 1] = (short) j[0];
+					attributesBase += 2 + size * 3;
+					thresholdsBase += size;
+					probabilitiesBase += j[0];
+				}
 			}
 		}
 	}
 
 	/**
 	 * Serialize a node into the attributes, thresholds, and probabilities
-	 * arrays.
+	 * arrays. This implements the "Expanded Storage" scheme.
 	 *
 	 * @param node
 	 * 	a tree node.
@@ -176,8 +251,72 @@ class RFPrediction {
 	}
 
 	/**
+	 * Serialize a node in into the attributes, thresholds, and probabilities
+	 * arrays. This implements the "Compact Storage" scheme.
+	 *
+	 * @param node
+	 * 	a tree node.
+	 * @param i
+	 * 	index of {@code node}.
+	 * @param j
+	 * 	j[0] index of next free leaf probabilities slot (will be incremented by
+	 * 	this method if leaf probabilities are stored.)
+	 * @param attributesBase
+	 * 	offset into attributes[] where the current tree is placed.
+	 * @param thresholdsBase
+	 * 	offset into thresholds[] where the current tree is placed.
+	 * @param probabilitiesBase
+	 * 	offset into probabilities[] where the current tree is placed.
+	 */
+	private int write_compact(final TransparentRandomTree node, final int i,
+		// index in data
+		final int[] j, // index in probabilities
+		final int attributesBase, final int thresholdsBase,
+		final int probabilitiesBase)
+	{
+		// write feature index and threshold
+		attributes[attributesBase + 3 * i] = (short) node.attributeIndex();
+		thresholds[thresholdsBase + i] = (float) node.threshold();
+
+		final int lsize;
+		final TransparentRandomTree smaller = node.smallerChild();
+		if (smaller.isLeaf()) {
+			attributes[attributesBase + 3 * i + 1] =
+				(short) (j[0] + Short.MIN_VALUE);
+			for (int c = 0; c < numClasses; ++c)
+				probabilities[probabilitiesBase + j[0]++] =
+					(float) smaller.classProbabilities()[c];
+			lsize = 0;
+		}
+		else {
+			attributes[attributesBase + 3 * i + 1] = (short) (i + 1);
+			lsize =
+				write_compact(smaller, i + 1, j, attributesBase, thresholdsBase,
+					probabilitiesBase);
+		}
+
+		final int rsize;
+		final TransparentRandomTree bigger = node.biggerChild();
+		if (bigger.isLeaf()) {
+			attributes[attributesBase + 3 * i + 2] =
+				(short) (j[0] + Short.MIN_VALUE);
+			for (int c = 0; c < numClasses; ++c)
+				probabilities[probabilitiesBase + j[0]++] =
+					(float) bigger.classProbabilities()[c];
+			rsize = 0;
+		}
+		else {
+			attributes[attributesBase + 3 * i + 2] = (short) (i + lsize + 1);
+			rsize = write_compact(bigger, i + lsize + 1, j, attributesBase,
+				thresholdsBase, probabilitiesBase);
+		}
+
+		return 1 + lsize + rsize;
+	}
+
+	/**
 	 * Applies the random forest to the given instance. Writes the class
-	 * probabilities to {@code distribution}. depending on the number of
+	 * probabilities to {@code distribution}. Depending on the number of
 	 * classes, this calls {@link #distributionForInstance_c2} (for 2 classes),
 	 * {@link #distributionForInstance_c3} (for 3 classes), or
 	 * {@link #distributionForInstance_ck} (for {@code >3} classes).
@@ -213,9 +352,11 @@ class RFPrediction {
 	{
 		Arrays.fill(distribution, 0);
 		final int numClasses = this.numClasses;
-		int dataBase = 0;
-		int probBase = 0;
-		for (int depth = 0; depth < numTreesOfHeight.length; depth++) {
+		int attributesBase = 0;
+		int probabilitiesBase = 0;
+		int depth = 0;
+		for (; depth < numTreesOfHeight.length &&
+			depth < COMPACT_STORAGE_MIN_HEIGHT - 1; depth++) {
 			final int nh = numTreesOfHeight[depth];
 			if (nh == 0) continue;
 
@@ -224,10 +365,12 @@ class RFPrediction {
 				final int dataSize = 1;
 				final int probSize = 2 * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
-					final int branchBits = evaluateTree_h1(instance, dataBase);
-					acc(distribution, numClasses, probBase, branchBits);
-					dataBase += dataSize;
-					probBase += probSize;
+					final int branchBits =
+						evaluateTree_h1(instance, attributesBase);
+					acc(distribution, numClasses, probabilitiesBase,
+						branchBits * numClasses);
+					attributesBase += dataSize;
+					probabilitiesBase += probSize;
 				}
 			}
 			else if (depth == 1) // special case for trees of height 2
@@ -235,10 +378,12 @@ class RFPrediction {
 				final int dataSize = 3;
 				final int probSize = 4 * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
-					final int branchBits = evaluateTree_h2(instance, dataBase);
-					acc(distribution, numClasses, probBase, branchBits);
-					dataBase += dataSize;
-					probBase += probSize;
+					final int branchBits =
+						evaluateTree_h2(instance, attributesBase);
+					acc(distribution, numClasses, probabilitiesBase,
+						branchBits * numClasses);
+					attributesBase += dataSize;
+					probabilitiesBase += probSize;
 				}
 			}
 			else if (depth == 2) // special case for trees of height 3
@@ -246,10 +391,12 @@ class RFPrediction {
 				final int dataSize = 7;
 				final int probSize = 8 * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
-					final int branchBits = evaluateTree_h3(instance, dataBase);
-					acc(distribution, numClasses, probBase, branchBits);
-					dataBase += dataSize;
-					probBase += probSize;
+					final int branchBits =
+						evaluateTree_h3(instance, attributesBase);
+					acc(distribution, numClasses, probabilitiesBase,
+						branchBits * numClasses);
+					attributesBase += dataSize;
+					probabilitiesBase += probSize;
 				}
 			}
 			else // general case
@@ -259,36 +406,64 @@ class RFPrediction {
 				final int probSize = numLeafs * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
 					final int branchBits =
-						evaluateTree(instance, dataBase, depth);
-					acc(distribution, numClasses, probBase, branchBits);
-					dataBase += dataSize;
-					probBase += probSize;
+						evaluateTree(instance, attributesBase, depth);
+					acc(distribution, numClasses, probabilitiesBase,
+						branchBits * numClasses);
+					attributesBase += dataSize;
+					probabilitiesBase += probSize;
 				}
 			}
 		}
+
+		int thresholdsBase = attributesBase;
+		for (; depth < numTreesOfHeight.length; depth++) {
+			final int nh = numTreesOfHeight[depth];
+			if (nh == 0) continue;
+
+			for (int tree = 0; tree < nh; ++tree) {
+				final int attrSize = attributes[attributesBase];
+				final int probSize = attributes[attributesBase + 1];
+				int node = 0;
+				while (node >= 0) {
+					final int attributeIndex =
+						attributes[attributesBase + 2 + 3 * node];
+					final float attributeValue = instance[attributeIndex];
+					final float threshold = thresholds[thresholdsBase + node];
+					node = (attributeValue < threshold) ?
+						attributes[attributesBase + 2 + 3 * node + 1] :
+						attributes[attributesBase + 2 + 3 * node + 2];
+				}
+				final int j = node - Short.MIN_VALUE;
+				acc(distribution, numClasses, probabilitiesBase, j);
+				attributesBase += 2 + 3 * attrSize;
+				thresholdsBase += attrSize;
+				probabilitiesBase += probSize;
+			}
+		}
+
 		ArrayUtils.normalize(distribution);
 	}
 
 	private void acc(final float[] distribution, final int numClasses,
-		final int probBase, final int branchBits)
+		final int probBase, final int offset)
 	{
 		for (int k = 0; k < numClasses; k++)
-			distribution[k] +=
-				probabilities[probBase + branchBits * numClasses + k];
+			distribution[k] += probabilities[probBase + offset + k];
 	}
 
 	/**
 	 * Applies the random forest to the given instance.
-	 * This implements the general case for 2 classes.
+	 * This implements the general case for arbitrary number of classes.
 	 */
-	private void distributionForInstance_c2(final float[] instance,
+	void distributionForInstance_c2(final float[] instance,
 		final float[] distribution)
 	{
 		float c0 = 0, c1 = 0;
-		final int numClasses = 2;
-		int dataBase = 0;
-		int probBase = 0;
-		for (int depth = 0; depth < numTreesOfHeight.length; depth++) {
+		int attributesBase = 0;
+		int probabilitiesBase = 0;
+		int depth = 0;
+		for (; depth < numTreesOfHeight.length &&
+			depth < COMPACT_STORAGE_MIN_HEIGHT - 1; depth++) {
 			final int nh = numTreesOfHeight[depth];
 			if (nh == 0) continue;
 
@@ -297,11 +472,14 @@ class RFPrediction {
 				final int dataSize = 1;
 				final int probSize = 2 * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
-					final int branchBits = evaluateTree_h1(instance, dataBase);
-					c0 += probabilities[probBase + branchBits * numClasses];
-					c1 += probabilities[probBase + branchBits * numClasses + 1];
-					dataBase += dataSize;
-					probBase += probSize;
+					final int branchBits =
+						evaluateTree_h1(instance, attributesBase);
+					c0 += probabilities[probabilitiesBase +
+						branchBits * numClasses];
+					c1 += probabilities[probabilitiesBase +
+						branchBits * numClasses + 1];
+					attributesBase += dataSize;
+					probabilitiesBase += probSize;
 				}
 			}
 			else if (depth == 1) // special case for trees of height 2
@@ -309,11 +487,14 @@ class RFPrediction {
 				final int dataSize = 3;
 				final int probSize = 4 * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
-					final int branchBits = evaluateTree_h2(instance, dataBase);
-					c0 += probabilities[probBase + branchBits * numClasses];
-					c1 += probabilities[probBase + branchBits * numClasses + 1];
-					dataBase += dataSize;
-					probBase += probSize;
+					final int branchBits =
+						evaluateTree_h2(instance, attributesBase);
+					c0 += probabilities[probabilitiesBase +
+						branchBits * numClasses];
+					c1 += probabilities[probabilitiesBase +
+						branchBits * numClasses + 1];
+					attributesBase += dataSize;
+					probabilitiesBase += probSize;
 				}
 			}
 			else if (depth == 2) // special case for trees of height 3
@@ -321,11 +502,14 @@ class RFPrediction {
 				final int dataSize = 7;
 				final int probSize = 8 * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
-					final int branchBits = evaluateTree_h3(instance, dataBase);
-					c0 += probabilities[probBase + branchBits * numClasses];
-					c1 += probabilities[probBase + branchBits * numClasses + 1];
-					dataBase += dataSize;
-					probBase += probSize;
+					final int branchBits =
+						evaluateTree_h3(instance, attributesBase);
+					c0 += probabilities[probabilitiesBase +
+						branchBits * numClasses];
+					c1 += probabilities[probabilitiesBase +
+						branchBits * numClasses + 1];
+					attributesBase += dataSize;
+					probabilitiesBase += probSize;
 				}
 			}
 			else // general case
@@ -335,14 +519,44 @@ class RFPrediction {
 				final int probSize = numLeafs * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
 					final int branchBits =
-						evaluateTree(instance, dataBase, depth);
-					c0 += probabilities[probBase + branchBits * numClasses];
-					c1 += probabilities[probBase + branchBits * numClasses + 1];
-					dataBase += dataSize;
-					probBase += probSize;
+						evaluateTree(instance, attributesBase, depth);
+					c0 += probabilities[probabilitiesBase +
+						branchBits * numClasses];
+					c1 += probabilities[probabilitiesBase +
+						branchBits * numClasses + 1];
+					attributesBase += dataSize;
+					probabilitiesBase += probSize;
 				}
 			}
 		}
+
+		int thresholdsBase = attributesBase;
+		for (; depth < numTreesOfHeight.length; depth++) {
+			final int nh = numTreesOfHeight[depth];
+			if (nh == 0) continue;
+
+			for (int tree = 0; tree < nh; ++tree) {
+				final int attrSize = attributes[attributesBase];
+				final int probSize = attributes[attributesBase + 1];
+				int node = 0;
+				while (node >= 0) {
+					final int attributeIndex =
+						attributes[attributesBase + 2 + 3 * node];
+					final float attributeValue = instance[attributeIndex];
+					final float threshold = thresholds[thresholdsBase + node];
+					node = (attributeValue < threshold) ?
+						attributes[attributesBase + 2 + 3 * node + 1] :
+						attributes[attributesBase + 2 + 3 * node + 2];
+				}
+				final int j = node - Short.MIN_VALUE;
+				c0 += probabilities[probabilitiesBase + j];
+				c1 += probabilities[probabilitiesBase + j + 1];
+				attributesBase += 2 + 3 * attrSize;
+				thresholdsBase += attrSize;
+				probabilitiesBase += probSize;
+			}
+		}
+
 		final float invsum = 1f / (c0 + c1);
 		distribution[0] = c0 * invsum;
 		distribution[1] = c1 * invsum;
@@ -357,9 +571,11 @@ class RFPrediction {
 	{
 		float c0 = 0, c1 = 0, c2 = 0;
 		final int numClasses = 3;
-		int dataBase = 0;
-		int probBase = 0;
-		for (int depth = 0; depth < numTreesOfHeight.length; depth++) {
+		int attributesBase = 0;
+		int probabilitiesBase = 0;
+		int depth = 0;
+		for (; depth < numTreesOfHeight.length &&
+			depth < COMPACT_STORAGE_MIN_HEIGHT - 1; depth++) {
 			final int nh = numTreesOfHeight[depth];
 			if (nh == 0) continue;
 
@@ -368,12 +584,16 @@ class RFPrediction {
 				final int dataSize = 1;
 				final int probSize = 2 * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
-					final int branchBits = evaluateTree_h1(instance, dataBase);
-					c0 += probabilities[probBase + branchBits * numClasses];
-					c1 += probabilities[probBase + branchBits * numClasses + 1];
-					c2 += probabilities[probBase + branchBits * numClasses + 2];
-					dataBase += dataSize;
-					probBase += probSize;
+					final int branchBits =
+						evaluateTree_h1(instance, attributesBase);
+					c0 += probabilities[probabilitiesBase +
+						branchBits * numClasses];
+					c1 += probabilities[probabilitiesBase +
+						branchBits * numClasses + 1];
+					c2 += probabilities[probabilitiesBase +
+						branchBits * numClasses + 2];
+					attributesBase += dataSize;
+					probabilitiesBase += probSize;
 				}
 			}
 			else if (depth == 1) // special case for trees of height 2
@@ -381,12 +601,16 @@ class RFPrediction {
 				final int dataSize = 3;
 				final int probSize = 4 * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
-					final int branchBits = evaluateTree_h2(instance, dataBase);
-					c0 += probabilities[probBase + branchBits * numClasses];
-					c1 += probabilities[probBase + branchBits * numClasses + 1];
-					c2 += probabilities[probBase + branchBits * numClasses + 2];
-					dataBase += dataSize;
-					probBase += probSize;
+					final int branchBits =
+						evaluateTree_h2(instance, attributesBase);
+					c0 += probabilities[probabilitiesBase +
+						branchBits * numClasses];
+					c1 += probabilities[probabilitiesBase +
+						branchBits * numClasses + 1];
+					c2 += probabilities[probabilitiesBase +
+						branchBits * numClasses + 2];
+					attributesBase += dataSize;
+					probabilitiesBase += probSize;
 				}
 			}
 			else if (depth == 2) // special case for trees of height 3
@@ -394,12 +618,16 @@ class RFPrediction {
 				final int dataSize = 7;
 				final int probSize = 8 * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
-					final int branchBits = evaluateTree_h3(instance, dataBase);
-					c0 += probabilities[probBase + branchBits * numClasses];
-					c1 += probabilities[probBase + branchBits * numClasses + 1];
-					c2 += probabilities[probBase + branchBits * numClasses + 2];
-					dataBase += dataSize;
-					probBase += probSize;
+					final int branchBits =
+						evaluateTree_h3(instance, attributesBase);
+					c0 += probabilities[probabilitiesBase +
+						branchBits * numClasses];
+					c1 += probabilities[probabilitiesBase +
+						branchBits * numClasses + 1];
+					c2 += probabilities[probabilitiesBase +
+						branchBits * numClasses + 2];
+					attributesBase += dataSize;
+					probabilitiesBase += probSize;
 				}
 			}
 			else // general case
@@ -409,15 +637,47 @@ class RFPrediction {
 				final int probSize = numLeafs * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
 					final int branchBits =
-						evaluateTree(instance, dataBase, depth);
-					c0 += probabilities[probBase + branchBits * numClasses];
-					c1 += probabilities[probBase + branchBits * numClasses + 1];
-					c2 += probabilities[probBase + branchBits * numClasses + 2];
-					dataBase += dataSize;
-					probBase += probSize;
+						evaluateTree(instance, attributesBase, depth);
+					c0 += probabilities[probabilitiesBase +
+						branchBits * numClasses];
+					c1 += probabilities[probabilitiesBase +
+						branchBits * numClasses + 1];
+					c2 += probabilities[probabilitiesBase +
+						branchBits * numClasses + 2];
+					attributesBase += dataSize;
+					probabilitiesBase += probSize;
 				}
 			}
 		}
+
+		int thresholdsBase = attributesBase;
+		for (; depth < numTreesOfHeight.length; depth++) {
+			final int nh = numTreesOfHeight[depth];
+			if (nh == 0) continue;
+
+			for (int tree = 0; tree < nh; ++tree) {
+				final int attrSize = attributes[attributesBase];
+				final int probSize = attributes[attributesBase + 1];
+				int node = 0;
+				while (node >= 0) {
+					final int attributeIndex =
+						attributes[attributesBase + 2 + 3 * node];
+					final float attributeValue = instance[attributeIndex];
+					final float threshold = thresholds[thresholdsBase + node];
+					node = (attributeValue < threshold) ?
+						attributes[attributesBase + 2 + 3 * node + 1] :
+						attributes[attributesBase + 2 + 3 * node + 2];
+				}
+				final int j = node - Short.MIN_VALUE;
+				c0 += probabilities[probabilitiesBase + j];
+				c1 += probabilities[probabilitiesBase + j + 1];
+				c2 += probabilities[probabilitiesBase + j + 2];
+				attributesBase += 2 + 3 * attrSize;
+				thresholdsBase += attrSize;
+				probabilitiesBase += probSize;
+			}
+		}
+
 		final float invsum = 1f / (c0 + c1 + c2);
 		distribution[0] = c0 * invsum;
 		distribution[1] = c1 * invsum;
@@ -568,9 +828,11 @@ class RFPrediction {
 	{
 		Arrays.fill(distribution, 0);
 		final int numClasses = this.numClasses;
-		int dataBase = 0;
-		int probBase = 0;
-		for (int depth = 0; depth < numTreesOfHeight.length; depth++) {
+		int attributesBase = 0;
+		int probabilitiesBase = 0;
+		int depth = 0;
+		for (; depth < numTreesOfHeight.length &&
+			depth < COMPACT_STORAGE_MIN_HEIGHT - 1; depth++) {
 			final int nh = numTreesOfHeight[depth];
 			if (nh == 0) continue;
 
@@ -578,12 +840,39 @@ class RFPrediction {
 			final int dataSize = numLeafs - 1;
 			final int probSize = numLeafs * numClasses;
 			for (int tree = 0; tree < nh; ++tree) {
-				final int branchBits = evaluateTree(instance, dataBase, depth);
+				final int branchBits =
+					evaluateTree(instance, attributesBase, depth);
 				for (int k = 0; k < numClasses; k++)
-					distribution[k] +=
-						probabilities[probBase + branchBits * numClasses + k];
-				dataBase += dataSize;
-				probBase += probSize;
+					distribution[k] += probabilities[probabilitiesBase +
+						branchBits * numClasses + k];
+				attributesBase += dataSize;
+				probabilitiesBase += probSize;
+			}
+		}
+		int thresholdsBase = attributesBase;
+		for (; depth < numTreesOfHeight.length; depth++) {
+			final int nh = numTreesOfHeight[depth];
+			if (nh == 0) continue;
+
+			for (int tree = 0; tree < nh; ++tree) {
+				final int attrSize = attributes[attributesBase];
+				final int probSize = attributes[attributesBase + 1];
+				int node = 0;
+				while (node >= 0) {
+					final int attributeIndex =
+						attributes[attributesBase + 2 + 3 * node];
+					final float attributeValue = instance[attributeIndex];
+					final float threshold = thresholds[thresholdsBase + node];
+					node = (attributeValue < threshold) ?
+						attributes[attributesBase + 2 + 3 * node + 1] :
+						attributes[attributesBase + 2 + 3 * node + 2];
+				}
+				final int j = node - Short.MIN_VALUE;
+				for (int k = 0; k < numClasses; k++)
+					distribution[k] += probabilities[probabilitiesBase + j + k];
+				attributesBase += 2 + 3 * attrSize;
+				thresholdsBase += attrSize;
+				probabilitiesBase += probSize;
 			}
 		}
 		ArrayUtils.normalize(distribution);
