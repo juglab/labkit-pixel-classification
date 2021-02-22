@@ -97,6 +97,8 @@ class RFPrediction {
 	 */
 	private final int[] numTreesOfHeight;
 
+	private final float[] prior;
+
 	public RFPrediction(final FastRandomForest classifier,
 		final int numberOfFeatures)
 	{
@@ -107,6 +109,7 @@ class RFPrediction {
 		final int numberOfFeatures)
 	{
 		numClasses = forest.numberOfClasses();
+		prior = new float[numClasses];
 
 		final Map<Integer, List<TransparentRandomTree>> treesByHeight =
 			new HashMap<>();
@@ -116,6 +119,13 @@ class RFPrediction {
 		final int[] heights =
 			treesByHeight.keySet().stream().mapToInt(Integer::intValue).sorted()
 				.toArray();
+
+		// handle trees of height 0 (leaf-only)
+		for (TransparentRandomTree leaf : treesByHeight
+			.getOrDefault(0, Collections.emptyList())) {
+			for (int i = 0; i < numClasses; ++i)
+				prior[i] += (float) leaf.classProbabilities()[i];
+		}
 
 		final int maxHeight =
 			heights.length == 0 ? 0 : heights[heights.length - 1];
@@ -350,8 +360,9 @@ class RFPrediction {
 	private void distributionForInstance_ck(final float[] instance,
 		final float[] distribution)
 	{
-		Arrays.fill(distribution, 0);
 		final int numClasses = this.numClasses;
+		for (int i = 0; i < numClasses; ++i)
+			distribution[i] = prior[i];
 		int attributesBase = 0;
 		int probabilitiesBase = 0;
 		int depth = 0;
@@ -458,7 +469,7 @@ class RFPrediction {
 	void distributionForInstance_c2(final float[] instance,
 		final float[] distribution)
 	{
-		float c0 = 0, c1 = 0;
+		float c0 = prior[ 0 ], c1 = prior[ 1 ];
 		int attributesBase = 0;
 		int probabilitiesBase = 0;
 		int depth = 0;
@@ -569,7 +580,7 @@ class RFPrediction {
 	private void distributionForInstance_c3(final float[] instance,
 		final float[] distribution)
 	{
-		float c0 = 0, c1 = 0, c2 = 0;
+		float c0 = prior[0], c1 = prior[1], c2 = prior[2];
 		final int numClasses = 3;
 		int attributesBase = 0;
 		int probabilitiesBase = 0;
@@ -826,8 +837,9 @@ class RFPrediction {
 	private void generic_distributionForInstance(final float[] instance,
 		final float[] distribution)
 	{
-		Arrays.fill(distribution, 0);
 		final int numClasses = this.numClasses;
+		for (int i = 0; i < numClasses; ++i)
+			distribution[i] = prior[i];
 		int attributesBase = 0;
 		int probabilitiesBase = 0;
 		int depth = 0;
