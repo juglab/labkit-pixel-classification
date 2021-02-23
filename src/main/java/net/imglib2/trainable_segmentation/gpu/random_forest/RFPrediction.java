@@ -1,7 +1,6 @@
 package net.imglib2.trainable_segmentation.gpu.random_forest;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -102,7 +101,7 @@ class RFPrediction {
 	public RFPrediction(final FastRandomForest classifier,
 		final int numberOfFeatures)
 	{
-		this(new TransparentRandomForest(classifier), numberOfFeatures);
+		this(TransparentRandomForest.forFastRandomForest(classifier), numberOfFeatures);
 	}
 
 	public RFPrediction(final TransparentRandomForest forest,
@@ -116,16 +115,18 @@ class RFPrediction {
 		for (final TransparentRandomTree tree : forest.trees())
 			treesByHeight.computeIfAbsent(tree.height(), ArrayList::new)
 				.add(tree);
-		final int[] heights =
-			treesByHeight.keySet().stream().mapToInt(Integer::intValue).sorted()
-				.toArray();
 
 		// handle trees of height 0 (leaf-only)
-		for (TransparentRandomTree leaf : treesByHeight
-			.getOrDefault(0, Collections.emptyList())) {
+		List< TransparentRandomTree > zeroHeightTrees = treesByHeight.getOrDefault(0, Collections.emptyList());
+		treesByHeight.remove(0);
+		for (TransparentRandomTree leaf : zeroHeightTrees) {
 			for (int i = 0; i < numClasses; ++i)
 				prior[i] += (float) leaf.classProbabilities()[i];
 		}
+
+		final int[] heights =
+				treesByHeight.keySet().stream().mapToInt(Integer::intValue).sorted()
+						.toArray();
 
 		final int maxHeight =
 			heights.length == 0 ? 0 : heights[heights.length - 1];
@@ -888,5 +889,9 @@ class RFPrediction {
 			}
 		}
 		ArrayUtils.normalize(distribution);
+	}
+
+	public int numberOfClasses() {
+		return numClasses;
 	}
 }

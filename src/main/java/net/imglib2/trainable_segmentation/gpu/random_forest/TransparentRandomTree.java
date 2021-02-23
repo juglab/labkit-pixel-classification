@@ -18,31 +18,48 @@ public class TransparentRandomTree {
 
 	private final TransparentRandomTree smallerChild;
 
-	private final TransparentRandomTree biggerChilld;
+	private final TransparentRandomTree biggerChild;
 
 	private final double[] classProbabilities;
+
+	private TransparentRandomTree(int attribute, double threshold,
+			TransparentRandomTree smallerChild,
+			TransparentRandomTree biggerChild,
+			double[] classProbabilities) {
+		this.attribute = attribute;
+		this.threshold = threshold;
+		this.smallerChild = smallerChild;
+		this.biggerChild = biggerChild;
+		this.classProbabilities = classProbabilities;
+	}
+
+	public static TransparentRandomTree leaf(double[] classProbabilities) {
+		return new TransparentRandomTree(-1, Double.NaN, null, null, classProbabilities);
+	}
+
+	public static TransparentRandomTree node(int attribute, double threshold,
+			TransparentRandomTree smallerChild,
+			TransparentRandomTree biggerChild)
+	{
+		return new TransparentRandomTree(attribute, threshold, smallerChild,
+				biggerChild, null);
+	}
 
 	/**
 	 * @param fastRandomTree is expected to be of type
 	 *          hr.irb.fastRandomForest.FastRandomTree
 	 */
-	public TransparentRandomTree(Object fastRandomTree) {
-		this.attribute = ReflectionUtils.getPrivateField(fastRandomTree, "m_Attribute", Integer.class);
-		if (isLeaf()) {
-			this.threshold = Double.NaN;
-			this.smallerChild = null;
-			this.biggerChilld = null;
-			this.classProbabilities = ReflectionUtils.getPrivateField(fastRandomTree, "m_ClassProbs",
-				double[].class);
+	public static TransparentRandomTree forFastRandomTree(Object fastRandomTree)
+	{
+		int attribute = ReflectionUtils.getPrivateField(fastRandomTree, "m_Attribute", Integer.class);
+		if (attribute < 0) {
+			double[] probs = ReflectionUtils .getPrivateField(fastRandomTree, "m_ClassProbs", double[].class);
+			return leaf(probs);
 		}
 		else {
-			this.threshold = ReflectionUtils.getPrivateField(fastRandomTree, "m_SplitPoint",
-				Double.class);
-			Object[] sucessors = ReflectionUtils.getPrivateField(fastRandomTree, "m_Successors",
-				Object[].class);
-			this.smallerChild = new TransparentRandomTree(sucessors[0]);
-			this.biggerChilld = new TransparentRandomTree(sucessors[1]);
-			this.classProbabilities = null;
+			double threshold = ReflectionUtils.getPrivateField(fastRandomTree, "m_SplitPoint", Double.class);
+			Object[] successors = ReflectionUtils.getPrivateField(fastRandomTree, "m_Successors", Object[].class);
+			return node(attribute, threshold, forFastRandomTree(successors[0]), forFastRandomTree(successors[1]));
 		}
 	}
 
@@ -67,7 +84,7 @@ public class TransparentRandomTree {
 	 * to the threshold.
 	 */
 	public TransparentRandomTree biggerChild() {
-		return biggerChilld;
+		return biggerChild;
 	}
 
 	public double[] classProbabilities() {
@@ -77,7 +94,7 @@ public class TransparentRandomTree {
 	public double[] distributionForInstance(Instance instance) {
 		if (!isLeaf()) {
 			TransparentRandomTree child = instance.value(attribute) < threshold ? smallerChild
-				: biggerChilld;
+				: biggerChild;
 			return child.distributionForInstance(instance);
 		}
 		else {

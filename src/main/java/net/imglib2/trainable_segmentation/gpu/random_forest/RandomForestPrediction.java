@@ -13,8 +13,6 @@ import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.StopWatch;
-import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import preview.net.imglib2.loops.LoopBuilder;
 
@@ -53,7 +51,8 @@ public class RandomForestPrediction {
 	private final RFPrediction rfPrediction;
 
 	public RandomForestPrediction(FastRandomForest classifier, int numberOfFeatures) {
-		TransparentRandomForest forest = new TransparentRandomForest(classifier);
+		TransparentRandomForest forest =
+				TransparentRandomForest.forFastRandomForest(classifier);
 		List<RandomTreePrediction> trees = forest.trees().stream().map(RandomTreePrediction::new)
 			.collect(Collectors.toList());
 		this.numberOfClasses = forest.numberOfClasses();
