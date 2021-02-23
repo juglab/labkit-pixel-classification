@@ -13,7 +13,7 @@ import net.imglib2.*;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.trainable_segmentation.gpu.api.GpuCopy;
 import net.imglib2.trainable_segmentation.gpu.api.GpuPool;
-import net.imglib2.trainable_segmentation.gpu.random_forest.RandomForestPrediction;
+import net.imglib2.trainable_segmentation.gpu.random_forest.GpuRandomForestPrediction;
 import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSettings;
 import net.imglib2.trainable_segmentation.RevampUtils;
@@ -47,7 +47,7 @@ public class Segmenter {
 
 	private final weka.classifiers.Classifier classifier;
 
-	private RandomForestPrediction predicition;
+	private GpuRandomForestPrediction predicition;
 
 	private boolean useGpu = false;
 
@@ -57,7 +57,7 @@ public class Segmenter {
 		this.classNames = Collections.unmodifiableList(classNames);
 		this.features = Objects.requireNonNull(features);
 		this.classifier = Objects.requireNonNull(classifier);
-		this.predicition = new RandomForestPrediction(Cast.unchecked(classifier),
+		this.predicition = new GpuRandomForestPrediction(Cast.unchecked(classifier),
 			features.count());
 	}
 
@@ -122,7 +122,7 @@ public class Segmenter {
 		RandomAccessibleInterval<? extends IntegerType<?>> out)
 	{
 		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
-		RandomForestPrediction forest = new RandomForestPrediction((FastRandomForest) classifier,
+		GpuRandomForestPrediction forest = new GpuRandomForestPrediction((FastRandomForest) classifier,
 			features.count());
 		forest.segment(featureValues, out);
 	}
@@ -131,7 +131,8 @@ public class Segmenter {
 		RandomAccessibleInterval<? extends IntegerType<?>> out)
 	{
 		try (GpuApi scope = GpuPool.borrowGpu()) {
-			RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier),
+			GpuRandomForestPrediction
+					prediction = new GpuRandomForestPrediction(Cast.unchecked(classifier),
 				features.count());
 			GpuImage featureStack = features.applyUseGpu(scope, image, out);
 			GpuImage segmentationBuffer = prediction.segment(scope, featureStack);
@@ -167,7 +168,7 @@ public class Segmenter {
 	{
 		Interval interval = RevampUtils.removeLastDimension(out);
 		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, interval);
-		RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier),
+		GpuRandomForestPrediction prediction = new GpuRandomForestPrediction(Cast.unchecked(classifier),
 			features.count());
 		prediction.distribution(featureValues, out);
 	}
@@ -176,7 +177,7 @@ public class Segmenter {
 		RandomAccessible<?> image)
 	{
 		Interval interval = RevampUtils.removeLastDimension(out);
-		RandomForestPrediction prediction = new RandomForestPrediction(Cast.unchecked(classifier),
+		GpuRandomForestPrediction prediction = new GpuRandomForestPrediction(Cast.unchecked(classifier),
 			features.count());
 		try (GpuApi scope = GpuPool.borrowGpu()) {
 			GpuImage featureStack = features.applyUseGpu(scope, image, interval);
@@ -233,7 +234,7 @@ public class Segmenter {
 		@Override
 		public void train() {
 			RevampUtils.wrapException(() -> classifier.buildClassifier(instances));
-			predicition = new RandomForestPrediction(Cast.unchecked(classifier), features.count());
+			predicition = new GpuRandomForestPrediction(Cast.unchecked(classifier), features.count());
 		}
 	}
 

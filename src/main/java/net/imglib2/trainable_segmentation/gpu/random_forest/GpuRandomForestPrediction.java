@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * <p>
  * The code can run on CPU or GPU.
  */
-public class RandomForestPrediction {
+public class GpuRandomForestPrediction {
 
 	private final int numberOfClasses;
 
@@ -48,12 +48,13 @@ public class RandomForestPrediction {
 
 	private final float[] leafProbabilities;
 
-	private final RFPrediction rfPrediction;
+	private final CpuRandomForestPrediction rfPrediction;
 
-	public RandomForestPrediction(FastRandomForest classifier, int numberOfFeatures) {
+	public GpuRandomForestPrediction(FastRandomForest classifier, int numberOfFeatures) {
 		TransparentRandomForest forest =
 				TransparentRandomForest.forFastRandomForest(classifier);
-		List<RandomTreePrediction> trees = forest.trees().stream().map(RandomTreePrediction::new)
+		List< GpuRandomTreePrediction > trees = forest.trees().stream().map(
+				GpuRandomTreePrediction::new)
 			.collect(Collectors.toList());
 		this.numberOfClasses = forest.numberOfClasses();
 		this.numberOfFeatures = numberOfFeatures;
@@ -64,7 +65,7 @@ public class RandomForestPrediction {
 		this.nodeThresholds = new float[numberOfTrees * numberOfNodes];
 		this.leafProbabilities = new float[numberOfTrees * numberOfLeafs * numberOfClasses];
 		for (int j = 0; j < numberOfTrees; j++) {
-			RandomTreePrediction tree = trees.get(j);
+			GpuRandomTreePrediction tree = trees.get(j);
 			for (int i = 0; i < tree.numberOfNodes; i++) {
 				nodeIndices[(j * numberOfNodes + i) * 3] = (short) tree.attributeIndicies[i];
 				nodeIndices[(j * numberOfNodes + i) * 3 + 1] = (short) tree.smallerChild[i];
@@ -76,7 +77,7 @@ public class RandomForestPrediction {
 					leafProbabilities[(j * numberOfLeafs + i) * numberOfClasses + k] =
 						(float) tree.classProbabilities[i][k];
 		}
-		rfPrediction = new RFPrediction(forest, numberOfFeatures);
+		rfPrediction = new CpuRandomForestPrediction(forest, numberOfFeatures);
 	}
 
 	public int numberOfClasses() {

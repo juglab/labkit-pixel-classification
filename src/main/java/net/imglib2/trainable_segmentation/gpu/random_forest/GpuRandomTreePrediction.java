@@ -3,7 +3,7 @@ package net.imglib2.trainable_segmentation.gpu.random_forest;
 
 import weka.core.Instance;
 
-public class RandomTreePrediction {
+public class GpuRandomTreePrediction {
 
 	final int numberOfNodes;
 	final int numberOfLeafs;
@@ -15,7 +15,7 @@ public class RandomTreePrediction {
 	final int[] biggerChild;
 	final double[][] classProbabilities;
 
-	public RandomTreePrediction(TransparentRandomTree tree) {
+	public GpuRandomTreePrediction(TransparentRandomTree tree) {
 		if (tree.isLeaf()) {
 			this.numberOfLeafs = 1;
 			this.numberOfNodes = 1;

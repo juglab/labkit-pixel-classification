@@ -8,7 +8,7 @@ import java.util.Map;
 
 import hr.irb.fastRandomForest.FastRandomForest;
 
-class RFPrediction {
+class CpuRandomForestPrediction {
 
 	private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
@@ -98,13 +98,13 @@ class RFPrediction {
 
 	private final float[] prior;
 
-	public RFPrediction(final FastRandomForest classifier,
+	public CpuRandomForestPrediction(final FastRandomForest classifier,
 		final int numberOfFeatures)
 	{
 		this(TransparentRandomForest.forFastRandomForest(classifier), numberOfFeatures);
 	}
 
-	public RFPrediction(final TransparentRandomForest forest,
+	public CpuRandomForestPrediction(final TransparentRandomForest forest,
 		final int numberOfFeatures)
 	{
 		numClasses = forest.numberOfClasses();
@@ -163,7 +163,7 @@ class RFPrediction {
 			probabilitiesSize > MAX_ARRAY_SIZE)
 			throw new IllegalArgumentException(
 				"forest is too big to represent in " +
-					RFPrediction.class.getSimpleName());
+					CpuRandomForestPrediction.class.getSimpleName());
 
 		attributes = new short[(int) attributesSize];
 		thresholds = new float[(int) thresholdsSize];
