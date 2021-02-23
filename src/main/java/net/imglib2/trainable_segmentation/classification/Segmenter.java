@@ -13,6 +13,7 @@ import net.imglib2.*;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.trainable_segmentation.gpu.api.GpuCopy;
 import net.imglib2.trainable_segmentation.gpu.api.GpuPool;
+import net.imglib2.trainable_segmentation.gpu.random_forest.CpuRandomForestPrediction;
 import net.imglib2.trainable_segmentation.gpu.random_forest.GpuRandomForestPrediction;
 import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSettings;
@@ -122,7 +123,7 @@ public class Segmenter {
 		RandomAccessibleInterval<? extends IntegerType<?>> out)
 	{
 		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, out);
-		GpuRandomForestPrediction forest = new GpuRandomForestPrediction((FastRandomForest) classifier,
+		CpuRandomForestPrediction forest = new CpuRandomForestPrediction((FastRandomForest) classifier,
 			features.count());
 		forest.segment(featureValues, out);
 	}
@@ -168,7 +169,7 @@ public class Segmenter {
 	{
 		Interval interval = RevampUtils.removeLastDimension(out);
 		RandomAccessibleInterval<FloatType> featureValues = features.apply(image, interval);
-		GpuRandomForestPrediction prediction = new GpuRandomForestPrediction(Cast.unchecked(classifier),
+		CpuRandomForestPrediction prediction = new CpuRandomForestPrediction(Cast.unchecked(classifier),
 			features.count());
 		prediction.distribution(featureValues, out);
 	}

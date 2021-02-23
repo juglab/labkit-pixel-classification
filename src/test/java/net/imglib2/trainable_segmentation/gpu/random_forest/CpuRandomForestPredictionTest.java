@@ -16,7 +16,7 @@ import weka.core.Instances;
 import static org.junit.Assert.assertArrayEquals;
 
 /**
- * Tests {@link CpuRandomForestPrediction} by comparing the results to
+ * Tests {@link CpuRandomForestCore} by comparing the results to
  * {@link FastRandomForest} on randomly generated datasets.
  */
 public class CpuRandomForestPredictionTest {
@@ -27,8 +27,8 @@ public class CpuRandomForestPredictionTest {
 	public void testLeafOnlyTree() {
 		TransparentRandomTree tree = TransparentRandomTree.leaf(new double[] { 0.1, 0.9 });
 		TransparentRandomForest forest = new TransparentRandomForest( Collections.singletonList(tree));
-		CpuRandomForestPrediction
-				prediction = new CpuRandomForestPrediction(forest, 1);
+		CpuRandomForestCore
+				prediction = new CpuRandomForestCore(forest);
 		float[] distribution = new float[2];
 		prediction.distributionForInstance(new float[1], distribution);
 		assertArrayEquals(new float[]{ 0.1f, 0.9f }, distribution, 0);
@@ -65,7 +65,7 @@ public class CpuRandomForestPredictionTest {
 	 * Train {@link FastRandomForest} on a randomly generated dataset.
 	 * Apply it on a different randomly generated dataset and compare the
 	 * resulting class distributions to the distributions calculated by
-	 * {@link CpuRandomForestPrediction}.
+	 * {@link CpuRandomForestCore}.
 	 */
 	private void trainAndCompareRandomForests(int numberOfFeatures, int numberOfClasses, int numberOfInstances)
 			throws Exception
@@ -75,8 +75,8 @@ public class CpuRandomForestPredictionTest {
 		Instances testDataset = randomDataset(numberOfFeatures, numberOfClasses, 100);
 		FastRandomForest fastRf = trainFastRandomForest(trainingDataset);
 		showTreeHeights(fastRf);
-		CpuRandomForestPrediction
-				cpuRf = new CpuRandomForestPrediction(fastRf, numberOfFeatures);
+		CpuRandomForestCore
+				cpuRf = new CpuRandomForestCore(fastRf);
 		compareRandomForests(testDataset, fastRf, cpuRf);
 	}
 
@@ -109,7 +109,7 @@ public class CpuRandomForestPredictionTest {
 	}
 
 	private void compareRandomForests(Instances data, FastRandomForest fastRf,
-			CpuRandomForestPrediction cpuRf) throws Exception
+			CpuRandomForestCore cpuRf) throws Exception
 	{
 		for (Instance instance : data) {
 			float[] expected = toFloats(fastRf.distributionForInstance(instance));
