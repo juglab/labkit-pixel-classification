@@ -55,11 +55,11 @@ public class CpuRandomForestCoreTest {
 	}
 
 	public void trainAndCompareRandomForests(int numberOfClasses) throws Exception {
-		// test a random forest with small trees (tree depth roughly 0 and 1)
+		// test a random forest with small trees (tree heights roughly 0 and 1)
 		trainAndCompareRandomForests(10, numberOfClasses, 4);
-		// test a random forest with moderate trees (tree depth roughly 2, 3, 4, 5)
+		// test a random forest with moderate trees (tree heights roughly 2, 3, 4, 5)
 		trainAndCompareRandomForests(10, numberOfClasses, 16);
-		// tess a random forest with big trees (tree depth roughly 5 to 10 to)
+		// test a random forest with big trees (tree heights roughly 5 to 10 to)
 		trainAndCompareRandomForests(10, numberOfClasses, 64);
 	}
 

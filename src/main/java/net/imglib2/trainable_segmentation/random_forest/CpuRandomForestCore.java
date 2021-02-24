@@ -115,29 +115,20 @@ class CpuRandomForestCore {
 			treesByHeight.computeIfAbsent(tree.height(), ArrayList::new)
 				.add(tree);
 
-		// handle trees of height 0 (leaf-only)
-		List< TransparentRandomTree > zeroHeightTrees = treesByHeight.getOrDefault(0, Collections.emptyList());
-		treesByHeight.remove(0);
-		for (TransparentRandomTree leaf : zeroHeightTrees) {
-			for (int i = 0; i < numClasses; ++i)
-				prior[i] += (float) leaf.classProbabilities()[i];
-		}
-
 		final int[] heights =
 				treesByHeight.keySet().stream().mapToInt(Integer::intValue).sorted()
 						.toArray();
 
 		final int maxHeight =
 			heights.length == 0 ? 0 : heights[heights.length - 1];
-		numTreesOfHeight = new int[maxHeight];
+		numTreesOfHeight = new int[maxHeight + 1];
 		long attributesSize = 0;
 		long thresholdsSize = 0;
 		long probabilitiesSize = 0;
-		for (int i = 0; i < numTreesOfHeight.length; ++i) {
+		for (int height = 1; height < numTreesOfHeight.length; ++height) {
 			final List<TransparentRandomTree> trees =
-				treesByHeight.getOrDefault(i + 1, Collections.emptyList());
-			numTreesOfHeight[i] = trees.size();
-			final int height = i + 1;
+				treesByHeight.getOrDefault(height, Collections.emptyList());
+			numTreesOfHeight[height] = trees.size();
 			if (height < COMPACT_STORAGE_MIN_HEIGHT) {
 				final long numTrees = trees.size();
 				final int numLeafs = 1 << height;
@@ -174,14 +165,18 @@ class CpuRandomForestCore {
 		final int[] j = new int[1];
 		for (final int height : heights) {
 			final List<TransparentRandomTree> trees = treesByHeight.get(height);
-			if (height < COMPACT_STORAGE_MIN_HEIGHT) {
-				final int depth = height - 1;
-				final int numLeafs = 2 << depth;
+			if (height == 0) {
+				for (final TransparentRandomTree tree : trees) {
+					for (int i = 0; i < numClasses; ++i)
+						prior[i] += (float) tree.classProbabilities()[i];
+				}
+			} else if (height < COMPACT_STORAGE_MIN_HEIGHT) {
+				final int numLeafs = 1 << height;
 				final int numNonLeafs = numLeafs - 1;
 				final int dataSize = numNonLeafs;
 				final int probSize = numLeafs * numClasses;
 				for (final TransparentRandomTree tree : trees) {
-					write(tree, 0, 0, 0, height - 1, attributesBase,
+					write(tree, 0, 0, 0, height, attributesBase,
 						probabilitiesBase);
 					attributesBase += dataSize;
 					thresholdsBase += dataSize;
@@ -219,9 +214,8 @@ class CpuRandomForestCore {
 	 * 	right, then left.)
 	 * @param depth
 	 * 	depth of {@code node}.
-	 * @param maxDepth
-	 * 	maximum depth of any node in the current tree (the tree that
-	 *    {@code node} belongs to).
+	 * @param height
+	 * 	height of the tree.
 	 * @param treeDataBase
 	 * 	offset into attributes[], thresholds[] where the current tree is
 	 * 	placed.
@@ -229,16 +223,16 @@ class CpuRandomForestCore {
 	 * 	offset into probabilities[] where the current tree is placed.
 	 */
 	private void write(final TransparentRandomTree node, final int nodeIndex,
-		final int branchBits, final int depth, final int maxDepth,
+		final int branchBits, final int depth, final int height,
 		final int treeDataBase, final int treeProbBase)
 	{
 		if (node.isLeaf()) {
 			final int b;
-			if (depth <= maxDepth) {
+			if (depth < height) {
 				// mark as leaf by setting attribute index to -1
 				final int o = treeDataBase + nodeIndex;
 				attributes[o] = -1;
-				b = branchBits << (1 + maxDepth - depth);
+				b = branchBits << (height - depth);
 			}
 			else b = branchBits;
 			final int o = treeProbBase + b * numClasses;
@@ -254,9 +248,9 @@ class CpuRandomForestCore {
 
 			// recursively write children
 			write(node.smallerChild(), 2 * nodeIndex + 1, (branchBits << 1),
-				depth + 1, maxDepth, treeDataBase, treeProbBase);
+				depth + 1, height, treeDataBase, treeProbBase);
 			write(node.biggerChild(), 2 * nodeIndex + 2, (branchBits << 1) + 1,
-				depth + 1, maxDepth, treeDataBase, treeProbBase);
+				depth + 1, height, treeDataBase, treeProbBase);
 		}
 	}
 
@@ -365,13 +359,13 @@ class CpuRandomForestCore {
 			distribution[i] = prior[i];
 		int attributesBase = 0;
 		int probabilitiesBase = 0;
-		int depth = 0;
-		for (; depth < numTreesOfHeight.length &&
-			depth < COMPACT_STORAGE_MIN_HEIGHT - 1; depth++) {
-			final int nh = numTreesOfHeight[depth];
+		int height = 1;
+		for (; height < numTreesOfHeight.length &&
+			height < COMPACT_STORAGE_MIN_HEIGHT; height++) {
+			final int nh = numTreesOfHeight[height];
 			if (nh == 0) continue;
 
-			if (depth == 0) // special case for trees of height 1
+			if (height == 1) // special case for trees of height 1
 			{
 				final int dataSize = 1;
 				final int probSize = 2 * numClasses;
@@ -384,7 +378,7 @@ class CpuRandomForestCore {
 					probabilitiesBase += probSize;
 				}
 			}
-			else if (depth == 1) // special case for trees of height 2
+			else if (height == 2) // special case for trees of height 2
 			{
 				final int dataSize = 3;
 				final int probSize = 4 * numClasses;
@@ -397,7 +391,7 @@ class CpuRandomForestCore {
 					probabilitiesBase += probSize;
 				}
 			}
-			else if (depth == 2) // special case for trees of height 3
+			else if (height == 3) // special case for trees of height 3
 			{
 				final int dataSize = 7;
 				final int probSize = 8 * numClasses;
@@ -412,12 +406,12 @@ class CpuRandomForestCore {
 			}
 			else // general case
 			{
-				final int numLeafs = 2 << depth;
+				final int numLeafs = 1 << height;
 				final int dataSize = numLeafs - 1;
 				final int probSize = numLeafs * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
 					final int branchBits =
-						evaluateTree(instance, attributesBase, depth);
+						evaluateTree(instance, attributesBase, height);
 					acc(distribution, numClasses, probabilitiesBase,
 						branchBits * numClasses);
 					attributesBase += dataSize;
@@ -427,8 +421,8 @@ class CpuRandomForestCore {
 		}
 
 		int thresholdsBase = attributesBase;
-		for (; depth < numTreesOfHeight.length; depth++) {
-			final int nh = numTreesOfHeight[depth];
+		for (; height < numTreesOfHeight.length; height++) {
+			final int nh = numTreesOfHeight[height];
 			if (nh == 0) continue;
 
 			for (int tree = 0; tree < nh; ++tree) {
@@ -472,13 +466,13 @@ class CpuRandomForestCore {
 		float c0 = prior[ 0 ], c1 = prior[ 1 ];
 		int attributesBase = 0;
 		int probabilitiesBase = 0;
-		int depth = 0;
-		for (; depth < numTreesOfHeight.length &&
-			depth < COMPACT_STORAGE_MIN_HEIGHT - 1; depth++) {
-			final int nh = numTreesOfHeight[depth];
+		int height = 1;
+		for (; height < numTreesOfHeight.length &&
+			height < COMPACT_STORAGE_MIN_HEIGHT; height++) {
+			final int nh = numTreesOfHeight[height];
 			if (nh == 0) continue;
 
-			if (depth == 0) // special case for trees of height 1
+			if (height == 1) // special case for trees of height 1
 			{
 				final int dataSize = 1;
 				final int probSize = 2 * numClasses;
@@ -493,7 +487,7 @@ class CpuRandomForestCore {
 					probabilitiesBase += probSize;
 				}
 			}
-			else if (depth == 1) // special case for trees of height 2
+			else if (height == 2) // special case for trees of height 2
 			{
 				final int dataSize = 3;
 				final int probSize = 4 * numClasses;
@@ -508,7 +502,7 @@ class CpuRandomForestCore {
 					probabilitiesBase += probSize;
 				}
 			}
-			else if (depth == 2) // special case for trees of height 3
+			else if (height == 3) // special case for trees of height 3
 			{
 				final int dataSize = 7;
 				final int probSize = 8 * numClasses;
@@ -525,12 +519,12 @@ class CpuRandomForestCore {
 			}
 			else // general case
 			{
-				final int numLeafs = 2 << depth;
+				final int numLeafs = 1 << height;
 				final int dataSize = numLeafs - 1;
 				final int probSize = numLeafs * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
 					final int branchBits =
-						evaluateTree(instance, attributesBase, depth);
+						evaluateTree(instance, attributesBase, height);
 					c0 += probabilities[probabilitiesBase +
 						branchBits * numClasses];
 					c1 += probabilities[probabilitiesBase +
@@ -542,8 +536,8 @@ class CpuRandomForestCore {
 		}
 
 		int thresholdsBase = attributesBase;
-		for (; depth < numTreesOfHeight.length; depth++) {
-			final int nh = numTreesOfHeight[depth];
+		for (; height < numTreesOfHeight.length; height++) {
+			final int nh = numTreesOfHeight[height];
 			if (nh == 0) continue;
 
 			for (int tree = 0; tree < nh; ++tree) {
@@ -584,13 +578,13 @@ class CpuRandomForestCore {
 		final int numClasses = 3;
 		int attributesBase = 0;
 		int probabilitiesBase = 0;
-		int depth = 0;
-		for (; depth < numTreesOfHeight.length &&
-			depth < COMPACT_STORAGE_MIN_HEIGHT - 1; depth++) {
-			final int nh = numTreesOfHeight[depth];
+		int height = 1;
+		for (; height < numTreesOfHeight.length &&
+			height < COMPACT_STORAGE_MIN_HEIGHT; height++) {
+			final int nh = numTreesOfHeight[height];
 			if (nh == 0) continue;
 
-			if (depth == 0) // special case for trees of height 1
+			if (height == 1) // special case for trees of height 1
 			{
 				final int dataSize = 1;
 				final int probSize = 2 * numClasses;
@@ -607,7 +601,7 @@ class CpuRandomForestCore {
 					probabilitiesBase += probSize;
 				}
 			}
-			else if (depth == 1) // special case for trees of height 2
+			else if (height == 2) // special case for trees of height 2
 			{
 				final int dataSize = 3;
 				final int probSize = 4 * numClasses;
@@ -624,7 +618,7 @@ class CpuRandomForestCore {
 					probabilitiesBase += probSize;
 				}
 			}
-			else if (depth == 2) // special case for trees of height 3
+			else if (height == 3) // special case for trees of height 3
 			{
 				final int dataSize = 7;
 				final int probSize = 8 * numClasses;
@@ -643,12 +637,12 @@ class CpuRandomForestCore {
 			}
 			else // general case
 			{
-				final int numLeafs = 2 << depth;
+				final int numLeafs = 1 << height;
 				final int dataSize = numLeafs - 1;
 				final int probSize = numLeafs * numClasses;
 				for (int tree = 0; tree < nh; ++tree) {
 					final int branchBits =
-						evaluateTree(instance, attributesBase, depth);
+						evaluateTree(instance, attributesBase, height);
 					c0 += probabilities[probabilitiesBase +
 						branchBits * numClasses];
 					c1 += probabilities[probabilitiesBase +
@@ -662,8 +656,8 @@ class CpuRandomForestCore {
 		}
 
 		int thresholdsBase = attributesBase;
-		for (; depth < numTreesOfHeight.length; depth++) {
-			final int nh = numTreesOfHeight[depth];
+		for (; height < numTreesOfHeight.length; height++) {
+			final int nh = numTreesOfHeight[height];
 			if (nh == 0) continue;
 
 			for (int tree = 0; tree < nh; ++tree) {
@@ -703,22 +697,22 @@ class CpuRandomForestCore {
 	 * 	feature vector to evaluate the tree on.
 	 * @param dataBase
 	 * 	offset into attributes[], thresholds[] where the tree is placed.
-	 * @param maxDepth
-	 * 	maximum depth of any node in the tree.
+	 * @param height
+	 * 	height of the tree.
 	 *
 	 * @return leaf index at maxDepth after evaluating the instance.
 	 * (This can be multiplied by {@code numClasses} to get the index
 	 * into leaf probabilities[] relative to start offset of the tree.)
 	 */
 	private int evaluateTree(final float[] instance, final int dataBase,
-		final int maxDepth)
+		final int height)
 	{
 		int branchBits = 0;
-		for (int nodeIndex = 0, depth = 0; depth <= maxDepth; ++depth) {
+		for (int nodeIndex = 0, depth = 0; depth < height; ++depth) {
 			final int o = dataBase + nodeIndex;
 			final int attributeIndex = attributes[o];
 			if (attributeIndex < 0) {
-				branchBits = branchBits << (1 + maxDepth - depth);
+				branchBits = branchBits << (height - depth);
 				break;
 			}
 			else {
@@ -842,18 +836,18 @@ class CpuRandomForestCore {
 			distribution[i] = prior[i];
 		int attributesBase = 0;
 		int probabilitiesBase = 0;
-		int depth = 0;
-		for (; depth < numTreesOfHeight.length &&
-			depth < COMPACT_STORAGE_MIN_HEIGHT - 1; depth++) {
-			final int nh = numTreesOfHeight[depth];
+		int height = 1;
+		for (; height < numTreesOfHeight.length &&
+			height < COMPACT_STORAGE_MIN_HEIGHT; height++) {
+			final int nh = numTreesOfHeight[height];
 			if (nh == 0) continue;
 
-			final int numLeafs = 2 << depth;
+			final int numLeafs = 1 << height;
 			final int dataSize = numLeafs - 1;
 			final int probSize = numLeafs * numClasses;
 			for (int tree = 0; tree < nh; ++tree) {
 				final int branchBits =
-					evaluateTree(instance, attributesBase, depth);
+					evaluateTree(instance, attributesBase, height);
 				for (int k = 0; k < numClasses; k++)
 					distribution[k] += probabilities[probabilitiesBase +
 						branchBits * numClasses + k];
@@ -862,8 +856,8 @@ class CpuRandomForestCore {
 			}
 		}
 		int thresholdsBase = attributesBase;
-		for (; depth < numTreesOfHeight.length; depth++) {
-			final int nh = numTreesOfHeight[depth];
+		for (; height < numTreesOfHeight.length; height++) {
+			final int nh = numTreesOfHeight[height];
 			if (nh == 0) continue;
 
 			for (int tree = 0; tree < nh; ++tree) {
