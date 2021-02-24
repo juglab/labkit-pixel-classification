@@ -3,20 +3,14 @@ package net.imglib2.trainable_segmentation.gpu.random_forest;
 
 import hr.irb.fastRandomForest.FastRandomForest;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
 import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
-import net.imglib2.trainable_segmentation.utils.views.FastViews;
-import net.imglib2.type.numeric.IntegerType;
-import net.imglib2.type.numeric.RealType;
+import net.imglib2.trainable_segmentation.random_forest.TransparentRandomForest;
+import net.imglib2.trainable_segmentation.utils.ArrayUtils;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.StopWatch;
-import net.imglib2.view.Views;
-import net.imglib2.view.composite.Composite;
-import preview.net.imglib2.loops.LoopBuilder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +26,7 @@ import java.util.stream.Collectors;
  * <p>
  * The code can run on CPU or GPU.
  */
-public class RandomForestPrediction {
+public class GpuRandomForestPrediction {
 
 	private final int numberOfClasses;
 
@@ -50,9 +44,11 @@ public class RandomForestPrediction {
 
 	private final float[] leafProbabilities;
 
-	public RandomForestPrediction(FastRandomForest classifier, int numberOfFeatures) {
-		TransparentRandomForest forest = new TransparentRandomForest(classifier);
-		List<RandomTreePrediction> trees = forest.trees().stream().map(RandomTreePrediction::new)
+	public GpuRandomForestPrediction(FastRandomForest classifier, int numberOfFeatures) {
+		TransparentRandomForest forest =
+				TransparentRandomForest.forFastRandomForest(classifier);
+		List< GpuRandomTreePrediction > trees = forest.trees().stream().map(
+				GpuRandomTreePrediction::new)
 			.collect(Collectors.toList());
 		this.numberOfClasses = forest.numberOfClasses();
 		this.numberOfFeatures = numberOfFeatures;
@@ -63,7 +59,7 @@ public class RandomForestPrediction {
 		this.nodeThresholds = new float[numberOfTrees * numberOfNodes];
 		this.leafProbabilities = new float[numberOfTrees * numberOfLeafs * numberOfClasses];
 		for (int j = 0; j < numberOfTrees; j++) {
-			RandomTreePrediction tree = trees.get(j);
+			GpuRandomTreePrediction tree = trees.get(j);
 			for (int i = 0; i < tree.numberOfNodes; i++) {
 				nodeIndices[(j * numberOfNodes + i) * 3] = (short) tree.attributeIndicies[i];
 				nodeIndices[(j * numberOfNodes + i) * 3 + 1] = (short) tree.smallerChild[i];
@@ -128,64 +124,6 @@ public class RandomForestPrediction {
 			GpuRandomForestKernel.findMax(scope, distribution, output);
 			return output;
 		}
-	}
-
-	/**
-	 * Applies the random forest to each pixel in the feature stack. Write the index
-	 * of the class with the highest probability into the output image.
-	 * 
-	 * @param featureStack Input image. Axis order should be XYZC of XYC. Number of
-	 *          channels must equal {@link #numberOfFeatures()}.
-	 * @param out Output image. Axis order should be XYZ or XY. Pixel values will be
-	 *          between 0 and {@link #numberOfClasses()} - 1.
-	 */
-	public void segment(RandomAccessibleInterval<FloatType> featureStack,
-		RandomAccessibleInterval<? extends IntegerType<?>> out)
-	{
-		LoopBuilder.setImages(FastViews.collapse(featureStack), out).forEachChunk(chunk -> {
-			float[] features = new float[numberOfFeatures];
-			float[] probabilities = new float[numberOfClasses];
-			chunk.forEachPixel((featureVector, classIndex) -> {
-				copyFromTo(featureVector, features);
-				distributionForInstance(features, probabilities);
-				classIndex.setInteger(ArrayUtils.findMax(probabilities));
-			});
-			return null;
-		});
-	}
-
-	/**
-	 * Applies the random forest for each pixel in the feature stack. Writes the
-	 * class probabilities into the output image.
-	 * 
-	 * @param featureStack Image with axis order XYZC or XYC. Where the channel axes
-	 *          length equals {@link #numberOfFeatures()}.
-	 * @param out Output image axis order must match the input image. Channel axes
-	 *          length must equal {@link #numberOfClasses()}.
-	 */
-	public void distribution(RandomAccessibleInterval<FloatType> featureStack,
-		RandomAccessibleInterval<? extends RealType<?>> out)
-	{
-		LoopBuilder.setImages(FastViews.collapse(featureStack), FastViews.collapse(out)).forEachChunk(chunk -> {
-			float[] features = new float[numberOfFeatures];
-			float[] probabilities = new float[numberOfClasses];
-			chunk.forEachPixel((featureVector, probabilityVector) -> {
-				copyFromTo(featureVector, features);
-				distributionForInstance(features, probabilities);
-				copyFromTo(probabilities, probabilityVector);
-			});
-			return null;
-		});
-	}
-
-	private static void copyFromTo(Composite<FloatType> input, float[] output) {
-		for (int i = 0, len = output.length; i < len; i++)
-			output[i] = input.get(i).getRealFloat();
-	}
-
-	private static void copyFromTo(float[] input, Composite<? extends RealType<?>> output) {
-		for (int i = 0, len = input.length; i < len; i++)
-			output.get(i).setReal(input[i]);
 	}
 
 	/**

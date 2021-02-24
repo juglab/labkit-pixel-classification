@@ -1,8 +1,8 @@
 
-package net.imglib2.trainable_segmentation.gpu.random_forest;
+package net.imglib2.trainable_segmentation.random_forest;
 
 import hr.irb.fastRandomForest.FastRandomForest;
-import net.imglib2.util.Cast;
+import net.imglib2.trainable_segmentation.utils.ArrayUtils;
 import weka.core.Instance;
 
 import java.util.Collections;
@@ -21,8 +21,14 @@ public class TransparentRandomForest {
 
 	private final List<TransparentRandomTree> trees;
 
-	public TransparentRandomForest(FastRandomForest original) {
-		this.trees = initTrees(original);
+	public TransparentRandomForest(List< TransparentRandomTree > trees) {
+		this.trees = trees;
+	}
+
+	public static TransparentRandomForest forFastRandomForest(
+			FastRandomForest original)
+	{
+		return new TransparentRandomForest(initTrees(original));
 	}
 
 	private static List<TransparentRandomTree> initTrees(FastRandomForest original) {
@@ -32,8 +38,8 @@ public class TransparentRandomForest {
 			return Collections.emptyList();
 		// NB: Type of trees is hr.irb.fastRandomForest.FastRandomTree
 		Object[] trees = ReflectionUtils.getPrivateField(bagger, "m_Classifiers", Object[].class);
-		return Collections.unmodifiableList(Stream.of(trees).map(TransparentRandomTree::new).collect(
-			Collectors.toList()));
+		return Collections.unmodifiableList(Stream.of(trees).map(TransparentRandomTree::forFastRandomTree).collect(
+				Collectors.toList()));
 	}
 
 	public List<TransparentRandomTree> trees() {

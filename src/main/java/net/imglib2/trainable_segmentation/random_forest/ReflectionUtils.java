@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.gpu.random_forest;
+package net.imglib2.trainable_segmentation.random_forest;
 
 import net.imglib2.util.Cast;
 
