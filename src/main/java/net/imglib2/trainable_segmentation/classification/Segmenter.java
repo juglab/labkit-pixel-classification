@@ -13,7 +13,7 @@ import net.imglib2.*;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.trainable_segmentation.gpu.api.GpuCopy;
 import net.imglib2.trainable_segmentation.gpu.api.GpuPool;
-import net.imglib2.trainable_segmentation.gpu.random_forest.CpuRandomForestPrediction;
+import net.imglib2.trainable_segmentation.random_forest.CpuRandomForestPrediction;
 import net.imglib2.trainable_segmentation.gpu.random_forest.GpuRandomForestPrediction;
 import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSettings;

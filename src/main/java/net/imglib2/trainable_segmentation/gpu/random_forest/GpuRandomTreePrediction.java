@@ -1,6 +1,7 @@
 
 package net.imglib2.trainable_segmentation.gpu.random_forest;
 
+import net.imglib2.trainable_segmentation.random_forest.TransparentRandomTree;
 import weka.core.Instance;
 
 public class GpuRandomTreePrediction {

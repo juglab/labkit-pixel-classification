@@ -1,7 +1,7 @@
 
-package net.imglib2.trainable_segmentation.gpu.random_forest;
+package net.imglib2.trainable_segmentation.utils;
 
-class ArrayUtils {
+public class ArrayUtils {
 
 	private ArrayUtils() {
 		// prevent from instantiation
@@ -71,5 +71,11 @@ class ArrayUtils {
 		for (float value : values)
 			sum += value;
 		return sum;
+	}
+
+	public static float[] toFloats(double[] values) {
+		float[] result = new float[values.length];
+		for (int i = 0; i < result.length; i++) result[i] = (float) values[i];
+		return result;
 	}
 }

@@ -1,8 +1,8 @@
 
-package net.imglib2.trainable_segmentation.gpu.random_forest;
+package net.imglib2.trainable_segmentation.random_forest;
 
 import hr.irb.fastRandomForest.FastRandomForest;
-import net.imglib2.util.Cast;
+import net.imglib2.trainable_segmentation.utils.ArrayUtils;
 import weka.core.Instance;
 
 import java.util.Collections;

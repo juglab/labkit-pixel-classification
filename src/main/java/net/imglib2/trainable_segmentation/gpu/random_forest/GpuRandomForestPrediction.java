@@ -7,6 +7,8 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
 import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
+import net.imglib2.trainable_segmentation.random_forest.TransparentRandomForest;
+import net.imglib2.trainable_segmentation.utils.ArrayUtils;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 
@@ -42,8 +44,6 @@ public class GpuRandomForestPrediction {
 
 	private final float[] leafProbabilities;
 
-	private final CpuRandomForestCore rfPrediction;
-
 	public GpuRandomForestPrediction(FastRandomForest classifier, int numberOfFeatures) {
 		TransparentRandomForest forest =
 				TransparentRandomForest.forFastRandomForest(classifier);
@@ -71,7 +71,6 @@ public class GpuRandomForestPrediction {
 					leafProbabilities[(j * numberOfLeafs + i) * numberOfClasses + k] =
 						(float) tree.classProbabilities[i][k];
 		}
-		rfPrediction = new CpuRandomForestCore(forest);
 	}
 
 	public int numberOfClasses() {

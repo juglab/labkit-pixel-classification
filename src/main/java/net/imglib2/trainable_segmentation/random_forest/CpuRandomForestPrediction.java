@@ -1,7 +1,8 @@
-package net.imglib2.trainable_segmentation.gpu.random_forest;
+package net.imglib2.trainable_segmentation.random_forest;
 
 import hr.irb.fastRandomForest.FastRandomForest;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.trainable_segmentation.utils.ArrayUtils;
 import net.imglib2.trainable_segmentation.utils.views.FastViews;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;

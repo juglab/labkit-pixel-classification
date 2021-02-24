@@ -1,4 +1,4 @@
-package net.imglib2.trainable_segmentation.gpu.random_forest;
+package net.imglib2.trainable_segmentation.random_forest;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import hr.irb.fastRandomForest.FastRandomForest;
+import net.imglib2.trainable_segmentation.utils.ArrayUtils;
 
 class CpuRandomForestCore {
 

@@ -1,4 +1,4 @@
-package net.imglib2.trainable_segmentation.gpu.random_forest;
+package net.imglib2.trainable_segmentation.random_forest;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import hr.irb.fastRandomForest.FastRandomForest;
+import net.imglib2.trainable_segmentation.utils.ArrayUtils;
 import org.junit.Test;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -19,16 +20,17 @@ import static org.junit.Assert.assertArrayEquals;
  * Tests {@link CpuRandomForestCore} by comparing the results to
  * {@link FastRandomForest} on randomly generated datasets.
  */
-public class CpuRandomForestPredictionTest {
+public class CpuRandomForestCoreTest {
 
 	private final Random random = new Random(42);
 
 	@Test
 	public void testLeafOnlyTree() {
+		// Random forest implementations tend to fail for trees that consist
+		// of only one leaf. That's why we test it separately.
 		TransparentRandomTree tree = TransparentRandomTree.leaf(new double[] { 0.1, 0.9 });
 		TransparentRandomForest forest = new TransparentRandomForest( Collections.singletonList(tree));
-		CpuRandomForestCore
-				prediction = new CpuRandomForestCore(forest);
+		CpuRandomForestCore prediction = new CpuRandomForestCore(forest);
 		float[] distribution = new float[2];
 		prediction.distributionForInstance(new float[1], distribution);
 		assertArrayEquals(new float[]{ 0.1f, 0.9f }, distribution, 0);
@@ -53,30 +55,26 @@ public class CpuRandomForestPredictionTest {
 	}
 
 	public void trainAndCompareRandomForests(int numberOfClasses) throws Exception {
-		// test a random forest with small trees (tree depth <= 2)
+		// test a random forest with small trees (tree depth roughly 0 and 1)
 		trainAndCompareRandomForests(10, numberOfClasses, 4);
-		// test a random forest with moderate trees (tree depth roughly 4)
+		// test a random forest with moderate trees (tree depth roughly 2, 3, 4, 5)
 		trainAndCompareRandomForests(10, numberOfClasses, 16);
-		// tess a random forest with big trees (tree depth > 6 up to 10)
+		// tess a random forest with big trees (tree depth roughly 5 to 10 to)
 		trainAndCompareRandomForests(10, numberOfClasses, 64);
 	}
 
 	/**
-	 * Train {@link FastRandomForest} on a randomly generated dataset.
-	 * Apply it on a different randomly generated dataset and compare the
-	 * resulting class distributions to the distributions calculated by
-	 * {@link CpuRandomForestCore}.
+	 * Train {@link FastRandomForest} on a randomly generated training dataset.
+	 * Apply it on a different randomly generated test dataset and compare the
+	 * results to the distributions calculated by {@link CpuRandomForestCore}.
 	 */
 	private void trainAndCompareRandomForests(int numberOfFeatures, int numberOfClasses, int numberOfInstances)
 			throws Exception
 	{
-		Instances trainingDataset = randomDataset(numberOfFeatures,
-				numberOfClasses, numberOfInstances);
+		Instances trainingDataset = randomDataset(numberOfFeatures, numberOfClasses, numberOfInstances);
 		Instances testDataset = randomDataset(numberOfFeatures, numberOfClasses, 100);
 		FastRandomForest fastRf = trainFastRandomForest(trainingDataset);
-		showTreeHeights(fastRf);
-		CpuRandomForestCore
-				cpuRf = new CpuRandomForestCore(fastRf);
+		CpuRandomForestCore cpuRf = new CpuRandomForestCore(fastRf);
 		compareRandomForests(testDataset, fastRf, cpuRf);
 	}
 
@@ -102,28 +100,16 @@ public class CpuRandomForestPredictionTest {
 		return rf;
 	}
 
-	private void showTreeHeights(FastRandomForest rf) {
-		TransparentRandomForest forest =
-				TransparentRandomForest.forFastRandomForest(rf);
-		System.out.println(forest.trees().stream().map(TransparentRandomTree::height).collect(Collectors.toSet()));
-	}
-
 	private void compareRandomForests(Instances data, FastRandomForest fastRf,
 			CpuRandomForestCore cpuRf) throws Exception
 	{
 		for (Instance instance : data) {
-			float[] expected = toFloats(fastRf.distributionForInstance(instance));
+			float[] expected = ArrayUtils.toFloats(fastRf.distributionForInstance(instance));
 			float[] distribution = new float[cpuRf.numberOfClasses()];
-			float[] featureVector = toFloats(instance.toDoubleArray());
+			float[] featureVector = ArrayUtils.toFloats(instance.toDoubleArray());
 			cpuRf.distributionForInstance(featureVector, distribution);
 			assertArrayEquals(expected, distribution, 1e-6f);
 		}
-	}
-
-	private float[] toFloats(double[] values) {
-		float[] result = new float[values.length];
-		for (int i = 0; i < result.length; i++) result[i] = (float) values[i];
-		return result;
 	}
 
 	private Instances emptyDataset(int numberOfFeatures, int numberOfClasses) {
