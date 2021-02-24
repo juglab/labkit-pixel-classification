@@ -73,7 +73,7 @@ public class FeatureInput {
 
 	private RandomAccessibleInterval<DoubleType> calculateGauss(double sigma) {
 		final RandomAccessibleInterval<DoubleType> result = create(Intervals.expand(target, 2));
-		if(sigma == 0)
+		if (sigma == 0)
 			RealTypeConverters.copyFromTo(original, result);
 		else
 			Gauss3.gauss(scaledSigmas(sigma), (RandomAccessible) original, result);

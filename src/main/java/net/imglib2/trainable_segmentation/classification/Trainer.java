@@ -67,7 +67,7 @@ public class Trainer {
 
 	public void trainLabeledImage(RandomAccessibleInterval<?> image, LabelRegions<?> labeling) {
 		RandomAccessible<Composite<FloatType>> featureStack = FastViews
-				.collapse(features.apply(image));
+			.collapse(features.apply(image));
 		trainLabeledFeatures(featureStack, labeling);
 	}
 

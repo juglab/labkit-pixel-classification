@@ -132,8 +132,8 @@ public class Segmenter {
 		RandomAccessibleInterval<? extends IntegerType<?>> out)
 	{
 		try (GpuApi scope = GpuPool.borrowGpu()) {
-			GpuRandomForestPrediction
-					prediction = new GpuRandomForestPrediction(Cast.unchecked(classifier),
+			GpuRandomForestPrediction prediction = new GpuRandomForestPrediction(Cast.unchecked(
+				classifier),
 				features.count());
 			GpuImage featureStack = features.applyUseGpu(scope, image, out);
 			GpuImage segmentationBuffer = prediction.segment(scope, featureStack);

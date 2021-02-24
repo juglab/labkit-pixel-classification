@@ -78,12 +78,12 @@ public class SingleHessianEigenvaluesFeature extends AbstractFeatureOp {
 	}
 
 	private void apply3d(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
-		RandomAccessibleInterval< DoubleType > a11 = input.derivedGauss(sigma, 2, 0, 0);
-		RandomAccessibleInterval< DoubleType > a12 = input.derivedGauss(sigma, 1, 1, 0);
-		RandomAccessibleInterval< DoubleType > a13 = input.derivedGauss(sigma, 1, 0, 1);
-		RandomAccessibleInterval< DoubleType > a22 = input.derivedGauss(sigma, 0, 2, 0);
-		RandomAccessibleInterval< DoubleType > a23 = input.derivedGauss(sigma, 0, 1, 1);
-		RandomAccessibleInterval< DoubleType > a33 = input.derivedGauss(sigma, 0, 0, 2);
+		RandomAccessibleInterval<DoubleType> a11 = input.derivedGauss(sigma, 2, 0, 0);
+		RandomAccessibleInterval<DoubleType> a12 = input.derivedGauss(sigma, 1, 1, 0);
+		RandomAccessibleInterval<DoubleType> a13 = input.derivedGauss(sigma, 1, 0, 1);
+		RandomAccessibleInterval<DoubleType> a22 = input.derivedGauss(sigma, 0, 2, 0);
+		RandomAccessibleInterval<DoubleType> a23 = input.derivedGauss(sigma, 0, 1, 1);
+		RandomAccessibleInterval<DoubleType> a33 = input.derivedGauss(sigma, 0, 0, 2);
 		EigenValuesSymmetric3D.calc(a11, a12, a13, a22, a23, a33, output);
 	}
 

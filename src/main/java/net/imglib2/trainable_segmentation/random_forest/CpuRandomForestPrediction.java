@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmentation.random_forest;
 
 import hr.irb.fastRandomForest.FastRandomForest;
@@ -30,8 +31,8 @@ public class CpuRandomForestPrediction {
 	 * @param out Output image. Axis order should be XYZ or XY. Pixel values will be
 	 *          between 0 and {@link #numberOfClasses()} - 1.
 	 */
-	public void segment(RandomAccessibleInterval< FloatType > featureStack,
-			RandomAccessibleInterval<? extends IntegerType<?> > out)
+	public void segment(RandomAccessibleInterval<FloatType> featureStack,
+		RandomAccessibleInterval<? extends IntegerType<?>> out)
 	{
 		LoopBuilder.setImages(FastViews.collapse(featureStack), out).forEachChunk(chunk -> {
 			float[] features = new float[numberOfFeatures];
@@ -55,18 +56,19 @@ public class CpuRandomForestPrediction {
 	 *          length must equal {@link #numberOfClasses()}.
 	 */
 	public void distribution(RandomAccessibleInterval<FloatType> featureStack,
-			RandomAccessibleInterval<? extends RealType<?> > out)
+		RandomAccessibleInterval<? extends RealType<?>> out)
 	{
-		LoopBuilder.setImages(FastViews.collapse(featureStack), FastViews.collapse(out)).forEachChunk(chunk -> {
-			float[] features = new float[numberOfFeatures];
-			float[] probabilities = new float[numberOfClasses()];
-			chunk.forEachPixel((featureVector, probabilityVector) -> {
-				copyFromTo(featureVector, features);
-				core.distributionForInstance(features, probabilities);
-				copyFromTo(probabilities, probabilityVector);
+		LoopBuilder.setImages(FastViews.collapse(featureStack), FastViews.collapse(out)).forEachChunk(
+			chunk -> {
+				float[] features = new float[numberOfFeatures];
+				float[] probabilities = new float[numberOfClasses()];
+				chunk.forEachPixel((featureVector, probabilityVector) -> {
+					copyFromTo(featureVector, features);
+					core.distributionForInstance(features, probabilities);
+					copyFromTo(probabilities, probabilityVector);
+				});
+				return null;
 			});
-			return null;
-		});
 	}
 
 	private static void copyFromTo(Composite<FloatType> input, float[] output) {

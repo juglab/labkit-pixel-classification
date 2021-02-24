@@ -1,3 +1,4 @@
+
 package net.imglib2.trainable_segmentation.random_forest;
 
 import java.util.ArrayList;
@@ -18,51 +19,51 @@ class CpuRandomForestCore {
 	/*
 	The random forest is encoded in the following attributes[], thresholds[],
 	and probabilities[] arrays.
-
+	
 	Trees are ordered by height. So first all trees of height 1 are put into the
 	arrays, then height 2, etc. There are two modes of encoding trees:
 	"expanded" and "compact". The COMPRESSED_STORAGE_MIN_HEIGHT constant defines
 	at which tree height to switch over to the "compact" storage scheme.
-
+	
 	Expanded Storage:
 	-----------------
-
+	
 	Trees are "flattened out" to full binary trees of their respective height.
 	For a tree of height h, space for 2^h-1 internal nodes is allocated in
 	attributes[] and thresholds[], and space for 2^h leaf nodes is allocated in
 	probabilities.
-
+	
 	For an internal tree node i, attributes[i] and thresholds[i] are the index
 	of the attribute to select and the threshold to compare it with. If the
 	attribute is smaller than the the threshold go to the left child, otherwise
 	go to the right child. The left child of node i is at 2*i+1. The right child
 	of node i is at 2*i+2.
-
+	
 	At the leafs at maximum depth of the tree, no attributes[] and thresholds[]
 	space is required, instead probabilities[] contains the leaf probabilities.
-
+	
 	A value attribute[i] < 0 signifies that this branch of the tree terminates
 	at node i (early, i is not at full depth). In this case, the leaf
 	probabilities are stored at the position we would reach by always going to
 	the left child until we reach full depth.
-
+	
 	Trees are ordered by height. So first all trees of height 1 are put into the
 	arrays, then height 2, etc.
-
+	
 	For the first few heights there are special case implementations for
 	evaluating the tree. For example, for a tree of height 1 we know that it
 	always has exactly one attribute comparison that directly results in either
 	of two leaf probability slots.
-
+	
 	Also for accumulating leaf probabilities there are special case
 	implementations for 2 classes and 3 classes.
-
+	
 	See generic_distributionForInstance() for the "simple" version without
 	special cases.
-
+	
 	Compact Storage:
 	-----------------
-
+	
 	For the "compact" scheme, the attributes[] array stores also node indices.
 	Only internal tree nodes are stored. Each node takes up 3 attributes[]
 	slots. For node i, attributes[3*i] and thresholds[i] are the index of the
@@ -71,16 +72,16 @@ class CpuRandomForestCore {
 	right child. The index of the left child node is stored at
 	attributes[3*i+1], the index of the right child node is stored at
 	attributes[3*i+2].
-
+	
 	If the left (or right) child is a leaf, instead of a node index,
 	attributes[3*i+1] (or attributes[3*i+2]) contains the starting index of the
 	leaf respective probabilities. To distinguish the leaf case, starting indices
 	are stored as negative numbers (i+Integer.MIN_VALUE)
-
+	
 	Additionally, before the attributes[] entries of each tree there are two
 	entries containing the number of nodes and number of leafs probability slots
 	for the tree.
-
+	
 	For accumulating leaf probabilities there are again special case
 	implementations for 2 classes and 3 classes.
 	*/
@@ -92,20 +93,18 @@ class CpuRandomForestCore {
 	private final int numClasses;
 
 	/**
-	 * The value at index i is the number of trees of height i+1.
-	 * (The length of the array is the maximum height of any tree in the forest.)
+	 * The value at index i is the number of trees of height i+1. (The length of the
+	 * array is the maximum height of any tree in the forest.)
 	 */
 	private final int[] numTreesOfHeight;
 
 	private final float[] prior;
 
-	public CpuRandomForestCore(final FastRandomForest classifier)
-	{
+	public CpuRandomForestCore(final FastRandomForest classifier) {
 		this(TransparentRandomForest.forFastRandomForest(classifier));
 	}
 
-	public CpuRandomForestCore(final TransparentRandomForest forest)
-	{
+	public CpuRandomForestCore(final TransparentRandomForest forest) {
 		numClasses = forest.numberOfClasses();
 		prior = new float[numClasses];
 
@@ -116,8 +115,8 @@ class CpuRandomForestCore {
 				.add(tree);
 
 		final int[] heights =
-				treesByHeight.keySet().stream().mapToInt(Integer::intValue).sorted()
-						.toArray();
+			treesByHeight.keySet().stream().mapToInt(Integer::intValue).sorted()
+				.toArray();
 
 		final int maxHeight =
 			heights.length == 0 ? 0 : heights[heights.length - 1];
@@ -170,7 +169,8 @@ class CpuRandomForestCore {
 					for (int i = 0; i < numClasses; ++i)
 						prior[i] += (float) tree.classProbabilities()[i];
 				}
-			} else if (height < COMPACT_STORAGE_MIN_HEIGHT) {
+			}
+			else if (height < COMPACT_STORAGE_MIN_HEIGHT) {
 				final int numLeafs = 1 << height;
 				final int numNonLeafs = numLeafs - 1;
 				final int dataSize = numNonLeafs;
@@ -200,27 +200,21 @@ class CpuRandomForestCore {
 	}
 
 	/**
-	 * Serialize a node into the attributes, thresholds, and probabilities
-	 * arrays. This implements the "Expanded Storage" scheme.
+	 * Serialize a node into the attributes, thresholds, and probabilities arrays.
+	 * This implements the "Expanded Storage" scheme.
 	 *
-	 * @param node
-	 * 	a tree node.
-	 * @param nodeIndex
-	 * 	flattened index of {@code node}. (Children of node i are at 2*i+1 and
-	 * 	2*i+2).
-	 * @param branchBits
-	 * 	path through the tree to this node. (The {@depth} least significant
-	 * 	bits are the branches, e.g., "010" says: from the root go left, then
-	 * 	right, then left.)
-	 * @param depth
-	 * 	depth of {@code node}.
-	 * @param height
-	 * 	height of the tree.
-	 * @param treeDataBase
-	 * 	offset into attributes[], thresholds[] where the current tree is
-	 * 	placed.
-	 * @param treeProbBase
-	 * 	offset into probabilities[] where the current tree is placed.
+	 * @param node a tree node.
+	 * @param nodeIndex flattened index of {@code node}. (Children of node i are at
+	 *          2*i+1 and 2*i+2).
+	 * @param branchBits path through the tree to this node. (The {@depth} least
+	 *          significant bits are the branches, e.g., "010" says: from the root
+	 *          go left, then right, then left.)
+	 * @param depth depth of {@code node}.
+	 * @param height height of the tree.
+	 * @param treeDataBase offset into attributes[], thresholds[] where the current
+	 *          tree is placed.
+	 * @param treeProbBase offset into probabilities[] where the current tree is
+	 *          placed.
 	 */
 	private void write(final TransparentRandomTree node, final int nodeIndex,
 		final int branchBits, final int depth, final int height,
@@ -258,19 +252,16 @@ class CpuRandomForestCore {
 	 * Serialize a node in into the attributes, thresholds, and probabilities
 	 * arrays. This implements the "Compact Storage" scheme.
 	 *
-	 * @param node
-	 * 	a tree node.
-	 * @param i
-	 * 	index of {@code node}.
-	 * @param j
-	 * 	j[0] index of next free leaf probabilities slot (will be incremented by
-	 * 	this method if leaf probabilities are stored.)
-	 * @param attributesBase
-	 * 	offset into attributes[] where the current tree is placed.
-	 * @param thresholdsBase
-	 * 	offset into thresholds[] where the current tree is placed.
-	 * @param probabilitiesBase
-	 * 	offset into probabilities[] where the current tree is placed.
+	 * @param node a tree node.
+	 * @param i index of {@code node}.
+	 * @param j j[0] index of next free leaf probabilities slot (will be incremented
+	 *          by this method if leaf probabilities are stored.)
+	 * @param attributesBase offset into attributes[] where the current tree is
+	 *          placed.
+	 * @param thresholdsBase offset into thresholds[] where the current tree is
+	 *          placed.
+	 * @param probabilitiesBase offset into probabilities[] where the current tree
+	 *          is placed.
 	 */
 	private int write_compact(final TransparentRandomTree node, final int i,
 		// index in data
@@ -318,16 +309,15 @@ class CpuRandomForestCore {
 
 	/**
 	 * Applies the random forest to the given instance. Writes the class
-	 * probabilities to {@code distribution}. Depending on the number of
-	 * classes, this calls {@link #distributionForInstance_c2} (for 2 classes),
+	 * probabilities to {@code distribution}. Depending on the number of classes,
+	 * this calls {@link #distributionForInstance_c2} (for 2 classes),
 	 * {@link #distributionForInstance_c3} (for 3 classes), or
 	 * {@link #distributionForInstance_ck} (for {@code >3} classes).
 	 *
-	 * @param instance
-	 * 	Instance / feature vector, array length must equal
-	 *    {@code numberOfFeatures}.
-	 * @param distribution
-	 * 	This is the output buffer, array length must equal number of classes.
+	 * @param instance Instance / feature vector, array length must equal
+	 *          {@code numberOfFeatures}.
+	 * @param distribution This is the output buffer, array length must equal number
+	 *          of classes.
 	 */
 	void distributionForInstance(final float[] instance,
 		final float[] distribution)
@@ -346,8 +336,8 @@ class CpuRandomForestCore {
 	}
 
 	/**
-	 * Applies the random forest to the given instance.
-	 * This implements the general case for arbitrary number of classes.
+	 * Applies the random forest to the given instance. This implements the general
+	 * case for arbitrary number of classes.
 	 */
 	private void distributionForInstance_ck(final float[] instance,
 		final float[] distribution)
@@ -359,7 +349,8 @@ class CpuRandomForestCore {
 		int probabilitiesBase = 0;
 		int height = 1;
 		for (; height < numTreesOfHeight.length &&
-			height < COMPACT_STORAGE_MIN_HEIGHT; height++) {
+			height < COMPACT_STORAGE_MIN_HEIGHT; height++)
+		{
 			final int nh = numTreesOfHeight[height];
 			if (nh == 0) continue;
 
@@ -432,9 +423,8 @@ class CpuRandomForestCore {
 						attributes[attributesBase + 2 + 3 * node];
 					final float attributeValue = instance[attributeIndex];
 					final float threshold = thresholds[thresholdsBase + node];
-					node = (attributeValue < threshold) ?
-						attributes[attributesBase + 2 + 3 * node + 1] :
-						attributes[attributesBase + 2 + 3 * node + 2];
+					node = (attributeValue < threshold) ? attributes[attributesBase + 2 + 3 * node + 1]
+						: attributes[attributesBase + 2 + 3 * node + 2];
 				}
 				final int j = node - Integer.MIN_VALUE;
 				acc(distribution, numClasses, probabilitiesBase, j);
@@ -455,18 +445,19 @@ class CpuRandomForestCore {
 	}
 
 	/**
-	 * Applies the random forest to the given instance.
-	 * This implements the general case for arbitrary number of classes.
+	 * Applies the random forest to the given instance. This implements the general
+	 * case for arbitrary number of classes.
 	 */
 	void distributionForInstance_c2(final float[] instance,
 		final float[] distribution)
 	{
-		float c0 = prior[ 0 ], c1 = prior[ 1 ];
+		float c0 = prior[0], c1 = prior[1];
 		int attributesBase = 0;
 		int probabilitiesBase = 0;
 		int height = 1;
 		for (; height < numTreesOfHeight.length &&
-			height < COMPACT_STORAGE_MIN_HEIGHT; height++) {
+			height < COMPACT_STORAGE_MIN_HEIGHT; height++)
+		{
 			final int nh = numTreesOfHeight[height];
 			if (nh == 0) continue;
 
@@ -547,9 +538,8 @@ class CpuRandomForestCore {
 						attributes[attributesBase + 2 + 3 * node];
 					final float attributeValue = instance[attributeIndex];
 					final float threshold = thresholds[thresholdsBase + node];
-					node = (attributeValue < threshold) ?
-						attributes[attributesBase + 2 + 3 * node + 1] :
-						attributes[attributesBase + 2 + 3 * node + 2];
+					node = (attributeValue < threshold) ? attributes[attributesBase + 2 + 3 * node + 1]
+						: attributes[attributesBase + 2 + 3 * node + 2];
 				}
 				final int j = node - Integer.MIN_VALUE;
 				c0 += probabilities[probabilitiesBase + j];
@@ -566,8 +556,8 @@ class CpuRandomForestCore {
 	}
 
 	/**
-	 * Applies the random forest to the given instance.
-	 * This implements the general case for 3 classes.
+	 * Applies the random forest to the given instance. This implements the general
+	 * case for 3 classes.
 	 */
 	private void distributionForInstance_c3(final float[] instance,
 		final float[] distribution)
@@ -578,7 +568,8 @@ class CpuRandomForestCore {
 		int probabilitiesBase = 0;
 		int height = 1;
 		for (; height < numTreesOfHeight.length &&
-			height < COMPACT_STORAGE_MIN_HEIGHT; height++) {
+			height < COMPACT_STORAGE_MIN_HEIGHT; height++)
+		{
 			final int nh = numTreesOfHeight[height];
 			if (nh == 0) continue;
 
@@ -667,9 +658,8 @@ class CpuRandomForestCore {
 						attributes[attributesBase + 2 + 3 * node];
 					final float attributeValue = instance[attributeIndex];
 					final float threshold = thresholds[thresholdsBase + node];
-					node = (attributeValue < threshold) ?
-						attributes[attributesBase + 2 + 3 * node + 1] :
-						attributes[attributesBase + 2 + 3 * node + 2];
+					node = (attributeValue < threshold) ? attributes[attributesBase + 2 + 3 * node + 1]
+						: attributes[attributesBase + 2 + 3 * node + 2];
 				}
 				final int j = node - Integer.MIN_VALUE;
 				c0 += probabilities[probabilitiesBase + j];
@@ -688,19 +678,16 @@ class CpuRandomForestCore {
 	}
 
 	/**
-	 * Apply the random forest to the given instance, and return the leaf
-	 * index for the resulting leaf probabilities.
+	 * Apply the random forest to the given instance, and return the leaf index for
+	 * the resulting leaf probabilities.
 	 *
-	 * @param instance
-	 * 	feature vector to evaluate the tree on.
-	 * @param dataBase
-	 * 	offset into attributes[], thresholds[] where the tree is placed.
-	 * @param height
-	 * 	height of the tree.
-	 *
-	 * @return leaf index at maxDepth after evaluating the instance.
-	 * (This can be multiplied by {@code numClasses} to get the index
-	 * into leaf probabilities[] relative to start offset of the tree.)
+	 * @param instance feature vector to evaluate the tree on.
+	 * @param dataBase offset into attributes[], thresholds[] where the tree is
+	 *          placed.
+	 * @param height height of the tree.
+	 * @return leaf index at maxDepth after evaluating the instance. (This can be
+	 *         multiplied by {@code numClasses} to get the index into leaf
+	 *         probabilities[] relative to start offset of the tree.)
 	 */
 	private int evaluateTree(final float[] instance, final int dataBase,
 		final int height)
@@ -725,11 +712,10 @@ class CpuRandomForestCore {
 	}
 
 	/**
-	 * See {@link #evaluateTree}.
-	 * This is a special case implementation for trees of height 1.
+	 * See {@link #evaluateTree}. This is a special case implementation for trees of
+	 * height 1.
 	 */
-	private int evaluateTree_h1(final float[] instance, final int dataBase)
-	{
+	private int evaluateTree_h1(final float[] instance, final int dataBase) {
 		final int attributeIndex = attributes[dataBase];
 		final float attributeValue = instance[attributeIndex];
 		final float threshold = thresholds[dataBase];
@@ -738,11 +724,10 @@ class CpuRandomForestCore {
 	}
 
 	/**
-	 * See {@link #evaluateTree}.
-	 * This is a special case implementation for trees of height 2.
+	 * See {@link #evaluateTree}. This is a special case implementation for trees of
+	 * height 2.
 	 */
-	private int evaluateTree_h2(final float[] instance, final int dataBase)
-	{
+	private int evaluateTree_h2(final float[] instance, final int dataBase) {
 		final int attributeIndex0 = attributes[dataBase];
 		final float attributeValue0 = instance[attributeIndex0];
 		final float threshold0 = thresholds[dataBase];
@@ -769,11 +754,10 @@ class CpuRandomForestCore {
 	}
 
 	/**
-	 * See {@link #evaluateTree}.
-	 * This is a special case implementation for trees of height 3.
+	 * See {@link #evaluateTree}. This is a special case implementation for trees of
+	 * height 3.
 	 */
-	private int evaluateTree_h3(final float[] instance, final int dataBase)
-	{
+	private int evaluateTree_h3(final float[] instance, final int dataBase) {
 		final int attributeIndex0 = attributes[dataBase];
 		final float attributeValue0 = instance[attributeIndex0];
 		final float threshold0 = thresholds[dataBase];
@@ -820,11 +804,10 @@ class CpuRandomForestCore {
 	 * Applies the random forest to the given instance. Writes the class
 	 * probabilities to {@code distribution}.
 	 *
-	 * @param instance
-	 * 	Instance / feature vector, array length must equal
-	 *    {@code numberOfFeatures}.
-	 * @param distribution
-	 * 	This is the output buffer, array length must equal number of classes.
+	 * @param instance Instance / feature vector, array length must equal
+	 *          {@code numberOfFeatures}.
+	 * @param distribution This is the output buffer, array length must equal number
+	 *          of classes.
 	 */
 	private void generic_distributionForInstance(final float[] instance,
 		final float[] distribution)
@@ -836,7 +819,8 @@ class CpuRandomForestCore {
 		int probabilitiesBase = 0;
 		int height = 1;
 		for (; height < numTreesOfHeight.length &&
-			height < COMPACT_STORAGE_MIN_HEIGHT; height++) {
+			height < COMPACT_STORAGE_MIN_HEIGHT; height++)
+		{
 			final int nh = numTreesOfHeight[height];
 			if (nh == 0) continue;
 
@@ -867,9 +851,8 @@ class CpuRandomForestCore {
 						attributes[attributesBase + 2 + 3 * node];
 					final float attributeValue = instance[attributeIndex];
 					final float threshold = thresholds[thresholdsBase + node];
-					node = (attributeValue < threshold) ?
-						attributes[attributesBase + 2 + 3 * node + 1] :
-						attributes[attributesBase + 2 + 3 * node + 2];
+					node = (attributeValue < threshold) ? attributes[attributesBase + 2 + 3 * node + 1]
+						: attributes[attributesBase + 2 + 3 * node + 2];
 				}
 				final int j = node - Integer.MIN_VALUE;
 				for (int k = 0; k < numClasses; k++)

@@ -41,8 +41,7 @@ public class GpuRandomForestKernelBenchmark {
 
 	private static final GpuApi gpu = GpuPool.borrowGpu();
 	private static final Segmenter segmenter = initializeSegmenter();
-	private static final GpuRandomForestPrediction
-			prediction = new GpuRandomForestPrediction(
+	private static final GpuRandomForestPrediction prediction = new GpuRandomForestPrediction(
 		(FastRandomForest) segmenter.getClassifier(), numberOfFeatures);
 	private static final GpuImage features = initializeFeatures(gpu);
 	private static final GpuImage distribution = gpu.create(features.getDimensions(), numberOfClasses,

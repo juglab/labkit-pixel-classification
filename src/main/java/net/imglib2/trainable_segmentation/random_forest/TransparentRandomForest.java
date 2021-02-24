@@ -21,12 +21,12 @@ public class TransparentRandomForest {
 
 	private final List<TransparentRandomTree> trees;
 
-	public TransparentRandomForest(List< TransparentRandomTree > trees) {
+	public TransparentRandomForest(List<TransparentRandomTree> trees) {
 		this.trees = trees;
 	}
 
 	public static TransparentRandomForest forFastRandomForest(
-			FastRandomForest original)
+		FastRandomForest original)
 	{
 		return new TransparentRandomForest(initTrees(original));
 	}
@@ -38,7 +38,8 @@ public class TransparentRandomForest {
 			return Collections.emptyList();
 		// NB: Type of trees is hr.irb.fastRandomForest.FastRandomTree
 		Object[] trees = ReflectionUtils.getPrivateField(bagger, "m_Classifiers", Object[].class);
-		return Collections.unmodifiableList(Stream.of(trees).map(TransparentRandomTree::forFastRandomTree).collect(
+		return Collections.unmodifiableList(Stream.of(trees).map(
+			TransparentRandomTree::forFastRandomTree).collect(
 				Collectors.toList()));
 	}
 

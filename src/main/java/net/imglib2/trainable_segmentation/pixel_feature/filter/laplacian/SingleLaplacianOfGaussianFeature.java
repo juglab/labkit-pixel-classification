@@ -42,25 +42,30 @@ public class SingleLaplacianOfGaussianFeature extends AbstractFeatureOp {
 	public void apply(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
 		int n = globalSettings().numDimensions();
 		switch (n) {
-			case 2: apply2d(input, output); return;
-			case 3: apply3d(input, output); return;
-			default: throw new IllegalArgumentException("Expect 2d or 3d.");
+			case 2:
+				apply2d(input, output);
+				return;
+			case 3:
+				apply3d(input, output);
+				return;
+			default:
+				throw new IllegalArgumentException("Expect 2d or 3d.");
 		}
 	}
 
-	private void apply2d(FeatureInput input, List< RandomAccessibleInterval< FloatType>> output) {
-		RandomAccessibleInterval<DoubleType> dx =input.derivedGauss(sigma, order(2, 0));
-		RandomAccessibleInterval<DoubleType> dy =input.derivedGauss(sigma, order(2, 1));
+	private void apply2d(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
+		RandomAccessibleInterval<DoubleType> dx = input.derivedGauss(sigma, order(2, 0));
+		RandomAccessibleInterval<DoubleType> dy = input.derivedGauss(sigma, order(2, 1));
 		LoopBuilder.setImages(dx, dy, output.get(0)).multiThreaded().forEachPixel(
-				(x, y, sum) -> sum.setReal(x.getRealDouble() + y.getRealDouble()));
+			(x, y, sum) -> sum.setReal(x.getRealDouble() + y.getRealDouble()));
 	}
 
-	private void apply3d(FeatureInput input, List< RandomAccessibleInterval< FloatType>> output) {
-		RandomAccessibleInterval<DoubleType> dx =input.derivedGauss(sigma, order(3, 0));
-		RandomAccessibleInterval<DoubleType> dy =input.derivedGauss(sigma, order(3, 1));
-		RandomAccessibleInterval<DoubleType> dz =input.derivedGauss(sigma, order(3, 2));
+	private void apply3d(FeatureInput input, List<RandomAccessibleInterval<FloatType>> output) {
+		RandomAccessibleInterval<DoubleType> dx = input.derivedGauss(sigma, order(3, 0));
+		RandomAccessibleInterval<DoubleType> dy = input.derivedGauss(sigma, order(3, 1));
+		RandomAccessibleInterval<DoubleType> dz = input.derivedGauss(sigma, order(3, 2));
 		LoopBuilder.setImages(dx, dy, dz, output.get(0)).multiThreaded().forEachPixel(
-				(x, y, z, sum) -> sum.setReal(x.getRealDouble() + y.getRealDouble() + z.getRealDouble()));
+			(x, y, z, sum) -> sum.setReal(x.getRealDouble() + y.getRealDouble() + z.getRealDouble()));
 	}
 
 	private int[] order(int n, int d) {

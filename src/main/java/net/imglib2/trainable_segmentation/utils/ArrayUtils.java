@@ -75,7 +75,8 @@ public class ArrayUtils {
 
 	public static float[] toFloats(double[] values) {
 		float[] result = new float[values.length];
-		for (int i = 0; i < result.length; i++) result[i] = (float) values[i];
+		for (int i = 0; i < result.length; i++)
+			result[i] = (float) values[i];
 		return result;
 	}
 }

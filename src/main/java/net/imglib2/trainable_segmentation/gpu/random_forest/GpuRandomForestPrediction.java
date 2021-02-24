@@ -46,9 +46,9 @@ public class GpuRandomForestPrediction {
 
 	public GpuRandomForestPrediction(FastRandomForest classifier, int numberOfFeatures) {
 		TransparentRandomForest forest =
-				TransparentRandomForest.forFastRandomForest(classifier);
-		List< GpuRandomTreePrediction > trees = forest.trees().stream().map(
-				GpuRandomTreePrediction::new)
+			TransparentRandomForest.forFastRandomForest(classifier);
+		List<GpuRandomTreePrediction> trees = forest.trees().stream().map(
+			GpuRandomTreePrediction::new)
 			.collect(Collectors.toList());
 		this.numberOfClasses = forest.numberOfClasses();
 		this.numberOfFeatures = numberOfFeatures;
