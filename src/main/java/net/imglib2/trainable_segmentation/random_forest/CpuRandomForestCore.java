@@ -75,7 +75,7 @@ class CpuRandomForestCore {
 	If the left (or right) child is a leaf, instead of a node index,
 	attributes[3*i+1] (or attributes[3*i+2]) contains the starting index of the
 	leaf respective probabilities. To distinguish the leaf case, starting indices
-	are stored as negative numbers (i+Short.MIN_VALUE
+	are stored as negative numbers (i+Integer.MIN_VALUE)
 
 	Additionally, before the attributes[] entries of each tree there are two
 	entries containing the number of nodes and number of leafs probability slots
@@ -85,7 +85,7 @@ class CpuRandomForestCore {
 	implementations for 2 classes and 3 classes.
 	*/
 
-	private final short[] attributes;
+	private final int[] attributes;
 	private final float[] thresholds;
 	private final float[] probabilities;
 
@@ -155,7 +155,7 @@ class CpuRandomForestCore {
 				"forest is too big to represent in " +
 					CpuRandomForestCore.class.getSimpleName());
 
-		attributes = new short[(int) attributesSize];
+		attributes = new int[(int) attributesSize];
 		thresholds = new float[(int) thresholdsSize];
 		probabilities = new float[(int) probabilitiesSize];
 
@@ -189,8 +189,8 @@ class CpuRandomForestCore {
 					final int size =
 						write_compact(tree, 0, j, attributesBase + 2,
 							thresholdsBase, probabilitiesBase);
-					attributes[attributesBase] = (short) size;
-					attributes[attributesBase + 1] = (short) j[0];
+					attributes[attributesBase] = size;
+					attributes[attributesBase + 1] = j[0];
 					attributesBase += 2 + size * 3;
 					thresholdsBase += size;
 					probabilitiesBase += j[0];
@@ -243,7 +243,7 @@ class CpuRandomForestCore {
 		{
 			// write feature index and threshold
 			final int o = treeDataBase + nodeIndex;
-			attributes[o] = (short) node.attributeIndex();
+			attributes[o] = node.attributeIndex();
 			thresholds[o] = (float) node.threshold();
 
 			// recursively write children
@@ -279,21 +279,20 @@ class CpuRandomForestCore {
 		final int probabilitiesBase)
 	{
 		// write feature index and threshold
-		attributes[attributesBase + 3 * i] = (short) node.attributeIndex();
+		attributes[attributesBase + 3 * i] = node.attributeIndex();
 		thresholds[thresholdsBase + i] = (float) node.threshold();
 
 		final int lsize;
 		final TransparentRandomTree smaller = node.smallerChild();
 		if (smaller.isLeaf()) {
-			attributes[attributesBase + 3 * i + 1] =
-				(short) (j[0] + Short.MIN_VALUE);
+			attributes[attributesBase + 3 * i + 1] = j[0] + Integer.MIN_VALUE;
 			for (int c = 0; c < numClasses; ++c)
 				probabilities[probabilitiesBase + j[0]++] =
 					(float) smaller.classProbabilities()[c];
 			lsize = 0;
 		}
 		else {
-			attributes[attributesBase + 3 * i + 1] = (short) (i + 1);
+			attributes[attributesBase + 3 * i + 1] = i + 1;
 			lsize =
 				write_compact(smaller, i + 1, j, attributesBase, thresholdsBase,
 					probabilitiesBase);
@@ -302,15 +301,14 @@ class CpuRandomForestCore {
 		final int rsize;
 		final TransparentRandomTree bigger = node.biggerChild();
 		if (bigger.isLeaf()) {
-			attributes[attributesBase + 3 * i + 2] =
-				(short) (j[0] + Short.MIN_VALUE);
+			attributes[attributesBase + 3 * i + 2] = j[0] + Integer.MIN_VALUE;
 			for (int c = 0; c < numClasses; ++c)
 				probabilities[probabilitiesBase + j[0]++] =
 					(float) bigger.classProbabilities()[c];
 			rsize = 0;
 		}
 		else {
-			attributes[attributesBase + 3 * i + 2] = (short) (i + lsize + 1);
+			attributes[attributesBase + 3 * i + 2] = i + lsize + 1;
 			rsize = write_compact(bigger, i + lsize + 1, j, attributesBase,
 				thresholdsBase, probabilitiesBase);
 		}
@@ -438,7 +436,7 @@ class CpuRandomForestCore {
 						attributes[attributesBase + 2 + 3 * node + 1] :
 						attributes[attributesBase + 2 + 3 * node + 2];
 				}
-				final int j = node - Short.MIN_VALUE;
+				final int j = node - Integer.MIN_VALUE;
 				acc(distribution, numClasses, probabilitiesBase, j);
 				attributesBase += 2 + 3 * attrSize;
 				thresholdsBase += attrSize;
@@ -553,7 +551,7 @@ class CpuRandomForestCore {
 						attributes[attributesBase + 2 + 3 * node + 1] :
 						attributes[attributesBase + 2 + 3 * node + 2];
 				}
-				final int j = node - Short.MIN_VALUE;
+				final int j = node - Integer.MIN_VALUE;
 				c0 += probabilities[probabilitiesBase + j];
 				c1 += probabilities[probabilitiesBase + j + 1];
 				attributesBase += 2 + 3 * attrSize;
@@ -673,7 +671,7 @@ class CpuRandomForestCore {
 						attributes[attributesBase + 2 + 3 * node + 1] :
 						attributes[attributesBase + 2 + 3 * node + 2];
 				}
-				final int j = node - Short.MIN_VALUE;
+				final int j = node - Integer.MIN_VALUE;
 				c0 += probabilities[probabilitiesBase + j];
 				c1 += probabilities[probabilitiesBase + j + 1];
 				c2 += probabilities[probabilitiesBase + j + 2];
@@ -873,7 +871,7 @@ class CpuRandomForestCore {
 						attributes[attributesBase + 2 + 3 * node + 1] :
 						attributes[attributesBase + 2 + 3 * node + 2];
 				}
-				final int j = node - Short.MIN_VALUE;
+				final int j = node - Integer.MIN_VALUE;
 				for (int k = 0; k < numClasses; k++)
 					distribution[k] += probabilities[probabilitiesBase + j + k];
 				attributesBase += 2 + 3 * attrSize;
