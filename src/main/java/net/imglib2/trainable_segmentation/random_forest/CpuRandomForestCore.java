@@ -446,7 +446,7 @@ class CpuRandomForestCore {
 
 	/**
 	 * Applies the random forest to the given instance. This implements the general
-	 * case for arbitrary number of classes.
+	 * case for 2 classes.
 	 */
 	void distributionForInstance_c2(final float[] instance,
 		final float[] distribution)
