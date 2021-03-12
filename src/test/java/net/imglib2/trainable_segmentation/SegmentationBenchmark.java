@@ -1,6 +1,7 @@
 
 package net.imglib2.trainable_segmentation;
 
+import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
@@ -17,14 +18,15 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
-import net.imglib2.util.StopWatch;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.Runner;
@@ -33,7 +35,6 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.scijava.Context;
 import preview.net.imglib2.loops.LoopBuilder;
-import preview.net.imglib2.parallel.Parallelization;
 
 import java.util.concurrent.TimeUnit;
 
@@ -42,23 +43,27 @@ import java.util.concurrent.TimeUnit;
 @Measurement(iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-@Fork(0)
+@Fork(1)
 public class SegmentationBenchmark {
-
-	private static final String imageFilename =
-		"drosophila_3d.tif";
-
-	private static final String labelingFileName =
-		"drosophila_3d_labeling.tif";
 
 	private final Context context = SingletonContext.getInstance();
 
-	private final RandomAccessibleInterval<FloatType> image = Utils.loadImageFloatType(imageFilename);
+	private final RandomAccessibleInterval<FloatType> image = Utils.loadImageFloatType(
+			"drosophila_3d.tif");
 
 	private final LabelRegions<?> labelRegions = asLabelRegions(Utils.loadImageFloatType(
-		labelingFileName));
+			"drosophila_3d_labeling.tif"));
 
-	private final Segmenter segmenter = trainSegmenter();
+	@Param(value={"false", "true"})
+	private boolean slowdown;
+
+	@Setup
+	public void setup() {
+		if(slowdown) {
+			Segmenter segmenter = trainSegmenter();
+			segmenter.segment(image);
+		}
+	}
 
 	private Segmenter trainSegmenter() {
 		final FeatureSettings featureSettings = new FeatureSettings(GlobalSettings.default3d().build(),
@@ -66,36 +71,31 @@ public class SegmentationBenchmark {
 			GroupedFeatures.differenceOfGaussians(),
 			GroupedFeatures.hessian(),
 			GroupedFeatures.gradient());
-		return Parallelization.runSingleThreaded(() -> Trainer.train(context, image, labelRegions,
-			featureSettings));
+		return Trainer.train(context, image, labelRegions, featureSettings);
 	}
 
-	@Benchmark
-	public Object benchmarkSegment() {
-		return Parallelization.runSingleThreaded(() -> segmenter.segment(image));
-	}
+	private final Img<? extends RealType<?>> floats = ArrayImgs.ints(1000, 1000);
 
 	@Benchmark
-	public Segmenter benchmarkTrain() {
-		return trainSegmenter();
+	public Object sum() {
+		double sum = 0;
+		RandomAccess< ? extends RealType< ? > > ra = floats.randomAccess();
+		ra.setPosition(0, 1);
+		for (int y = 0; y < 1000; y++) {
+			ra.setPosition(0, 0);
+			for (int x = 0; x < 1000; x++) {
+				sum += ra.get().getRealDouble();
+				ra.fwd(0);
+			}
+			ra.fwd(1);
+		}
+		return sum;
 	}
 
 	public static void main(String... args) throws RunnerException {
-		runBenchmark();
-	}
-
-	private static void runForever() {
-		StopWatch stopWatch = StopWatch.createAndStart();
-		SegmentationBenchmark segmentationBenchmark = new SegmentationBenchmark();
-		while (true) {
-			System.out.println("start " + stopWatch);
-			segmentationBenchmark.benchmarkSegment();
-		}
-	}
-
-	private static void runBenchmark() throws RunnerException {
-		Options options = new OptionsBuilder().include(SegmentationBenchmark.class.getSimpleName())
-			.build();
+		Options options = new OptionsBuilder()
+				.include(SegmentationBenchmark.class.getSimpleName())
+				.build();
 		new Runner(options).run();
 	}
 
