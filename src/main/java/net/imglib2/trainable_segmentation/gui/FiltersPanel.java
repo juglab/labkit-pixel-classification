@@ -17,7 +17,10 @@ import net.imglib2.trainable_segmentation.pixel_feature.filter.gradient.Gaussian
 import net.imglib2.trainable_segmentation.pixel_feature.filter.hessian.HessianEigenvaluesFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.identity.IdentityFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.laplacian.LaplacianOfGaussianFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.StatisticsFeature;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.MaxFeature;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.MeanFeature;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.MinFeature;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.VarianceFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.structure.StructureTensorEigenvaluesFeature;
 import org.scijava.Context;
 
@@ -28,7 +31,7 @@ import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
 
 public class FiltersPanel extends JPanel {
 
-	private static final Set<Class<?>> BASIC_FILTERS = new HashSet<>(Arrays.asList(
+	private static final List<Class<?>> BASIC_FILTERS = Arrays.asList(
 		IdentityFeature.class,
 		GaussianBlurFeature.class,
 		DifferenceOfGaussiansFeature.class,
@@ -36,7 +39,10 @@ public class FiltersPanel extends JPanel {
 		LaplacianOfGaussianFeature.class,
 		HessianEigenvaluesFeature.class,
 		StructureTensorEigenvaluesFeature.class,
-		StatisticsFeature.class));
+		MinFeature.class,
+		MaxFeature.class,
+		MeanFeature.class,
+		VarianceFeature.class);
 
 	private List<FeatureInfo> deprecatedFilters;
 	private List<FeatureInfo> basicFilters;
@@ -82,6 +88,7 @@ public class FiltersPanel extends JPanel {
 			else
 				advancedFilters.add(featureInfo);
 		}
+		basicFilters.sort(Comparator.comparing(f -> BASIC_FILTERS.indexOf(f.pluginClass())));
 	}
 
 	private boolean isBasic(Class<? extends FeatureOp> clazz) {

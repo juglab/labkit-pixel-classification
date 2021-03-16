@@ -4,12 +4,15 @@ package net.imglib2.trainable_segmentation.pixel_feature.filter;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.gradient.SingleGaussianGradientMagnitudeFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.identity.IdentityFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.dog2.SingleDifferenceOfGaussiansFeature;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.SingleMaxFeature;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.SingleMeanFeature;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.SingleMinFeature;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.SingleVarianceFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.SingleGaborFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.gauss.SingleGaussianBlurFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.hessian.SingleHessianEigenvaluesFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.laplacian.SingleLaplacianOfGaussianFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.SingleLipschitzFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.SingleStatisticsFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.structure.SingleStructureTensorEigenvaluesFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
 
@@ -75,31 +78,20 @@ public class SingleFeatures {
 		return createFeature(SingleLaplacianOfGaussianFeature.class, "sigma", sigma);
 	}
 
-	public static FeatureSetting statistics(double radius) {
-		return statistics(radius, true, true, true, true);
-	}
-
 	public static FeatureSetting min(double radius) {
-		return statistics(radius, true, false, false, false);
+		return createFeature(SingleMinFeature.class, "radius", radius);
 	}
 
 	public static FeatureSetting max(double radius) {
-		return statistics(radius, false, true, false, false);
+		return createFeature(SingleMaxFeature.class, "radius", radius);
 	}
 
 	public static FeatureSetting mean(double radius) {
-		return statistics(radius, false, false, true, false);
+		return createFeature(SingleMeanFeature.class, "radius", radius);
 	}
 
 	public static FeatureSetting variance(double radius) {
-		return statistics(radius, false, false, false, true);
-	}
-
-	private static FeatureSetting statistics(double radius, boolean min, boolean max, boolean mean,
-		boolean variance)
-	{
-		return createFeature(SingleStatisticsFeature.class, "radius", radius, "min", min, "max", max,
-			"mean", mean, "variance", variance);
+		return createFeature(SingleVarianceFeature.class, "radius", radius);
 	}
 
 	private static FeatureSetting createFeature(Class<? extends FeatureOp> aClass, Object... args) {

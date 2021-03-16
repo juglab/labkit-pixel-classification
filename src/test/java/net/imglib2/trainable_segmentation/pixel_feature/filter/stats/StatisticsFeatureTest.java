@@ -11,13 +11,16 @@ import net.imglib2.view.Views;
 import org.junit.Test;
 
 /**
- * Tests {@link StatisticsFeature}.
+ * Tests {@link MinFeature}.
  */
 public class StatisticsFeatureTest {
 
 	private final FeatureCalculator calculator = FeatureCalculator.default2d()
 		.sigmas(1., 2.)
-		.addFeature(GroupedFeatures.statistics())
+		.addFeature(GroupedFeatures.min())
+		.addFeature(GroupedFeatures.max())
+		.addFeature(GroupedFeatures.mean())
+		.addFeature(GroupedFeatures.variance())
 		.build();
 
 	@Test
@@ -60,8 +63,7 @@ public class StatisticsFeatureTest {
 		Img<FloatType> expectedMean2 = filled5x5Image(1 / 25f);
 		Img<FloatType> expectedVariance2 = filled5x5Image(1 / 25f);
 		ImgLib2Assert.assertImageEqualsRealType(Views.stack(
-			expectedMin1, expectedMax1, expectedMean1, expectedVariance1,
-			expectedMin2, expectedMax2, expectedMean2, expectedVariance2), output, 0.0001);
+			expectedMin1, expectedMin2, expectedMax1, expectedMax2, expectedMean1, expectedMean2, expectedVariance1, expectedVariance2), output, 0.0001);
 	}
 
 	private Img<FloatType> filled5x5Image(float value) {

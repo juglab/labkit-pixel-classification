@@ -11,26 +11,13 @@ import org.scijava.plugin.Plugin;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Plugin(type = FeatureOp.class, label = "statistic filters (group)")
-public class StatisticsFeature extends AbstractGroupFeatureOp {
-
-	@Parameter
-	private boolean min = true;
-
-	@Parameter
-	private boolean max = true;
-
-	@Parameter
-	private boolean mean = true;
-
-	@Parameter
-	private boolean variance = true;
+@Plugin(type = FeatureOp.class, label = "min filters (group)")
+public class MinFeature extends AbstractGroupFeatureOp {
 
 	@Override
 	protected List<FeatureSetting> initFeatures() {
 		return globalSettings().sigmas().stream()
-			.map(r -> new FeatureSetting(SingleStatisticsFeature.class, "radius", r,
-				"min", min, "max", max, "mean", mean, "variance", variance))
+			.map(r -> new FeatureSetting(SingleMinFeature.class, "radius", r))
 			.collect(Collectors.toList());
 	}
 }

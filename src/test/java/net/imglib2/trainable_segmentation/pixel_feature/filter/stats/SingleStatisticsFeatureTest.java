@@ -29,7 +29,10 @@ public class SingleStatisticsFeatureTest {
 	private final boolean useGpu;
 
 	FeatureCalculator calculator = FeatureCalculator.default2d()
-		.addFeature(SingleFeatures.statistics(1))
+		.addFeature(SingleFeatures.min(1))
+		.addFeature(SingleFeatures.max(1))
+		.addFeature(SingleFeatures.mean(1))
+		.addFeature(SingleFeatures.variance(1))
 		.build();
 
 	@Test
@@ -79,8 +82,12 @@ public class SingleStatisticsFeatureTest {
 
 	@Test
 	public void testRadius0() {
-		FeatureCalculator calculator = FeatureCalculator.default2d().addFeature(SingleFeatures
-			.statistics(0)).build();
+		FeatureCalculator calculator = FeatureCalculator.default2d()
+				.addFeature(SingleFeatures.min(0))
+				.addFeature(SingleFeatures.max(0))
+				.addFeature(SingleFeatures.mean(0))
+				.addFeature(SingleFeatures.variance(0))
+				.build();
 		calculator.setUseGpu(useGpu);
 		Img<FloatType> input = ArrayImgs.floats(new float[] {
 			0, 0, 0, 0,

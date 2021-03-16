@@ -19,14 +19,10 @@ import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.scijava.Context;
 import preview.net.imglib2.algorithm.gauss3.Gauss3;
 import preview.net.imglib2.loops.LoopBuilder;
 import preview.net.imglib2.parallel.Parallelization;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.Assume.assumeFalse;
 
@@ -81,8 +77,24 @@ public class AnisotropicFeaturesTest {
 	}
 
 	@Test
-	public void testStatistics() {
-		testAnisotropy(GroupedFeatures.statistics());
+	public void testMin() {
+		testAnisotropy(GroupedFeatures.min());
+	}
+
+	@Test
+	public void testMax() {
+		testAnisotropy(GroupedFeatures.max());
+	}
+
+	@Test
+	public void testMean() {
+		testAnisotropy(GroupedFeatures.mean());
+	}
+
+	@Test
+	public void testVariance() {
+		testAnisotropy2d(39, GroupedFeatures.variance());
+		testAnisotropy3d(39, GroupedFeatures.variance());
 	}
 
 	private void testAnisotropy(FeatureSetting setting) {

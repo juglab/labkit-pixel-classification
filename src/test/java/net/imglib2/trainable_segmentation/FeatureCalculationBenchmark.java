@@ -67,8 +67,23 @@ public class FeatureCalculationBenchmark {
 	}
 
 	@Benchmark
-	public Object statistics() {
-		return calculateFeature(GroupedFeatures.statistics());
+	public Object min() {
+		return calculateFeature(GroupedFeatures.min());
+	}
+
+	@Benchmark
+	public Object max() {
+		return calculateFeature(GroupedFeatures.max());
+	}
+
+	@Benchmark
+	public Object mean() {
+		return calculateFeature(GroupedFeatures.mean());
+	}
+
+	@Benchmark
+	public Object variance() {
+		return calculateFeature(GroupedFeatures.variance());
 	}
 
 	@Benchmark

@@ -6,9 +6,12 @@ import net.imglib2.trainable_segmentation.pixel_feature.filter.gauss.GaussianBlu
 import net.imglib2.trainable_segmentation.pixel_feature.filter.gradient.GaussianGradientMagnitudeFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.hessian.HessianEigenvaluesFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.laplacian.LaplacianOfGaussianFeature;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.MaxFeature;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.MeanFeature;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.VarianceFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.LipschitzFeature;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.GaborFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.StatisticsFeature;
+import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.MinFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.structure.StructureTensorEigenvaluesFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
 
@@ -59,31 +62,20 @@ public class GroupedFeatures {
 		return createFeature(StructureTensorEigenvaluesFeature.class);
 	}
 
-	public static FeatureSetting statistics() {
-		return statistics(true, true, true, true);
-	}
-
 	public static FeatureSetting min() {
-		return statistics(true, false, false, false);
+		return createFeature(MinFeature.class);
 	}
 
 	public static FeatureSetting max() {
-		return statistics(false, true, false, false);
+		return createFeature(MaxFeature.class);
 	}
 
 	public static FeatureSetting mean() {
-		return statistics(false, false, true, false);
+		return createFeature(MeanFeature.class);
 	}
 
 	public static FeatureSetting variance() {
-		return statistics(false, false, false, true);
-	}
-
-	private static FeatureSetting statistics(boolean min, boolean max, boolean mean,
-		boolean variance)
-	{
-		return createFeature(StatisticsFeature.class, "min", min, "max", max, "mean", mean, "variance",
-			variance);
+		return createFeature(VarianceFeature.class);
 	}
 
 	private static FeatureSetting createFeature(Class<? extends FeatureOp> aClass, Object... args) {

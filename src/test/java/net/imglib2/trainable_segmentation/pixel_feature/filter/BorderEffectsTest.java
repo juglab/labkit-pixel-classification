@@ -79,8 +79,23 @@ public class BorderEffectsTest {
 	}
 
 	@Test
-	public void testStatistics() {
-		testFeature(GroupedFeatures.statistics());
+	public void testMin() {
+		testFeature(GroupedFeatures.min());
+	}
+
+	@Test
+	public void testMax() {
+		testFeature(GroupedFeatures.max());
+	}
+
+	@Test
+	public void testMean() {
+		testFeature(GroupedFeatures.mean());
+	}
+
+	@Test
+	public void testVariance() {
+		testFeature(GroupedFeatures.variance());
 	}
 
 	public void testFeature(FeatureSetting feature) {

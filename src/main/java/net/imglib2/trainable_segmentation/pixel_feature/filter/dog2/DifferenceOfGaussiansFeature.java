@@ -4,17 +4,12 @@ package net.imglib2.trainable_segmentation.pixel_feature.filter.dog2;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractGroupFeatureOp;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureInput;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.SingleFeatures;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.SingleStatisticsFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Pair;
 import net.imglib2.util.ValuePair;
 import org.scijava.plugin.Plugin;
-import preview.net.imglib2.loops.LoopBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
