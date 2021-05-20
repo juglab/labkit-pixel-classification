@@ -12,7 +12,7 @@ public class AbstractGpuTest {
 
 	@Before
 	public void before() {
-		assumeTrue("OpencL device is not available.", GpuPool.isGpuAvailable());
+		assumeTrue("OpenCL device is not available.", GpuPool.isGpuAvailable());
 		gpu = GpuPool.borrowGpu();
 	}
 
