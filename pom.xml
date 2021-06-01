@@ -85,6 +85,7 @@
 
 		<imglib2-algorithm.version>0.12.1</imglib2-algorithm.version> <!-- make sure that imglib2-algorithm version is at least 0.12.1, older versions won't achive the same performance -->
 		<clij2_.version>2.1.4.7</clij2_.version>
+		<imglib2-blk.version>0.0.1-SNAPSHOT</imglib2-blk.version>
 	</properties>
 
 	<repositories>
@@ -117,6 +118,11 @@
 	</build>
 
 	<dependencies>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-blk</artifactId>
+			<version>${imglib2-blk.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-ops</artifactId>
