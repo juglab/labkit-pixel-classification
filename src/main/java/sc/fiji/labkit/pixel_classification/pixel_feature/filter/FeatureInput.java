@@ -34,6 +34,10 @@ import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.blk.GaussDoubleBlocked;
+import net.imglib2.blk.GaussFloatBlocked;
+import net.imglib2.blk.view.ViewBlocks;
+import net.imglib2.blk.view.ViewProps;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.algorithm.convolution.Convolution;
 import net.imglib2.algorithm.convolution.kernel.Kernel1D;
@@ -63,6 +67,8 @@ public class FeatureInput {
 		new ConcurrentHashMap<>();
 	private double[] pixelSize;
 
+	private final ViewBlocks blocks;
+
 	/**
 	 * Expected channel order XY and optional Z.
 	 */
@@ -72,6 +78,8 @@ public class FeatureInput {
 		this.original = original;
 		this.pixelSize = pixelSize;
 		this.target = new FinalInterval(targetInterval);
+		final ViewProps props = new ViewProps( original ); // TODO handle IllegalArgumentException and fall back to old behaviour
+		blocks = new ViewBlocks( props, new FloatType() );
 	}
 
 	/**
@@ -99,12 +107,72 @@ public class FeatureInput {
 	}
 
 	private RandomAccessibleInterval<DoubleType> calculateGauss(double sigma) {
-		final RandomAccessibleInterval<DoubleType> result = create(Intervals.expand(target, 2));
-		if (sigma == 0)
-			RealTypeConverters.copyFromTo(original, result);
+		final long t0 = System.currentTimeMillis();
+		final boolean USE_BLK = true;
+		final boolean BLK_DOUBLE = false;
+		if ( USE_BLK )
+		{
+			final FinalInterval paddedTarget = Intervals.expand( target, 2 );
+			final int[] targetSize = Intervals.dimensionsAsIntArray( paddedTarget );
+			final long[] targetSizeLong = Intervals.dimensionsAsLongArray( paddedTarget );
+			final int length = ( int ) Intervals.numElements( targetSizeLong );
+			final double[] destDoubles = new double[ length ];
+			final RandomAccessibleInterval< DoubleType > result = Views.translate( ArrayImgs.doubles( destDoubles, targetSizeLong ), Intervals.minAsLongArray( paddedTarget ) );
+			if ( sigma == 0 )
+			{
+				RealTypeConverters.copyFromTo( original, result );
+				final int[] srcPos = Intervals.minAsIntArray( paddedTarget );
+				final float[] destFloats = new float[ length ];
+				blocks.copy( srcPos, destFloats, targetSize);
+				for ( int i = 0; i < length; ++i )
+					destDoubles[ i ] = destFloats[ i ];
+			}
+			else
+			{
+				if ( BLK_DOUBLE )
+				{
+					GaussDoubleBlocked gauss = new GaussDoubleBlocked( scaledSigmas( sigma ) );
+					gauss.setTargetSize( targetSize );
+					final int[] srcPos = Intervals.minAsIntArray( paddedTarget );
+					final int[] srcOffset = gauss.getSourceOffset();
+					for ( int i = 0; i < srcPos.length; i++ )
+						srcPos[ i ] += srcOffset[ i ];
+					final float[] srcFloats = new float[ ( int ) Intervals.numElements( gauss.getSourceSize() ) ];
+					blocks.copy( srcPos, srcFloats, gauss.getSourceSize() );
+					final double[] srcDoubles = gauss.getSourceBuffer();
+					for ( int i = 0; i < srcFloats.length; ++i )
+						srcDoubles[ i ] = srcFloats[ i ];
+					gauss.compute( gauss.getSourceBuffer(), destDoubles );
+
+				}
+				else
+				{
+					GaussFloatBlocked gauss = new GaussFloatBlocked( scaledSigmas( sigma ) );
+					gauss.setTargetSize( targetSize );
+					final int[] srcPos = Intervals.minAsIntArray( paddedTarget );
+					final int[] srcOffset = gauss.getSourceOffset();
+					for ( int i = 0; i < srcPos.length; i++ )
+						srcPos[ i ] += srcOffset[ i ];
+					blocks.copy( srcPos, gauss.getSourceBuffer(), gauss.getSourceSize() );
+					final float[] destFloats = new float[ length ];
+					gauss.compute( gauss.getSourceBuffer(), destFloats );
+					for ( int i = 0; i < length; ++i )
+						destDoubles[ i ] = destFloats[ i ];
+				}
+			}
+			final long t1 = System.currentTimeMillis();
+			System.out.println( String.format( "derivative: %d ms,  sigma = %f", t1 - t0, sigma ) );
+			return result;
+		}
 		else
-			Gauss3.gauss(scaledSigmas(sigma), (RandomAccessible) original, result);
-		return result;
+		{
+			final RandomAccessibleInterval< DoubleType > result = create( Intervals.expand( target, 2 ) );
+			if ( sigma == 0 )
+				RealTypeConverters.copyFromTo( original, result );
+			else
+				Gauss3.gauss( scaledSigmas( sigma ), ( RandomAccessible ) original, result );
+			return result;
+		}
 	}
 
 	private double[] scaledSigmas(double sigma) {
@@ -120,6 +188,7 @@ public class FeatureInput {
 	}
 
 	private RandomAccessibleInterval<DoubleType> calculateDerivative(double sigma, int[] orders) {
+		final long t0 = System.currentTimeMillis();
 		List<Convolution<NumericType<?>>> convolutions = new ArrayList<>();
 		for (int i = 0; i < orders.length; i++) {
 			int order = orders[i];
@@ -132,6 +201,8 @@ public class FeatureInput {
 			return gauss(sigma);
 		final RandomAccessibleInterval<DoubleType> result = create(target);
 		Convolution.concat(convolutions).process(extendedGauss(sigma), result);
+		final long t1 = System.currentTimeMillis();
+		System.out.println( String.format( "derivative: %d ms,  sigma = %f, orders = %s", t1 - t0, sigma, Arrays.toString( orders ) ) );
 		return result;
 	}
 
