@@ -182,10 +182,10 @@ public class Segmenter {
 			features.count());
 		try (GpuApi scope = GpuPool.borrowGpu()) {
 			GpuImage featureStack = features.applyUseGpu(scope, image, interval);
-			GpuImage distribution = scope.create(featureStack.getDimensions(), features.count(),
+			GpuImage distribution = scope.create(featureStack.getDimensions(), classNames.size(),
 				NativeTypeEnum.Float);
 			prediction.distribution(scope, featureStack, distribution);
-			GpuCopy.copyFromTo(featureStack, out);
+			GpuCopy.copyFromTo(distribution, out);
 		}
 	}
 

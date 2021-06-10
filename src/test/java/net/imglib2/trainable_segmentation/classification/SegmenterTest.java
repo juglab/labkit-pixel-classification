@@ -2,11 +2,14 @@
 package net.imglib2.trainable_segmentation.classification;
 
 import com.google.gson.JsonElement;
+import io.scif.img.ImgSaver;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
+import net.imglib2.img.ImgView;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.trainable_segmentation.RevampUtils;
 import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
 import net.imglib2.trainable_segmentation.pixel_feature.settings.ChannelSetting;
@@ -19,9 +22,11 @@ import net.imglib2.trainable_segmentation.Utils;
 import net.imglib2.trainable_segmentation.utils.CpuGpuRunner;
 import net.imglib2.trainable_segmentation.utils.SingletonContext;
 import net.imglib2.type.numeric.IntegerType;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Cast;
 import net.imglib2.view.Views;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -32,6 +37,7 @@ import weka.classifiers.meta.RandomCommittee;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
@@ -52,6 +58,8 @@ public class SegmenterTest {
 
 	private Img<FloatType> img = ImageJFunctions.convertFloat(Utils.loadImage("nuclei.tif"));
 
+	private Img<FloatType> expectedProbabilityMap = ImageJFunctions.convertFloat(Utils.loadImage("nucleiProbabilityMap.tif"));
+
 	private LabelRegions<String> labeling = loadLabeling("nucleiLabeling.tif");
 
 	private final Context context = SingletonContext.getInstance();
@@ -62,6 +70,14 @@ public class SegmenterTest {
 		segmenter.setUseGpu(useGpu);
 		RandomAccessibleInterval<? extends IntegerType<?>> result = segmenter.segment(img);
 		checkExpected(result, segmenter.classNames());
+	}
+
+	@Test
+	public void testPredict() {
+		Segmenter segmenter = trainClassifier();
+		segmenter.setUseGpu(useGpu);
+		RandomAccessibleInterval<? extends RealType<?>> probabilityMap = segmenter.predict(img);
+		ImgLib2Assert.assertImageEqualsRealType(expectedProbabilityMap, probabilityMap, 0.001);
 	}
 
 	private Segmenter trainClassifier() {
