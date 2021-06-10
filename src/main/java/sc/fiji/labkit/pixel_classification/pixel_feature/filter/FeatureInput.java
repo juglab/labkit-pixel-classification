@@ -30,12 +30,13 @@
 package sc.fiji.labkit.pixel_classification.pixel_feature.filter;
 
 import gnu.trove.list.array.TIntArrayList;
+import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.blk.GaussDoubleBlocked;
 import net.imglib2.blk.GaussFloatBlocked;
+import net.imglib2.blk.derivative.ConvolveDoubleBlocked;
 import net.imglib2.blk.view.ViewBlocks;
 import net.imglib2.blk.view.ViewProps;
 import net.imglib2.type.numeric.NumericType;
@@ -106,10 +107,34 @@ public class FeatureInput {
 		return gaussCache.computeIfAbsent(sigma, this::calculateGauss);
 	}
 
+	static final boolean COMPARE_RESULTS = false;
+	static final boolean USE_BLK = true;
+
 	private RandomAccessibleInterval<DoubleType> calculateGauss(double sigma) {
-		final long t0 = System.currentTimeMillis();
-		final boolean USE_BLK = true;
-		final boolean BLK_DOUBLE = false;
+		if ( COMPARE_RESULTS )
+		{
+			final RandomAccessibleInterval< DoubleType > orig = calculateGauss( sigma, false );
+			final RandomAccessibleInterval< DoubleType > fast = calculateGauss( sigma, true );
+
+			double diff = 0.0;
+			final Cursor< DoubleType > c1 = Views.flatIterable( orig ).cursor();
+			final Cursor< DoubleType > c2 = Views.flatIterable( fast ).cursor();
+			while ( c1.hasNext() )
+			{
+				final double v1 = c1.next().get();
+				final double v2 = c2.next().get();
+				diff += Math.abs( v1 - v2 );
+			}
+			if ( c2.hasNext() )
+				System.out.println( "Error!" );
+			System.out.println( "gauss " + sigma + " diff = " + diff );
+			return orig;
+		}
+		else
+			return calculateGauss( sigma, USE_BLK );
+	}
+
+	private RandomAccessibleInterval<DoubleType> calculateGauss(double sigma, final boolean USE_BLK) {
 		if ( USE_BLK )
 		{
 			final FinalInterval paddedTarget = Intervals.expand( target, 2 );
@@ -129,39 +154,18 @@ public class FeatureInput {
 			}
 			else
 			{
-				if ( BLK_DOUBLE )
-				{
-					GaussDoubleBlocked gauss = new GaussDoubleBlocked( scaledSigmas( sigma ) );
-					gauss.setTargetSize( targetSize );
-					final int[] srcPos = Intervals.minAsIntArray( paddedTarget );
-					final int[] srcOffset = gauss.getSourceOffset();
-					for ( int i = 0; i < srcPos.length; i++ )
-						srcPos[ i ] += srcOffset[ i ];
-					final float[] srcFloats = new float[ ( int ) Intervals.numElements( gauss.getSourceSize() ) ];
-					blocks.copy( srcPos, srcFloats, gauss.getSourceSize() );
-					final double[] srcDoubles = gauss.getSourceBuffer();
-					for ( int i = 0; i < srcFloats.length; ++i )
-						srcDoubles[ i ] = srcFloats[ i ];
-					gauss.compute( gauss.getSourceBuffer(), destDoubles );
-
-				}
-				else
-				{
-					GaussFloatBlocked gauss = new GaussFloatBlocked( scaledSigmas( sigma ) );
-					gauss.setTargetSize( targetSize );
-					final int[] srcPos = Intervals.minAsIntArray( paddedTarget );
-					final int[] srcOffset = gauss.getSourceOffset();
-					for ( int i = 0; i < srcPos.length; i++ )
-						srcPos[ i ] += srcOffset[ i ];
-					blocks.copy( srcPos, gauss.getSourceBuffer(), gauss.getSourceSize() );
-					final float[] destFloats = new float[ length ];
-					gauss.compute( gauss.getSourceBuffer(), destFloats );
-					for ( int i = 0; i < length; ++i )
-						destDoubles[ i ] = destFloats[ i ];
-				}
+				GaussFloatBlocked gauss = new GaussFloatBlocked( scaledSigmas( sigma ) );
+				gauss.setTargetSize( targetSize );
+				final int[] srcPos = Intervals.minAsIntArray( paddedTarget );
+				final int[] srcOffset = gauss.getSourceOffset();
+				for ( int i = 0; i < srcPos.length; i++ )
+					srcPos[ i ] += srcOffset[ i ];
+				blocks.copy( srcPos, gauss.getSourceBuffer(), gauss.getSourceSize() );
+				final float[] destFloats = new float[ length ];
+				gauss.compute( gauss.getSourceBuffer(), destFloats );
+				for ( int i = 0; i < length; ++i )
+					destDoubles[ i ] = destFloats[ i ];
 			}
-			final long t1 = System.currentTimeMillis();
-			System.out.println( String.format( "derivative: %d ms,  sigma = %f", t1 - t0, sigma ) );
 			return result;
 		}
 		else
@@ -188,22 +192,67 @@ public class FeatureInput {
 	}
 
 	private RandomAccessibleInterval<DoubleType> calculateDerivative(double sigma, int[] orders) {
-		final long t0 = System.currentTimeMillis();
-		List<Convolution<NumericType<?>>> convolutions = new ArrayList<>();
-		for (int i = 0; i < orders.length; i++) {
-			int order = orders[i];
-			if (order != 0) {
-				Kernel1D multiply = multiply(SIMPLE_KERNELS.get(order), Math.pow(pixelSize[i], -order));
-				convolutions.add(SeparableKernelConvolution.convolution1d(multiply, i));
+
+		if ( COMPARE_RESULTS )
+		{
+			final RandomAccessibleInterval< DoubleType > orig = calculateDerivative( sigma, orders, false );
+			final RandomAccessibleInterval< DoubleType > fast = calculateDerivative( sigma, orders, true );
+
+			double diff = 0.0;
+			final Cursor< DoubleType > c1 = Views.flatIterable( orig ).cursor();
+			final Cursor< DoubleType > c2 = Views.flatIterable( fast ).cursor();
+			while ( c1.hasNext() )
+			{
+				final double v1 = c1.next().get();
+				final double v2 = c2.next().get();
+				diff += Math.abs( v1 - v2 );
 			}
+			if ( c2.hasNext() )
+				System.out.println( "Error!" );
+			System.out.println( "derivative " + sigma + " " + Arrays.toString( orders ) + " diff = " + diff );
+			return orig;
 		}
-		if (convolutions.isEmpty())
-			return gauss(sigma);
-		final RandomAccessibleInterval<DoubleType> result = create(target);
-		Convolution.concat(convolutions).process(extendedGauss(sigma), result);
-		final long t1 = System.currentTimeMillis();
-		System.out.println( String.format( "derivative: %d ms,  sigma = %f, orders = %s", t1 - t0, sigma, Arrays.toString( orders ) ) );
-		return result;
+		else
+			return calculateDerivative( sigma, orders, USE_BLK );
+	}
+
+	private RandomAccessibleInterval<DoubleType> calculateDerivative(double sigma, int[] orders, final boolean USE_BLK) {
+		final RandomAccessibleInterval< DoubleType > gauss = extendedGauss( sigma );
+		if ( USE_BLK )
+		{
+			final int[] targetSize = Intervals.dimensionsAsIntArray( target );
+			final long[] targetSizeLong = Intervals.dimensionsAsLongArray( target );
+			final int length = ( int ) Intervals.numElements( targetSizeLong );
+			final double[] destDoubles = new double[ length ];
+			final RandomAccessibleInterval< DoubleType > result = Views.translate( ArrayImgs.doubles( destDoubles, targetSizeLong ), Intervals.minAsLongArray( target ) );
+
+			final Kernel1D[] kernels = derivativeKernels( orders, pixelSize );
+			ConvolveDoubleBlocked convolve = new ConvolveDoubleBlocked( kernels );
+			convolve.setTargetSize( targetSize );
+			final ViewBlocks< DoubleType > gaussBlocks = new ViewBlocks<>( new ViewProps( gauss ), new DoubleType() );
+			final int[] srcPos = Intervals.minAsIntArray( target );
+			final int[] srcOffset = convolve.getSourceOffset();
+			for ( int i = 0; i < srcPos.length; i++ )
+				srcPos[ i ] += srcOffset[ i ];
+			gaussBlocks.copy( srcPos, convolve.getSourceBuffer(), convolve.getSourceSize() );
+			convolve.compute( convolve.getSourceBuffer(), destDoubles );
+
+			return result;
+		}
+		else
+		{
+			List<Convolution<NumericType<?>>> convolutions = new ArrayList<>();
+			final Kernel1D[] kernels = derivativeKernels( orders, pixelSize );
+			for ( int i = 0; i < kernels.length; i++ )
+				if ( kernels[ i ] != null )
+					convolutions.add( SeparableKernelConvolution.convolution1d( kernels[ i ], i ) );
+			if (convolutions.isEmpty())
+				return gauss(sigma);
+			final RandomAccessibleInterval<DoubleType> result = create(target);
+			Convolution.concat(convolutions).process(gauss, result);
+
+			return result;
+		}
 	}
 
 	static List<Kernel1D> SIMPLE_KERNELS = Arrays.asList(
@@ -211,13 +260,30 @@ public class FeatureInput {
 		Kernel1D.centralAsymmetric(0.5, 0, -0.5),
 		Kernel1D.centralAsymmetric(1, -2, 1));
 
-	private Kernel1D multiply(Kernel1D kernel1D, double scaleFactor) {
+	private static Kernel1D[] derivativeKernels( final int[] orders, final double[] pixelSize )
+	{
+		final int n = orders.length;
+		final Kernel1D[] kernels = new Kernel1D[ n ];
+		for ( int d = 0; d < n; d++ )
+		{
+			final int order = orders[ d ];
+			if ( order == 0 )
+				continue;
+			else if ( order > 2 || order < 0 )
+				throw new IllegalArgumentException();
+			else
+				kernels[ d ] = multiply( SIMPLE_KERNELS.get( order ), Math.pow( pixelSize[ d ], -order ) );
+		}
+		return kernels;
+	}
+
+	private static Kernel1D multiply(Kernel1D kernel1D, double scaleFactor) {
 		double[] fullKernel = multiply(kernel1D.fullKernel(), scaleFactor);
 		int originIndex = (int) -kernel1D.min();
 		return Kernel1D.asymmetric(fullKernel, originIndex);
 	}
 
-	private double[] multiply(double[] array, double scaleFactor) {
+	private static double[] multiply(double[] array, double scaleFactor) {
 		double[] result = new double[array.length];
 		for (int i = 0; i < array.length; i++)
 			result[i] = array[i] * scaleFactor;
