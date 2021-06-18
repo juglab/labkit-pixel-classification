@@ -3,12 +3,9 @@ package net.imglib2.trainable_segmentation.gpu.api;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.haesleinhuepf.clij2.CLIJ2;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
-import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.After;
 import org.junit.Before;
@@ -29,8 +26,8 @@ public class DefaultGpuApiTest {
 
 	@Before
 	public void before() {
-		assumeTrue(DefaultGpuApi.isDeviceAvailable(null));
-		gpu = new DefaultGpuApi(null);
+		assumeTrue(DefaultGpuApi.isDeviceAvailable());
+		gpu = new DefaultGpuApi(0);
 	}
 
 	@After

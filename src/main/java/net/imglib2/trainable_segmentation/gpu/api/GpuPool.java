@@ -1,35 +1,56 @@
 
 package net.imglib2.trainable_segmentation.gpu.api;
 
+import net.haesleinhuepf.clij.CLIJ;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+
+/**
+ * A pool of {@link DefaultGpuApi}.
+ * <p>
+ * Which OpenCL devices are used and how threads should access it in parallel
+ * can be configure by an environment variable "LABKIT_OPENCL_DEVICES".
+ * <p>
+ * Possible configurations are for example:
+ * <ul>
+ *     <li>"10 NVIDIA", 10 threads can access the NVIDIA CPU in parallel.</li>
+ *     <li>"2 Intel; 4 NVIDIA", 2 threads should use the Intel GPU, 4 threads the NVIDIA GPU.</li>
+ *     <li>"12 *", 12 threads may access whatever GPU is available.</li>
+ *     <li>"12 device_id:0; 12 device_id:1", 12 threads should use the 1st GPU, 12 threads should use the 2nd GPU.</li>
+ * </ul>
+ */
 public class GpuPool {
 
-	private static final String OPEN_CL_DEVICE_NAME = null;
-
-	private static final int NUMBER_OF_OPENCL_CONTEXT_USED = 4;
+	private final BlockingDeque<Integer> deviceIds;
 
 	private final GenericObjectPool<DefaultGpuApi> pool;
 
-	private static final GpuPool POOL = initializePool();
+	private static final GpuPool POOL = new GpuPool();
 
-	private static GpuPool initializePool() {
-		return DefaultGpuApi.isDeviceAvailable(OPEN_CL_DEVICE_NAME) ? new GpuPool() : null;
-	}
-
+	/**
+	 * Borrow a {@link GpuApi} from the pool. It must be return after use by simply
+	 * calling the {@link GpuApi#close()} method.
+	 */
 	public static GpuApi borrowGpu() {
 		if (!isGpuAvailable())
-			throw new IllegalStateException("No OpenCL device is available. " + OPEN_CL_DEVICE_NAME);
+			throw new IllegalStateException("No OpenCL device is available.");
 		return POOL.gpu();
 	}
 
 	private GpuPool() {
 		GenericObjectPoolConfig<DefaultGpuApi> config = new GenericObjectPoolConfig<>();
-		config.setMaxTotal(NUMBER_OF_OPENCL_CONTEXT_USED);
+		deviceIds = new LinkedBlockingDeque<>(initializeDeviceIds());
+		System.out.println("OpenCL device used: " + deviceIds);
+		config.setMaxTotal(deviceIds.size());
 		config.setMinIdle(0);
 		config.setMinEvictableIdleTimeMillis(2000);
 		config.setTimeBetweenEvictionRunsMillis(500);
@@ -37,6 +58,10 @@ public class GpuPool {
 		Runtime.getRuntime().addShutdownHook(new Thread(pool::close));
 	}
 
+	/**
+	 * Borrow a {@link GpuApi} from the pool. It must be return after use by simply
+	 * calling the {@link GpuApi#close()} method.
+	 */
 	public GpuApi gpu() {
 		try {
 			DefaultGpuApi gpu = pool.borrowObject();
@@ -50,20 +75,36 @@ public class GpuPool {
 		}
 	}
 
+	/**
+	 * Returns true if the {@link GpuPool} can give access to available GPUs.
+	 */
 	public static boolean isGpuAvailable() {
-		return POOL != null;
+		return size() > 0;
 	}
 
-	private static class MyObjectFactory implements PooledObjectFactory<DefaultGpuApi> {
+	/**
+	 * The number of {@link GpuApi} objects that can be borrowed from the pool.
+	 */
+	public static int size() {
+		return POOL.pool.getMaxTotal();
+	}
+
+	private class MyObjectFactory implements PooledObjectFactory<DefaultGpuApi> {
 
 		@Override
 		public PooledObject<DefaultGpuApi> makeObject() throws Exception {
-			return new DefaultPooledObject<>(new DefaultGpuApi(OPEN_CL_DEVICE_NAME));
+			int deviceId = deviceIds.take();
+			System.out.println("Create gpu context for device: " + deviceId);
+			return new DefaultPooledObject<>(new DefaultGpuApi(deviceId));
 		}
 
 		@Override
-		public void destroyObject(PooledObject<DefaultGpuApi> pooledObject) {
-			pooledObject.getObject().close();
+		public void destroyObject(PooledObject<DefaultGpuApi> pooledObject) throws Exception {
+			DefaultGpuApi gpuApi = pooledObject.getObject();
+			gpuApi.close();
+			int deviceId = gpuApi.getOpenClDeviceId();
+			System.out.println("Return context for device: " + deviceId);
+			deviceIds.put(deviceId);
 		}
 
 		@Override
@@ -80,5 +121,71 @@ public class GpuPool {
 		public void passivateObject(PooledObject<DefaultGpuApi> pooledObject) {
 
 		}
+	}
+
+	// ===============================================================================
+
+	/**
+	 * Returns a list of indices. The indices refer to the OpenCl device at the
+	 * respective location in the list returned by {@code CLIJ.getAvailableDeviceNames()}.
+	 * Each index should appear in the list several times. The number of times
+	 * an index appears in the returned list, should define the number of {@link GpuApi}
+	 * instances this GpuPool creates and distributes at the same time for this devices.
+	 */
+	private static List<Integer> initializeDeviceIds() {
+		String configString = System.getenv("LABKIT_OPENCL_DEVICES");
+		List<String> availableDeviceNames = CLIJ.getAvailableDeviceNames();
+		if(availableDeviceNames == null || availableDeviceNames.isEmpty())
+			return Collections.emptyList();
+		if(configString == null || configString.isEmpty())
+			return defaultOpenClDeviceIds(availableDeviceNames);
+		return parseOpenClConfigString(configString, availableDeviceNames);
+
+	}
+
+	static List<Integer> parseOpenClConfigString(String configString, List<String> availableDeviceName) {
+		List<Integer> result = new ArrayList<>();
+		for(String config : configString.split(";")) {
+			config = config.trim();
+			int space = config.indexOf(" ");
+			String first = config.substring(0, space);
+			String second = config.substring(space + 1).trim();
+			result.addAll(Collections.nCopies(Integer.parseInt(first), findOpenClDeviceId(second, availableDeviceName)));
+		}
+		return result;
+	}
+
+	static List<Integer> defaultOpenClDeviceIds(List<String> availableDeviceNames) {
+		int deviceIndex = defaultOpenCLDeviceId(availableDeviceNames);
+		CLIJ clij = new CLIJ(deviceIndex);
+		try {
+			long memory = clij.getGPUMemoryInBytes();
+			int instances = (int) (memory / 500_000_000);
+			return Collections.nCopies(instances, deviceIndex);
+		}
+		finally {
+			clij.close();
+		}
+	}
+
+	static int findOpenClDeviceId(String id, List<String> availableDeviceNames) {
+		// parse ids like "device_id:2"
+		if(id.startsWith("device_id:"))
+			return Integer.parseInt(id.substring("device_id:".length()));
+		// return the first id that isn't a cpu device
+		if(id.equals("*"))
+			return defaultOpenCLDeviceId(availableDeviceNames);
+		// return first device that contains the string
+		for(int i = 0; i < availableDeviceNames.size(); i++)
+			if(availableDeviceNames.get(i).contains(id))
+				return i;
+		throw new RuntimeException("No such OpenCL device found: " + id);
+	}
+
+	private static int defaultOpenCLDeviceId(List<String> availableDeviceNames) {
+		for (int i = 0; i < availableDeviceNames.size(); i++)
+			if(!availableDeviceNames.get(i).contains("CPU"))
+				return i;
+		return 0;
 	}
 }

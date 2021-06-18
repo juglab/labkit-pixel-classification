@@ -16,34 +16,31 @@ import java.util.function.Supplier;
 
 public class DefaultGpuApi implements GpuApi {
 
+	private final int deviceId;
+
 	private final CLIJ2 clij;
 
 	private final ClearCLBufferPool pool;
 
 	private final static Set<ClearCLBufferPool> POOLS = new CopyOnWriteArraySet<>();
 
-	DefaultGpuApi(String openClDeviceName) {
-		this.clij = createCLIJ2(openClDeviceName);
+	DefaultGpuApi(int deviceId) {
+		this.deviceId = deviceId;
+		this.clij = createCLIJ2(deviceId);
 		this.pool = new ClearCLBufferPool(clij.getCLIJ().getClearCLContext());
 		POOLS.add(pool);
 	}
 
-	public static synchronized CLIJ2 createCLIJ2(String openClDeviceName) {
-		return new CLIJ2(new CLIJ(openClDeviceName));
+	public int getOpenClDeviceId() {
+		return deviceId;
 	}
 
-	public static boolean isDeviceAvailable(String openClDeviceName) {
-		try (ClearCL clearCL = new ClearCL(new ClearCLBackendJOCL())) {
-			for (ClearCLDevice device : clearCL.getAllDevices()) {
-				if (openClDeviceName == null || device.getName().contains(openClDeviceName)) {
-					return true;
-				}
-			}
-			return false;
-		}
-		catch (Throwable e) {
-			return false;
-		}
+	public static synchronized CLIJ2 createCLIJ2(int deviceId) {
+		return new CLIJ2(new CLIJ(deviceId));
+	}
+
+	public static boolean isDeviceAvailable() {
+		return CLIJ.getAvailableDeviceNames().isEmpty();
 	}
 
 	@Override
