@@ -11,7 +11,7 @@
 
 	<groupId>net.imglib2</groupId>
 	<artifactId>imglib2-trainable-segmentation</artifactId>
-	<version>0.1.9-SNAPSHOT</version>
+	<version>0.1.10-SNAPSHOT</version>
 
 	<name>ImgLib2 Trainable Segmentation</name>
 	<description>Trainable segmentation features implemented with imglib2.</description>
