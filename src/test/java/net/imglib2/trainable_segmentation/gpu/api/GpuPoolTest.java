@@ -55,15 +55,6 @@ public class GpuPoolTest {
 	}
 
 	@Test
-	public void testDefaultDeviceSettings() {
-		ClearCL clearCL = new ClearCL(ClearCLBackends.getBestBackend());
-		ClearCLDevice device = clearCL.getBestCPUDevice();
-		System.out.println(device.getName());
-		System.out.println(device.getGlobalMemorySizeInBytes() / 500_000_000);
-		clearCL.close();
-	}
-
-	@Test
 	public void test() {
 		assertEquals(0, GpuPool.findOpenClDeviceId("*", Arrays.asList("CPU")));
 		assertEquals(0, GpuPool.findOpenClDeviceId("*", Arrays.asList("GPU")));

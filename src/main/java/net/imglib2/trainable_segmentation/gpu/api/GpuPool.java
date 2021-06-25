@@ -134,13 +134,22 @@ public class GpuPool {
 	 */
 	private static List<Integer> initializeDeviceIds() {
 		String configString = System.getenv("LABKIT_OPENCL_DEVICES");
-		List<String> availableDeviceNames = CLIJ.getAvailableDeviceNames();
-		if(availableDeviceNames == null || availableDeviceNames.isEmpty())
+		List<String> availableDeviceNames = getAvailableDeviceNames();
+		if (availableDeviceNames == null || availableDeviceNames.isEmpty())
 			return Collections.emptyList();
-		if(configString == null || configString.isEmpty())
+		if (configString == null || configString.isEmpty())
 			return defaultOpenClDeviceIds(availableDeviceNames);
 		return parseOpenClConfigString(configString, availableDeviceNames);
 
+	}
+
+	private static List<String> getAvailableDeviceNames() {
+		try {
+			return CLIJ.getAvailableDeviceNames();
+		}
+		catch (Throwable e) {
+			return Collections.emptyList();
+		}
 	}
 
 	static List<Integer> parseOpenClConfigString(String configString, List<String> availableDeviceName) {

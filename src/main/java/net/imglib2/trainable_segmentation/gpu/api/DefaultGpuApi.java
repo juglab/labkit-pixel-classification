@@ -40,7 +40,12 @@ public class DefaultGpuApi implements GpuApi {
 	}
 
 	public static boolean isDeviceAvailable() {
-		return CLIJ.getAvailableDeviceNames().isEmpty();
+		try {
+			return CLIJ.getAvailableDeviceNames().isEmpty();
+		}
+		catch (Throwable e) {
+			return false;
+		}
 	}
 
 	@Override
