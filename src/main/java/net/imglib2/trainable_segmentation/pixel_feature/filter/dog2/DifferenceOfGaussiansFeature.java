@@ -1,8 +1,6 @@
 
 package net.imglib2.trainable_segmentation.pixel_feature.filter.dog2;
 
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractFeatureOp;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractGroupFeatureOp;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
 import net.imglib2.trainable_segmentation.pixel_feature.filter.SingleFeatures;
@@ -18,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class, label = "difference of gaussians (group)")
+@Plugin(type = FeatureOp.class, label = "difference of gaussians (for each sigma)")
 public class DifferenceOfGaussiansFeature extends AbstractGroupFeatureOp {
 
 	private List<Pair<Double, Double>> sigmaPairs(List<Double> sigmas) {

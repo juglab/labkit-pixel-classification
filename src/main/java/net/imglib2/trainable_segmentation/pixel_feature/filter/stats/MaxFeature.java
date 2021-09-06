@@ -9,7 +9,7 @@ import org.scijava.plugin.Plugin;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Plugin(type = FeatureOp.class, label = "max filters (group)")
+@Plugin(type = FeatureOp.class, label = "max filters (for each sigma)")
 public class MaxFeature extends AbstractGroupFeatureOp {
 
 	@Override

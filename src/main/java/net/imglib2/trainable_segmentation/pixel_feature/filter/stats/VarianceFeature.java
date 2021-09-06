@@ -9,7 +9,7 @@ import org.scijava.plugin.Plugin;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Plugin(type = FeatureOp.class, label = "variance filters (group)")
+@Plugin(type = FeatureOp.class, label = "variance filters (for each sigma)")
 public class VarianceFeature extends AbstractGroupFeatureOp {
 
 	@Override

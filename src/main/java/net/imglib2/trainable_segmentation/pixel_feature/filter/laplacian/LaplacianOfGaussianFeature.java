@@ -5,7 +5,7 @@ import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractSigmaGrou
 import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
 import org.scijava.plugin.Plugin;
 
-@Plugin(type = FeatureOp.class, label = "laplacian of gaussian (group)")
+@Plugin(type = FeatureOp.class, label = "laplacian of gaussian (for each sigma)")
 public class LaplacianOfGaussianFeature extends AbstractSigmaGroupFeatureOp {
 
 	public LaplacianOfGaussianFeature() {

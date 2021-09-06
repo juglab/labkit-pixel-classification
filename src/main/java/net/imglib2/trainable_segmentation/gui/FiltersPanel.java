@@ -4,9 +4,7 @@ package net.imglib2.trainable_segmentation.gui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
@@ -61,7 +59,7 @@ public class FiltersPanel extends JPanel {
 		sections = new ArrayList<>();
 		AccordionPanel accordion = new AccordionPanel();
 		accordion.addSection(newSection(fs, "Basic Filters", basicFilters, true));
-		accordion.addSection(newSection(fs, "Advanced Filters", advancedFilters, false));
+		accordion.addSection(newSection(fs, "Customizable Filters", advancedFilters, false));
 		accordion.addSection(newSection(fs, "Deprecated Filters", deprecatedFilters, false));
 		add(accordion);
 	}

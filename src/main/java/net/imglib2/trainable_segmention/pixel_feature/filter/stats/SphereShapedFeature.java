@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * @author Matthias Arzt
  */
 @Deprecated
-@Plugin(type = FeatureOp.class, label = "Min/Max/Mean/Median/Variance (Group)")
+@Plugin(type = FeatureOp.class, label = "Min/Max/Mean/Median/Variance (for each sigma)")
 public class SphereShapedFeature extends AbstractGroupFeatureOp {
 
 	@Parameter(choices = {

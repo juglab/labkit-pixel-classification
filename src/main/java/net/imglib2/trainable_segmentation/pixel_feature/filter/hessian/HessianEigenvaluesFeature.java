@@ -9,7 +9,7 @@ import org.scijava.plugin.Plugin;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class, label = "hessian eigenvalues (group)")
+@Plugin(type = FeatureOp.class, label = "hessian eigenvalues (for each sigma)")
 public class HessianEigenvaluesFeature extends AbstractSigmaGroupFeatureOp {
 
 	public HessianEigenvaluesFeature() {
