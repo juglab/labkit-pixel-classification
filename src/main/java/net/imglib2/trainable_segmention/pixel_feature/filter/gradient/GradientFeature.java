@@ -9,7 +9,7 @@ import org.scijava.plugin.Plugin;
  * @author Matthias Arzt
  */
 @Deprecated
-@Plugin(type = FeatureOp.class, label = "Gradient (Group)")
+@Plugin(type = FeatureOp.class, label = "Gradient (for each sigma)")
 public class GradientFeature extends AbstractSigmaGroupFeatureOp {
 
 	public GradientFeature() {

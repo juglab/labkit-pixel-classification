@@ -9,7 +9,7 @@ import org.scijava.plugin.Plugin;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Plugin(type = FeatureOp.class, label = "mean filters (group)")
+@Plugin(type = FeatureOp.class, label = "mean filters (for each sigma)")
 public class MeanFeature extends AbstractGroupFeatureOp {
 
 	@Override

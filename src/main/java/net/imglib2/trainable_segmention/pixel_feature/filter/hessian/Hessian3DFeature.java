@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * @author Matthias Arzt
  */
 @Deprecated
-@Plugin(type = FeatureOp.class, label = "Hessian (Group)")
+@Plugin(type = FeatureOp.class, label = "Hessian (for each sigma)")
 public class Hessian3DFeature extends AbstractGroupFeatureOp {
 
 	@Parameter

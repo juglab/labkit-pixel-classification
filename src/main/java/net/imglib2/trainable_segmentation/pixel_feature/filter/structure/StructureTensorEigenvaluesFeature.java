@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Plugin(type = FeatureOp.class, label = "structure tensor eigenvalues (group)")
+@Plugin(type = FeatureOp.class, label = "structure tensor eigenvalues (for each sigma)")
 public class StructureTensorEigenvaluesFeature extends AbstractGroupFeatureOp {
 
 	@Override

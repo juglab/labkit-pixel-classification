@@ -9,7 +9,7 @@ import org.scijava.plugin.Plugin;
  * @author Matthias Arzt
  */
 @Deprecated
-@Plugin(type = FeatureOp.class, label = "Gauss (Group)")
+@Plugin(type = FeatureOp.class, label = "Gauss (for each sigma)")
 public class GaussFeature extends AbstractSigmaGroupFeatureOp {
 
 	public GaussFeature() {

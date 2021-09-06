@@ -107,7 +107,7 @@ public class FeatureSettingsUI extends JPanel {
 			dimensionsField.setSelectedItem(globalSettings.numDimensions() + "D");
 			dimensionsField.addActionListener(this::dimensionsChanged);
 			add(dimensionsField, "wrap");
-			add(new JLabel("Sigmas:"));
+			add(new JLabel("List of sigmas:"));
 			sigmasField = new JFormattedTextField(new ListOfDoubleFormatter());
 			sigmasField.setColumns(50);
 			sigmasField.setValue(globalSettings.sigmas());

@@ -8,7 +8,7 @@ import org.scijava.plugin.Plugin;
 /**
  * @author Matthias Arzt
  */
-@Plugin(type = FeatureOp.class, label = "gaussian blur (group)")
+@Plugin(type = FeatureOp.class, label = "gaussian blur (for each sigma)")
 public class GaussianBlurFeature extends AbstractSigmaGroupFeatureOp {
 
 	public GaussianBlurFeature() {

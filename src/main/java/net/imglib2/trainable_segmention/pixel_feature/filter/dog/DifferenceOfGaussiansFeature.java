@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @author Matthias Arzt
  */
 @Deprecated
-@Plugin(type = FeatureOp.class, label = "Difference of Gaussians (Group)")
+@Plugin(type = FeatureOp.class, label = "Difference of Gaussians (for each sigma)")
 public class DifferenceOfGaussiansFeature extends AbstractFeatureOp {
 
 	private List<Double> sigmas;
