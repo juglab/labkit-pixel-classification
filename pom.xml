@@ -11,7 +11,7 @@
 
 	<groupId>net.imglib2</groupId>
 	<artifactId>imglib2-trainable-segmentation</artifactId>
-	<version>0.1.11-SNAPSHOT</version>
+	<version>0.1.11</version>
 
 	<name>ImgLib2 Trainable Segmentation</name>
 	<description>Trainable segmentation features implemented with imglib2.</description>
@@ -60,7 +60,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/maarzt/imglib2-trainable-segmentation</connection>
 		<developerConnection>scm:git:git@github.com:maarzt/imglib2-trainable-segmentation</developerConnection>
-		<tag>HEAD</tag>
+		<tag>imglib2-trainable-segmentation-0.1.11</tag>
 		<url>https://github.com/maarzt/imglib2-trainable-segmentation</url>
 	</scm>
 
