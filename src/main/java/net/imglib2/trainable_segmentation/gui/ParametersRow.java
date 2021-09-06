@@ -53,6 +53,16 @@ public class ParametersRow extends JPanel {
 		JPanel btnPanel = new JPanel();
 		btnPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
+		JButton editButton = new JButton(PARAMS_ICON);
+		editButton.setFocusPainted(false);
+		editButton.setMargin(new Insets(0, 0, 0, 0));
+		editButton.setContentAreaFilled(false);
+		editButton.setBorderPainted(false);
+		editButton.setOpaque(false);
+		editButton.setToolTipText("Edit filter parameters");
+		editButton.addActionListener(this::editParameters);
+		btnPanel.add(editButton);
+
 		JButton rmButton = new JButton(RM_ICON);
 		rmButton.setFocusPainted(false);
 		rmButton.setMargin(new Insets(0, 0, 0, 0));
@@ -63,15 +73,6 @@ public class ParametersRow extends JPanel {
 		rmButton.addActionListener(this::remove);
 		btnPanel.add(rmButton);
 
-		JButton editButton = new JButton(PARAMS_ICON);
-		editButton.setFocusPainted(false);
-		editButton.setMargin(new Insets(0, 0, 0, 0));
-		editButton.setContentAreaFilled(false);
-		editButton.setBorderPainted(false);
-		editButton.setOpaque(false);
-		editButton.setToolTipText("Edit filter parameters");
-		editButton.addActionListener(this::editParameters);
-		btnPanel.add(editButton);
 		add(btnPanel, BorderLayout.EAST);
 	}
 

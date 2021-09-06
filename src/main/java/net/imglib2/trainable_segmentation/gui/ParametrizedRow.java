@@ -79,7 +79,7 @@ public class ParametrizedRow extends JPanel implements SelectableRow {
 		JPanel btnPanel = new JPanel();
 		btnPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		btnPanel.add(createButton(DUP_ICON, "Duplicate filter", this::duplicate));
-		btnPanel.add(createButton(INFO_ICON, "Filter information", this::showInfoDialog));
+		//btnPanel.add(createButton(INFO_ICON, "Filter information", this::showInfoDialog));
 		return btnPanel;
 	}
 

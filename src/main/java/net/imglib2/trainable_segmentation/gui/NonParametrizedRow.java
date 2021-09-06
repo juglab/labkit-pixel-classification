@@ -42,7 +42,8 @@ public class NonParametrizedRow extends JPanel implements SelectableRow {
 		JPanel btnPanel = new JPanel();
 		btnPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		btnPanel.add(createInfoButton());
-		add(btnPanel, BorderLayout.LINE_END);
+		//add(btnPanel, BorderLayout.LINE_END);
+		this.setPreferredSize(new Dimension(getPreferredSize().width, btnPanel.getPreferredSize().height));
 	}
 
 	private JButton createInfoButton() {
