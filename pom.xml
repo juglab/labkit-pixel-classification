@@ -70,8 +70,8 @@
 	</issueManagement>
 
 	<ciManagement>
-		<system>Travis CI</system>
-		<url>https://travis-ci.org/maarzt/imglib2-trainable-segmentation</url>
+		<system>GitHub Actions</system>
+		<url>https://github.com/maarzt/imglib2-trainable-segmentation/actions</url>
 	</ciManagement>
 
 	<properties>
