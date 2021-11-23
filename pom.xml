@@ -32,8 +32,9 @@
 		<developer>
 			<id>maarzt</id>
 			<name>Matthias Arzt</name>
-			<url>https://imagej.net/User:Maarzt</url>
+			<url>https://imagej.net/people/Maarzt</url>
 			<roles>
+				<role>founder</role>
 				<role>lead</role>
 				<role>developer</role>
 				<role>debugger</role>
@@ -46,7 +47,8 @@
 
 	<contributors>
  		<contributor>
-			<name>None</name>
+			<name>Tobias Pietzsch</name>
+			<url>https://imagej.net/people/tpietzsch</url>
 		</contributor>
 	</contributors>
 
