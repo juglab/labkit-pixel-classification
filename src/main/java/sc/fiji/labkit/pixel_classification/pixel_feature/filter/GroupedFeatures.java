@@ -1,19 +1,19 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter;
 
-import net.imglib2.trainable_segmentation.pixel_feature.filter.dog2.DifferenceOfGaussiansFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.gauss.GaussianBlurFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.gradient.GaussianGradientMagnitudeFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.hessian.HessianEigenvaluesFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.laplacian.LaplacianOfGaussianFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.MaxFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.MeanFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.VarianceFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.LipschitzFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.GaborFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.MinFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.structure.StructureTensorEigenvaluesFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.dog2.DifferenceOfGaussiansFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.gauss.GaussianBlurFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.gradient.GaussianGradientMagnitudeFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.hessian.HessianEigenvaluesFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.laplacian.LaplacianOfGaussianFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats.MaxFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats.MeanFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats.VarianceFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.lipschitz.LipschitzFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.gabor.GaborFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats.MinFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.structure.StructureTensorEigenvaluesFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSetting;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;

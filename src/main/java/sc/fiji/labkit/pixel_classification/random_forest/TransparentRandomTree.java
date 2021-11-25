@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.random_forest;
+package sc.fiji.labkit.pixel_classification.random_forest;
 
 import weka.core.Instance;
 

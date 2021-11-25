@@ -1,8 +1,8 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter.laplacian;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.laplacian;
 
-import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractSigmaGroupFeatureOp;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.AbstractSigmaGroupFeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureOp;
 import org.scijava.plugin.Plugin;
 
 @Plugin(type = FeatureOp.class, label = "laplacian of gaussian (for each sigma)")

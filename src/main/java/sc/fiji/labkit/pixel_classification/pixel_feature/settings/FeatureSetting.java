@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.settings;
+package sc.fiji.labkit.pixel_classification.pixel_feature.settings;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -8,7 +8,7 @@ import com.google.gson.JsonPrimitive;
 import net.imagej.ops.OpInfo;
 import net.imagej.ops.OpService;
 import net.imglib2.util.Cast;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureOp;
 import org.scijava.Context;
 import org.scijava.command.CommandInfo;
 import org.scijava.module.Module;
@@ -156,10 +156,20 @@ public class FeatureSetting {
 	public static FeatureSetting fromJson(JsonElement element) {
 		JsonObject o = element.getAsJsonObject();
 		String className = o.get("class").getAsString();
+		className = updateDeprecatedPackageNames(className);
 		FeatureSetting fs = FeatureSetting.fromClass(classForName(className));
 		for (String p : fs.parameters())
 			fs.setParameter(p, new Gson().fromJson(o.get(p), fs.getParameterType(p)));
 		return fs;
+	}
+
+	private static String updateDeprecatedPackageNames( String className )
+	{
+		if( className.startsWith( "net.imglib2.trainable_segmention.pixel_feature.filter" ) )
+			return className.replace( "net.imglib2.trainable_segmention.pixel_feature.filter", "sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated" );
+		if( className.startsWith( "net.imglib2.trainable_segmentation.pixel_feature.filter" ) )
+			return className.replace( "net.imglib2.trainable_segmentation.pixel_feature.filter", "sc.fiji.labkit.pixel_classification.pixel_feature.filter" );
+		return className;
 	}
 
 	public JsonElement toJsonTree() {

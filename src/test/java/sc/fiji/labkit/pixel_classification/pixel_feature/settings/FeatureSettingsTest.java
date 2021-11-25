@@ -1,8 +1,8 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.settings;
+package sc.fiji.labkit.pixel_classification.pixel_feature.settings;
 
 import com.google.gson.JsonElement;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.SingleFeatures;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.SingleFeatures;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

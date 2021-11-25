@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.gpu.api;
+package sc.fiji.labkit.pixel_classification.gpu.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,7 +1,7 @@
 
-package net.imglib2.trainable_segmentation.utils;
+package sc.fiji.labkit.pixel_classification.utils;
 
-import net.imglib2.trainable_segmentation.gpu.api.GpuPool;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuPool;
 import org.junit.runner.Runner;
 import org.junit.runners.Suite;
 import org.junit.runners.model.InitializationError;

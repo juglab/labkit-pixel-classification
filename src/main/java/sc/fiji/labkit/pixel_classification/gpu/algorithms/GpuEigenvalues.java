@@ -1,9 +1,9 @@
 
-package net.imglib2.trainable_segmentation.gpu.algorithms;
+package sc.fiji.labkit.pixel_classification.gpu.algorithms;
 
-import net.imglib2.trainable_segmentation.gpu.api.GpuPixelWiseOperation;
-import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
-import net.imglib2.trainable_segmentation.gpu.api.GpuView;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuPixelWiseOperation;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuApi;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuView;
 
 import java.util.List;
 

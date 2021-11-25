@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.gpu.algorithms;
+package sc.fiji.labkit.pixel_classification.gpu.algorithms;
 
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.converters.implementations.RandomAccessibleIntervalToClearCLBufferConverter;
@@ -10,13 +10,13 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.RandomImgs;
-import net.imglib2.trainable_segmentation.Utils;
-import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
-import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
-import net.imglib2.trainable_segmentation.gpu.api.GpuPool;
-import net.imglib2.trainable_segmentation.gpu.api.GpuViews;
-import net.imglib2.trainable_segmentation.gpu.compute_cache.GpuComputeCache;
-import net.imglib2.trainable_segmentation.gpu.compute_cache.GpuGaussContent;
+import sc.fiji.labkit.pixel_classification.Utils;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuApi;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuImage;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuPool;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuViews;
+import sc.fiji.labkit.pixel_classification.gpu.compute_cache.GpuComputeCache;
+import sc.fiji.labkit.pixel_classification.gpu.compute_cache.GpuGaussContent;
 import net.imglib2.type.numeric.real.FloatType;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;

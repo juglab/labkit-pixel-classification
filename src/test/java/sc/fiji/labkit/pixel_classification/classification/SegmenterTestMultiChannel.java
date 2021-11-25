@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.classification;
+package sc.fiji.labkit.pixel_classification.classification;
 
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccess;
@@ -11,13 +11,13 @@ import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.roi.labeling.LabelingType;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmentation.Utils;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.SingleFeatures;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.ChannelSetting;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
-import net.imglib2.trainable_segmentation.utils.SingletonContext;
-import net.imglib2.trainable_segmentation.utils.views.FastViews;
+import sc.fiji.labkit.pixel_classification.Utils;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.SingleFeatures;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.ChannelSetting;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSettings;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.GlobalSettings;
+import sc.fiji.labkit.pixel_classification.utils.SingletonContext;
+import sc.fiji.labkit.pixel_classification.utils.views.FastViews;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;

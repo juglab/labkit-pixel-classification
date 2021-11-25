@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.gpu.algorithms;
+package sc.fiji.labkit.pixel_classification.gpu.algorithms;
 
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.Interval;
@@ -7,9 +7,9 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmentation.gpu.api.AbstractGpuTest;
-import net.imglib2.trainable_segmentation.gpu.api.GpuView;
-import net.imglib2.trainable_segmentation.gpu.api.GpuViews;
+import sc.fiji.labkit.pixel_classification.gpu.api.AbstractGpuTest;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuView;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuViews;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import org.junit.Test;

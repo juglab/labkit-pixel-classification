@@ -1,8 +1,8 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter.gauss;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.gauss;
 
-import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.GroupedFeatures;
+import sc.fiji.labkit.pixel_classification.pixel_feature.calculator.FeatureCalculator;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.GroupedFeatures;
 import org.junit.Test;
 
 import java.util.Arrays;

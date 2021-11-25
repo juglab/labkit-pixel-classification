@@ -1,13 +1,13 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter.identity;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.identity;
 
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmentation.gpu.api.GpuCopy;
-import net.imglib2.trainable_segmentation.gpu.GpuFeatureInput;
-import net.imglib2.trainable_segmentation.gpu.api.GpuView;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractFeatureOp;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureInput;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuCopy;
+import sc.fiji.labkit.pixel_classification.gpu.GpuFeatureInput;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuView;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.AbstractFeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureInput;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.scijava.plugin.Plugin;

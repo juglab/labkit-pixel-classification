@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.performance;
+package sc.fiji.labkit.pixel_classification.performance;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.cache.img.CachedCellImg;
@@ -7,10 +7,10 @@ import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions;
 import net.imglib2.img.Img;
-import net.imglib2.trainable_segmentation.Utils;
-import net.imglib2.trainable_segmentation.classification.Segmenter;
-import net.imglib2.trainable_segmentation.gson.GsonUtils;
-import net.imglib2.trainable_segmentation.utils.SingletonContext;
+import sc.fiji.labkit.pixel_classification.Utils;
+import sc.fiji.labkit.pixel_classification.classification.Segmenter;
+import sc.fiji.labkit.pixel_classification.gson.GsonUtils;
+import sc.fiji.labkit.pixel_classification.utils.SingletonContext;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;

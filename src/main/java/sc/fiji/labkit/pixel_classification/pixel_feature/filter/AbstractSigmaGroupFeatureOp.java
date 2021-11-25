@@ -1,7 +1,7 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter;
 
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSetting;
 
 import java.util.ArrayList;
 import java.util.List;

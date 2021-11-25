@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter;
 
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -12,15 +12,15 @@ import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.trainable_segmentation.Utils;
-import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmention.pixel_feature.filter.dog.DifferenceOfGaussiansFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gradient.SobelGradientFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.hessian.HessianFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SphereShapedFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
+import sc.fiji.labkit.pixel_classification.Utils;
+import sc.fiji.labkit.pixel_classification.pixel_feature.calculator.FeatureCalculator;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.dog.DifferenceOfGaussiansFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.gauss.GaussFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.gradient.SobelGradientFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.hessian.HessianFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.stats.SingleSphereShapedFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.stats.SphereShapedFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSetting;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Ignore;
 import org.junit.Test;

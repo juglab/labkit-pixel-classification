@@ -1,12 +1,12 @@
 
-package net.imglib2.trainable_segmention.pixel_feature.filter.gabor;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.gabor;
 
 import ij.ImagePlus;
 import net.imagej.ops.OpService;
-import net.imglib2.trainable_segmentation.Utils;
+import sc.fiji.labkit.pixel_classification.Utils;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.trainable_segmentation.utils.SingletonContext;
+import sc.fiji.labkit.pixel_classification.utils.SingletonContext;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
 

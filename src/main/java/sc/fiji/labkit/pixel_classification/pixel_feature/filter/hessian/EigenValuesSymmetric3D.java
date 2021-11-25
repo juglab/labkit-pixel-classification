@@ -1,10 +1,10 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter.hessian;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.hessian;
 
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.linalg.eigen.EigenValues;
-import net.imglib2.trainable_segmentation.utils.CubicEquation;
+import sc.fiji.labkit.pixel_classification.utils.CubicEquation;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;

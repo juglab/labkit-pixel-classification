@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.classification;
+package sc.fiji.labkit.pixel_classification.classification;
 
 import hr.irb.fastRandomForest.FastRandomForest;
 import ij.Prefs;
@@ -7,11 +7,11 @@ import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalculator;
+import sc.fiji.labkit.pixel_classification.pixel_feature.calculator.FeatureCalculator;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmentation.utils.views.FastViews;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSettings;
+import sc.fiji.labkit.pixel_classification.utils.views.FastViews;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;

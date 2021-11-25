@@ -1,16 +1,16 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter;
 
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.trainable_segmentation.RevampUtils;
-import net.imglib2.trainable_segmentation.Utils;
-import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmentation.utils.CpuGpuRunner;
+import sc.fiji.labkit.pixel_classification.RevampUtils;
+import sc.fiji.labkit.pixel_classification.Utils;
+import sc.fiji.labkit.pixel_classification.pixel_feature.calculator.FeatureCalculator;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSetting;
+import sc.fiji.labkit.pixel_classification.utils.CpuGpuRunner;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;

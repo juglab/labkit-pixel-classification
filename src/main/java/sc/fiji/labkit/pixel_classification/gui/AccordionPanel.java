@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.gui;
+package sc.fiji.labkit.pixel_classification.gui;
 
 import net.miginfocom.swing.MigLayout;
 

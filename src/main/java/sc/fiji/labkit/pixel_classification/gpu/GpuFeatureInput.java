@@ -1,15 +1,15 @@
 
-package net.imglib2.trainable_segmentation.gpu;
+package sc.fiji.labkit.pixel_classification.gpu;
 
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
-import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
-import net.imglib2.trainable_segmentation.gpu.api.GpuView;
-import net.imglib2.trainable_segmentation.gpu.compute_cache.GpuComputeCache;
-import net.imglib2.trainable_segmentation.gpu.compute_cache.GpuDerivativeContent;
-import net.imglib2.trainable_segmentation.gpu.compute_cache.GpuGaussContent;
-import net.imglib2.trainable_segmentation.gpu.compute_cache.GpuOriginalContent;
-import net.imglib2.trainable_segmentation.gpu.compute_cache.GpuSecondDerivativeContent;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuApi;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuView;
+import sc.fiji.labkit.pixel_classification.gpu.compute_cache.GpuComputeCache;
+import sc.fiji.labkit.pixel_classification.gpu.compute_cache.GpuDerivativeContent;
+import sc.fiji.labkit.pixel_classification.gpu.compute_cache.GpuGaussContent;
+import sc.fiji.labkit.pixel_classification.gpu.compute_cache.GpuOriginalContent;
+import sc.fiji.labkit.pixel_classification.gpu.compute_cache.GpuSecondDerivativeContent;
 import net.imglib2.type.numeric.real.FloatType;
 
 public class GpuFeatureInput {

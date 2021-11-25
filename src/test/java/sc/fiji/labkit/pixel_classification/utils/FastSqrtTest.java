@@ -1,7 +1,7 @@
 
-package net.imglib2.trainable_segmentation.utils;
+package sc.fiji.labkit.pixel_classification.utils;
 
-import net.imglib2.trainable_segmentation.utils.FastSqrt;
+import sc.fiji.labkit.pixel_classification.utils.FastSqrt;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

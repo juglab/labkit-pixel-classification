@@ -1,23 +1,23 @@
 
-package net.imglib2.trainable_segmentation.classification;
+package sc.fiji.labkit.pixel_classification.classification;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import hr.irb.fastRandomForest.FastRandomForest;
-import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
-import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuImage;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuApi;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.*;
 import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.trainable_segmentation.gpu.api.GpuCopy;
-import net.imglib2.trainable_segmentation.gpu.api.GpuPool;
-import net.imglib2.trainable_segmentation.random_forest.CpuRandomForestPrediction;
-import net.imglib2.trainable_segmentation.gpu.random_forest.GpuRandomForestPrediction;
-import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmentation.RevampUtils;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuCopy;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuPool;
+import sc.fiji.labkit.pixel_classification.random_forest.CpuRandomForestPrediction;
+import sc.fiji.labkit.pixel_classification.gpu.random_forest.GpuRandomForestPrediction;
+import sc.fiji.labkit.pixel_classification.pixel_feature.calculator.FeatureCalculator;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSettings;
+import sc.fiji.labkit.pixel_classification.RevampUtils;
 import net.imglib2.img.Img;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;

@@ -1,7 +1,7 @@
 
-package net.imglib2.trainable_segmentation.gui;
+package sc.fiji.labkit.pixel_classification.gui;
 
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureOp;
 import org.scijava.Context;
 import org.scijava.InstantiableException;
 import org.scijava.plugin.PluginInfo;

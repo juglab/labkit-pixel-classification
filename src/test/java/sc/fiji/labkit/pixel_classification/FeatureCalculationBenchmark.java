@@ -1,14 +1,14 @@
 
-package net.imglib2.trainable_segmentation;
+package sc.fiji.labkit.pixel_classification;
 
 import net.imagej.ops.OpService;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.GroupedFeatures;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
-import net.imglib2.trainable_segmentation.utils.SingletonContext;
+import sc.fiji.labkit.pixel_classification.pixel_feature.calculator.FeatureCalculator;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.GroupedFeatures;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSetting;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSettings;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.GlobalSettings;
+import sc.fiji.labkit.pixel_classification.utils.SingletonContext;
 import net.imglib2.type.numeric.real.FloatType;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;

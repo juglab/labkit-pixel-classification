@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.classification;
+package sc.fiji.labkit.pixel_classification.classification;
 
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.composite.Composite;

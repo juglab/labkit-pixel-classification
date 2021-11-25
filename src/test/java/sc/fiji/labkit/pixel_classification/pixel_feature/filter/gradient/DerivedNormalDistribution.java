@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter.gradient;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.gradient;
 
 import preview.net.imglib2.algorithm.convolution.kernel.Kernel1D;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;

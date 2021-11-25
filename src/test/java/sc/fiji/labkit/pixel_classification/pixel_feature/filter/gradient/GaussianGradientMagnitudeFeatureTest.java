@@ -1,7 +1,7 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter.gradient;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.gradient;
 
-import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalculator;
+import sc.fiji.labkit.pixel_classification.pixel_feature.calculator.FeatureCalculator;
 import org.junit.Test;
 
 import java.util.Arrays;

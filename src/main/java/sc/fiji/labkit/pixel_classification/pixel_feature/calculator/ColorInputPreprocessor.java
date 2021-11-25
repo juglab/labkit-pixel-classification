@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.calculator;
+package sc.fiji.labkit.pixel_classification.pixel_feature.calculator;
 
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
@@ -7,8 +7,8 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
-import net.imglib2.trainable_segmentation.RevampUtils;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
+import sc.fiji.labkit.pixel_classification.RevampUtils;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.GlobalSettings;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;

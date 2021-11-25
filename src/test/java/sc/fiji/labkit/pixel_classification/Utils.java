@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation;
+package sc.fiji.labkit.pixel_classification;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -20,7 +20,7 @@ import net.imglib2.img.cell.CellGrid;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.trainable_segmentation.utils.DoubleTernaryOperator;
+import sc.fiji.labkit.pixel_classification.utils.DoubleTernaryOperator;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;

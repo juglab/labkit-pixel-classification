@@ -1,9 +1,9 @@
 
-package net.imglib2.trainable_segmention.pixel_feature.filter.gradient;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.gradient;
 
-import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractSigmaGroupFeatureOp;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.AbstractSigmaGroupFeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.GlobalSettings;
 import org.scijava.plugin.Plugin;
 
 /**

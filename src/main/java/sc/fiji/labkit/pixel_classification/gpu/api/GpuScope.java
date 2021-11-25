@@ -1,8 +1,8 @@
 
-package net.imglib2.trainable_segmentation.gpu.api;
+package sc.fiji.labkit.pixel_classification.gpu.api;
 
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
-import net.imglib2.trainable_segmentation.utils.Scope;
+import sc.fiji.labkit.pixel_classification.utils.Scope;
 
 import java.util.HashMap;
 import java.util.function.Supplier;

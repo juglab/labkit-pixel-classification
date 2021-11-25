@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter.stats;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats;
 
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -9,8 +9,8 @@ import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.test.RandomImgs;
-import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmention.pixel_feature.filter.stats.SingleSphereShapedFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.calculator.FeatureCalculator;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.stats.SingleSphereShapedFeature;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;

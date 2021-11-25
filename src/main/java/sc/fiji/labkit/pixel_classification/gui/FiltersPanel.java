@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.gui;
+package sc.fiji.labkit.pixel_classification.gui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,23 +9,23 @@ import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
-import net.imglib2.trainable_segmentation.pixel_feature.filter.dog2.DifferenceOfGaussiansFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.gauss.GaussianBlurFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.gradient.GaussianGradientMagnitudeFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.hessian.HessianEigenvaluesFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.identity.IdentityFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.laplacian.LaplacianOfGaussianFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.MaxFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.MeanFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.MinFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.VarianceFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.structure.StructureTensorEigenvaluesFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.dog2.DifferenceOfGaussiansFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.gauss.GaussianBlurFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.gradient.GaussianGradientMagnitudeFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.hessian.HessianEigenvaluesFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.identity.IdentityFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.laplacian.LaplacianOfGaussianFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats.MaxFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats.MeanFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats.MinFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats.VarianceFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.structure.StructureTensorEigenvaluesFeature;
 import org.scijava.Context;
 
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSetting;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSettings;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.GlobalSettings;
 
 public class FiltersPanel extends JPanel {
 

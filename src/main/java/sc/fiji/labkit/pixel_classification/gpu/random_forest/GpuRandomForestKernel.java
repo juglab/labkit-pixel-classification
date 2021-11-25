@@ -1,8 +1,8 @@
 
-package net.imglib2.trainable_segmentation.gpu.random_forest;
+package sc.fiji.labkit.pixel_classification.gpu.random_forest;
 
-import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
-import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuApi;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuImage;
 import net.imglib2.util.Intervals;
 
 import java.util.HashMap;

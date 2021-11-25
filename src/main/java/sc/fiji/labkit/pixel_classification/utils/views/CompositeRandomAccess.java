@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.utils.views;
+package sc.fiji.labkit.pixel_classification.utils.views;
 
 import net.imglib2.Localizable;
 import net.imglib2.RandomAccess;

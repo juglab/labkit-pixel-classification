@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter.gradient;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.gradient;
 
 import org.junit.Ignore;
 import org.junit.Test;

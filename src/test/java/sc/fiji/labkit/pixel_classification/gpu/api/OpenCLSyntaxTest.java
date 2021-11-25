@@ -1,7 +1,7 @@
 
-package net.imglib2.trainable_segmentation.gpu.api;
+package sc.fiji.labkit.pixel_classification.gpu.api;
 
-import net.imglib2.trainable_segmentation.gpu.api.OpenCLSyntax;
+import sc.fiji.labkit.pixel_classification.gpu.api.OpenCLSyntax;
 import org.junit.Test;
 
 import java.util.Arrays;

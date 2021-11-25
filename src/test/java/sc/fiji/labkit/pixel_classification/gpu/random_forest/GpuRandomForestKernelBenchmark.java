@@ -1,17 +1,17 @@
 
-package net.imglib2.trainable_segmentation.gpu.random_forest;
+package sc.fiji.labkit.pixel_classification.gpu.random_forest;
 
 import com.google.gson.JsonElement;
 import hr.irb.fastRandomForest.FastRandomForest;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmentation.Utils;
-import net.imglib2.trainable_segmentation.classification.Segmenter;
-import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
-import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
-import net.imglib2.trainable_segmentation.gpu.api.GpuPool;
-import net.imglib2.trainable_segmentation.gson.GsonUtils;
+import sc.fiji.labkit.pixel_classification.Utils;
+import sc.fiji.labkit.pixel_classification.classification.Segmenter;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuApi;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuImage;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuPool;
+import sc.fiji.labkit.pixel_classification.gson.GsonUtils;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.openjdk.jmh.annotations.Benchmark;

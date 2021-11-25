@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.gpu.api;
+package sc.fiji.labkit.pixel_classification.gpu.api;
 
 import org.junit.After;
 import org.junit.Before;

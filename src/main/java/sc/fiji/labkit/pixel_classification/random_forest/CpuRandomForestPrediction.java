@@ -1,10 +1,10 @@
 
-package net.imglib2.trainable_segmentation.random_forest;
+package sc.fiji.labkit.pixel_classification.random_forest;
 
 import hr.irb.fastRandomForest.FastRandomForest;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmentation.utils.ArrayUtils;
-import net.imglib2.trainable_segmentation.utils.views.FastViews;
+import sc.fiji.labkit.pixel_classification.utils.ArrayUtils;
+import sc.fiji.labkit.pixel_classification.utils.views.FastViews;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;

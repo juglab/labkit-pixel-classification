@@ -1,18 +1,18 @@
 
-package net.imglib2.trainable_segmentation;
+package sc.fiji.labkit.pixel_classification;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.RandomImgs;
-import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureInput;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.GroupedFeatures;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.SingleFeatures;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmentation.utils.CpuGpuRunner;
-import net.imglib2.trainable_segmentation.utils.SingletonContext;
+import sc.fiji.labkit.pixel_classification.pixel_feature.calculator.FeatureCalculator;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureInput;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.GroupedFeatures;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.SingleFeatures;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSetting;
+import sc.fiji.labkit.pixel_classification.utils.CpuGpuRunner;
+import sc.fiji.labkit.pixel_classification.utils.SingletonContext;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;

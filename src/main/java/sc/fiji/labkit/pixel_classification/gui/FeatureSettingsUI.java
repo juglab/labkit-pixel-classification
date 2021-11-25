@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.gui;
+package sc.fiji.labkit.pixel_classification.gui;
 
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -21,14 +21,14 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
 
-import net.imglib2.trainable_segmentation.gson.GsonUtils;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.GroupedFeatures;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.SingleFeatures;
+import sc.fiji.labkit.pixel_classification.gson.GsonUtils;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.GroupedFeatures;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.SingleFeatures;
 import org.scijava.Context;
 
-import net.imglib2.trainable_segmentation.pixel_feature.settings.ChannelSetting;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.ChannelSetting;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSettings;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.GlobalSettings;
 import net.miginfocom.swing.MigLayout;
 
 /**

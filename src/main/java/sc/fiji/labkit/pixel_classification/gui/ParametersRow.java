@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.gui;
+package sc.fiji.labkit.pixel_classification.gui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -16,7 +16,7 @@ import javax.swing.SwingConstants;
 
 import org.scijava.Context;
 
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSetting;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleCanceledException;
 import org.scijava.module.ModuleException;

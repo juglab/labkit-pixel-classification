@@ -1,20 +1,20 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter;
 
-import net.imglib2.trainable_segmentation.pixel_feature.filter.gradient.SingleGaussianGradientMagnitudeFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.identity.IdentityFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.dog2.SingleDifferenceOfGaussiansFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.SingleMaxFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.SingleMeanFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.SingleMinFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.stats.SingleVarianceFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gabor.SingleGaborFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.gauss.SingleGaussianBlurFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.hessian.SingleHessianEigenvaluesFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.laplacian.SingleLaplacianOfGaussianFeature;
-import net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz.SingleLipschitzFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.structure.SingleStructureTensorEigenvaluesFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.gradient.SingleGaussianGradientMagnitudeFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.identity.IdentityFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.dog2.SingleDifferenceOfGaussiansFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats.SingleMaxFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats.SingleMeanFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats.SingleMinFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats.SingleVarianceFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.gabor.SingleGaborFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.gauss.SingleGaussianBlurFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.hessian.SingleHessianEigenvaluesFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.laplacian.SingleLaplacianOfGaussianFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.lipschitz.SingleLipschitzFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.structure.SingleStructureTensorEigenvaluesFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSetting;
 
 /**
  * @author Matthias Arzt

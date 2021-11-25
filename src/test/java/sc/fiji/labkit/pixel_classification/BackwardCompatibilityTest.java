@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation;
+package sc.fiji.labkit.pixel_classification;
 
 import ij.IJ;
 import net.imglib2.FinalInterval;
@@ -10,9 +10,9 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.loops.LoopBuilder;
-import net.imglib2.trainable_segmentation.classification.Segmenter;
-import net.imglib2.trainable_segmentation.gson.GsonUtils;
-import net.imglib2.trainable_segmentation.utils.SingletonContext;
+import sc.fiji.labkit.pixel_classification.classification.Segmenter;
+import sc.fiji.labkit.pixel_classification.gson.GsonUtils;
+import sc.fiji.labkit.pixel_classification.utils.SingletonContext;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;

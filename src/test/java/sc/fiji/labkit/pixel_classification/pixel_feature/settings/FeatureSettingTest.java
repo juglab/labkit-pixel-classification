@@ -1,11 +1,12 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.settings;
+package sc.fiji.labkit.pixel_classification.pixel_feature.settings;
 
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmentation.gson.GsonUtils;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractFeatureOp;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureInput;
-import net.imglib2.trainable_segmentation.utils.SingletonContext;
+import sc.fiji.labkit.pixel_classification.gson.GsonUtils;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.AbstractFeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureInput;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.identity.IdentityFeature;
+import sc.fiji.labkit.pixel_classification.utils.SingletonContext;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
 import org.scijava.module.Module;
@@ -98,7 +99,31 @@ public class FeatureSettingTest {
 		String json = "{\"class\":\"" + TestFeature.class.getName() + "\",\"sigma\":7.0}";
 		FeatureSetting fs = FeatureSetting.fromJson(GsonUtils.fromString(json));
 		FeatureSetting expected = new FeatureSetting(TestFeature.class, "sigma", 7.0);
-		assertEquals(fs, expected);
+		assertEquals(expected, fs);
+	}
+
+	@Test
+	public void testBackwardCompatibility() {
+		// NB: Packages have been renamed in this code base twice:
+		//   net.imglib2.trainable_segmention -> net.imglib2.trainable_segmentation
+		//   net.imglib2.trainable_segmentation -> sc.fiji.labkit.pixel_classification
+		// This test assures that class names stored in old classifiers
+		// are translated correctly to the current package name / class names.
+		testBackwardCompatibility( "net.imglib2.trainable_segmentation.pixel_feature.filter.identity.IdentityFeature", IdentityFeature.class );
+
+		// The oldest version of this code had a typo in it's package name.
+		// The package name was fix simultaneously with replacing old filters
+		// by better implementations. The class names with typos there refer
+		// to now deprecated filters.
+		testBackwardCompatibility( "net.imglib2.trainable_segmention.pixel_feature.filter.identity.IdendityFeature",
+				sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.identity.IdendityFeature.class );
+	}
+
+	private void testBackwardCompatibility( String oldClassName, Class<?> newClass )
+	{
+		String json = "{\"class\":\"" + oldClassName + "\"}";
+		FeatureSetting fs = FeatureSetting.fromJson(GsonUtils.fromString(json));
+		assertEquals( newClass, fs.pluginClass());
 	}
 
 	public static class TestFeature extends AbstractFeatureOp {

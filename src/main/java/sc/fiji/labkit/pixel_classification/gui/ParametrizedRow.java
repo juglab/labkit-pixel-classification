@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.gui;
+package sc.fiji.labkit.pixel_classification.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 
 import javax.swing.*;
 
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSettings;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSettings;
 import org.scijava.Context;
 
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSetting;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.GlobalSettings;
 
 public class ParametrizedRow extends JPanel implements SelectableRow {
 

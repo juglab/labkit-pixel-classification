@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmention.pixel_feature.filter.lipschitz;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.lipschitz;
 
 import net.imglib2.Localizable;
 import net.imglib2.RandomAccess;
@@ -7,7 +7,7 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.neighborhood.Neighborhood;
 import net.imglib2.algorithm.neighborhood.RectangleShape;
 import net.imglib2.algorithm.neighborhood.Shape;
-import net.imglib2.trainable_segmentation.RevampUtils;
+import sc.fiji.labkit.pixel_classification.RevampUtils;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Localizables;

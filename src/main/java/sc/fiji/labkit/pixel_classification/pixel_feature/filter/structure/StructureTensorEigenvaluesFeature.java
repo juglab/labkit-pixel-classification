@@ -1,9 +1,9 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter.structure;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.structure;
 
-import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractGroupFeatureOp;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.AbstractGroupFeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSetting;
 import org.scijava.plugin.Plugin;
 
 import java.util.List;

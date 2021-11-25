@@ -1,15 +1,15 @@
 
-package net.imglib2.trainable_segmentation.gpu.algorithms;
+package sc.fiji.labkit.pixel_classification.gpu.algorithms;
 
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
-import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
-import net.imglib2.trainable_segmentation.gpu.api.GpuScope;
-import net.imglib2.trainable_segmentation.gpu.api.GpuView;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuApi;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuImage;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuScope;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuView;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;

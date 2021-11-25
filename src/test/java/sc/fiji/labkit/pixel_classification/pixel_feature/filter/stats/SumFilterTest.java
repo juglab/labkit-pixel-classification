@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter.stats;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats;
 
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;

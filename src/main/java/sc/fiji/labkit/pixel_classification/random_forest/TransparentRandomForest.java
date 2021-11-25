@@ -1,8 +1,8 @@
 
-package net.imglib2.trainable_segmentation.random_forest;
+package sc.fiji.labkit.pixel_classification.random_forest;
 
 import hr.irb.fastRandomForest.FastRandomForest;
-import net.imglib2.trainable_segmentation.utils.ArrayUtils;
+import sc.fiji.labkit.pixel_classification.utils.ArrayUtils;
 import weka.core.Instance;
 
 import java.util.Collections;

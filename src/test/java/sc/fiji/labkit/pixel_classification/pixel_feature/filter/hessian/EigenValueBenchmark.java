@@ -1,12 +1,12 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter.hessian;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.hessian;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.linalg.eigen.EigenValues;
 import net.imglib2.algorithm.linalg.eigen.EigenValuesSymmetric;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.RandomImgs;
-import net.imglib2.trainable_segmentation.RevampUtils;
+import sc.fiji.labkit.pixel_classification.RevampUtils;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.view.composite.Composite;
 import org.openjdk.jmh.annotations.Benchmark;

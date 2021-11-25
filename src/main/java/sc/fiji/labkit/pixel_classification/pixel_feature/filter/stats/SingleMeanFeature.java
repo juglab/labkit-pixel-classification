@@ -1,11 +1,11 @@
-package net.imglib2.trainable_segmentation.pixel_feature.filter.stats;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats;
 
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.trainable_segmentation.gpu.algorithms.GpuNeighborhoodOperations;
-import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
-import net.imglib2.trainable_segmentation.gpu.api.GpuView;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
+import sc.fiji.labkit.pixel_classification.gpu.algorithms.GpuNeighborhoodOperations;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuApi;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuView;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;

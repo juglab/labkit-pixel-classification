@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.gson;
+package sc.fiji.labkit.pixel_classification.gson;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

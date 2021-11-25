@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.utils;
+package sc.fiji.labkit.pixel_classification.utils;
 
 import org.junit.Ignore;
 import org.junit.Test;

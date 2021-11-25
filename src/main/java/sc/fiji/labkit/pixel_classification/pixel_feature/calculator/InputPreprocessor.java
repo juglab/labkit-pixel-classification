@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.calculator;
+package sc.fiji.labkit.pixel_classification.pixel_feature.calculator;
 
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;

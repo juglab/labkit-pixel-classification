@@ -1,12 +1,12 @@
 
-package net.imglib2.trainable_segmentation;
+package sc.fiji.labkit.pixel_classification;
 
 import net.imglib2.*;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.trainable_segmentation.utils.views.FastViews;
+import sc.fiji.labkit.pixel_classification.utils.views.FastViews;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.RealType;

@@ -1,14 +1,14 @@
 
-package net.imglib2.trainable_segmentation.gpu.random_forest;
+package sc.fiji.labkit.pixel_classification.gpu.random_forest;
 
 import hr.irb.fastRandomForest.FastRandomForest;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.trainable_segmentation.gpu.api.GpuApi;
-import net.imglib2.trainable_segmentation.gpu.api.GpuImage;
-import net.imglib2.trainable_segmentation.random_forest.TransparentRandomForest;
-import net.imglib2.trainable_segmentation.utils.ArrayUtils;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuApi;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuImage;
+import sc.fiji.labkit.pixel_classification.random_forest.TransparentRandomForest;
+import sc.fiji.labkit.pixel_classification.utils.ArrayUtils;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 

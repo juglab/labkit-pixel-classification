@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.settings;
+package sc.fiji.labkit.pixel_classification.pixel_feature.settings;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;

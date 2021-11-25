@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter;
 
 import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
@@ -14,8 +14,8 @@ import preview.net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.converter.Converters;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.trainable_segmentation.Utils;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.gradient.DerivedNormalDistribution;
+import sc.fiji.labkit.pixel_classification.Utils;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.gradient.DerivedNormalDistribution;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;

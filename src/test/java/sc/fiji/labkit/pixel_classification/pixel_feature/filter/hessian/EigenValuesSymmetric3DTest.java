@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter.hessian;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.hessian;
 
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.type.numeric.real.DoubleType;

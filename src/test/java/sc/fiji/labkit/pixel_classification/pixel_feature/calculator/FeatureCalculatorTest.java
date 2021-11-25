@@ -1,19 +1,19 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.calculator;
+package sc.fiji.labkit.pixel_classification.pixel_feature.calculator;
 
-import net.imglib2.trainable_segmentation.gpu.api.GpuPixelWiseOperation;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuPixelWiseOperation;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.trainable_segmentation.Utils;
-import net.imglib2.trainable_segmentation.gpu.GpuFeatureInput;
-import net.imglib2.trainable_segmentation.gpu.api.GpuView;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractFeatureOp;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureInput;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.ChannelSetting;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmentation.utils.CpuGpuRunner;
+import sc.fiji.labkit.pixel_classification.Utils;
+import sc.fiji.labkit.pixel_classification.gpu.GpuFeatureInput;
+import sc.fiji.labkit.pixel_classification.gpu.api.GpuView;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.AbstractFeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureInput;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.ChannelSetting;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSetting;
+import sc.fiji.labkit.pixel_classification.utils.CpuGpuRunner;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;

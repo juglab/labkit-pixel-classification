@@ -1,7 +1,7 @@
 
-package net.imglib2.trainable_segmention.pixel_feature.filter.identity;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.identity;
 
-import net.imglib2.trainable_segmentation.pixel_feature.filter.identity.IdentityFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.identity.IdentityFeature;
 
 @Deprecated
 public class IdendityFeature extends IdentityFeature {}

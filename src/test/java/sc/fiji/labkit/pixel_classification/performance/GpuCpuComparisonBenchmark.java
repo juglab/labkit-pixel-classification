@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.performance;
+package sc.fiji.labkit.pixel_classification.performance;
 
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.integer.UnsignedShortType;

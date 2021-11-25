@@ -1,9 +1,9 @@
 
-package net.imglib2.trainable_segmentation.pixel_feature.filter.dog2;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.dog2;
 
-import net.imglib2.trainable_segmentation.pixel_feature.calculator.FeatureCalculator;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.GroupedFeatures;
-import net.imglib2.trainable_segmentation.utils.CpuGpuRunner;
+import sc.fiji.labkit.pixel_classification.pixel_feature.calculator.FeatureCalculator;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.GroupedFeatures;
+import sc.fiji.labkit.pixel_classification.utils.CpuGpuRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

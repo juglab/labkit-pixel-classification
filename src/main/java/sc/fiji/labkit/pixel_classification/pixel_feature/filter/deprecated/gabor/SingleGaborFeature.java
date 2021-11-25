@@ -1,16 +1,16 @@
 
-package net.imglib2.trainable_segmention.pixel_feature.filter.gabor;
+package sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.gabor;
 
 import net.imagej.ops.OpEnvironment;
 import net.imglib2.*;
-import net.imglib2.trainable_segmentation.RevampUtils;
+import sc.fiji.labkit.pixel_classification.RevampUtils;
 import net.imglib2.algorithm.fft2.FFTConvolution;
 import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.AbstractFeatureOp;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureInput;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.FeatureOp;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
-import net.imglib2.trainable_segmentation.utils.views.FastViews;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.AbstractFeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureInput;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureOp;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.GlobalSettings;
+import sc.fiji.labkit.pixel_classification.utils.views.FastViews;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;

@@ -1,5 +1,5 @@
 
-package net.imglib2.trainable_segmentation.classification;
+package sc.fiji.labkit.pixel_classification.classification;
 
 import com.google.gson.JsonElement;
 import io.scif.img.ImgSaver;
@@ -10,17 +10,17 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegions;
 import net.imglib2.test.ImgLib2Assert;
-import net.imglib2.trainable_segmentation.RevampUtils;
-import net.imglib2.trainable_segmention.pixel_feature.filter.gauss.GaussFeature;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.ChannelSetting;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSetting;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.FeatureSettings;
-import net.imglib2.trainable_segmentation.pixel_feature.settings.GlobalSettings;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.GroupedFeatures;
-import net.imglib2.trainable_segmentation.pixel_feature.filter.SingleFeatures;
-import net.imglib2.trainable_segmentation.Utils;
-import net.imglib2.trainable_segmentation.utils.CpuGpuRunner;
-import net.imglib2.trainable_segmentation.utils.SingletonContext;
+import sc.fiji.labkit.pixel_classification.RevampUtils;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.gauss.GaussFeature;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.ChannelSetting;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSetting;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.FeatureSettings;
+import sc.fiji.labkit.pixel_classification.pixel_feature.settings.GlobalSettings;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.GroupedFeatures;
+import sc.fiji.labkit.pixel_classification.pixel_feature.filter.SingleFeatures;
+import sc.fiji.labkit.pixel_classification.Utils;
+import sc.fiji.labkit.pixel_classification.utils.CpuGpuRunner;
+import sc.fiji.labkit.pixel_classification.utils.SingletonContext;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.IntType;
