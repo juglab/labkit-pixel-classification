@@ -15,7 +15,7 @@
 
 	<name>Labkit Pixel Classification</name>
 	<description>The implementation of the pixel classification algorithm, that is used the Labkit image segmentation plugin for Fiji.</description>
-	<url>https://github.com/maarzt/imglib2-trainable-segmentation</url>
+	<url>https://github.com/juglab/labkit-pixel-classification</url>
 	<inceptionYear>2017</inceptionYear>
 	<organization>
 		<name>CSBD</name>
@@ -60,20 +60,20 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:git://github.com/maarzt/imglib2-trainable-segmentation</connection>
-		<developerConnection>scm:git:git@github.com:maarzt/imglib2-trainable-segmentation</developerConnection>
+		<connection>scm:git:git://github.com/juglab/labkit-pixel-classification</connection>
+		<developerConnection>scm:git:git@github.com:juglab/labkit-pixel-classification</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://github.com/maarzt/imglib2-trainable-segmentation</url>
+		<url>https://github.com/juglab/labkit-pixel-classification</url>
 	</scm>
 
 	<issueManagement>
 		<system>GitHub Issues</system>
-		<url>https://github.com/maarzt/imglib2-trainable-segmentation/issues</url>
+		<url>https://github.com/juglab/labkit-pixel-classification/issues</url>
 	</issueManagement>
 
 	<ciManagement>
 		<system>GitHub Actions</system>
-		<url>https://github.com/maarzt/imglib2-trainable-segmentation/actions</url>
+		<url>https://github.com/juglab/labkit-pixel-classification/actions</url>
 	</ciManagement>
 
 	<properties>
