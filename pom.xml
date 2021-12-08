@@ -11,7 +11,7 @@
 
 	<groupId>sc.fiji</groupId>
 	<artifactId>labkit-pixel-classification</artifactId>
-	<version>0.1.13-SNAPSHOT</version>
+	<version>0.1.13</version>
 
 	<name>Labkit Pixel Classification</name>
 	<description>The implementation of the pixel classification algorithm, that is used the Labkit image segmentation plugin for Fiji.</description>
@@ -62,7 +62,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/juglab/labkit-pixel-classification</connection>
 		<developerConnection>scm:git:git@github.com:juglab/labkit-pixel-classification</developerConnection>
-		<tag>HEAD</tag>
+		<tag>labkit-pixel-classification-0.1.13</tag>
 		<url>https://github.com/juglab/labkit-pixel-classification</url>
 	</scm>
 
