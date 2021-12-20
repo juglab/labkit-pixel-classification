@@ -30,8 +30,8 @@
 package sc.fiji.labkit.pixel_classification.gpu.algorithms;
 
 import sc.fiji.labkit.pixel_classification.gpu.api.GpuApi;
-import preview.net.imglib2.algorithm.convolution.kernel.Kernel1D;
-import preview.net.imglib2.algorithm.gauss3.Gauss3;
+import net.imglib2.algorithm.convolution.kernel.Kernel1D;
+import net.imglib2.algorithm.gauss3.Gauss3;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -30,7 +30,7 @@
 package sc.fiji.labkit.pixel_classification.pixel_feature.filter.deprecated.gradient;
 
 import net.imglib2.RandomAccessibleInterval;
-import preview.net.imglib2.loops.LoopBuilder;
+import net.imglib2.loops.LoopBuilder;
 import sc.fiji.labkit.pixel_classification.RevampUtils;
 import sc.fiji.labkit.pixel_classification.pixel_feature.filter.AbstractFeatureOp;
 import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureOp;
