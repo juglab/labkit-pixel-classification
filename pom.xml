@@ -82,6 +82,8 @@
 		<license.copyrightOwners>Matthias Arzt</license.copyrightOwners>
 		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
+
+		<imglib2-algorithm.version>0.12.1</imglib2-algorithm.version> <!-- make sure that imglib2-algorithm version is at least 0.12.1, older versions won't achive the same performance -->
 		<clij2_.version>2.1.4.7</clij2_.version>
 	</properties>
 
@@ -134,6 +136,7 @@
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-algorithm</artifactId>
+			<version>${imglib2-algorithm.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.imglib2</groupId>

@@ -31,7 +31,7 @@ package sc.fiji.labkit.pixel_classification.pixel_feature.filter.gradient;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import preview.net.imglib2.algorithm.convolution.kernel.Kernel1D;
+import net.imglib2.algorithm.convolution.kernel.Kernel1D;
 
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;

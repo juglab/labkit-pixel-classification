@@ -32,7 +32,6 @@ package sc.fiji.labkit.pixel_classification.pixel_feature.filter.laplacian;
 import sc.fiji.labkit.pixel_classification.gpu.api.GpuPixelWiseOperation;
 import sc.fiji.labkit.pixel_classification.gpu.api.GpuApi;
 import net.imglib2.RandomAccessibleInterval;
-import sc.fiji.labkit.pixel_classification.RevampUtils;
 import sc.fiji.labkit.pixel_classification.gpu.GpuFeatureInput;
 import sc.fiji.labkit.pixel_classification.gpu.api.GpuView;
 import sc.fiji.labkit.pixel_classification.pixel_feature.filter.AbstractFeatureOp;
@@ -40,14 +39,12 @@ import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureInput;
 import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureOp;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.view.composite.Composite;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import preview.net.imglib2.loops.LoopBuilder;
+import net.imglib2.loops.LoopBuilder;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Plugin(type = FeatureOp.class, label = "laplacian of gaussian")

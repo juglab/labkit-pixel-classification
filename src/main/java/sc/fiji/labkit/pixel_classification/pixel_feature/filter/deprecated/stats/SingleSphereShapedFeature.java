@@ -37,6 +37,7 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.neighborhood.Neighborhood;
 import net.imglib2.algorithm.neighborhood.Shape;
+import preview.net.imglib2.algorithm.neighborhood.HyperEllipsoidShape;
 import sc.fiji.labkit.pixel_classification.pixel_feature.filter.AbstractFeatureOp;
 import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureInput;
 import sc.fiji.labkit.pixel_classification.pixel_feature.filter.FeatureOp;
@@ -45,11 +46,9 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import preview.net.imglib2.algorithm.neighborhood.HyperEllipsoidShape;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.DoubleStream;
 
 /**
  * @author Matthias Arzt

@@ -32,8 +32,8 @@ package sc.fiji.labkit.pixel_classification.pixel_feature.filter.stats;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
-import preview.net.imglib2.algorithm.convolution.Convolution;
-import preview.net.imglib2.algorithm.convolution.LineConvolution;
+import net.imglib2.algorithm.convolution.Convolution;
+import net.imglib2.algorithm.convolution.LineConvolution;
 
 import java.util.ArrayList;
 import java.util.List;
