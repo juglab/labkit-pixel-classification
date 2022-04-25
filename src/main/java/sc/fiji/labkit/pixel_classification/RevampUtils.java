@@ -34,6 +34,7 @@ import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealTypeConverters;
 import net.imglib2.img.array.ArrayImgFactory;
+import org.apache.commons.lang3.ArrayUtils;
 import sc.fiji.labkit.pixel_classification.utils.views.FastViews;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ComplexType;
@@ -72,20 +73,6 @@ public class RevampUtils {
 		long[] min = Intervals.minAsLongArray(interval);
 		long[] size = Intervals.dimensionsAsLongArray(interval);
 		return Views.translate(new ArrayImgFactory<>(type).create(size), min);
-	}
-
-	public static long[] extend(long[] in, long elem) {
-		long result[] = new long[in.length + 1];
-		System.arraycopy(in, 0, result, 0, in.length);
-		result[in.length] = elem;
-		return result;
-	}
-
-	public static int[] extend(int[] in, int elem) {
-		int result[] = new int[in.length + 1];
-		System.arraycopy(in, 0, result, 0, in.length);
-		result[in.length] = elem;
-		return result;
 	}
 
 	// TODO: move to Intervals?

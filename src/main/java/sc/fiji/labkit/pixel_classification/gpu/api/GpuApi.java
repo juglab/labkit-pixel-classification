@@ -33,6 +33,7 @@ import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
+import org.apache.commons.lang3.ArrayUtils;
 import sc.fiji.labkit.pixel_classification.RevampUtils;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Cast;
@@ -84,8 +85,8 @@ public interface GpuApi extends AutoCloseable {
 
 	default <T extends RealType<?>> RandomAccessibleInterval<T> pullRAIMultiChannel(GpuImage image) {
 		return handleOutOfMemoryException(() -> {
-			return Private.internalPullRai(image, RevampUtils.extend(image.getDimensions(), image
-				.getNumberOfChannels()));
+			long[] dimensions = ArrayUtils.add( image.getDimensions(), image.getNumberOfChannels() );
+			return Private.internalPullRai(image, dimensions );
 		});
 	}
 
