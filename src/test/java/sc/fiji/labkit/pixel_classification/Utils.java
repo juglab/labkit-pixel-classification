@@ -56,7 +56,6 @@ import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.ConstantUtils;
@@ -65,8 +64,6 @@ import net.imglib2.util.Localizables;
 import net.imglib2.util.Pair;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
-import org.scijava.Context;
-import org.scijava.script.ScriptService;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.parallel.Parallelization;
 import net.imglib2.parallel.TaskExecutor;
@@ -375,12 +372,12 @@ public class Utils {
 			pathOrURL));
 	}
 
-	public static void populateCellImg(CachedCellImg<UnsignedShortType, ?> segmentation) {
+	public static void populateCellImg(CachedCellImg<?, ?> segmentation) {
 		TaskExecutor executor = Parallelization.getTaskExecutor();
 		List<Point> cellCenters = getCellCenters(segmentation.getCellGrid());
 		AtomicInteger counter = new AtomicInteger();
 		executor.forEach(cellCenters, cellCenter -> {
-			RandomAccess<UnsignedShortType> ra = segmentation.randomAccess();
+			RandomAccess<?> ra = segmentation.randomAccess();
 			ra.setPosition(cellCenter);
 			ra.get();
 			System.out.println("step " + counter.incrementAndGet() + "/" + cellCenters.size());
