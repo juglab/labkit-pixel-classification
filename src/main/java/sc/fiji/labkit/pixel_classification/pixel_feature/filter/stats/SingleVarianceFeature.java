@@ -66,7 +66,7 @@ public class SingleVarianceFeature extends AbstractSingleStatisticFeature {
 		}
 		RandomAccessibleInterval<FloatType> mean = Views.translate(ArrayImgs.floats(Intervals.dimensionsAsLongArray(output)), Intervals.minAsLongArray(output));
 		SumFilter.convolution(windowSize).process(input, mean);
-		double factor = 1.0 / Intervals.numElements(windowSize);
+		double factor = 1.0 / n;
 		LoopBuilder.setImages(mean).forEachPixel(pixel -> pixel.mul(factor));
 		RandomAccessible<FloatType> squared = Converters.convert(input, (i, o) -> o.set(square(i.getRealFloat())), new FloatType());
 		Convolution<RealType<?>> sumFilter = SumFilter.convolution(windowSize);
