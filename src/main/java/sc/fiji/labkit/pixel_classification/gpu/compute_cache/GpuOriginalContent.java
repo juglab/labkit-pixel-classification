@@ -34,7 +34,6 @@ import sc.fiji.labkit.pixel_classification.gpu.api.GpuApi;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.StopWatch;
 import net.imglib2.view.Views;
 
 public class GpuOriginalContent implements GpuComputeCache.Content {
