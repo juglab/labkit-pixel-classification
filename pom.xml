@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>31.1.0</version>
+		<version>33.1.0</version>
 		<relativePath />
 	</parent>
 
@@ -82,12 +82,6 @@
 		<license.copyrightOwners>Matthias Arzt</license.copyrightOwners>
 		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
-
-		<imglib2-algorithm.version>0.12.1</imglib2-algorithm.version> <!-- make sure that imglib2-algorithm version is at least 0.12.1, older versions won't achive the same performance -->
-		<clij-core.version>1.7.4.0</clij-core.version>
-		<clij-clearcl.version>2.0.0.21</clij-clearcl.version>
-		<clij-coremem.version>2.0.0.10</clij-coremem.version>
-		<clij2_.version>2.1.4.7</clij2_.version>
 	</properties>
 
 	<repositories>
