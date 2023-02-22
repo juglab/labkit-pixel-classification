@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>33.1.0</version>
+		<version>33.2.0</version>
 		<relativePath />
 	</parent>
 
@@ -46,16 +46,20 @@
 	</developers>
 
 	<contributors>
- 		<contributor>
+		<contributor>
 			<name>Tobias Pietzsch</name>
 			<url>https://imagej.net/people/tpietzsch</url>
+		</contributor>
+		<contributor>
+			<name>Curtis Rueden</name>
+			<url>https://imagej.net/people/ctrueden</url>
 		</contributor>
 	</contributors>
 
 	<mailingLists>
 		<mailingList>
-			<name>ImageJ Forum</name>
-			<archive>http://image.sc</archive>
+			<name>Image.sc Forum</name>
+			<archive>https://image.sc/tag/labkit</archive>
 		</mailingList>
 	</mailingLists>
 
@@ -80,12 +84,16 @@
 		<package-name>sc.fiji.labkit.pixel_classification</package-name>
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>Matthias Arzt</license.copyrightOwners>
-		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
+
+		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
+
+		<commons-pool2.version>2.11.1</commons-pool2.version>
+		<fastRandomForest.version>r49</fastRandomForest.version>
+		<imagescience.version>3.0.0</imagescience.version>
 	</properties>
 
 	<repositories>
-		<!-- NB: for SciJava dependencies -->
 		<repository>
 			<id>scijava.public</id>
 			<url>https://maven.scijava.org/content/groups/public</url>
@@ -97,7 +105,6 @@
 			<plugin>
 				<groupId>net.revelc.code.formatter</groupId>
 				<artifactId>formatter-maven-plugin</artifactId>
-				<version>${formatter-maven-plugin.version}</version>
 				<configuration>
 					<configFile>coding-style.xml</configFile>
 				</configuration>
@@ -105,7 +112,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>${maven-surefire-plugin.version}</version>
 				<configuration>
 					<argLine>-Xmx2G</argLine>
 				</configuration>
@@ -161,7 +167,6 @@
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-algorithm</artifactId>
-			<version>${imglib2-algorithm.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.imglib2</groupId>
@@ -170,7 +175,6 @@
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>2.8.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>
@@ -185,7 +189,6 @@
 		<dependency>
 			<groupId>net.haesleinhuepf</groupId>
 			<artifactId>clij2_</artifactId>
-			<version>${clij2_.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.imagej</groupId>
@@ -201,7 +204,6 @@
 		<dependency>
 			<groupId>net.haesleinhuepf</groupId>
 			<artifactId>clij-core</artifactId>
-			<version>${clij-core.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.imagej</groupId>
@@ -217,7 +219,6 @@
 		<dependency>
 			<groupId>net.haesleinhuepf</groupId>
 			<artifactId>clij-coremem</artifactId>
-			<version>${clij-coremem.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.imagej</groupId>
@@ -233,7 +234,6 @@
 		<dependency>
 			<groupId>net.haesleinhuepf</groupId>
 			<artifactId>clij-clearcl</artifactId>
-			<version>${clij-clearcl.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.imagej</groupId>
@@ -249,13 +249,13 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-pool2</artifactId>
-			<version>2.11.1</version>
+			<version>${commons-pool2.version}</version>
 		</dependency>
 		<!-- TODO: replace dependency to Trainable_Segmentation with fastRandomForest
 		<dependency>
 			<groupId>hr.irb.fastRandomForest</groupId>
 			<artifactId>fastRandomForest</artifactId>
-			<version>r49</version>
+			<version>${fastRandomForest.version}</version>
 		</dependency>
 		-->
 		<!-- Test dependencies -->
@@ -287,7 +287,7 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>imagescience</artifactId>
-			<version>3.0.0</version>
+			<version>${imagescience.version}</version>
 			<scope>test</scope>
 		</dependency>
 
