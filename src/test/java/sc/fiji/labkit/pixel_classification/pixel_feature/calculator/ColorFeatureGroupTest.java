@@ -65,7 +65,7 @@ public class ColorFeatureGroupTest {
 		.build();
 
 	private final Img<ARGBType> image = Utils.loadImageARGBType(
-		"https://imagej.nih.gov/ij/images/clown.png");
+		"https://imagej.net/images/clown.png");
 
 	@Test
 	public void testAttributes() {
