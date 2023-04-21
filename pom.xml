@@ -88,6 +88,8 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
+		<imglib2.version>6.1.0</imglib2.version>
+
 		<fastRandomForest.version>r49</fastRandomForest.version>
 		<imagescience.version>3.0.0</imagescience.version>
 	</properties>

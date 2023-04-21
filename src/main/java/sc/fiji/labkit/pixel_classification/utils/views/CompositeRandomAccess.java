@@ -31,7 +31,6 @@ package sc.fiji.labkit.pixel_classification.utils.views;
 
 import net.imglib2.Localizable;
 import net.imglib2.RandomAccess;
-import net.imglib2.Sampler;
 import net.imglib2.util.Cast;
 import net.imglib2.view.composite.Composite;
 import net.imglib2.loops.ClassCopyProvider;
@@ -55,18 +54,13 @@ public class CompositeRandomAccess<T> implements RandomAccess<Composite<T>>, Com
 	}
 
 	@Override
-	public RandomAccess<Composite<T>> copyRandomAccess() {
-		return new CompositeRandomAccess<>(ra.copyRandomAccess());
+	public RandomAccess<Composite<T>> copy() {
+		return new CompositeRandomAccess<>(ra.copy());
 	}
 
 	@Override
 	public Composite<T> get() {
 		return this;
-	}
-
-	@Override
-	public Sampler<Composite<T>> copy() {
-		return copyRandomAccess();
 	}
 
 	@Override
