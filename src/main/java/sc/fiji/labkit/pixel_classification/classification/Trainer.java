@@ -109,7 +109,7 @@ public class Trainer {
 			if (label == null)
 				continue;
 			LabelRegion<L> region = regions.getLabelRegion(label);
-			Cursor<Void> cursor = region.cursor();
+			Cursor<Void> cursor = region.inside().cursor();
 			while (cursor.hasNext()) {
 				cursor.next();
 				ra.setPosition(cursor);
