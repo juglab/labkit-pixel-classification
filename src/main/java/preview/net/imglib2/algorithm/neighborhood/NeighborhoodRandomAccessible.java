@@ -60,4 +60,10 @@ public final class NeighborhoodRandomAccessible<T> extends AbstractEuclideanSpac
 	public RandomAccess<Neighborhood<T>> randomAccess(final Interval interval) {
 		return new NeighborhoodRandomAccess<T>(source, factory, interval);
 	}
+
+	@Override
+	public Neighborhood< T > getType()
+	{
+		return randomAccess().getType();
+	}
 }

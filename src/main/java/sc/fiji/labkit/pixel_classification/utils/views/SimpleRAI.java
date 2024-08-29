@@ -67,4 +67,10 @@ public class SimpleRAI<T> implements RandomAccessible<T> {
 	public int numDimensions() {
 		return blueprint.numDimensions();
 	}
+
+	@Override
+	public T getType()
+	{
+		return blueprint.getType();
+	}
 }
