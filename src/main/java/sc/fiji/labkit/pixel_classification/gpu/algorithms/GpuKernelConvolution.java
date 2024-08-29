@@ -2,7 +2,7 @@
  * #%L
  * The implementation of the pixel classification algorithm, that is used the Labkit image segmentation plugin for Fiji.
  * %%
- * Copyright (C) 2017 - 2023 Matthias Arzt
+ * Copyright (C) 2017 - 2024 Matthias Arzt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
